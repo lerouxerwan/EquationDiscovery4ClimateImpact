@@ -1,6 +1,6 @@
 import pytest
 
-from tests.pysr_emulator.utils_tests_pysr_emulator import load_pysr_emulator_for_test, \
+from tests.emulator.utils_tests_emulator import load_pysr_emulator_for_test, \
     run_three_main_functions
 
 
