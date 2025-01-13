@@ -1,5 +1,5 @@
 import math
-from typing import Literal, Callable
+from typing import Literal, Callable, Optional
 
 import numpy as np
 import pandas as pd
@@ -37,6 +37,7 @@ class PySREmulatorValidated(PySREmulator):
             Default is None, this default is replaced  by an empty dictionary in the __init__ method
 
     """
+    df_ranked_results_: Optional[pd.DataFrame]
 
     def fit(self, X, y, *, Xresampled=None, weights=None, variable_names: ArrayLike[str] | None = None,
             complexity_of_variables: int | float | list[int | float] | None = None,
@@ -53,7 +54,8 @@ class PySREmulatorValidated(PySREmulator):
         # Run hyperparameter search with respect to param_grid
         cv = self.get_cv(ind_validation)
         scoring = {'MSE': make_scorer(mean_squared_error, greater_is_better=False)}
-        search_cv = self.search_cv_type(estimator=PySREmulator(), scoring=scoring, cv=cv, n_jobs=1, refit=False,
+        search_cv = self.search_cv_type(estimator=PySREmulator(), scoring=scoring, cv=cv,
+                                        n_jobs=self.n_jobs, refit=False,
                                         return_train_score=True,
                                         # error_score='raise',
                                         **self.search_cv_kwargs)
@@ -61,10 +63,10 @@ class PySREmulatorValidated(PySREmulator):
         # Extract best params from search cv results
         df_results = pd.DataFrame(search_cv.cv_results_)
         column_for_ranking = 'rank_test_MSE'
-        df_ranked_results = df_results.sort_values(by=column_for_ranking)
-        assert df_ranked_results[column_for_ranking].values[0] == 1
-        best_params = df_ranked_results.iloc[0].loc['params']
+        self.df_ranked_results_ = df_results.sort_values(by=column_for_ranking)
+        assert self.df_ranked_results_[column_for_ranking].values[0] == 1
         # Final fit only on the train split
+        best_params = self.df_ranked_results_.iloc[0].loc['params']
         self.set_params(**best_params)
         X_train, y_train = X[~ind_validation, :], y[~ind_validation]
         return super().fit(X_train, y_train, Xresampled=Xresampled, weights=weights, variable_names=variable_names,
@@ -143,6 +145,7 @@ class PySREmulatorValidated(PySREmulator):
                  validation_size: float = 0.3,
                  search_cv_type: type = RandomizedSearchCV,
                  n_iter: int = 10,
+                 n_jobs: Optional[int] = None,
                  param_grid: dict[str, list] | list[dict[str, list]] = None,
                  **kwargs):
         super().__init__(model_selection, binary_operators=binary_operators, unary_operators=unary_operators,
@@ -189,9 +192,13 @@ class PySREmulatorValidated(PySREmulator):
         self.validation_size = validation_size
         self.search_cv_type = search_cv_type
         self.n_iter = n_iter
+        self.n_jobs = n_jobs
         self.param_grid = dict() if param_grid is None else param_grid
         # Some checks
         assert isinstance(self.validation_size, float) and (0 < self.validation_size < 1)
         assert issubclass(self.search_cv_type, BaseSearchCV)
         assert isinstance(self.n_iter, int) and self.n_iter > 0
+        assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
         assert isinstance(self.param_grid, (dict, list))
+        # Create attributes
+        self.df_ranked_results_ = None

@@ -4,7 +4,7 @@ from emulator.pysr_emulator.pysr_emulator import PySREmulator
 from emulator.pysr_emulator_validated.pysr_emulator_validated import PySREmulatorValidated
 
 
-def load_pysr_emulator_validated_for_test(**kwargs) -> PySREmulator:
+def load_pysr_emulator_validated_for_test(**kwargs) -> PySREmulatorValidated:
     return PySREmulatorValidated(niterations=1, **kwargs)
 
 
