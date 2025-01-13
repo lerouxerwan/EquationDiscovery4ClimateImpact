@@ -4,9 +4,12 @@ import numpy as np
 import pandas as pd
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
 
+from utils.utils_run import random_seed
+
 
 class PySREmulator(PySRRegressor):
-    """PySREmulator is an extension of PySRRegressor with several additional attributes:
+    """PySREmulator is a variant of PySRRegressor (deterministic, no verbose, hall of fame files are deleted)
+    with several additional attributes:
         threshold_for_best_model_selection : float
             Threshold to select the best equation with the 'best' model selection
             this threshold must be larger or equal to 1
@@ -90,6 +93,15 @@ class PySREmulator(PySRRegressor):
                  # Additional attributes
                  threshold_for_best_model_selection: float = 1.5,
                  **kwargs):
+        # Some default attributes of PySRRegressor are modified
+        # Verbosity is removed
+        verbosity = 0
+        # All files are deleted
+        temp_equation_file = True
+        # Randomness is fixed, see PySRRegressor documentation for more details
+        deterministic = True
+        random_state = random_seed
+        parallelism = "serial"
         super().__init__(model_selection, binary_operators=binary_operators, unary_operators=unary_operators,
                          expression_spec=expression_spec, niterations=niterations, populations=populations,
                          population_size=population_size, max_evals=max_evals, maxsize=maxsize, maxdepth=maxdepth,
