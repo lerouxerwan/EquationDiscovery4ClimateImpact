@@ -39,6 +39,7 @@ class PySREmulatorValidated(PySREmulator):
 
     """
     df_ranked_results_: Optional[pd.DataFrame]
+    ind_validation_: Optional[np.ndarray[bool]]
 
     def fit(self, X, y, *, Xresampled=None, weights=None, variable_names: ArrayLike[str] | None = None,
             complexity_of_variables: int | float | list[int | float] | None = None,
@@ -60,25 +61,24 @@ class PySREmulatorValidated(PySREmulator):
                 or (y_units is not None) or category is not None):
             raise NotImplementedError
         # Compute an array of boolean such that ind_validation[i] = True if the index 'i' is in the validation set
-        ind_validation = compute_ind_validation(len(y), self.validation_size, index_start_validation)
-        # Compute the attribute df_ranked_results_
-        self.compute_df_ranked_results_(X, y, ind_validation)
-        # Final fit only on the train split
+        self.ind_validation_ = compute_ind_validation(len(y), self.validation_size, index_start_validation)
+        # Compute the attribute df_ranked_results_, a Dataframe with the result of the hyperparameter search
+        self.compute_df_ranked_results_(X, y)
+        # Fit with the best setting of hyperparameter (best_params) on the train split
         best_params = self.df_ranked_results_.iloc[0].loc['params']
         self.set_params(**best_params)
-        X_train, y_train = X[~ind_validation, :], y[~ind_validation]
+        X_train, y_train = X[~self.ind_validation_, :], y[~self.ind_validation_]
         return super().fit(X_train, y_train, Xresampled=Xresampled, weights=weights, variable_names=variable_names,
                            complexity_of_variables=complexity_of_variables, X_units=X_units, y_units=y_units,
                            category=category)
 
-    def compute_df_ranked_results_(self, X, y, ind_validation):
+    def compute_df_ranked_results_(self, X, y):
         """Run hyperparameter search (grid search or random search)
         and save the ranked results in the attribute df_ranked_results_"""
         #  Run hyperparameter search with respect to param_grid
-        cv = get_cv(ind_validation)
-        scoring = {'MSE': make_scorer(mean_squared_error, greater_is_better=False)}
-        search_cv = self.search_cv_type(estimator=PySREmulator(), scoring=scoring, cv=cv,
-                                        n_jobs=self.n_jobs, refit=False,
+        search_cv = self.search_cv_type(estimator=PySREmulator(),
+                                        scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
+                                        cv=get_cv(self.ind_validation_), n_jobs=self.n_jobs, refit=False,
                                         return_train_score=True,
                                         # error_score='raise',
                                         **self.search_cv_kwargs)
@@ -208,3 +208,4 @@ class PySREmulatorValidated(PySREmulator):
         assert isinstance(self.param_grid, (dict, list))
         # Create attributes
         self.df_ranked_results_ = None
+        self.ind_validation_ = None

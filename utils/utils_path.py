@@ -9,6 +9,8 @@ CURRENT_PATH = os.getcwd()
 
 #  Data parameters
 DATA_PATH = op.join(ROOT, 'data')
+DATASET_PATH = op.join(DATA_PATH, 'dataset')
+SEARCH_PATH = op.join(DATA_PATH, 'search')
 
 #  Result parameters
 RESULT_PATH = op.join(ROOT, 'results')
