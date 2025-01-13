@@ -12,6 +12,7 @@ from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
 from emulator.pysr_emulator.pysr_emulator import PySREmulator
 from emulator.pysr_emulator_validated.utils_params_distribution import get_param_distributions
+from emulator.pysr_emulator_validated.utils_validation import compute_ind_validation, get_cv
 from utils.utils_run import random_seed
 
 
@@ -42,29 +43,26 @@ class PySREmulatorValidated(PySREmulator):
     def fit(self, X, y, *, Xresampled=None, weights=None, variable_names: ArrayLike[str] | None = None,
             complexity_of_variables: int | float | list[int | float] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
-            category: ndarray | None = None) -> "PySRRegressor":
+            category: ndarray | None = None,
+            start_index_of_validation: int = 0) -> "PySRRegressor":
+        """
+        Fit where many hyperparameters settings are compared on a single validation set, and the hyperparameter
+        setting that minimizes the validation error is selected
+        Arguments and return types are the same as fit() method of PySR, except the additional argument:
+             start_index_of_validation: int; first index for the validation; Default is 0
+        """
+        # Some standard checks
+        assert X.shape[0] == y.shape[0]
+        assert isinstance(start_index_of_validation, int)
         # Some checks for additional arguments that have not been passed for the search_cv, check how to do that
         if ((Xresampled is not None) or (weights is not None) or (variable_names is not None)
                 or (complexity_of_variables is not None) or (X_units is not None)
                 or (y_units is not None) or category is not None):
             raise NotImplementedError
-        assert X.shape[0] == y.shape[0]
         # Compute an array of boolean such that ind_validation[i] = True if the index 'i' is in the validation set
-        ind_validation = self.compute_ind_validation(y)
-        # Run hyperparameter search with respect to param_grid
-        cv = self.get_cv(ind_validation)
-        scoring = {'MSE': make_scorer(mean_squared_error, greater_is_better=False)}
-        search_cv = self.search_cv_type(estimator=PySREmulator(), scoring=scoring, cv=cv,
-                                        n_jobs=self.n_jobs, refit=False,
-                                        return_train_score=True,
-                                        # error_score='raise',
-                                        **self.search_cv_kwargs)
-        search_cv.fit(X, y)
-        # Extract best params from search cv results
-        df_results = pd.DataFrame(search_cv.cv_results_)
-        column_for_ranking = 'rank_test_MSE'
-        self.df_ranked_results_ = df_results.sort_values(by=column_for_ranking)
-        assert self.df_ranked_results_[column_for_ranking].values[0] == 1
+        ind_validation = compute_ind_validation(len(y), self.validation_size, start_index_of_validation)
+        # Compute the attribute df_ranked_results_
+        self.compute_df_ranked_results_(X, y, ind_validation)
         # Final fit only on the train split
         best_params = self.df_ranked_results_.iloc[0].loc['params']
         self.set_params(**best_params)
@@ -73,19 +71,27 @@ class PySREmulatorValidated(PySREmulator):
                            complexity_of_variables=complexity_of_variables, X_units=X_units, y_units=y_units,
                            category=category)
 
-    def compute_ind_validation(self, y: np.ndarray[float]) -> np.ndarray[bool]:
-        """Compute an array of boolean such that ind_validation[i] = True if the index 'i' is in the validation set"""
-        validation_length = math.ceil(len(y) * self.validation_size)
-        ind_validation = (y * 0).astype(bool)
-        ind_validation[:validation_length] = True
-        return ind_validation
-
-    def get_cv(self, ind_validation: np.ndarray):
-        indices = np.arange(len(ind_validation))
-        yield indices[~ind_validation], indices[ind_validation]
+    def compute_df_ranked_results_(self, X, y, ind_validation):
+        """Run hyperparameter search (grid search or random search)
+        and save the ranked results in the attribute df_ranked_results_"""
+        #  Run hyperparameter search with respect to param_grid
+        cv = get_cv(ind_validation)
+        scoring = {'MSE': make_scorer(mean_squared_error, greater_is_better=False)}
+        search_cv = self.search_cv_type(estimator=PySREmulator(), scoring=scoring, cv=cv,
+                                        n_jobs=self.n_jobs, refit=False,
+                                        return_train_score=True,
+                                        # error_score='raise',
+                                        **self.search_cv_kwargs)
+        search_cv.fit(X, y)
+        #  Extract best params from search cv results
+        df_results = pd.DataFrame(search_cv.cv_results_)
+        column_for_ranking = 'rank_test_MSE'
+        self.df_ranked_results_ = df_results.sort_values(by=column_for_ranking)
+        assert self.df_ranked_results_[column_for_ranking].values[0] == 1
 
     @property
     def search_cv_kwargs(self) -> dict:
+        """Additional arguments for the instantiation of search_cv object, depending on the type of search"""
         if self.search_cv_type is GridSearchCV:
             return {'param_grid': self.param_grid}
         elif self.search_cv_type is RandomizedSearchCV:
