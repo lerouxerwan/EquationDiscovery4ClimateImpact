@@ -44,23 +44,23 @@ class PySREmulatorValidated(PySREmulator):
             complexity_of_variables: int | float | list[int | float] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
             category: ndarray | None = None,
-            start_index_of_validation: int = 0) -> "PySRRegressor":
+            index_start_validation: int = 0) -> "PySRRegressor":
         """
         Fit where many hyperparameters settings are compared on a single validation set, and the hyperparameter
         setting that minimizes the validation error is selected
         Arguments and return types are the same as fit() method of PySR, except the additional argument:
-             start_index_of_validation: int; first index for the validation; Default is 0
+             index_start_validation: int; first index for the validation; Default is 0
         """
         # Some standard checks
         assert X.shape[0] == y.shape[0]
-        assert isinstance(start_index_of_validation, int)
+        assert isinstance(index_start_validation, int)
         # Some checks for additional arguments that have not been passed for the search_cv, check how to do that
         if ((Xresampled is not None) or (weights is not None) or (variable_names is not None)
                 or (complexity_of_variables is not None) or (X_units is not None)
                 or (y_units is not None) or category is not None):
             raise NotImplementedError
         # Compute an array of boolean such that ind_validation[i] = True if the index 'i' is in the validation set
-        ind_validation = compute_ind_validation(len(y), self.validation_size, start_index_of_validation)
+        ind_validation = compute_ind_validation(len(y), self.validation_size, index_start_validation)
         # Compute the attribute df_ranked_results_
         self.compute_df_ranked_results_(X, y, ind_validation)
         # Final fit only on the train split
