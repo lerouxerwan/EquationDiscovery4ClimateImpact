@@ -1,4 +1,3 @@
-import math
 from typing import Literal, Callable, Optional
 
 import numpy as np
@@ -10,15 +9,15 @@ from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
-from emulator.pysr_emulator.pysr_emulator import PySREmulator
-from emulator.pysr_emulator_validated.utils_params_distribution import get_param_distributions
-from emulator.pysr_emulator_validated.utils_validation import compute_ind_validation, get_cv
+from emulator.climate_impact_emulator.climate_impact_emulator import ClimateImpactEmulator
+from emulator.climate_impact_emulator_with_search.utils_params_distribution import get_param_distributions
+from emulator.climate_impact_emulator_with_search.utils_validation import compute_ind_validation, get_cv
 from utils.utils_run import random_seed
 
 
-class PySREmulatorValidated(PySREmulator):
-    """PySREmulatorValidated is an extension of PySREmulator where many hyperparameters settings are compared
-     on a single validation set, and the hyperparameter setting that minimizes the validation error is selected
+class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
+    """This class is an extension of ClimateImpactEmulator with hyperparameter search. Hyperparameter settings are
+    compared on a validation set, and the best hyperparameter setting (minimizing validation error) is selected
 
     This extension has several additional attributes:
 
@@ -67,16 +66,22 @@ class PySREmulatorValidated(PySREmulator):
         # Fit with the best setting of hyperparameter (best_params) on the train split
         best_params = self.df_ranked_results_.iloc[0].loc['params']
         self.set_params(**best_params)
-        X_train, y_train = X[~self.ind_validation_, :], y[~self.ind_validation_]
-        return super().fit(X_train, y_train, Xresampled=Xresampled, weights=weights, variable_names=variable_names,
-                           complexity_of_variables=complexity_of_variables, X_units=X_units, y_units=y_units,
-                           category=category)
+        X_train_train, y_train_train = self.get_X_and_y(X, y, validation_set=False)
+        return super().fit(X_train_train, y_train_train, Xresampled=Xresampled, weights=weights,
+                           variable_names=variable_names, complexity_of_variables=complexity_of_variables,
+                           X_units=X_units, y_units=y_units, category=category)
+
+    def get_X_and_y(self, X, y, validation_set: bool):
+        if validation_set:
+            return X[self.ind_validation_, :], y[self.ind_validation_]
+        else:
+            return X[~self.ind_validation_, :], y[~self.ind_validation_]
 
     def compute_df_ranked_results_(self, X, y):
         """Run hyperparameter search (grid search or random search)
         and save the ranked results in the attribute df_ranked_results_"""
         #  Run hyperparameter search with respect to param_grid
-        search_cv = self.search_cv_type(estimator=PySREmulator(),
+        search_cv = self.search_cv_type(estimator=ClimateImpactEmulator(),
                                         scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
                                         cv=get_cv(self.ind_validation_), n_jobs=self.n_jobs, refit=False,
                                         return_train_score=True,

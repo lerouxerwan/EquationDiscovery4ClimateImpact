@@ -7,8 +7,8 @@ from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
 from utils.utils_run import random_seed
 
 
-class PySREmulator(PySRRegressor):
-    """PySREmulator is a variant of PySRRegressor (deterministic, no verbose, hall of fame files are deleted)
+class ClimateImpactEmulator(PySRRegressor):
+    """ClimateImpactEmulator is a variant of PySRRegressor (deterministic, no verbose, hall of fame files are deleted)
     with several additional attributes:
         threshold_for_best_model_selection : float
             Threshold to select the best equation with the 'best' model selection
