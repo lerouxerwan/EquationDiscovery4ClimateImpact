@@ -39,6 +39,9 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
             or a list of such dictionaries, in which case the grids spanned by each dictionary in the list are explored.
             This enables searching over any sequence of hyperparameter settings.
             Default is None, this default is replaced  by an empty dictionary in the __init__ method
+        save_or_load_csv_of_search_results: bool
+            Whether search results should be saved to a csv (or loaded from a csv if the search has been run)
+            Default is True
 
     """
     df_ranked_results_: Optional[pd.DataFrame]
@@ -84,14 +87,16 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
     def get_df_ranked_results(self, X, y) -> pd.DataFrame:
         """Load or run hyperparameter search to obtain df_ranked_results"""
         filepath_search = get_filepath_search(X, y, self.validation_size, self.search_cv_type, self.n_iter, self.param_grid)
-        if op.exists(filepath_search):
+        if op.exists(filepath_search) and self.save_or_load_csv_of_search_results:
             log_info('Load df_ranked_results from csv file')
             df_ranked_results = pd.read_csv(filepath_search, index_col=0)
             df_ranked_results['params'] = df_ranked_results['params'].apply(string_to_dict)
         else:
-            log_info('Compute df_ranked_results and save it to csv file')
+            log_info('Compute df_ranked_results')
             df_ranked_results = self.compute_df_ranked_results(X, y)
-            df_ranked_results.to_csv(filepath_search)
+            if self.save_or_load_csv_of_search_results:
+                log_info('Save df_ranked_results to csv file')
+                df_ranked_results.to_csv(filepath_search)
         return df_ranked_results
 
 
@@ -177,6 +182,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                  n_iter: int = 10,
                  n_jobs: Optional[int] = None,
                  param_grid: dict[str, list] | list[dict[str, list]] = None,
+                 save_or_load_csv_of_search_results: bool = True,
                  **kwargs):
         super().__init__(model_selection, binary_operators=binary_operators, unary_operators=unary_operators,
                          expression_spec=expression_spec, niterations=niterations, populations=populations,
@@ -224,12 +230,14 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         self.n_iter = n_iter
         self.n_jobs = n_jobs
         self.param_grid = dict() if param_grid is None else param_grid
+        self.save_or_load_csv_of_search_results = save_or_load_csv_of_search_results
         # Some checks
         assert isinstance(self.validation_size, float) and (0 < self.validation_size < 1)
         assert issubclass(self.search_cv_type, BaseSearchCV)
         assert isinstance(self.n_iter, int) and self.n_iter > 0
         assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
         assert isinstance(self.param_grid, (dict, list))
+        assert isinstance(save_or_load_csv_of_search_results, bool)
         # Create attributes
         self.df_ranked_results_ = None
         self.ind_validation_ = None
