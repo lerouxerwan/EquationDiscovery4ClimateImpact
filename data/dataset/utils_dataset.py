@@ -5,17 +5,17 @@ import numpy as np
 import pandas as pd
 from pysr.utils import ArrayLike
 
-from utils.utils_path import DATASET_PATH
+from utils.utils_path import DATASET_CSV_PATH
 
 
-def load_dataset(filename: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray,
+def load_dataset(filename_dataset: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray,
 Optional[ArrayLike[str]], Optional[ArrayLike[str]], list[str], int]:
     """
 
-    :param filename:
+    :param filename_dataset:
     :return:
     """
-    df = pd.read_csv(op.join(DATASET_PATH, filename), index_col=0)
+    df = pd.read_csv(op.join(DATASET_CSV_PATH, filename_dataset), index_col=0)
     y = df.iloc[:, 0].values
     X = df.iloc[:, 1:].values
     ind_test = df.index.str.startswith('RCP45')
@@ -30,5 +30,5 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], list[str], int]:
     return X_train, y_train, X_test, y_test, X_units, y_units, variable_names, index_start_validation
 
 if __name__ == '__main__':
-    res = load_dataset(r"NPP/v4_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_25_month_season.csv")
+    res = load_dataset(r"v4_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_25_month_season.csv")
     print(res[-1])

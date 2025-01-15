@@ -1,3 +1,4 @@
+import os.path as op
 from typing import Literal, Callable, Optional
 
 import numpy as np
@@ -9,9 +10,12 @@ from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
+from data.search.utils_json_loader import string_to_dict
+from data.search.utils_search import get_filepath_search
 from emulator.climate_impact_emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.climate_impact_emulator_with_search.utils_params_distribution import get_param_distributions
 from emulator.climate_impact_emulator_with_search.utils_validation import compute_ind_validation, get_cv
+from utils.utils_log import log_info
 from utils.utils_run import random_seed
 
 
@@ -62,7 +66,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         # Compute an array of boolean such that ind_validation[i] = True if the index 'i' is in the validation set
         self.ind_validation_ = compute_ind_validation(len(y), self.validation_size, index_start_validation)
         # Compute the attribute df_ranked_results_, a Dataframe with the result of the hyperparameter search
-        self.compute_df_ranked_results_(X, y)
+        self.df_ranked_results_ = self.get_df_ranked_results(X, y)
         # Fit with the best setting of hyperparameter (best_params) on the train split
         best_params = self.df_ranked_results_.iloc[0].loc['params']
         self.set_params(**best_params)
@@ -77,7 +81,21 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         else:
             return X[~self.ind_validation_, :], y[~self.ind_validation_]
 
-    def compute_df_ranked_results_(self, X, y):
+    def get_df_ranked_results(self, X, y) -> pd.DataFrame:
+        """Load or run hyperparameter search to obtain df_ranked_results"""
+        filepath_search = get_filepath_search(X, y, self.validation_size, self.search_cv_type, self.n_iter, self.param_grid)
+        if op.exists(filepath_search):
+            log_info('Load df_ranked_results from csv file')
+            df_ranked_results = pd.read_csv(filepath_search, index_col=0)
+            df_ranked_results['params'] = df_ranked_results['params'].apply(string_to_dict)
+        else:
+            log_info('Compute df_ranked_results and save it to csv file')
+            df_ranked_results = self.compute_df_ranked_results(X, y)
+            df_ranked_results.to_csv(filepath_search)
+        return df_ranked_results
+
+
+    def compute_df_ranked_results(self, X, y) -> pd.DataFrame:
         """Run hyperparameter search (grid search or random search)
         and save the ranked results in the attribute df_ranked_results_"""
         #  Run hyperparameter search with respect to param_grid
@@ -91,8 +109,9 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         #  Extract best params from search cv results
         df_results = pd.DataFrame(search_cv.cv_results_)
         column_for_ranking = 'rank_test_MSE'
-        self.df_ranked_results_ = df_results.sort_values(by=column_for_ranking)
-        assert self.df_ranked_results_[column_for_ranking].values[0] == 1
+        df_ranked_results_ = df_results.sort_values(by=column_for_ranking)
+        assert df_ranked_results_[column_for_ranking].values[0] == 1
+        return df_ranked_results_
 
     @property
     def search_cv_kwargs(self) -> dict:
