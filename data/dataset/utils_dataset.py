@@ -9,12 +9,7 @@ from utils.utils_path import DATASET_CSV_PATH
 
 
 def load_dataset(filename_dataset: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray,
-Optional[ArrayLike[str]], Optional[ArrayLike[str]], list[str], int]:
-    """
-
-    :param filename_dataset:
-    :return:
-    """
+Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, list[str], int]:
     df = pd.read_csv(op.join(DATASET_CSV_PATH, filename_dataset), index_col=0)
     y = df.iloc[:, 0].values
     X = df.iloc[:, 1:].values
@@ -27,7 +22,10 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], list[str], int]:
     index_start_validation = int(df.index.str.startswith('HIST').sum())
     X_units = None
     y_units = None
-    return X_train, y_train, X_test, y_test, X_units, y_units, variable_names, index_start_validation
+    years = np.array([int(i.split('_')[-1]) for i in df.index.values])
+    years_train = years[~ind_test]
+    years_test = years[ind_test]
+    return X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, variable_names, index_start_validation
 
 if __name__ == '__main__':
     res = load_dataset(r"v4_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_25_month_season.csv")
