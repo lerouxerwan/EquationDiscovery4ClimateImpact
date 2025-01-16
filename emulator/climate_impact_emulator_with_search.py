@@ -12,9 +12,9 @@ from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
 from data.search.utils_json_loader import string_to_dict
 from data.search.utils_search import get_filepath_search
-from emulator.climate_impact_emulator.climate_impact_emulator import ClimateImpactEmulator
-from emulator.climate_impact_emulator_with_search.utils_params_distribution import get_param_distributions
-from emulator.climate_impact_emulator_with_search.utils_validation import compute_ind_validation, get_cv
+from emulator.climate_impact_emulator import ClimateImpactEmulator
+from emulator.utils_hyperparameter_search.utils_params_distribution import get_param_distributions
+from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_cv
 from utils.utils_log import log_info
 from utils.utils_run import random_seed
 

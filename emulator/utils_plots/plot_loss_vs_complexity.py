@@ -2,10 +2,10 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 
-from emulator.climate_impact_emulator.climate_impact_emulator import ClimateImpactEmulator
-from emulator.climate_impact_emulator.utils_equation_str import get_equation_str
-from emulator.climate_impact_emulator.utils_plot_loss_vs_complexity_axis import set_custom_y_axis, set_x_axis
-from emulator.climate_impact_emulator.utils_plot_split_name import SPLIT_NAMES, split_name_to_linestyle, \
+from emulator.climate_impact_emulator import ClimateImpactEmulator
+from emulator.utils_plots.utils_equation_str import get_equation_str
+from emulator.utils_plots.utils_axis import set_custom_y_axis, set_x_axis
+from emulator.utils_plots.utils_plot_split_name import SPLIT_NAMES, split_name_to_linestyle, \
     split_name_to_marker
 from utils.utils_plot import show_or_save_plot, FONTSIZE
 

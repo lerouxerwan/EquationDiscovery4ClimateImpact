@@ -1,7 +1,5 @@
-from emulator.climate_impact_emulator.climate_impact_emulator import ClimateImpactEmulator
-from emulator.climate_impact_emulator.utils_plot_loss_vs_complexity import plot_loss_vs_complexity
-from emulator.climate_impact_emulator_with_search.climate_impact_emulator_with_search import \
-    ClimateImpactEmulatorWithSearch
+from emulator.climate_impact_emulator import ClimateImpactEmulator
+from emulator.utils_plots.plot_loss_vs_complexity import plot_loss_vs_complexity
 from tests.emulator.utils_tests_emulator import load_X_and_y_for_1D_test
 
 

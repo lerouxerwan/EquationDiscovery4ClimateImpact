@@ -1,6 +1,6 @@
 from data.dataset.utils_dataset import load_dataset
-from emulator.climate_impact_emulator.utils_plot import generate_plots
-from emulator.climate_impact_emulator_with_search.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
+from emulator.utils_plots.plot_full_diagnosis import plot_full_diagnosis
+from emulator.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
 
 
 def workflow(filename: str, nb_features: int, param_grid: dict[str, list], n_jobs: int, n_iter: int, show: bool) -> None:
@@ -22,5 +22,5 @@ def workflow(filename: str, nb_features: int, param_grid: dict[str, list], n_job
     years_list = [years_train[~emulator.ind_validation_], years_train[emulator.ind_validation_], years_test]
     split_name_to_X_and_y_and_years = {split_name: (X, y, years)
                              for split_name, X, y, years in zip(split_names, X_list, y_list, years_list)}
-    generate_plots(emulator, split_name_to_X_and_y_and_years, show)
+    plot_full_diagnosis(emulator, split_name_to_X_and_y_and_years, show)
 
