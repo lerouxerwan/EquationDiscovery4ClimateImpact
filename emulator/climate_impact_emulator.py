@@ -26,14 +26,17 @@ class ClimateImpactEmulator(PySRRegressor):
     def expr_list(self) -> list[Expr]:
         return self.equations_['sympy_format'].to_list()
 
-
     def compute_loss(self, X, y) -> list[float]:
-        """Compute mean squared error loss for every equation of the Pareto front"""
-        loss_list = []
-        for index in range(len(self.equations_)):
-            y_predicted = self.predict(X, index=index)
-            loss_list.append(mean_squared_error(y_true=y, y_pred=y_predicted))
-        return loss_list
+        """Compute mean squared error (the default loss in PySR) for every equation of the Pareto front"""
+        return [mean_squared_error(y_true=y, y_pred=y_predicted) for y_predicted in self.compute_y_predicted_list(X)]
+
+    def compute_y_predicted_list(self, X) -> list[np.ndarray]:
+        """Compute predicted vector for every equation of the Pareto front"""
+        return [self.predict(X, index=index) for index in range(len(self.equations_))]
+
+    @property
+    def selected_expr(self) -> Expr:
+        return self.get_best()['sympy_format']
 
     def get_best(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
         """

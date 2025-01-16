@@ -20,7 +20,6 @@ def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, split_name_to_x_and
         loss_list.extend(_plot_loss_vs_complexity(ax, emulator, X, y, split_name))
     # General settings for the plot
     set_x_axis(ax, emulator.maxsize)
-    print(loss_list)
     set_custom_y_axis(ax, loss_list, y_units=emulator.y_units_)
     ax.legend(loc='lower left', fontsize=FONTSIZE)
     show_or_save_plot(f'loss_vs_complexity', show)
