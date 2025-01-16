@@ -3,6 +3,8 @@ from typing import Literal, Callable
 import numpy as np
 import pandas as pd
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
+from sklearn.metrics import mean_squared_error
+from sympy import Expr
 
 from utils.utils_run import random_seed
 
@@ -16,6 +18,22 @@ class ClimateImpactEmulator(PySRRegressor):
             Default is 1.5 (as specified in PySR).
     """
 
+    @property
+    def complexity_list(self) -> list[int]:
+        return self.equations_['complexity'].to_list()
+
+    @property
+    def expr_list(self) -> list[Expr]:
+        return self.equations_['sympy_format'].to_list()
+
+
+    def compute_loss(self, X, y) -> list[float]:
+        """Compute mean squared error loss for every equation of the Pareto front"""
+        loss_list = []
+        for index in range(len(self.equations_)):
+            y_predicted = self.predict(X, index=index)
+            loss_list.append(mean_squared_error(y_true=y, y_pred=y_predicted))
+        return loss_list
 
     def get_best(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
         """

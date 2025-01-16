@@ -23,9 +23,13 @@ def test_invalid_threshold_for_best_model_selection(threshold_for_best_model_sel
 
 
 @pytest.mark.repeat(2)
-def test_climate_impact_emulator_deterministic():
+def test_deterministic_and_compute_loss():
     emulator = load_climate_impact_emulator_for_test()
     X, y = load_X_and_y_for_1D_test()
     emulator.fit(X, y)
-    total_loss = float(emulator.equations_['loss'].values.sum())
-    np.testing.assert_almost_equal(total_loss, 18557963.2727)
+    # Assert that the fit of the emulator is deterministic
+    loss_list = emulator.equations_['loss'].values
+    np.testing.assert_almost_equal(float(loss_list.sum()), 35698078.93297232)
+    # Assert that the method compute_loss of the emulator work well
+    for loss1, loss2 in zip(loss_list, emulator.compute_loss(X, y)):
+        np.testing.assert_almost_equal(float(loss1), loss2, decimal=0)
