@@ -21,7 +21,7 @@ def plot_time_series(emulator: ClimateImpactEmulator, split_name_to_x_and_y_and_
         ax.plot(years, y_predicted, label=y_predicted_label)
         # Annotate equation and metric box
         add_equation(ax, emulator.selected_expr)
-        add_metric_box(ax, y, y_predicted, split_name.capitalize(), (0.5, 0.1))
+        add_metric_box(ax, y, y_predicted, target_label, split_name.capitalize(), (0.5, 0.1))
         #  Add legend and labels
         ax.set_xlabel('Years')
         ax.set_ylabel(target_label)

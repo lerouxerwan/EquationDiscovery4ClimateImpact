@@ -24,7 +24,7 @@ def plot_scatter(emulator: ClimateImpactEmulator, split_name_to_X_and_y: dict[st
         ax.plot([lower_bound, upper_bound], [lower_bound, upper_bound], color='grey', linestyle='--')
         # Annotate equation and metric box
         add_equation(ax, emulator.selected_expr)
-        add_metric_box(ax, y, y_predicted, split_name.capitalize(), (0.5, 0.1))
+        add_metric_box(ax, y, y_predicted, target_label, split_name.capitalize(), (0.5, 0.1))
         # Add legend and labels
         x_label, y_label = get_labels(target_label)
         ax.set_xlabel(x_label)
