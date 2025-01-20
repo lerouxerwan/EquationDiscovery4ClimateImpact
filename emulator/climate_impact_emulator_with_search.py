@@ -1,3 +1,4 @@
+import math
 import os.path as op
 from typing import Literal, Callable, Optional
 
@@ -34,11 +35,19 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         n_iter: int
             Number of parameter settings sampled for RandomSearchCV, which trades off runtime vs quality of the solution
             Default is 10
+        n_jobs : int
+            Number of jobs to run in parallel.
+            None means 1 unless in a joblib context. -1 means using all processors
+            Default is None
         param_grid : dict[str, list] | list[dict[str, list]]
             Dictionary with hyperparameters names (`str`) as keys and lists of hyperparameter settings to try as values,
             or a list of such dictionaries, in which case the grids spanned by each dictionary in the list are explored.
             This enables searching over any sequence of hyperparameter settings.
-            Default is None, this default is replaced  by an empty dictionary in the __init__ method
+            Default is None, this default is replaced by an empty dictionary in the __init__ method
+        param_list_to_optimize_around_default: list[str]
+            List of hyperparameter names that are optimized by random search between [default_value/10, default*10]
+            If param_grid is specified, i.e. different from None, then this list is not accounted for
+            Default is None, this default is replaced by a list of 5 defaults hyperparameters that are optimized
         save_or_load_csv_of_search_results: bool
             Whether search results should be saved to a csv (or loaded from a csv if the search has been run)
             Default is True
@@ -108,7 +117,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                                         scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
                                         cv=get_cv(self.ind_validation_), n_jobs=self.n_jobs, refit=False,
                                         return_train_score=True,
-                                        # error_score='raise',
+                                        error_score='raise',
                                         **self.search_cv_kwargs)
         search_cv.fit(X, y)
         #  Extract best params from search cv results
@@ -182,6 +191,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                  n_iter: int = 10,
                  n_jobs: Optional[int] = None,
                  param_grid: dict[str, list] | list[dict[str, list]] = None,
+                 param_list_to_optimize_around_default: Optional[list[str]] = None,
                  save_or_load_csv_of_search_results: bool = True,
                  **kwargs):
         super().__init__(model_selection, binary_operators=binary_operators, unary_operators=unary_operators,
@@ -230,6 +240,9 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         self.n_iter = n_iter
         self.n_jobs = n_jobs
         self.param_grid = dict() if param_grid is None else param_grid
+        if param_list_to_optimize_around_default is None:
+            self.param_list_to_optimize_around_default = ['niterations', 'adaptive_parsimony_scaling', 'fraction_replaced_hof']
+            # Hyperparameters that could be added: 'populations', 'population_size' (but can lead to long computation)
         self.save_or_load_csv_of_search_results = save_or_load_csv_of_search_results
         # Some checks
         assert isinstance(self.validation_size, float) and (0 < self.validation_size < 1)
@@ -237,7 +250,19 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         assert isinstance(self.n_iter, int) and self.n_iter > 0
         assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
         assert isinstance(self.param_grid, (dict, list))
+        assert isinstance(self.param_list_to_optimize_around_default, list)
         assert isinstance(save_or_load_csv_of_search_results, bool)
+        # Set param grid with param_list_to_optimize_around_default if it has not been specified by the user
+        # Hyperparameters in the list should be sampled between [default_value / 10, default * 10]
+        scaling_factor = 10
+        if not self.param_grid:
+            for key in self.param_list_to_optimize_around_default:
+                default_value = self.__getattribute__(key)
+                min_value = default_value / scaling_factor
+                max_value = default_value * scaling_factor
+                if isinstance(default_value, int):
+                    min_value = math.ceil(min_value)
+                self.param_grid[key] = [min_value, max_value]
         # Create attributes
         self.df_ranked_results_ = None
         self.ind_validation_ = None
