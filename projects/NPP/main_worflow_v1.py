@@ -1,7 +1,7 @@
 from projects.utils_workflow import workflow
 from utils.utils_run import NB_CORES
 
-FILENAME = r"NPP/v4_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_25_month_season.csv"
+FILENAME = r"v4_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_25_month_season.csv"
 
 def main_workflow(fast: bool = False):
     if fast:

@@ -56,7 +56,8 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
     df_ranked_results_: Optional[pd.DataFrame]
     ind_validation_: Optional[np.ndarray[bool]]
 
-    def fit(self, X, y, *, Xresampled=None, weights=None, variable_names: ArrayLike[str] | None = None,
+    def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, *, Xresampled=None, weights=None,
+            variable_names: ArrayLike[str] | None = None,
             complexity_of_variables: int | float | list[int | float] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
             category: ndarray | None = None,
@@ -87,11 +88,17 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                            variable_names=variable_names, complexity_of_variables=complexity_of_variables,
                            X_units=X_units, y_units=y_units, category=category)
 
-    def get_X_and_y(self, X, y, validation_set: bool):
+    def get_X_and_y(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, validation_set: bool):
         if validation_set:
-            return X[self.ind_validation_, :], y[self.ind_validation_]
+            if isinstance(X, np.ndarray):
+                return X[self.ind_validation_, :], y[self.ind_validation_]
+            else:
+                return X.loc[self.ind_validation_, :], y.loc[self.ind_validation_]
         else:
-            return X[~self.ind_validation_, :], y[~self.ind_validation_]
+            if isinstance(X, np.ndarray):
+                return X[~self.ind_validation_, :], y[~self.ind_validation_]
+            else:
+                return X.loc[~self.ind_validation_, :], y.loc[~self.ind_validation_]
 
     def get_df_ranked_results(self, X, y) -> pd.DataFrame:
         """Load or run hyperparameter search to obtain df_ranked_results"""

@@ -2,9 +2,12 @@ from emulator.utils_metric.metric import Metric, metric_to_str, metric_to_functi
 from emulator.utils_metric.utils_metric_function import condition_for_climatological_metrics
 
 
-def add_metric_box(ax, y, y_predicted, target_label:str, prefix, x_and_y_location, coef=0.95):
+def add_metric_box(ax, y, y_predicted, target_label:str, split_name: str,
+                   add_climatological_metrics=False):
+    x_and_y_location = (0.5, 0.02)
+    coef = 0.95
     metrics = [Metric.MRAE, Metric.RMSE, Metric.COR]
-    if condition_for_climatological_metrics(y):
+    if add_climatological_metrics and condition_for_climatological_metrics(y):
         metrics += [Metric.MRE_AVERAGE_FIRST_20_YEARS, Metric.MRE_AVERAGE_LAST_20_YEARS,
                     Metric.MRE_TREND_BETWEEN_FIRST_AND_LAST_20_YEARS]
     summary = []
@@ -16,7 +19,7 @@ def add_metric_box(ax, y, y_predicted, target_label:str, prefix, x_and_y_locatio
             if '(' in target_label:
                 text += ' (' + target_label.split('(')[-1]
         summary.append(text)
-    text_to_annotate = f'{prefix} metrics\n'
+    text_to_annotate = f'{split_name.capitalize()} metrics\n'
     text_to_annotate += '\n'.join(summary)
     ax.annotate(text_to_annotate, xy=x_and_y_location, xycoords='axes fraction', textcoords='offset points',
                 xytext=x_and_y_location,
