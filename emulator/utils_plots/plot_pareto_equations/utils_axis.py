@@ -18,7 +18,7 @@ def set_x_axis(ax: Axes, complexity_max: int):
     ax_twin.set_xlabel('Complexity')
 
 
-def set_custom_y_axis(ax: Axes, loss_list: list[float], y_units: Optional[np.ndarray[str]]):
+def set_custom_y_axis(ax: Axes, loss_list: list[float], target_label: str):
     # Scale y axis
     threshold = 2.0 * min(loss_list)
     ax.set_yscale(FuncScale(ax.yaxis, custom_functions_for_yaxis(threshold)))
@@ -28,8 +28,7 @@ def set_custom_y_axis(ax: Axes, loss_list: list[float], y_units: Optional[np.nda
     y_ticks = small_ticks + large_ticks
     ax.set_yticks(y_ticks)
     ax.set_ylim((y_ticks[0], y_ticks[-1]))
-    y_unit = '' if y_units is None else y_units[0]
-    ax.set_ylabel(f'Mean squared error ({y_unit})')
+    ax.set_ylabel(f'Mean squared error for {target_label}')
 
 
 def custom_functions_for_yaxis(threshold: float) -> tuple[Callable, Callable]:

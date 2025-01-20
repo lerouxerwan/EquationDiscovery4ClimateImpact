@@ -41,7 +41,7 @@ def test_units_v1():
     """Test loading of the 7 units from the international system"""
     emulator = load_climate_impact_emulator_for_test()
     filename_dataset = 'units_v1.csv'
-    X, y, _, _, X_units, y_units, _, _, variable_names, _ = load_dataset(filename_dataset)
+    X, y, _, _, X_units, y_units, _, _, variable_names, _, _ = load_dataset(filename_dataset)
     assert X_units == ['m', 's', 'mol', 'K', 'A', 'kg', 'cd']
     assert y_units == ['m']
     emulator.fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)

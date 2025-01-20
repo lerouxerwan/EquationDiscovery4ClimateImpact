@@ -9,7 +9,7 @@ from utils.utils_path import DATASET_CSV_PATH
 
 
 def load_dataset(filename_dataset: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray,
-Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, list[str], int]:
+Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, list[str], str, int]:
     df = pd.read_csv(op.join(DATASET_CSV_PATH, filename_dataset), index_col=0)
     # Extract the row 'UNIT' then remove it from df (if the row exists)
     if 'UNIT' in df.index:
@@ -24,6 +24,8 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, list
     ind_test = df.index.str.startswith('RCP45')
     X_test, y_test = X[ind_test, :], y[ind_test]
     X_train, y_train = X[~ind_test, :], y[~ind_test]
+    target_name = df.columns[:1].values[0]
+    target_label = f'{target_name} {'' if y_units is None else y_units[0]}'
     variable_names = df.columns[1:].values
     variable_names = [variable_name.replace(' ', '_') for variable_name in variable_names]
     assert df.index.values[0].startswith('HIST')
@@ -31,7 +33,7 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, list
     years = np.array([int(i.split('_')[-1]) for i in df.index.values])
     years_train = years[~ind_test]
     years_test = years[ind_test]
-    return X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, variable_names, index_start_validation
+    return X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, variable_names, target_label, index_start_validation
 
 if __name__ == '__main__':
     filename_dataset = r"v4_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_25_month_season.csv"
