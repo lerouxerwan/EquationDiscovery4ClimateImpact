@@ -13,14 +13,17 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, list
     """Load dataset parameters from a csv file, with X and y as ndarrays"""
     (X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test,
      variable_names, target_label, index_start_validation) = load_dataset_dataframe(filename_dataset)
+    variable_names = X_train.columns.values
     return (X_train.values, y_train.values, X_test.values, y_test.values, X_units, y_units,
             years_train, years_test, variable_names, target_label, index_start_validation)
 
 
 def load_dataset_dataframe(filename_dataset: str) -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series,
-Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, list[str], str, int]:
+Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, Optional[list[str]], str, int]:
     """Load dataset parameters from a csv file, with X and y as pandas Dataframe and Series"""
     df = pd.read_csv(op.join(DATASET_CSV_PATH, filename_dataset), index_col=0)
+    # Remove blank space from columns
+    df.rename(columns={c: c.replace(' ', '_') for c in df.columns}, inplace=True)
     # Load features units and dataframe, target units and its series
     df, X, X_units, y, y_units = load_units(df)
     # Split features X and target y between train split and test split
@@ -34,8 +37,7 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, list
     # Load feature names and target name
     target_name = df.columns[:1].values[0]
     target_label = f'{target_name} {'' if y_units is None else y_units[0]}'
-    variable_names = df.columns[1:].values
-    variable_names = [variable_name.replace(' ', '_') for variable_name in variable_names]
+    variable_names = None
     # Load index, necessary to create a validation split
     index_start_validation = load_index_start_validation(df)
     return X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, variable_names, target_label, index_start_validation
@@ -45,7 +47,6 @@ def load_index_start_validation(df: pd.DataFrame) -> int:
     assert df.index.values[0].startswith('HIST')
     index_start_validation = int(df.index.str.startswith('HIST').sum())
     return index_start_validation
-
 
 def load_units(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, Optional[list[str]], pd.Series, Optional[list[str]]]:
     """Extract the row 'UNIT' then remove it from df (if the row exists)"""

@@ -1,5 +1,3 @@
-import warnings
-
 from projects.utils_workflow import workflow
 from utils.utils_run import NB_CORES
 
@@ -9,7 +7,6 @@ FILENAME = r"v4_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_
 
 def main_workflow(fast: bool = False):
     if fast:
-        # warnings.filterwarnings("error")
         nb_features_list = [1]
         n_iter, n_jobs  = 2, 1
         param_grid = {'populations': [10, 20]}

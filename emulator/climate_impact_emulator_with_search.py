@@ -4,7 +4,6 @@ from typing import Literal, Callable, Optional
 
 import numpy as np
 import pandas as pd
-from numpy import ndarray
 from pysr import AbstractExpressionSpec, AbstractLoggerSpec
 from pysr.utils import ArrayLike
 from sklearn.metrics import make_scorer, mean_squared_error
@@ -56,37 +55,30 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
     df_ranked_results_: Optional[pd.DataFrame]
     ind_validation_: Optional[np.ndarray[bool]]
 
-    def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, *, Xresampled=None, weights=None,
-            variable_names: ArrayLike[str] | None = None,
-            complexity_of_variables: int | float | list[int | float] | None = None,
+    def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, variable_names: ArrayLike[str] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
-            category: ndarray | None = None,
             index_start_validation: int = 0) -> "PySRRegressor":
         """
         Fit where many hyperparameters settings are compared on a single validation set, and the hyperparameter
         setting that minimizes the validation error is selected
-        Arguments and return types are the same as fit() method of PySR, except the additional argument:
+        Some arguments from the fit() method of PySR, are not yet handled (weights, Xresampled, ...)
+        because we would need to modify filepath_search for every variations of these arguments.
+        We add one argument:
              index_start_validation: int; first index for the validation; Default is 0
         """
         # Some standard checks
         assert X.shape[0] == y.shape[0]
         assert isinstance(index_start_validation, int)
-        # Some checks for additional arguments that have not been passed for the search_cv, check how to do that
-        if ((Xresampled is not None) or (weights is not None) or (variable_names is not None)
-                or (complexity_of_variables is not None) or (X_units is not None)
-                or (y_units is not None) or category is not None):
-            raise NotImplementedError
         # Compute an array of boolean such that ind_validation[i] = True if the index 'i' is in the validation set
         self.ind_validation_ = compute_ind_validation(len(y), self.validation_size, index_start_validation)
         # Compute the attribute df_ranked_results_, a Dataframe with the result of the hyperparameter search
-        self.df_ranked_results_ = self.get_df_ranked_results(X, y)
+        self.df_ranked_results_ = self.get_df_ranked_results(X, y, variable_names=variable_names,
+                                                             X_units=X_units, y_units=y_units)
         # Fit with the best setting of hyperparameter (best_params) on the train split
         best_params = self.df_ranked_results_.iloc[0].loc['params']
         self.set_params(**best_params)
         X_train_train, y_train_train = self.get_X_and_y(X, y, validation_set=False)
-        return super().fit(X_train_train, y_train_train, Xresampled=Xresampled, weights=weights,
-                           variable_names=variable_names, complexity_of_variables=complexity_of_variables,
-                           X_units=X_units, y_units=y_units, category=category)
+        return super().fit(X_train_train, y_train_train, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
     def get_X_and_y(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, validation_set: bool):
         if validation_set:
@@ -100,35 +92,43 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
             else:
                 return X.loc[~self.ind_validation_, :], y.loc[~self.ind_validation_]
 
-    def get_df_ranked_results(self, X, y) -> pd.DataFrame:
+    def get_df_ranked_results(self, X, y, **params_fit) -> pd.DataFrame:
         """Load or run hyperparameter search to obtain df_ranked_results"""
         X_sum, y_sum = (X.sum(), y.sum()) if isinstance(X, np.ndarray) else (X.values.sum(), y.values.sum())
         X_sum, y_sum = float(X_sum), float(y_sum)
-        filepath_search = get_filepath_search(X_sum, y_sum, self.validation_size, self.search_cv_type, self.n_iter, self.param_grid)
+        filepath_search = get_filepath_search(X_sum, y_sum, self.validation_size, self.search_cv_type, self.n_iter,
+                                              self.param_grid, **params_fit)
         if op.exists(filepath_search) and self.save_or_load_csv_of_search_results:
             log_info('Load df_ranked_results from csv file')
             df_ranked_results = pd.read_csv(filepath_search, index_col=0)
             df_ranked_results['params'] = df_ranked_results['params'].apply(string_to_dict)
         else:
             log_info('Compute df_ranked_results')
-            df_ranked_results = self.compute_df_ranked_results(X, y)
+            df_ranked_results = self.compute_df_ranked_results(X, y, **params_fit)
             if self.save_or_load_csv_of_search_results:
                 log_info('Save df_ranked_results to csv file')
                 df_ranked_results.to_csv(filepath_search)
         return df_ranked_results
 
+    def load_climate_impact_emulator_with_same_params(self) -> ClimateImpactEmulator:
+        estimator = ClimateImpactEmulator()
+        params = self.get_params()
+        params = {param_name: params[param_name] for param_name in estimator.__dict__}
+        estimator.set_params(**params)
+        return estimator
 
-    def compute_df_ranked_results(self, X, y) -> pd.DataFrame:
+
+    def compute_df_ranked_results(self, X, y, **params_fit) -> pd.DataFrame:
         """Run hyperparameter search (grid search or random search)
         and save the ranked results in the attribute df_ranked_results_"""
         #  Run hyperparameter search with respect to param_grid
-        search_cv = self.search_cv_type(estimator=ClimateImpactEmulator(),
+        search_cv = self.search_cv_type(estimator=self.load_climate_impact_emulator_with_same_params(),
                                         scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
                                         cv=get_cv(self.ind_validation_), n_jobs=self.n_jobs, refit=False,
                                         return_train_score=True,
                                         error_score='raise',
                                         **self.search_cv_kwargs)
-        search_cv.fit(X, y)
+        search_cv.fit(X, y, **params_fit)
         #  Extract best params from search cv results
         df_results = pd.DataFrame(search_cv.cv_results_)
         column_for_ranking = 'rank_test_MSE'
