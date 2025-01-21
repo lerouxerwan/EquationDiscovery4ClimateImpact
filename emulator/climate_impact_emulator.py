@@ -1,11 +1,19 @@
-from typing import Literal, Callable
+import copy
+from typing import Literal, Callable, cast
 
 import numpy as np
 import pandas as pd
+from numpy import ndarray
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
+from pysr.denoising import multi_denoise, denoise
+from pysr.feature_selection import run_feature_selection
+from pysr.utils import ArrayLike
 from sklearn.metrics import mean_squared_error
+from sklearn.utils.validation import _check_feature_names_in
 from sympy import Expr
 
+from emulator.utils_feature_selection.feature_selection import get_selection_mask
+from utils.utils_log import log_info
 from utils.utils_run import random_seed
 
 
@@ -16,56 +24,10 @@ class ClimateImpactEmulator(PySRRegressor):
             Threshold to select the best equation with the 'best' model selection
             this threshold must be larger or equal to 1
             Default is 1.5 (as specified in PySR).
+        feature_selection_name: str
+            Name of the feature selection to use if select_k_features is not None
+            Default is PySRDefault (the default feature selection used in PySR)
     """
-
-    @property
-    def complexity_list(self) -> list[int]:
-        return self.equations_['complexity'].to_list()
-
-    @property
-    def expr_list(self) -> list[Expr]:
-        return self.equations_['sympy_format'].to_list()
-
-    def compute_loss(self, X, y) -> list[float]:
-        """Compute mean squared error (the default loss in PySR) for every equation of the Pareto front"""
-        return [mean_squared_error(y_true=y, y_pred=y_predicted) for y_predicted in self.compute_y_predicted_list(X)]
-
-    def compute_y_predicted_list(self, X) -> list[np.ndarray]:
-        """Compute predicted vector for every equation of the Pareto front"""
-        return [self.predict(X, index=index) for index in range(len(self.equations_))]
-
-    @property
-    def selected_expr(self) -> Expr:
-        return self.get_best()['sympy_format']
-
-    def get_best(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
-        """
-        Get best equation using `model_selection`.
-
-        Parameters
-        ----------
-        index : int | list[int]
-            If you wish to select a particular equation from `self.equations_`,
-            give the row number here. This overrides the `model_selection`
-            parameter. If there are multiple output features, then pass
-            a list of indices with the order the same as the output feature.
-
-        Returns
-        -------
-        best_equation : pandas.Series
-            Dictionary representing the best expression found.
-
-        Raises
-        ------
-        NotImplementedError
-            Raised when an invalid model selection strategy is provided.
-        """
-        if (index is None) and (self.model_selection == "best") and (self.threshold_for_best_model_selection != 1.5):
-            min_loss_train = self.equations_["loss"].min()
-            max_loss_for_filter = self.threshold_for_best_model_selection * min_loss_train
-            filtered_equations = self.equations_.query(f"loss <= {max_loss_for_filter}")
-            index = filtered_equations["score"].idxmax()
-        return super().get_best(index)
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
@@ -113,6 +75,7 @@ class ClimateImpactEmulator(PySRRegressor):
                  select_k_features: int | None = None,
                  # Additional attributes
                  threshold_for_best_model_selection: float = 1.5,
+                 feature_selection_name: str = 'PySRDefault',
                  **kwargs):
         # Some default attributes of PySRRegressor are modified
         # Verbosity is removed
@@ -165,6 +128,119 @@ class ClimateImpactEmulator(PySRRegressor):
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          **kwargs)
         self.threshold_for_best_model_selection = threshold_for_best_model_selection
+        self.feature_selection_name = feature_selection_name
         assert isinstance(self.threshold_for_best_model_selection, float)
         assert self.threshold_for_best_model_selection >= 1.
+
+    @property
+    def complexity_list(self) -> list[int]:
+        return self.equations_['complexity'].to_list()
+
+    @property
+    def expr_list(self) -> list[Expr]:
+        return self.equations_['sympy_format'].to_list()
+
+    def compute_loss(self, X, y) -> list[float]:
+        """Compute mean squared error (the default loss in PySR) for every equation of the Pareto front"""
+        return [mean_squared_error(y_true=y, y_pred=y_predicted) for y_predicted in self.compute_y_predicted_list(X)]
+
+    def compute_y_predicted_list(self, X) -> list[np.ndarray]:
+        """Compute predicted vector for every equation of the Pareto front"""
+        return [self.predict(X, index=index) for index in range(len(self.equations_))]
+
+    @property
+    def selected_expr(self) -> Expr:
+        return self.get_best()['sympy_format']
+
+    def get_best(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
+        """
+        Get best equation using `model_selection`.
+
+        Parameters
+        ----------
+        index : int | list[int]
+            If you wish to select a particular equation from `self.equations_`,
+            give the row number here. This overrides the `model_selection`
+            parameter. If there are multiple output features, then pass
+            a list of indices with the order the same as the output feature.
+
+        Returns
+        -------
+        best_equation : pandas.Series
+            Dictionary representing the best expression found.
+
+        Raises
+        ------
+        NotImplementedError
+            Raised when an invalid model selection strategy is provided.
+        """
+        if (index is None) and (self.model_selection == "best") and (self.threshold_for_best_model_selection != 1.5):
+            min_loss_train = self.equations_["loss"].min()
+            max_loss_for_filter = self.threshold_for_best_model_selection * min_loss_train
+            filtered_equations = self.equations_.query(f"loss <= {max_loss_for_filter}")
+            index = filtered_equations["score"].idxmax()
+        return super().get_best(index)
+
+    def _pre_transform_training_data(self, X: ndarray, y: ndarray, Xresampled: ndarray | None,
+                                     variable_names: ArrayLike[str],
+                                     complexity_of_variables: int | float | list[int | float] | None,
+                                     X_units: ArrayLike[str] | None, y_units: ArrayLike[str] | str | None,
+                                     random_state: np.random.RandomState):
+        # Feature selection transformation
+        if self.select_k_features:
+            selection_mask = get_selection_mask(
+                X, y, self.select_k_features, self.feature_selection_name, self.feature_names_in_, random_state)
+            X = X[:, selection_mask]
+
+            if Xresampled is not None:
+                Xresampled = Xresampled[:, selection_mask]
+
+            # Reduce variable_names to selection
+            variable_names = cast(
+                ArrayLike[str],
+                [
+                    variable_names[i]
+                    for i in range(len(variable_names))
+                    if selection_mask[i]
+                ],
+            )
+
+            if isinstance(complexity_of_variables, list):
+                complexity_of_variables = [
+                    complexity_of_variables[i]
+                    for i in range(len(complexity_of_variables))
+                    if selection_mask[i]
+                ]
+                self.complexity_of_variables_ = copy.deepcopy(complexity_of_variables)
+
+            if X_units is not None:
+                X_units = cast(
+                    ArrayLike[str],
+                    [X_units[i] for i in range(len(X_units)) if selection_mask[i]],
+                )
+                self.X_units_ = copy.deepcopy(X_units)
+
+            # Re-perform data validation and feature name updating
+            X, y = self._validate_data_X_y(X, y)
+            # Update feature names with selected variable names
+            self.selection_mask_ = selection_mask
+            self.feature_names_in_ = _check_feature_names_in(self, variable_names)
+            self.display_feature_names_in_ = self.feature_names_in_
+            log_info(f"Using features {self.feature_names_in_}")
+
+        # Denoising transformation
+        if self.denoise:
+            if self.nout_ > 1:
+                X, y = multi_denoise(
+                    X, y, Xresampled=Xresampled, random_state=random_state
+                )
+            else:
+                X, y = denoise(X, y, Xresampled=Xresampled, random_state=random_state)
+
+        return X, y, variable_names, complexity_of_variables, X_units, y_units
+
+
+
+
+
 
