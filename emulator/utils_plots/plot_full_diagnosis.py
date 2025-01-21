@@ -1,5 +1,6 @@
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from emulator.climate_impact_emulator import ClimateImpactEmulator
@@ -12,9 +13,7 @@ def plot_full_diagnosis(emulator: ClimateImpactEmulator, split_name_to_X_and_y_a
                         target_label:str, show: bool):
     """Generate many plots to generator a full diagnosis for the emulator"""
     # Cast all X and y as ndarray (instead of Dataframe and Series) if it is not already done
-    if isinstance(list(split_name_to_X_and_y_and_years.values())[0], pd.DataFrame):
-        split_name_to_X_and_y_and_years = {split_name: (X.values, y.values, *others)
-                                           for split_name, (X, y, *others) in split_name_to_X_and_y_and_years.items()}
+    split_name_to_X_and_y_and_years = cast_as_ndarray(split_name_to_X_and_y_and_years)
     # Create split_name_to_x_and_y
     split_name_to_x_and_y = {split_name: (X, y) for split_name, (X, y, _) in split_name_to_X_and_y_and_years.items()}
     # Plot loss versus complexity
@@ -23,3 +22,13 @@ def plot_full_diagnosis(emulator: ClimateImpactEmulator, split_name_to_X_and_y_a
     plot_scatter(emulator, split_name_to_x_and_y, target_label, show)
     # Plot time series
     plot_time_series(emulator, split_name_to_X_and_y_and_years, target_label, show)
+
+
+def cast_as_ndarray(split_name_to_X_and_y_and_years: dict[str, Any]) -> dict[str, Any]:
+    if isinstance(list(split_name_to_X_and_y_and_years.values())[0][0], pd.DataFrame):
+        split_name_to_X_and_y_and_years = {split_name: (X.values, y.values, *others)
+                                           for split_name, (X, y, *others) in split_name_to_X_and_y_and_years.items()}
+    for X, y, *_ in split_name_to_X_and_y_and_years.values():
+        assert isinstance(X, np.ndarray)
+        assert isinstance(y, np.ndarray)
+    return split_name_to_X_and_y_and_years

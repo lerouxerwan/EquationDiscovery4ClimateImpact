@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from sympy import Symbol
 
-from data.dataset.utils_dataset import load_dataset_ndarray
+from data.dataset.utils_dataset import load_dataset_dataframe
 from tests.emulator.utils_tests_emulator import load_climate_impact_emulator_for_test, \
     run_three_main_functions, load_X_and_y_for_1D_test
 
@@ -41,7 +41,7 @@ def test_units_v1():
     """Test loading of the 7 units from the international system"""
     emulator = load_climate_impact_emulator_for_test()
     filename_dataset = 'units_v1.csv'
-    X, y, _, _, X_units, y_units, _, _, variable_names, _, _ = load_dataset_ndarray(filename_dataset)
+    X, y, _, _, X_units, y_units, _, _, variable_names, _, _ = load_dataset_dataframe(filename_dataset)
     assert X_units == ['m', 's', 'mol', 'K', 'A', 'kg', 'cd']
     assert y_units == ['m']
     emulator.fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
