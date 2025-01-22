@@ -39,13 +39,18 @@ def test_deterministic_and_compute_loss():
     for loss1, loss2 in zip(loss_list, emulator.compute_loss(X, y)):
         np.testing.assert_almost_equal(float(loss1), loss2, decimal=0)
 
-def test_units_from_international_system():
-    """Test loading of the 7 units from the international system"""
+list_of_X_units_and_expected_variable_names = [
+    (['m', 's', 'mol', 'K', 'A', 'kg', 'cd'], ['x1']),
+    (['s', 'm', 'mol', 'K', 'A', 'kg', 'cd'], ['x2']),
+    (['s', 'mol', 'm', 'K', 'A', 'kg', 'cd'], ['x3']),
+]
+
+@pytest.mark.parametrize("X_units_and_expected_variable_names", list_of_X_units_and_expected_variable_names)
+def test_units(X_units_and_expected_variable_names):
     # We force dimensionless constants for the test, because otherwise any variable (with any unit)
     # could be used in the equation, as long as it is multiplied by a constant that map its unit to the expected unit
     emulator = load_climate_impact_emulator_for_test(dimensionless_constants_only=True)
-    print(emulator.dimensional_constraint_penalty)
-    X_units = ['m', 's', 'mol', 'K', 'A', 'kg', 'cd']
+    X_units, expected_variable_names = X_units_and_expected_variable_names
     y_units = ['m']
     nb_features = len(X_units)
     X, y = load_X_and_y_for_test(nb_features=nb_features)
@@ -53,8 +58,17 @@ def test_units_from_international_system():
     emulator.fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
     selected_variable_names = set(emulator.selected_expr.atoms(Symbol))
     sorted_selected_variable_names = sorted([str(variable_name) for variable_name in set(selected_variable_names)])
-    # The selected expression should only contain the variable 'x1', because it has the same unit as the target
-    assert list(sorted_selected_variable_names) == ['x1']
+    # The selected expression should only contain expected variable to agree with the unit of the target
+    assert list(sorted_selected_variable_names) == expected_variable_names
+
+def test_composed_units():
+    emulator = load_climate_impact_emulator_for_test(dimensionless_constants_only=True)
+    X_units = ['', 'yr', 's^-1', 'm/s']
+    y_units = ['m']
+    nb_features = len(X_units)
+    X, y = load_X_and_y_for_test(nb_features=nb_features)
+    variable_names = [f'x{i+1}' for i in range(nb_features)]
+    emulator.fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
 
 list_of_feature_selection_name_and_selected_features = [
@@ -65,7 +79,7 @@ list_of_feature_selection_name_and_selected_features = [
 @pytest.mark.parametrize("feature_selection_name_and_selected_features", list_of_feature_selection_name_and_selected_features)
 def test_feature_selection(feature_selection_name_and_selected_features):
     feature_selection_name, selected_features_expected = feature_selection_name_and_selected_features
-    filename = r"v4_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_25_month_season.csv"
+    filename = r"v5_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_25_month_season.csv"
     X, y, _, _, _, _, _, _, variable_names, _, _ = load_dataset_ndarray(filename)
     nb_features = 4
     selection_mask = get_selection_mask(X, y, nb_features, feature_selection_name, variable_names, random_seed)

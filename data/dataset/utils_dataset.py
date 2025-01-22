@@ -55,6 +55,7 @@ def load_units(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, Optional[l
         X_units = series_units.iloc[1:].to_list()
         y_units = series_units.iloc[:1].to_list()
         df = df.iloc[1:, :]
+        # See https://symbolicml.org/DynamicQuantities.jl/dev/units/ for a list of accepted units
     else:
         X_units, y_units = None, None
     series_y = df.iloc[:, 0].astype(float)
@@ -63,7 +64,6 @@ def load_units(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, Optional[l
 
 
 if __name__ == '__main__':
-    # filename = r"v4_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_25_month_season.csv"
-    filename = r"units_v1.csv"
+    filename = r"v5_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_25_month_season.csv"
     res = load_dataset_dataframe(filename)
     print(res[-1])

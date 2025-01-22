@@ -225,7 +225,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         X_sum, y_sum = (X.sum(), y.sum()) if isinstance(X, np.ndarray) else (X.values.sum(), y.values.sum())
         X_sum, y_sum = float(X_sum), float(y_sum)
         filepath_search = get_filepath_search(X_sum, y_sum, self.validation_size, self.search_cv_type, self.n_iter,
-                                              self.param_grid, **params_fit)
+                                              self.param_grid, self.select_k_features, **params_fit)
         if op.exists(filepath_search) and self.save_or_load_csv_of_search_results:
             log_info('Load df_ranked_results from csv file')
             df_ranked_results = pd.read_csv(filepath_search, index_col=0)
