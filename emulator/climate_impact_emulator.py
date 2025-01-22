@@ -140,6 +140,11 @@ class ClimateImpactEmulator(PySRRegressor):
     def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, variable_names: ArrayLike[str] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
             use_cache: bool = False) -> "PySRRegressor":
+        """
+        Some arguments from the fit() method of PySR, are not handled (weights, Xresampled, ...)
+        We add one argument:
+             use_cache: bool; whether fit results should be saved to/loaded from cache; Default is False
+        """
         if use_cache:
             key = tuple(list(self.get_X_sum_and_y_sum(X, y)) + self.hash_params)
             if key in self.cache:

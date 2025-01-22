@@ -13,11 +13,10 @@ from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 from data.search.utils_json_loader import string_to_dict
 from data.search.utils_search import get_filepath_search
 from emulator.climate_impact_emulator import ClimateImpactEmulator
-from emulator.utils_hyperparameter_search.utils_params_distribution import get_param_distributions
-from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_cv
+from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs
+from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_cv, get_X_and_y
 from emulator.utils_optimize_threshold.utils_threshold import get_param_grid_with_thresholds
 from utils.utils_log import log_info
-from utils.utils_run import random_seed
 
 
 class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
@@ -207,20 +206,9 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         # Fit with the best setting of hyperparameter (best_params) on the train split
         best_params = self.df_ranked_results_.iloc[0].loc['params']
         self.set_params(**best_params)
-        X_train_train, y_train_train = self.get_X_and_y(X, y, validation_set=False)
-        return PySRRegressor.fit(self, X_train_train, y_train_train, variable_names=variable_names, X_units=X_units, y_units=y_units)
-
-    def get_X_and_y(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, validation_set: bool):
-        if validation_set:
-            if isinstance(X, np.ndarray):
-                return X[self.ind_validation_, :], y[self.ind_validation_]
-            else:
-                return X.loc[self.ind_validation_, :], y.loc[self.ind_validation_]
-        else:
-            if isinstance(X, np.ndarray):
-                return X[~self.ind_validation_, :], y[~self.ind_validation_]
-            else:
-                return X.loc[~self.ind_validation_, :], y.loc[~self.ind_validation_]
+        X_train_train, y_train_train = get_X_and_y(X, y, self.ind_validation_, validation_set=False)
+        return super().fit(X_train_train, y_train_train, variable_names=variable_names, X_units=X_units,
+                           y_units=y_units, use_cache=False)
 
     def get_df_ranked_results(self, X, y, **params_fit) -> pd.DataFrame:
         """Load or run hyperparameter search to obtain df_ranked_results"""
@@ -239,25 +227,16 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                 df_ranked_results.to_csv(filepath_search)
         return df_ranked_results
 
-    def load_climate_impact_emulator_with_same_params(self) -> ClimateImpactEmulator:
-        estimator = ClimateImpactEmulator()
-        params = self.get_params()
-        params = {param_name: params[param_name] for param_name in estimator.__dict__}
-        estimator.set_params(**params)
-        return estimator
-
-
     def compute_df_ranked_results(self, X, y, **params_fit) -> pd.DataFrame:
-        """Run hyperparameter search (grid search or random search)
+        """Run 2 consecutive hyperparameter search (first self.search_cv_type, then a grid search for thresholds)
         and save the ranked results in the attribute df_ranked_results_"""
-        log_info('Start hyperparameter search')
         #  Run hyperparameter search with respect to self.param_grid
+        log_info('Start first hyperparameter search')
         search_cv = self.run_search_cv(self.search_cv_type, X, y, self.param_grid, **params_fit)
-        # Run a grid search based on the results from search_cv and on a list of thresholds to try.
-        # This additional grid search for the threshold cost almost nothing because pareto fronts have been cached
-        log_info('Start grid search for threshold')
-        param_grid_with_thresholds = get_param_grid_with_thresholds(search_cv)
-        search_cv = self.run_search_cv(GridSearchCV, X, y, param_grid_with_thresholds, **params_fit)
+        # Run a grid search that extends the first hyperparameter search with a list of thresholds to try.
+        # This additional grid search for the threshold cost almost nothing because fit results have been cached
+        log_info('Start second hyperparameter search for threshold')
+        search_cv = self.run_search_cv(GridSearchCV, X, y, get_param_grid_with_thresholds(search_cv), **params_fit)
         #  Extract best params from search cv results
         df_results = pd.DataFrame(search_cv.cv_results_)
         column_for_ranking = 'rank_test_MSE'
@@ -266,25 +245,26 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         return df_ranked_results_
 
     def run_search_cv(self, search_cv_type: type, X, y, param_grid: dict, **params_fit):
-        search_cv = search_cv_type(estimator=self.load_climate_impact_emulator_with_same_params(),
-                                        scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
-                                        cv=get_cv(self.ind_validation_), n_jobs=self.n_jobs, refit=False,
-                                        return_train_score=True,
-                                        error_score='raise',
-                                        **self.get_search_cv_kwargs(search_cv_type, param_grid))
+        """Run hyperparameter search for a specific type of search (random, grid), a param_grid (all hyperparameters)
+        and some parameters 'params_fit' that will be passed to the estimator"""
+        assert issubclass(search_cv_type, BaseSearchCV)
+        search_cv = search_cv_type(estimator=self.load_climate_impact_emulator_with_same_attributes(),
+                                   scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
+                                   cv=get_cv(self.ind_validation_), n_jobs=self.n_jobs, refit=False,
+                                   return_train_score=True,
+                                   error_score='raise',
+                                   **get_search_cv_kwargs(search_cv_type, param_grid, self.n_iter))
         search_cv.fit(X, y, **params_fit)
         return search_cv
 
-    def get_search_cv_kwargs(self, search_cv_type: type, param_grid: dict) -> dict:
-        """Additional arguments for the instantiation of search_cv object, depending on the type of search"""
-        if search_cv_type is GridSearchCV:
-            return {'param_grid': param_grid}
-        elif search_cv_type is RandomizedSearchCV:
-            assert isinstance(param_grid, dict)
-            assert self.n_iter is not None
-            return {'n_iter': self.n_iter, 'random_state': random_seed,
-                    'param_distributions': get_param_distributions(param_grid)}
-        else:
-            raise NotImplementedError
+    def load_climate_impact_emulator_with_same_attributes(self) -> ClimateImpactEmulator:
+        """Load a climate_impact_emulator object with the same attributes as self,
+        except additional attributes that are due to inheritance"""
+        estimator = ClimateImpactEmulator()
+        params = self.get_params()
+        params = {param_name: params[param_name] for param_name in estimator.__dict__}
+        estimator.set_params(**params)
+        return estimator
+
 
 

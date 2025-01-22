@@ -1,5 +1,6 @@
 from data.dataset.utils_dataset import load_dataset_dataframe
 from emulator.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
+from emulator.utils_hyperparameter_search.utils_validation import get_X_and_y
 from emulator.utils_plots.plot_full_diagnosis import plot_full_diagnosis
 from emulator.utils_plots.utils_plot_split_name import SPLIT_NAMES
 
@@ -14,8 +15,8 @@ def workflow(filename: str, nb_features: int, param_grid: dict[str, list], n_job
                                                n_jobs=n_jobs, n_iter=n_iter)
     emulator.fit(X_train, y_train, variable_names=variable_names, X_units=X_units, y_units=y_units,
                  index_start_validation=index_start_validation)
-    X_train_train, y_train_train = emulator.get_X_and_y(X_train, y_train, validation_set=False)
-    X_train_validation, y_train_validation = emulator.get_X_and_y(X_train, y_train, validation_set=True)
+    X_train_train, y_train_train = get_X_and_y(X_train, y_train, emulator.ind_validation_, validation_set=False)
+    X_train_validation, y_train_validation = get_X_and_y(X_train, y_train, emulator.ind_validation_, validation_set=True)
     # Generate plots based on the 3 splits
     split_names = SPLIT_NAMES
     X_list = [X_train_train, X_train_validation, X_test]
