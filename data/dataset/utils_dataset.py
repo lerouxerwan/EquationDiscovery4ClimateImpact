@@ -9,7 +9,7 @@ from utils.utils_path import DATASET_CSV_PATH
 
 
 def load_dataset_ndarray(filename_dataset: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray,
-Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, list[str], str, int]:
+Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, np.ndarray[str], str, int]:
     """Load dataset parameters from a csv file, with X and y as ndarrays"""
     (X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test,
      variable_names, target_label, index_start_validation) = load_dataset_dataframe(filename_dataset)
@@ -19,7 +19,7 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, list
 
 
 def load_dataset_dataframe(filename_dataset: str) -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series,
-Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, Optional[list[str]], str, int]:
+Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, Optional[np.ndarray[str]], str, int]:
     """Load dataset parameters from a csv file, with X and y as pandas Dataframe and Series"""
     df = pd.read_csv(op.join(DATASET_CSV_PATH, filename_dataset), index_col=0)
     # Remove blank space from columns

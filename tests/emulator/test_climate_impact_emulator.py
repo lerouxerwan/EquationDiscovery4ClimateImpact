@@ -2,8 +2,11 @@ import numpy as np
 import pytest
 from sympy import Symbol
 
+from data.dataset.utils_dataset import load_dataset_ndarray
+from emulator.utils_feature_selection.feature_selection import get_selection_mask
 from tests.emulator.utils_tests_emulator import load_climate_impact_emulator_for_test, \
     run_three_main_functions, load_X_and_y_for_test
+from utils.utils_run import random_seed
 
 
 @pytest.mark.parametrize("threshold_for_best_model_selection", [1.0, 1.5, 2.0])
@@ -49,5 +52,23 @@ def test_units_from_international_system():
     sorted_selected_variable_names = sorted([str(variable_name) for variable_name in set(selected_variable_names)])
     # The selected expression should only contain the variable 'x1', because it has the same unit as the target
     assert list(sorted_selected_variable_names) == ['x1']
+
+
+list_of_feature_selection_name_and_selected_features = [
+    ('PySRDefault', ['PoDens_Mar', 'PoDens_May', 'SSH_May', 'SSS_Apr']),
+    ('ExpertKnowledge', ['Shortwave_Mar', 'Shortwave_Apr', 'MLD_Mar', 'MLD_Apr'])
+]
+
+@pytest.mark.parametrize("feature_selection_name_and_selected_features", list_of_feature_selection_name_and_selected_features)
+def test_feature_selection(feature_selection_name_and_selected_features):
+    feature_selection_name, selected_features_expected = feature_selection_name_and_selected_features
+    filename = r"v4_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_25_month_season.csv"
+    X, y, _, _, _, _, _, _, variable_names, _, _ = load_dataset_ndarray(filename)
+    nb_features = 4
+    selection_mask = get_selection_mask(X, y, nb_features, feature_selection_name, variable_names, random_seed)
+    assert sum(selection_mask) == nb_features
+    # Check that selected features are as expected
+    assert list(variable_names[selection_mask]) == list(selected_features_expected)
+
 
 
