@@ -3,6 +3,7 @@ import pytest
 from sympy import Symbol
 
 from data.dataset.utils_dataset import load_dataset_ndarray
+from emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.utils_feature_selection.feature_selection import get_selection_mask
 from tests.emulator.utils_tests_emulator import load_climate_impact_emulator_for_test, \
     run_three_main_functions, load_X_and_y_for_test
@@ -38,10 +39,12 @@ def test_deterministic_and_compute_loss():
     for loss1, loss2 in zip(loss_list, emulator.compute_loss(X, y)):
         np.testing.assert_almost_equal(float(loss1), loss2, decimal=0)
 
-@pytest.mark.xfail
 def test_units_from_international_system():
     """Test loading of the 7 units from the international system"""
-    emulator = load_climate_impact_emulator_for_test()
+    # We force dimensionless constants for the test, because otherwise any variable (with any unit)
+    # could be used in the equation, as long as it is multiplied by a constant that map its unit to the expected unit
+    emulator = load_climate_impact_emulator_for_test(dimensionless_constants_only=True)
+    print(emulator.dimensional_constraint_penalty)
     X_units = ['m', 's', 'mol', 'K', 'A', 'kg', 'cd']
     y_units = ['m']
     nb_features = len(X_units)

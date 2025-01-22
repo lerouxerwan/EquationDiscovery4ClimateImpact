@@ -6,7 +6,6 @@ import pandas as pd
 from numpy import ndarray
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
 from pysr.denoising import multi_denoise, denoise
-from pysr.feature_selection import run_feature_selection
 from pysr.utils import ArrayLike
 from sklearn.metrics import mean_squared_error
 from sklearn.utils.validation import _check_feature_names_in
@@ -27,6 +26,8 @@ class ClimateImpactEmulator(PySRRegressor):
         feature_selection_name: str
             Name of the feature selection to use if select_k_features is not None
             Default is PySRDefault (the default feature selection used in PySR)
+    and with some modification on the default value:
+        dimensional_constraint_penalty equals None by default, we set it to 10**8
     """
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score"] = "best", *,
@@ -131,6 +132,8 @@ class ClimateImpactEmulator(PySRRegressor):
         self.feature_selection_name = feature_selection_name
         assert isinstance(self.threshold_for_best_model_selection, float)
         assert self.threshold_for_best_model_selection >= 1.
+        if self.dimensional_constraint_penalty is None:
+            self.dimensional_constraint_penalty = 10 ** 8
 
     @property
     def complexity_list(self) -> list[int]:
