@@ -1,5 +1,6 @@
 import copy
-from typing import Literal, Callable, cast
+from operator import itemgetter
+from typing import Literal, Callable, cast, Any
 
 import numpy as np
 import pandas as pd
@@ -29,6 +30,7 @@ class ClimateImpactEmulator(PySRRegressor):
     and with some modification on the default value:
         dimensional_constraint_penalty equals None by default, we set it to 10**8
     """
+    cache = {}
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
@@ -135,6 +137,33 @@ class ClimateImpactEmulator(PySRRegressor):
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
 
+    def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, variable_names: ArrayLike[str] | None = None,
+            X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
+            use_cache: bool = False) -> "PySRRegressor":
+        if use_cache:
+            key = tuple(list(self.get_X_sum_and_y_sum(X, y)) + self.hash_params)
+            if key in self.cache:
+                log_info('Load from cache')
+                (self.equations_, self.nout_, self.selection_mask_, self.julia_state_stream_,
+                 self.julia_options_stream_, self.X_units_, self.y_units_, self.feature_names_in_) = self.cache[key]
+            else:
+                super().fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
+                attributes = (self.equations_.copy(), self.nout_, self.selection_mask_, self.julia_state_stream_.copy(),
+                              self.julia_options_stream_.copy(), self.X_units_, self.y_units_, self.feature_names_in_.copy())
+                log_info('Save to cache')
+                self.cache[key] = attributes
+            return self
+        else:
+            return super().fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
+
+    @property
+    def hash_params(self) -> list[tuple[Any] | Any]:
+        """All parameters except model_selection_threshold"""
+        l = sorted(list(self.get_params().items()), key=itemgetter(0))
+        l2 = [tuple(v) if isinstance(v, list) else v for k, v in l if k != 'threshold_for_best_model_selection']
+        assert len(l2) == len(l) - 1, 'threshold_for_best_model_selection attribute must be removed from the list'
+        return l2
+
     @property
     def complexity_list(self) -> list[int]:
         return self.equations_['complexity'].to_list()
@@ -154,6 +183,11 @@ class ClimateImpactEmulator(PySRRegressor):
     @property
     def selected_expr(self) -> Expr:
         return self.get_best()['sympy_format']
+
+    def get_X_sum_and_y_sum(self, X, y) -> tuple[float, float]:
+        X_sum, y_sum = (X.sum(), y.sum()) if isinstance(X, np.ndarray) else (X.values.sum(), y.values.sum())
+        return float(X_sum), float(y_sum)
+
 
     def get_best(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
         """

@@ -6,7 +6,7 @@ FILENAME = r"v5_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_
 
 def main_workflow(fast: bool = False):
     if fast:
-        nb_features_list = [1]
+        nb_features_list = [3]
         n_iter, n_jobs  = 2, 1
         param_grid = {'populations': [10, 20]}
     else:

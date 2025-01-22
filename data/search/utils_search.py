@@ -3,6 +3,7 @@ from typing import Optional
 
 from sklearn.model_selection import RandomizedSearchCV
 
+from emulator.utils_optimize_threshold.utils_threshold import NB_THRESHOLDS
 from utils.utils_path import SEARCH_CSV_PATH
 
 NDIGITS = 1
@@ -11,7 +12,7 @@ def get_filepath_search(X_sum: float, y_sum: float, validation_size: float, sear
                         param_grid: dict, select_k_features: Optional[int], **params_fit) -> str:
     # Create filename search
     filename_search = f'{round(X_sum, NDIGITS)}_{round(y_sum, NDIGITS)}_{validation_size}_{search_cv_type.__name__}'
-    filename_search += f'_{select_k_features}'
+    filename_search += f'_{select_k_features}_{NB_THRESHOLDS}'
     if search_cv_type is RandomizedSearchCV:
         filename_search += f'_{n_iter}'
     if 'X_units' in params_fit:
