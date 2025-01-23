@@ -44,9 +44,13 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
             This enables searching over any sequence of hyperparameter settings.
             Default is None, this default is replaced by an empty dictionary in the __init__ method
         param_list_to_optimize_around_default: list[str]
-            List of hyperparameter names that are optimized by random search between [default_value/10, default*10]
+            List of hyperparameter names that are optimized by random search around default
             If param_grid is specified, i.e. different from None, then this list is not accounted for
-            Default is None, this default is replaced by a list of 5 defaults hyperparameters that are optimized
+            Default is None, this default is replaced by a list of 3 defaults hyperparameters that are optimized
+        scaling_factor: int
+            Scaling factor to optimize around default.
+            Hyperparameter are sampled in [default_value / scaling_factor, default * scaling_factor]
+            Default is 10
         save_or_load_csv_of_search_results: bool
             Whether search results should be saved to a csv (or loaded from a csv if the search has been run)
             Default is True
@@ -107,6 +111,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                  n_jobs: Optional[int] = None,
                  param_grid: dict[str, list] | list[dict[str, list]] = None,
                  param_list_to_optimize_around_default: Optional[list[str]] = None,
+                 scaling_factor: int = 10,
                  save_or_load_csv_of_search_results: bool = True,
                  **kwargs):
         super().__init__(model_selection, binary_operators=binary_operators, unary_operators=unary_operators,
@@ -156,9 +161,11 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         self.n_iter = n_iter
         self.n_jobs = n_jobs
         self.param_grid = dict() if param_grid is None else param_grid
-        if param_list_to_optimize_around_default is None:
+        self.param_list_to_optimize_around_default = param_list_to_optimize_around_default
+        if self.param_list_to_optimize_around_default is None:
             self.param_list_to_optimize_around_default = ['niterations', 'adaptive_parsimony_scaling', 'fraction_replaced_hof']
             # Hyperparameters that could be added: 'populations', 'population_size' (but can lead to long computation)
+        self.scaling_factor = scaling_factor
         self.save_or_load_csv_of_search_results = save_or_load_csv_of_search_results
         # Some checks
         assert isinstance(self.validation_size, float) and (0 < self.validation_size < 1)
@@ -169,16 +176,21 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         assert isinstance(self.param_list_to_optimize_around_default, list)
         assert isinstance(save_or_load_csv_of_search_results, bool)
         # Set param grid with param_list_to_optimize_around_default if it has not been specified by the user
-        # Hyperparameters in the list should be sampled between [default_value / 10, default * 10]
-        scaling_factor = 10
+        # Hyperparameters in the list should be sampled between [default_value / scaling_factor, default * scaling_factor]
         if not self.param_grid:
             for key in self.param_list_to_optimize_around_default:
                 default_value = self.__getattribute__(key)
-                min_value = default_value / scaling_factor
-                max_value = default_value * scaling_factor
+                min_value = default_value / self.scaling_factor
+                max_value = default_value * self.scaling_factor
                 if isinstance(default_value, int):
                     min_value = math.ceil(min_value)
                 self.param_grid[key] = [min_value, max_value]
+        # Some checks
+        if 'population_size' in self.param_grid:
+            min_population_size = min(self.param_grid['population_size'])
+            assert self.tournament_selection_n < min_population_size, \
+                (f"tournament_selection_n parameter (={self.tournament_selection_n}) "
+                 f"must be smaller than the minimum population_size (={min_population_size})")
         # Create attributes
         self.df_ranked_results_ = None
         self.ind_validation_ = None

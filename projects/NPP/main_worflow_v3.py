@@ -15,9 +15,12 @@ def main_workflow(fast: bool = False):
     else:
         nb_features_list = [4]
         params_emulator = {
-            "n_iter": 100,
+            "n_iter": 50,
             "n_jobs": 1,
             "tournament_selection_n": 10,
+            "warmup_maxsize_by": 0.5,
+            "maxsize": 20,
+            "adaptive_parsimony_scaling": 3000.,
             "param_list_to_optimize_around_default": ['niterations', 'adaptive_parsimony_scaling',
                                                       'fraction_replaced_hof', 'populations',
                                                       'population_size'],

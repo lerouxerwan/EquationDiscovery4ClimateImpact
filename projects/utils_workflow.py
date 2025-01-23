@@ -5,14 +5,13 @@ from emulator.utils_plots.plot_full_diagnosis import plot_full_diagnosis
 from emulator.utils_plots.utils_plot_split_name import SPLIT_NAMES
 
 
-def workflow(filename: str, nb_features: int, param_grid: dict[str, list], n_jobs: int, n_iter: int, show: bool = False) -> None:
+def workflow(filename: str, nb_features: int, show: bool = False, **params_emulator) -> None:
     """Workflow that fit an emulator and generate diagnosis plots to assess the quality of this emulator"""
     # Load dataset
     (X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, variable_names,
      target_label, index_start_validation) = load_dataset_dataframe(filename)
     # Fit emulator with search
-    emulator = ClimateImpactEmulatorWithSearch(select_k_features=nb_features, param_grid=param_grid,
-                                               n_jobs=n_jobs, n_iter=n_iter)
+    emulator = ClimateImpactEmulatorWithSearch(select_k_features=nb_features, **params_emulator)
     emulator.fit(X_train, y_train, variable_names=variable_names, X_units=X_units, y_units=y_units,
                  index_start_validation=index_start_validation)
     X_train_train, y_train_train = get_X_and_y(X_train, y_train, emulator.ind_validation_, validation_set=False)

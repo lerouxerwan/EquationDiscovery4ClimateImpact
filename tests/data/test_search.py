@@ -15,3 +15,9 @@ def test_json_loader():
     dict_string = "{'a1': None}"
     d = string_to_dict(dict_string)
     assert d['a1'] is None
+    dict_string = "{'a1': np.float64(2354.2)}"
+    d = string_to_dict(dict_string)
+    assert d['a1'] == 2354.2
+
+
+

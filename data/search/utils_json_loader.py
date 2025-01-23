@@ -1,4 +1,6 @@
 import json
+import re
+from collections import Counter
 from typing import Any
 
 
@@ -26,6 +28,8 @@ class JsonLoader(object):
             dict_string = dict_string.replace(str_symbol, f'"{str_symbol}"')
             # When the boolean is a parameter of an object, we revert the previous operation
             dict_string = dict_string.replace(f'="{str_symbol}"', f'={str_symbol}')
+        # Only keep the float that is inside "np.float64(...)"
+        dict_string = re.sub(r"np.float64\([+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)\)", r"\1", dict_string)
         return dict_string
 
 

@@ -18,6 +18,7 @@ def main_workflow(fast: bool = False):
             "n_iter": 100,
             "n_jobs": 1,
             "tournament_selection_n": 10,
+            "adaptive_parsimony_scaling": 3000.,
             "param_list_to_optimize_around_default": ['niterations', 'adaptive_parsimony_scaling',
                                                       'fraction_replaced_hof', 'populations',
                                                       'population_size'],

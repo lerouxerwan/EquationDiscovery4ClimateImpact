@@ -1,3 +1,4 @@
+from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from sympy import Expr
 
@@ -11,6 +12,7 @@ def get_labels(target_label: str, remove_units=False) -> list[str]:
     return labels
 
 def add_equation(ax: Axes, expr: Expr):
+    # plt.rcParams['text.usetex'] = True
     coef = 0.95
     ax.annotate(f'Equation found: {get_equation_str(expr)}', xy=(0.02, 0.95),
                 xycoords='axes fraction', textcoords='offset points', size=7,
