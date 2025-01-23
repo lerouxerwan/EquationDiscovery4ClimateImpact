@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 
 from utils.utils_path import RESULT_PATH
 
-FONTSIZE = 6.5
-
 #  Result parameters
 VERSION = str(datetime.now()).split('.')[0][5:]
 for s in [' ', ':', '-']:
@@ -26,6 +24,7 @@ def subplots_custom(nrows, ncols, sharex=False, sharey=False, hspace=None, wspac
 
 
 def show_or_save_plot(plot_name: str, show: bool=False):
+    plt.tight_layout()
     if show:
         plt.show()
     else:

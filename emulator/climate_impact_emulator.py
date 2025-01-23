@@ -13,6 +13,7 @@ from sklearn.utils.validation import _check_feature_names_in
 from sympy import Expr
 
 from emulator.utils_feature_selection.feature_selection import get_selection_mask
+from emulator.utils_metric.metric import Metric, metric_to_function
 from utils.utils_log import log_info
 from utils.utils_run import random_seed
 
@@ -174,12 +175,17 @@ class ClimateImpactEmulator(PySRRegressor):
         return self.equations_['complexity'].to_list()
 
     @property
+    def score_list(self) -> list[float]:
+        return self.equations_['score'].to_list()
+
+    @property
     def expr_list(self) -> list[Expr]:
         return self.equations_['sympy_format'].to_list()
 
-    def compute_loss(self, X, y) -> list[float]:
-        """Compute mean squared error (the default loss in PySR) for every equation of the Pareto front"""
-        return [mean_squared_error(y_true=y, y_pred=y_predicted) for y_predicted in self.compute_y_predicted_list(X)]
+    def compute_loss(self, X, y, metric=Metric.MSE) -> list[float]:
+        """Compute a loss function for every equation of the Pareto optimal set of equations"""
+        loss_function = metric_to_function[metric]
+        return [loss_function(y_true=y, y_pred=y_predicted) for y_predicted in self.compute_y_predicted_list(X)]
 
     def compute_y_predicted_list(self, X) -> list[np.ndarray]:
         """Compute predicted vector for every equation of the Pareto front"""

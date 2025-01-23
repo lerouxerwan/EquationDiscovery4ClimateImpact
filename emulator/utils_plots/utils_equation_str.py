@@ -5,26 +5,21 @@ from sympy import Expr, Number, count_ops
 
 
 def get_equation_str(expr: Expr) -> str:
-    equation_str = str(round_expr(expr, 1))
+    equation_str = str(round_expr(expr, 2))
     return text_on_two_lines_if_too_long(equation_str)
 
 def round_expr(expr: Expr, num_digits: int) -> Expr:
-    n_list = expr.atoms(Number)
-    for n in n_list:
-        new_expr_ready = False
-        expr_digits = num_digits
-        while not new_expr_ready:
-            #  Rounding is ok if it does not delete a term from the equation (and thus change the number of ops)
-            new_expr = expr.subs(n, round(n, expr_digits))
-            if count_ops(new_expr) == count_ops(expr):
-                expr = new_expr
-                new_expr_ready = True
-            else:
-                expr_digits += 1
-        new_expr = expr.subs(n, round(n, num_digits))
-        if count_ops(new_expr) == count_ops(expr):
-            expr = new_expr
+    number_replacement = 1
+    while number_replacement > 0:
+        numbers = expr.atoms(Number)
+        number_replacement = 0
+        for number in numbers:
+            round_number = round(number, num_digits)
+            if round_number != number:
+                number_replacement += 1
+                expr = expr.subs(number, round_number)
     return expr
+
 
 def text_on_two_lines_if_too_long(text: str) -> str:
     if len(text) <= 50:

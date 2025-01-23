@@ -12,3 +12,9 @@ split_name_to_marker = {
     "test": "s",
     "validation": "x"
 }
+
+split_name_to_color = {
+    "train": "r",
+    "validation": "orange",
+      "test": "tab:purple",
+}
