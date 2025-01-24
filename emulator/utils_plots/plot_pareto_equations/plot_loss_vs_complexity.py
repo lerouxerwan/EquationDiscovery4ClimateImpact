@@ -1,6 +1,7 @@
 from typing import Any
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.utils_metric.metric import Metric
@@ -36,7 +37,13 @@ def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, split_name_to_x_and
     ax_twin.set_ylim(ax_twin_ymin, 2 * ax_twin_ymax)
     ax_twin.set_ylabel('PySR score', color=color_PySR_score)
     # Add a line for PySR threshold
-    threshold_constant_values = [emulator.threshold_for_best_model_selection for _ in complexity_list]
+    if metric is Metric.MSE:
+        constant_value = emulator.threshold_for_best_model_selection
+    elif metric is Metric.RMSE:
+        constant_value = np.sqrt(emulator.threshold_for_best_model_selection)
+    else:
+        raise NotImplementedError
+    threshold_constant_values = [constant_value for _ in complexity_list]
     ax.plot(complexity_list, threshold_constant_values, color=split_name_to_color["train"],
             linestyle='--', label='Threshold for equation selection')
     # Add rounded equations on the lower X axis

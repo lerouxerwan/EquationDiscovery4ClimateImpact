@@ -5,6 +5,7 @@ import pandas as pd
 
 from emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.utils_plots.plot_pareto_equations.plot_loss_vs_complexity import plot_loss_vs_complexity
+from emulator.utils_plots.plot_selected_equation.plot_climatological_errors import plot_climatological_errors
 from emulator.utils_plots.plot_selected_equation.plot_scatter import plot_scatter
 from emulator.utils_plots.plot_selected_equation.plot_time_series import plot_time_series
 
@@ -22,6 +23,8 @@ def plot_full_diagnosis(emulator: ClimateImpactEmulator, split_name_to_X_and_y_a
     plot_scatter(emulator, split_name_to_x_and_y, target_label, show)
     # Plot time series
     plot_time_series(emulator, split_name_to_X_and_y_and_years, target_label, show)
+    # Plot climatological errors
+    plot_climatological_errors(emulator, split_name_to_X_and_y_and_years, target_label, show)
 
 
 def cast_as_ndarray(split_name_to_X_and_y_and_years: dict[str, Any]) -> dict[str, Any]:
