@@ -30,43 +30,34 @@ def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, split_name_to_x_and
         loss_list.extend(loss)
     # Add a bar plot for the PySR score
     ax_twin = ax.twinx()
-    ax_twin.bar(coordinate_list[-1], emulator.score_list, width=width, label='PySR score', color='blue')
-    ax_twin.set_ylabel('PySR score')
+    color_PySR_score = 'blue'
+    ax_twin.bar(coordinate_list[-1], emulator.score_list, width=width, color=color_PySR_score)
+    ax_twin_ymin, ax_twin_ymax = ax_twin.get_ylim()
+    ax_twin.set_ylim(ax_twin_ymin, 2 * ax_twin_ymax)
+    ax_twin.set_ylabel('PySR score', color=color_PySR_score)
     # Add a line for PySR threshold
     threshold_constant_values = [emulator.threshold_for_best_model_selection for _ in complexity_list]
     ax.plot(complexity_list, threshold_constant_values, color=split_name_to_color["train"],
             linestyle='--', label='Threshold for equation selection')
-    # Add rounded equations on the X axis
+    # Add rounded equations on the lower X axis
     ax.set_xlabel('Equations with rounded coefficients\n(which may explain why the complexity seems wrong)')
-    # General settings for the plot
     x_ticks = complexity_list
     set_x_axis(ax, x_ticks)
     ax.set_xticks(x_ticks)
-    ax.set_xticklabels([get_equation_str(expr) for expr in emulator.expr_list], rotation=45, ha='right', rotation_mode='anchor')
+    xticklabels = [get_equation_str(expr) for expr in emulator.expr_list]
+    xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True)
+    ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
+    # Add y axis with special scaling
     set_custom_y_axis(ax, loss_list, target_label, metric)
+    # General settings for the plot
     ax.legend(loc='upper right')
     show_or_save_plot(f'loss_vs_complexity', show)
 
 def load_bar_attributes(nb_bars: int, complexity_list: list[int]):
-    assert all([c % 2 == 1 for c in complexity_list]), 'A case with pair complexity must be implemented'
-    width = 2 / (1 + nb_bars) # add one for the blank bar
+    # assert all([c % 2 == 1 for c in complexity_list]), 'A case with pair complexity must be implemented'
+    width = 1 / (1 + nb_bars) # add one for the blank bar
     coordinates_list = [[c  + width * (bar_id - nb_bars / 2 + 0.5) for c in complexity_list] for bar_id in range(nb_bars)]
     return width, coordinates_list
-
-
-
-
-    # # For the train split, we show the equation near each point
-    # if split_name == 'train':
-    #     best_complexity = emulator.get_best()['complexity']
-    #     for complexity, loss, expr in zip(complexity_list, loss_list, emulator.expr_list):
-    #         bold = complexity == best_complexity
-    #         equation_str = get_equation_str(expr)
-    #         if bold:
-    #             equation_str = '\n'.join(['$\\mathbf{' + s[1:-1] + '}$' for s in equation_str.split('\n')])
-    #         ax.text(x=complexity, y=loss, s=equation_str, fontsize=FONTSIZE,
-    #                 rotation=90, verticalalignment='bottom', horizontalalignment='left')
-    # return loss_list
 
 
 

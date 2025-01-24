@@ -195,6 +195,11 @@ class ClimateImpactEmulator(PySRRegressor):
     def selected_expr(self) -> Expr:
         return self.get_best()['sympy_format']
 
+    @property
+    def selected_complexity(self) -> int:
+        return self.get_best()['complexity']
+
+
     def get_X_sum_and_y_sum(self, X, y) -> tuple[float, float]:
         X_sum, y_sum = (X.sum(), y.sum()) if isinstance(X, np.ndarray) else (X.values.sum(), y.values.sum())
         return float(X_sum), float(y_sum)

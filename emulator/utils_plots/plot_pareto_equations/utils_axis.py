@@ -27,7 +27,8 @@ def set_custom_y_axis(ax: Axes, loss_list: list[float], target_label: str, metri
     y_ticks = small_ticks + large_ticks
     ax.set_yticks(y_ticks)
     ax.set_ylim((y_ticks[0], y_ticks[-1]))
-    ax.set_ylabel(f'{metric_to_label[metric]} for {target_label}')
+    unit = '(' + target_label.split('(')[-1].replace(' ', '')
+    ax.set_ylabel(f'{metric_to_label[metric]} {unit}')
 
 
 def custom_functions_for_yaxis(threshold: float) -> tuple[Callable, Callable]:

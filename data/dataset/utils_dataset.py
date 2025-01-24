@@ -36,7 +36,7 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, Opti
     years_test = years[ind_test]
     # Load feature names and target name
     target_name = df.columns[:1].values[0]
-    target_label = f'{target_name} {'' if y_units is None else y_units[0]}'
+    target_label = f'{target_name} ({'' if y_units is None else y_units[0]})'
     variable_names = None
     # Load index, necessary to create a validation split
     index_start_validation = load_index_start_validation(df)

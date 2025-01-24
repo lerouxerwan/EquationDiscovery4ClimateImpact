@@ -1,12 +1,20 @@
 import numpy as np
 from sympy import Expr, Number, count_ops
 
+from utils.utils_date import get_short_month_names
 
 
-
-def get_equation_str(expr: Expr) -> str:
+def get_equation_str(expr: Expr, add_bold=False) -> str:
     equation_str = str(round_expr(expr, 2))
-    return text_on_two_lines_if_too_long(equation_str)
+    if add_bold:
+        equation_str  = '$\\mathbf{' + equation_str + '}$'
+    else:
+        equation_str = f'${equation_str}$'
+    # Replace the month
+    for short_month_name in get_short_month_names():
+        equation_str = equation_str.replace(f'_{short_month_name}', '_{' + short_month_name + '}')
+    # equation_str = text_on_two_lines_if_too_long(equation_str)
+    return equation_str
 
 def round_expr(expr: Expr, num_digits: int) -> Expr:
     number_replacement = 1
@@ -41,6 +49,6 @@ def text_on_two_lines_if_too_long(text: str) -> str:
                 middle_index = len(text) // 2
                 distance_to_middle_index = [abs(i - middle_index) for i in index_plus_and_minus]
                 index_minimize_distance = index_plus_and_minus[np.argmin(distance_to_middle_index)]
-                return text[:index_minimize_distance] + '$\n$' + text[index_minimize_distance:]
+                return text[:index_minimize_distance] + '\n' + text[index_minimize_distance:]
         else:
             return text
