@@ -29,23 +29,7 @@ def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, split_name_to_x_and
         ax.bar(coordinates, loss, width=width,
                label=split_name, color=split_name_to_color[split_name])
         loss_list.extend(loss)
-    # Add a bar plot for the PySR score
-    ax_twin = ax.twinx()
-    color_PySR_score = 'blue'
-    ax_twin.bar(coordinate_list[-1], emulator.score_list, width=width, color=color_PySR_score)
-    ax_twin_ymin, ax_twin_ymax = ax_twin.get_ylim()
-    ax_twin.set_ylim(ax_twin_ymin, 2 * ax_twin_ymax)
-    ax_twin.set_ylabel('PySR score', color=color_PySR_score)
-    # Add a line for PySR threshold
-    if metric is Metric.MSE:
-        constant_value = emulator.threshold_for_best_model_selection
-    elif metric is Metric.RMSE:
-        constant_value = np.sqrt(emulator.threshold_for_best_model_selection)
-    else:
-        raise NotImplementedError
-    threshold_constant_values = [constant_value for _ in complexity_list]
-    ax.plot(complexity_list, threshold_constant_values, color=split_name_to_color["train"],
-            linestyle='--', label='Threshold for equation selection')
+    add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width)
     # Add rounded equations on the lower X axis
     ax.set_xlabel('Equations with rounded coefficients\n(which may explain why the complexity seems wrong)')
     x_ticks = complexity_list
@@ -56,9 +40,35 @@ def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, split_name_to_x_and
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     # Add y axis with special scaling
     set_custom_y_axis(ax, loss_list, target_label, metric)
+    plot_threshold(ax, emulator, metric, *ax.get_xlim())
     # General settings for the plot
     ax.legend(loc='upper right')
     show_or_save_plot(f'loss_vs_complexity', show)
+
+
+def add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width):
+    #  Add a bar plot for the PySR score
+    ax_twin = ax.twinx()
+    color_PySR_score = 'blue'
+    ax_twin.bar(coordinate_list[-1], emulator.score_list, width=width, color=color_PySR_score)
+    ax_twin_ymin, ax_twin_ymax = ax_twin.get_ylim()
+    ax_twin.set_ylim(ax_twin_ymin, 2 * ax_twin_ymax)
+    ax_twin.set_ylabel('PySR score', color=color_PySR_score)
+
+
+def plot_threshold(ax, emulator, metric, xmax, xmin):
+    # Add a line for PySR threshold
+    if metric is Metric.MSE:
+        constant_value = emulator.threshold_for_best_model_selection
+    elif metric is Metric.RMSE:
+        constant_value = np.sqrt(emulator.threshold_for_best_model_selection)
+    else:
+        raise NotImplementedError
+    x_for_threshold = [xmin, xmax]
+    threshold_constant_values = [constant_value for _ in x_for_threshold]
+    ax.plot(x_for_threshold, threshold_constant_values, color=split_name_to_color["train"],
+            linestyle='--', label='Threshold for equation selection')
+
 
 def load_bar_attributes(nb_bars: int, complexity_list: list[int]):
     # assert all([c % 2 == 1 for c in complexity_list]), 'A case with pair complexity must be implemented'
