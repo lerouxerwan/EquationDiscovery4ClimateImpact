@@ -38,9 +38,9 @@ def _get_selection_mask(X: np.ndarray, y: np.ndarray, select_k_features: int, fe
     if feature_selection is FeatureSelection.PySRDefault:
         return list(run_feature_selection(X, y, select_k_features, random_state))
     elif feature_selection is FeatureSelection.ExpertKnowledge:
-        assert select_k_features == 4
-        feature_names_to_select = {'Shortwave_Mar', 'Shortwave_Apr', 'MLD_Mar', 'MLD_Apr'}
-        return [feature_name_in in feature_names_to_select for feature_name_in in feature_names_in]
+        assert select_k_features <= 5
+        feature_names = set(['MLD_Apr', 'MLD_Mar', 'Shortwave_Mar', 'Shortwave_Apr', 'MLD_Feb'][:select_k_features])
+        return [feature_name_in in feature_names for feature_name_in in feature_names_in]
     else:
         raise NotImplementedError
 

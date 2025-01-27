@@ -11,6 +11,7 @@ def main_workflow(fast: bool = False):
             "n_iter": 2,
             "n_jobs": 1,
             "param_grid": {'populations': [10, 20]},
+            "feature_selection_name": 'ExpertKnowledge',
         }
     else:
         nb_features_list = [4]
@@ -36,7 +37,7 @@ def main_workflow(fast: bool = False):
 
 
 if __name__ == '__main__':
-    fast = False
+    fast = True
     main_workflow(fast)
 
 
