@@ -4,6 +4,8 @@ from emulator.utils_metric.utils_metric_function import condition_for_climatolog
 
 def add_metric_box(ax, y, y_predicted, target_label:str, split_name: str,
                    add_climatological_metrics=False):
+    assert y.ndim == 1
+    assert y_predicted.ndim == 1
     x_and_y_location = (0.5, 0.02)
     coef = 0.95
     metrics = [Metric.MRAE, Metric.RMSE, Metric.COR]

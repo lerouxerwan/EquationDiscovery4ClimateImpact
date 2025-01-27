@@ -1,7 +1,7 @@
 from matplotlib.axes import Axes
 from sympy import Expr
 
-from emulator.utils_plots.utils_equation_str import get_equation_str
+from emulator.utils_plots.plot_by_split.utils_equation_str import get_equation_str
 
 
 def get_labels(target_label: str, remove_units=False) -> list[str]:

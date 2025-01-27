@@ -1,25 +1,24 @@
-import math
-from typing import Any
-
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.scale import FuncScale
 
 from emulator.climate_impact_emulator import ClimateImpactEmulator
-from emulator.utils_metric.metric import Metric, metric_to_label
-from emulator.utils_plots.plot_pareto_equations.utils_axis import set_custom_y_axis, set_x_axis, \
-    custom_functions_for_yaxis
-from emulator.utils_plots.utils_equation_str import get_equation_str
-from emulator.utils_plots.utils_plot_split_name import SPLIT_NAMES, split_name_to_color
+from emulator.utils_metric.metric import Metric
+from emulator.utils_plots.plot_by_split.utils_axis import custom_functions_for_yaxis
+from emulator.utils_plots.plot_by_split.utils_equation_str import get_equation_str
+from emulator.utils_plots.plot_by_split.utils_plot_by_split import load_split_name_to_X_and_y
+from emulator.utils_plots.plot_by_split.utils_plot_split_name import SPLIT_NAMES, split_name_to_color
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_pareto_front_example(emulator: ClimateImpactEmulator, split_name_to_x_and_y: dict[str, Any],
+def plot_pareto_front_example(emulator: ClimateImpactEmulator, X: np.ndarray, y: np.ndarray,
                             target_label: str = "Target (-)", show: bool = False, metric=Metric.MSE) -> None:
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""
     ax = plt.gca()
     complexity_list = emulator.complexity_list
+    split_name_to_x_and_y = load_split_name_to_X_and_y(emulator, X, y)
     nb_bars = 1 + len(split_name_to_x_and_y)
     width, coordinate_list = load_bar_attributes(nb_bars=nb_bars, complexity_list=complexity_list)
     # One bar plot for each split
@@ -32,7 +31,6 @@ def plot_pareto_front_example(emulator: ClimateImpactEmulator, split_name_to_x_a
         ax.bar(coordinates, loss, width=width,
                label=split_name, color=split_name_to_color[split_name])
         loss_list.extend(loss)
-    print(loss_list)
     ax.set_xlabel('Equation f')
     # Add rounded equations on the lower X axis
     x_ticks = complexity_list
@@ -41,7 +39,7 @@ def plot_pareto_front_example(emulator: ClimateImpactEmulator, split_name_to_x_a
     xticklabels = [get_equation_str(expr).replace('x0', 'x') for expr in emulator.expr_list]
     xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True).replace('x0', 'x')
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
-    # Add y axis with special scaling
+    # Add y-axis with special scaling
     set_custom_y_axis_example(ax, loss_list, target_label, metric)
     # General settings for the plot
     # ax.legend(loc='upper right')

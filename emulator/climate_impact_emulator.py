@@ -175,6 +175,11 @@ class ClimateImpactEmulator(PySRRegressor):
         return self.equations_['complexity'].to_list()
 
     @property
+    def loss_list(self) -> list[float]:
+        return self.equations_['loss'].to_list()
+
+
+    @property
     def score_list(self) -> list[float]:
         return self.equations_['score'].to_list()
 

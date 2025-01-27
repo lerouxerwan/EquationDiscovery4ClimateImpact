@@ -1,5 +1,5 @@
 import numpy as np
-from sympy import Expr, Number, count_ops
+from sympy import Expr, Number
 
 from utils.utils_date import get_short_month_names
 

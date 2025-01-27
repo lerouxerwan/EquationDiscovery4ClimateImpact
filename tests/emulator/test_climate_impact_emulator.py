@@ -5,9 +5,13 @@ from sympy import Symbol
 from data.dataset.utils_dataset import load_dataset_ndarray
 from emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.utils_feature_selection.feature_selection import get_selection_mask
+from emulator.utils_plots.plot_by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
+from emulator.utils_plots.plot_by_split.plot_scatter import plot_scatter
+from emulator.utils_plots.plot_by_split.plot_time_series import plot_time_series
 from tests.emulator.utils_tests_emulator import load_climate_impact_emulator_for_test, \
     run_three_main_functions, load_X_and_y_for_test
 from utils.utils_run import random_seed
+
 
 
 @pytest.mark.parametrize("threshold_for_best_model_selection", [1.0, 1.5, 2.0])
@@ -33,11 +37,23 @@ def test_deterministic_and_compute_loss():
     X, y = load_X_and_y_for_test()
     emulator.fit(X, y)
     # Assert that the fit of the emulator is deterministic
-    loss_list = emulator.equations_['loss'].values
-    np.testing.assert_almost_equal(float(loss_list.sum()), 35698078.93297232)
+    np.testing.assert_almost_equal(float(sum(emulator.loss_list)), 35698078.93297232)
+
+def test_loss():
+    emulator = load_climate_impact_emulator_for_test()
+    X, y = load_X_and_y_for_test()
+    emulator.fit(X, y)
     # Assert that the method compute_loss of the emulator work well
-    for loss1, loss2 in zip(loss_list, emulator.compute_loss(X, y)):
+    for loss1, loss2 in zip(emulator.loss_list, emulator.compute_loss(X, y)):
         np.testing.assert_almost_equal(float(loss1), loss2, decimal=0)
+
+@pytest.mark.parametrize("plot_function", [plot_loss_vs_complexity, plot_scatter, plot_time_series])
+def test_plot(plot_function):
+    emulator = load_climate_impact_emulator_for_test()
+    X, y = load_X_and_y_for_test()
+    emulator.fit(X, y)
+    plot_function(emulator, X, y)
+
 
 list_of_X_units_and_expected_variable_names = [
     (['m', 's', 'mol', 'K', 'A', 'kg', 'cd'], ['x1']),

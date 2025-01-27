@@ -1,20 +1,27 @@
-from typing import Any
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 from emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.utils_metric.metric import Metric
-from emulator.utils_plots.plot_pareto_equations.utils_axis import set_custom_y_axis, set_x_axis
-from emulator.utils_plots.utils_equation_str import get_equation_str
-from emulator.utils_plots.utils_plot_split_name import SPLIT_NAMES, split_name_to_color
+from emulator.utils_plots.plot_by_split.utils_axis import set_custom_y_axis, set_x_axis
+from emulator.utils_plots.plot_by_split.utils_plot_by_split import load_split_name_to_X_and_y
+from emulator.utils_plots.plot_by_split.utils_equation_str import get_equation_str
+from emulator.utils_plots.plot_by_split.utils_plot_split_name import SPLIT_NAMES, split_name_to_color
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, split_name_to_x_and_y: dict[str, Any],
+def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, X_train: np.ndarray | pd.DataFrame,
+                                         y_train: np.ndarray | pd.Series,
+                                         X_test: Optional[np.ndarray | pd.DataFrame]=None,
+                                         y_test: Optional[np.ndarray | pd.Series]=None,
+                               years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None,
                             target_label: str = "Target (-)", show: bool = False, metric=Metric.RMSE) -> None:
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""
+    split_name_to_x_and_y = load_split_name_to_X_and_y(emulator, X_train, y_train, X_test, y_test, years_train, years_test)
     ax = plt.gca()
     complexity_list = emulator.complexity_list
     nb_bars = 1 + len(split_name_to_x_and_y)
