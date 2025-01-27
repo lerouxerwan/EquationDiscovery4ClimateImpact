@@ -34,11 +34,7 @@ def load_split_name_to_X_and_y_and_years(emulator: ClimateImpactEmulator, X_trai
     if isinstance(X_train, pd.DataFrame):
         X_train, y_train, X_test, y_test = X_train.values, y_train.values, X_test.values, y_test.values
     # Set default for years_train and years_test if needed
-    if years_train is None:
-        years_train = np.array(list(range(len(y_train))))
-    if years_test is None:
-        if X_test is not None:
-            years_test = np.array(list(range(len(y_test))))
+    years_test, years_train = set_default_years(y_test, y_train, years_test, years_train)
     # Three splits for ClimateImpactEmulatorWithSearch
     if isinstance(emulator, ClimateImpactEmulatorWithSearch):
         #  Separate train data between train (train_train) and validation (train_validation) data
@@ -66,5 +62,14 @@ def load_split_name_to_X_and_y_and_years(emulator: ClimateImpactEmulator, X_trai
         assert len(X) == len(y) == len(years)
         split_name_to_X_and_y_and_years[split_name] = (X, y, years)
     return split_name_to_X_and_y_and_years
+
+
+def set_default_years(y_test, y_train, years_test, years_train):
+    if years_train is None:
+        years_train = np.array(list(range(len(y_train))))
+    if years_test is None:
+        if y_test is not None:
+            years_test = np.array(list(range(len(y_test))))
+    return years_test, years_train
 
 

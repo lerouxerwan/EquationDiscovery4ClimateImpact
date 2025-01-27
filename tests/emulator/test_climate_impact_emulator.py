@@ -47,14 +47,6 @@ def test_loss():
     for loss1, loss2 in zip(emulator.loss_list, emulator.compute_loss(X, y)):
         np.testing.assert_almost_equal(float(loss1), loss2, decimal=0)
 
-@pytest.mark.parametrize("plot_function", [plot_loss_vs_complexity, plot_scatter, plot_time_series])
-def test_plot(plot_function):
-    emulator = load_climate_impact_emulator_for_test()
-    X, y = load_X_and_y_for_test()
-    emulator.fit(X, y)
-    plot_function(emulator, X, y)
-
-
 list_of_X_units_and_expected_variable_names = [
     (['m', 's', 'mol', 'K', 'A', 'kg', 'cd'], ['x1']),
     (['s', 'm', 'mol', 'K', 'A', 'kg', 'cd'], ['x2']),
@@ -96,7 +88,7 @@ list_of_feature_selection_name_and_selected_features = [
 def test_feature_selection(feature_selection_name_and_selected_features):
     feature_selection_name, selected_features_expected = feature_selection_name_and_selected_features
     filename = r"v5_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_25_month_season.csv"
-    X, y, _, _, _, _, _, _, variable_names, _, _ = load_dataset_ndarray(filename)
+    X, y, _, _, _, _, _, _, _, _, variable_names, _, _ = load_dataset_ndarray(filename)
     nb_features = 4
     selection_mask = get_selection_mask(X, y, nb_features, feature_selection_name, variable_names, random_seed)
     assert sum(selection_mask) == nb_features

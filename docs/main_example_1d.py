@@ -1,4 +1,5 @@
 from emulator.climate_impact_emulator import ClimateImpactEmulator
+from emulator.utils_plots.plot_by_rcp.plot_climatological_series import plot_climatological_series
 from emulator.utils_plots.plot_by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
 from emulator.utils_plots.plot_by_split.plot_scatter import plot_scatter
 from emulator.utils_plots.plot_by_split.plot_time_series import plot_time_series
@@ -10,8 +11,9 @@ def main_example_1d():
     emulator = ClimateImpactEmulator(niterations=5, maxsize=10)
     # emulator = ClimateImpactEmulatorWithSearch(n_iter=2)
     emulator.fit(X, y)
-    for plot in [plot_loss_vs_complexity, plot_scatter, plot_time_series][-1:]:
-        plot(emulator, X, y, show=True)
+    plot_climatological_series(emulator, y, show=True)
+    # for plot in [plot_loss_vs_complexity, plot_scatter, plot_time_series][-1:]:
+    #     plot(emulator, X, y, show=True)
 
 
 if __name__ == '__main__':
