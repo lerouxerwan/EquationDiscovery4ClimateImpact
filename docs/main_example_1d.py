@@ -9,13 +9,13 @@ from tests.emulator.utils_tests_emulator import load_X_and_y_for_test
 
 def main_example_1d():
     X, y = load_X_and_y_for_test()
-    plot_observed_climato(y, show=True)
+    # plot_observed_climato(y, show=True)
     emulator = ClimateImpactEmulator(niterations=5, maxsize=10)
     emulator.fit(X, y)
-    plot_predicted_climato(emulator, X, show=True)
+    # plot_predicted_climato(emulator, X, show=True)
     # emulator = ClimateImpactEmulatorWithSearch(n_iter=2)
-    # for plot in [plot_loss_vs_complexity, plot_scatter, plot_time_series][-1:]:
-    #     plot(emulator, X, y, show=True)
+    for plot in [plot_loss_vs_complexity, plot_scatter, plot_time_series][1:2]:
+        plot(emulator, X, y, show=True)
 
 
 if __name__ == '__main__':
