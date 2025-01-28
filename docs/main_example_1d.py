@@ -8,10 +8,12 @@ from tests.emulator.utils_tests_emulator import load_X_and_y_for_test
 
 def main_example_1d():
     X, y = load_X_and_y_for_test()
+    plot_climatological_series(y, show=True)
     emulator = ClimateImpactEmulator(niterations=5, maxsize=10)
-    # emulator = ClimateImpactEmulatorWithSearch(n_iter=2)
     emulator.fit(X, y)
-    plot_climatological_series(emulator, y, show=True)
+    y_predicted = emulator.predict(X)
+    plot_climatological_series(y_predicted, suffix='Predicted', show=True)
+    # emulator = ClimateImpactEmulatorWithSearch(n_iter=2)
     # for plot in [plot_loss_vs_complexity, plot_scatter, plot_time_series][-1:]:
     #     plot(emulator, X, y, show=True)
 

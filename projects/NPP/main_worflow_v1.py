@@ -30,7 +30,7 @@ def main_workflow(fast: bool = False):
 
 
 if __name__ == '__main__':
-    fast = False
+    fast = True
     main_workflow(fast)
 
 

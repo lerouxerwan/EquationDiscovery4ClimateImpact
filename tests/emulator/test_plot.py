@@ -16,11 +16,10 @@ def test_plot_by_split(plot_function):
 
 @pytest.mark.parametrize("plot_function", [plot_climatological_series])
 def test_plot_by_rcp_for_observed_values(plot_function):
-    emulator = load_climate_impact_emulator_for_test()
     X, y = load_X_and_y_for_test()
-    emulator.fit(X, y)
     for nb_historical_years in [0, 20]:
-        plot_function(emulator, y, nb_historical_years=nb_historical_years)
+        plot_function(y, nb_historical_years=nb_historical_years)
+
 
 
 
