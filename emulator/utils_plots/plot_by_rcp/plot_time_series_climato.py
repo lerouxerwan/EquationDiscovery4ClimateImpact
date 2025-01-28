@@ -1,0 +1,53 @@
+import math
+
+import numpy as np
+from matplotlib import pyplot as plt
+
+from emulator.utils_plots.plot_by_rcp.utils_plot_by_rcp import plot_average_value
+from utils.utils_plot import show_or_save_plot
+
+
+def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_label_and_color, y_train, target_label, suffix,
+                                    show):
+    ax = plt.gca()
+    window_size = 30
+    all_dates = []
+    for rcp_name, list_of_y_and_years_and_color_and_label in rcp_name_to_list_of_years_and_y_and_label_and_color.items():
+        dates, values = [], []
+        #  Plot for each sub period the points in their respective color
+        for years, y, color, label in list_of_y_and_years_and_color_and_label:
+            ax.plot(years, y, color=color, linestyle='', marker='o', label=label)
+            values.append(y)
+            dates.append(years)
+        dates, values = np.concat(dates), np.concat(values)
+        #  Plot the average mean/std with the last color, i.e. the color of the RCP,
+        plot_average_value(ax, color, values, dates, window_size)
+        all_dates.append(dates)
+    #  Set custom X-axis
+    xmin = int(math.floor(np.min(np.concat(all_dates)) / 10.0)) * 10
+    xmax = int(math.ceil(np.max(np.concat(all_dates)) / 10.0)) * 10
+    ax.set_xlim(xmin, xmax)
+    xticks = [x for x in range(xmin, xmax + 1, 10)]
+    xticks_half = xticks[::2]
+    ax.set_xticks(xticks_half if ((xticks_half[0] == xticks[0]) and (xticks_half[-1] == xticks[-1])) else xticks)
+    ax.set_xlabel('Years')
+    #  Y axis
+    ax.set_ylabel(f'{suffix} {target_label.lower()}')
+    #  Add first legend
+    increasing_trend = (y_train[0] < y_train[-1]) if isinstance(y_train, np.ndarray) else (
+                y_train.values[0] < y_train.values[-1])
+    loc1, loc2 = ('upper left', 'lower right') if increasing_trend else ('upper right', 'lower left')
+    ax.legend(loc=loc1)
+    #  Add a second legend to explain the dot and the line
+    legend_labels = ['Annual indicator', f'{window_size}-years average', 'Standard deviation']
+    legend_handles = [
+        plt.Line2D([0], [0], marker='o', linestyle='', color='k', markerfacecolor='w'),
+        plt.Line2D([0], [0], marker='', linestyle='-', color='k'),
+        plt.Line2D([0], [0], marker='s', linestyle='', color='k', markerfacecolor='k', markersize=10,
+                   alpha=0.5),
+    ]
+    ax_twin = ax.twinx()
+    ax_twin.set_yticks([])
+    ax_twin.legend(legend_handles, legend_labels, loc=loc2)
+    ax.yaxis.grid()
+    show_or_save_plot(f'climatological_series_{suffix}', show)
