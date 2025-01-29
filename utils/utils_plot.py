@@ -4,6 +4,7 @@ import os
 import os.path as op
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from utils.utils_path import RESULT_PATH
 
@@ -12,6 +13,12 @@ VERSION = str(datetime.now()).split('.')[0][5:]
 for s in [' ', ':', '-']:
     VERSION = VERSION.replace(s, '_')
 VERSION = ''.join(VERSION)
+
+
+def compute_axis_lim(values: np.ndarray) -> tuple[float, float]:
+    lower_lim, upper_lim = np.min(values), np.max(values)
+    delta = 0.01 * (upper_lim - lower_lim)
+    return lower_lim - delta, upper_lim + delta
 
 
 def subplots_custom(nrows, ncols, sharex=False, sharey=False, hspace=None, wspace=None):

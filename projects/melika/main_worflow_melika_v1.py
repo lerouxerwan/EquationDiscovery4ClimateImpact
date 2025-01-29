@@ -6,16 +6,16 @@ FILENAME = r"v5_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_
 
 def main_workflow(fast: bool = False):
     if fast:
-        nb_features_list = [3]
         params_emulator = {
+            "select_k_features": 3,
             "n_iter": 2,
             "n_jobs": 1,
             "param_grid": {'populations': [10, 20]},
             "feature_selection_name": 'ExpertKnowledge',
         }
     else:
-        nb_features_list = [5]
         params_emulator = {
+            "select_k_features": 5,
             "n_iter": 100,
             "n_jobs": 1,
             "population_size": 31,
@@ -27,11 +27,10 @@ def main_workflow(fast: bool = False):
             "param_list_to_optimize_around_default": ['niterations', 'adaptive_parsimony_scaling',
                                                       'fraction_replaced_hof', 'populations',
                                                       'population_size'],
-            "feature_selection_name": ['PySRDefault', 'ExpertKnowledge'][0],
+            "feature_selection_name": ['PySRDefault', 'ExpertKnowledge'][1],
         }
     # Run workflow for several number of features
-    for nb_features in nb_features_list:
-        workflow(FILENAME, nb_features, **params_emulator)
+    workflow(FILENAME, **params_emulator)
 
 
 if __name__ == '__main__':

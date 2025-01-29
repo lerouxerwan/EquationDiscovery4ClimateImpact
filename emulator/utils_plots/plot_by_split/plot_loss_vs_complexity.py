@@ -22,7 +22,7 @@ def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, X_train: np.ndarray
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""
     split_name_to_x_and_y = load_split_name_to_X_and_y(emulator, X_train, y_train, X_test, y_test, years_train, years_test)
-    ax = plt.gca()
+    fig, ax = plt.subplots(figsize=(16, 9))
     complexity_list = emulator.complexity_list
     nb_bars = 1 + len(split_name_to_x_and_y)
     width, coordinate_list = load_bar_attributes(nb_bars=nb_bars, complexity_list=complexity_list)
@@ -36,7 +36,7 @@ def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, X_train: np.ndarray
         ax.bar(coordinates, loss, width=width,
                label=split_name, color=split_name_to_color[split_name])
         loss_list.extend(loss)
-    add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width)
+    # add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width)
     # Add rounded equations on the lower X axis
     ax.set_xlabel('Equations with rounded coefficients\n(which may explain why the complexity seems wrong)')
     x_ticks = complexity_list
@@ -45,9 +45,9 @@ def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, X_train: np.ndarray
     xticklabels = [get_equation_str(expr) for expr in emulator.expr_list]
     xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True)
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
-    # Add y axis with special scaling
+    # Add y-axis with special scaling
     set_custom_y_axis(ax, loss_list, target_label, metric)
-    plot_threshold(ax, emulator, metric, *ax.get_xlim())
+    # plot_threshold(ax, emulator, metric, *ax.get_xlim())
     # General settings for the plot
     ax.legend(loc='upper right')
     show_or_save_plot(f'loss_vs_complexity', show)

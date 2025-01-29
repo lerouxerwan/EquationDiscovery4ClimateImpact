@@ -1,6 +1,4 @@
 from emulator.climate_impact_emulator import ClimateImpactEmulator
-from emulator.utils_plots.plot_by_rcp.plot_climato import plot_observed_climato, \
-    plot_predicted_climato
 from emulator.utils_plots.plot_by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
 from emulator.utils_plots.plot_by_split.plot_scatter import plot_scatter
 from emulator.utils_plots.plot_by_split.plot_time_series import plot_time_series

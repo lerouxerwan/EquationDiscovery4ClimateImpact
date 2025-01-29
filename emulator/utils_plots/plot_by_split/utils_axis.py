@@ -21,10 +21,11 @@ def set_x_axis(ax: Axes, x_ticks: list[int]):
 def set_custom_y_axis(ax: Axes, loss_list: list[float], target_label: str, metric: Metric):
     """Scale y-axis with a log scale for large values then a linear scale for smaller values"""
     threshold = 2.0 * min(loss_list)
-    ax.set_yscale(FuncScale(ax.yaxis, custom_functions_for_yaxis(threshold)))
-    small_ticks = [float(t) / 10 for t in range(math.floor(10 * min(loss_list)), math.ceil(10 * threshold))][::2]
-    large_ticks = [t * 10 for t in [1, 10, 100, 1000, 10000, 100000] if t < max(loss_list)]
-    y_ticks = small_ticks + large_ticks
+    y_ticks = [float(t) / 10 for t in range(math.floor(10 * min(loss_list)), math.ceil(10 * threshold))][::2]
+    if max(loss_list) > threshold:
+        ax.set_yscale(FuncScale(ax.yaxis, custom_functions_for_yaxis(threshold)))
+        large_ticks = [t * 10 for t in [1, 10, 100, 1000, 10000, 100000] if t < max(loss_list)]
+        y_ticks += large_ticks
     ax.set_yticks(y_ticks)
     ax.set_ylim((y_ticks[0], y_ticks[-1]))
     unit = '(' + target_label.split('(')[-1].replace(' ', '')

@@ -8,7 +8,7 @@ from utils.utils_plot import show_or_save_plot
 
 
 def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_label_and_color, y_train, target_label, suffix,
-                                    show):
+                                    show, ymin_and_ymax: tuple[float, float] = None):
     ax = plt.gca()
     window_size = 30
     all_dates = []
@@ -32,6 +32,8 @@ def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_label_an
     ax.set_xticks(xticks_half if ((xticks_half[0] == xticks[0]) and (xticks_half[-1] == xticks[-1])) else xticks)
     ax.set_xlabel('Years')
     #  Y axis
+    if ymin_and_ymax is not None:
+        ax.set_ylim(ymin_and_ymax)
     ax.set_ylabel(f'{suffix} {target_label.lower()}')
     #  Add first legend
     increasing_trend = (y_train[0] < y_train[-1]) if isinstance(y_train, np.ndarray) else (

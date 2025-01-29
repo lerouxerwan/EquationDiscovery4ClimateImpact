@@ -7,6 +7,7 @@ from emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
 from emulator.utils_hyperparameter_search.utils_validation import get_X_and_y
 from emulator.utils_plots.plot_by_split.utils_plot_split_name import SPLIT_NAMES
+from utils.utils_plot import compute_axis_lim
 
 
 def load_split_name_to_X_and_y(emulator: ClimateImpactEmulator, X_train: np.ndarray | pd.DataFrame,
@@ -77,6 +78,6 @@ def get_ymin_and_ymax(split_name_to_X_and_y_and_y_predicted_and_years: dict[str,
     for _, (_, y, y_predicted, _) in split_name_to_X_and_y_and_y_predicted_and_years.items():
         y_arrays.extend([y, y_predicted])
     y_values = np.concat(y_arrays)
-    return np.min(y_values), np.max(y_values)
+    return compute_axis_lim(y_values)
 
 
