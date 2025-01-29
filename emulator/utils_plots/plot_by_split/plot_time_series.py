@@ -30,7 +30,7 @@ def plot_time_series(emulator: ClimateImpactEmulator,X_train: np.ndarray | pd.Da
         ax.plot(years, y_predicted, label=y_predicted_label)
         # Annotate equation and metric box
         add_equation(ax, emulator.selected_expr)
-        add_metric_box(ax, y, y_predicted, target_label, split_name, add_climatological_metrics=True)
+        add_metric_box(ax, y, y_predicted, target_label, split_name)
         #  Add legend and labels
         ax.set_xlabel('Years')
         ax.set_ylabel(target_label)
