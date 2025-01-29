@@ -4,10 +4,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from emulator.utils_plots.plot_by_rcp.utils_plot_by_rcp import plot_average_value
+from emulator.utils_plots.plot_by_split.utlis_plot_selected_equation import get_label
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_label_and_color, y_train, target_label, suffix,
+def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_label_and_color, y_train, target_label, prefix,
                                     show, ymin_and_ymax: tuple[float, float] = None):
     ax = plt.gca()
     window_size = 30
@@ -34,7 +35,7 @@ def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_label_an
     #  Y axis
     if ymin_and_ymax is not None:
         ax.set_ylim(ymin_and_ymax)
-    ax.set_ylabel(f'{suffix} {target_label.lower()}')
+    ax.set_ylabel(f'{prefix} {get_label(target_label)}')
     #  Add first legend
     increasing_trend = (y_train[0] < y_train[-1]) if isinstance(y_train, np.ndarray) else (
                 y_train.values[0] < y_train.values[-1])
@@ -52,4 +53,4 @@ def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_label_an
     ax_twin.set_yticks([])
     ax_twin.legend(legend_handles, legend_labels, loc=loc2)
     ax.yaxis.grid()
-    show_or_save_plot(f'climatological_series_{suffix}', show)
+    show_or_save_plot(f'climatological_series_{prefix}', show)

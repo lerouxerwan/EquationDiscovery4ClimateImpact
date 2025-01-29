@@ -6,6 +6,7 @@ from matplotlib.axes import Axes
 from matplotlib.scale import FuncScale
 
 from emulator.utils_metric.metric import Metric, metric_to_label
+from emulator.utils_plots.plot_by_split.utlis_plot_selected_equation import get_unit
 
 
 def set_x_axis(ax: Axes, x_ticks: list[int]):
@@ -28,8 +29,7 @@ def set_custom_y_axis(ax: Axes, loss_list: list[float], target_label: str, metri
         y_ticks += large_ticks
     ax.set_yticks(y_ticks)
     ax.set_ylim((y_ticks[0], y_ticks[-1]))
-    unit = '(' + target_label.split('(')[-1].replace(' ', '')
-    ax.set_ylabel(f'{metric_to_label[metric]} {unit}')
+    ax.set_ylabel(f'{metric_to_label[metric]} {get_unit(target_label)}')
 
 
 def custom_functions_for_yaxis(threshold: float) -> tuple[Callable, Callable]:

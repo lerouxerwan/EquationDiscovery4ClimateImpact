@@ -21,7 +21,6 @@ def plot_climato(emulator: ClimateImpactEmulator, X_train: np.ndarray | pd.DataF
     y_values = np.concat([y for y in [y_train, y_test, y_train_predicted, y_test_predicted] if y is not None])
     ymin_and_ymax = compute_axis_lim(y_values)
     # Plot observation and prediction using the same limit
-
     _plot_climato(y_train, y_test, years_train, years_test, rcp_name_train, rcp_name_test,
                   nb_historical_years, target_label, "Observed", show, ymin_and_ymax)
     _plot_climato(y_train_predicted, y_test_predicted, years_train, years_test, rcp_name_train, rcp_name_test,

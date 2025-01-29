@@ -18,9 +18,10 @@ def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, X_train: np.ndarray
                                          X_test: Optional[np.ndarray | pd.DataFrame]=None,
                                          y_test: Optional[np.ndarray | pd.Series]=None,
                                years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None,
-                            target_label: str = "Target (-)", show: bool = False, metric=Metric.RMSE) -> None:
+                            target_label: str = "Target (-)", show: bool = False, detailed_plot: bool = False) -> None:
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""
+    metric = Metric.RMSE
     split_name_to_x_and_y = load_split_name_to_X_and_y(emulator, X_train, y_train, X_test, y_test, years_train, years_test)
     fig, ax = plt.subplots(figsize=(16, 9))
     complexity_list = emulator.complexity_list
@@ -36,7 +37,7 @@ def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, X_train: np.ndarray
         ax.bar(coordinates, loss, width=width,
                label=split_name, color=split_name_to_color[split_name])
         loss_list.extend(loss)
-    # add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width)
+
     # Add rounded equations on the lower X axis
     ax.set_xlabel('Equations with rounded coefficients\n(which may explain why the complexity seems wrong)')
     x_ticks = complexity_list
@@ -47,7 +48,10 @@ def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, X_train: np.ndarray
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     # Add y-axis with special scaling
     set_custom_y_axis(ax, loss_list, target_label, metric)
-    # plot_threshold(ax, emulator, metric, *ax.get_xlim())
+    # Potentially add detailed plots
+    if detailed_plot:
+        add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width)
+        plot_threshold(ax, emulator, metric, *ax.get_xlim())
     # General settings for the plot
     ax.legend(loc='upper right')
     show_or_save_plot(f'loss_vs_complexity', show)

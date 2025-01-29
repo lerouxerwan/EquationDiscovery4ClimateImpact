@@ -8,7 +8,8 @@ from emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.utils_metric.utlis_metric_box import add_metric_box
 from emulator.utils_plots.plot_by_split.utils_plot_by_split import load_split_name_to_X_and_y_and_y_predicted_and_years, \
     get_ymin_and_ymax
-from emulator.utils_plots.plot_by_split.utlis_plot_selected_equation import get_labels, add_equation
+from emulator.utils_plots.plot_by_split.utlis_plot_selected_equation import get_true_label_and_predicted_label, \
+    add_equation, get_label
 from utils.utils_plot import show_or_save_plot
 
 
@@ -25,7 +26,7 @@ def plot_time_series(emulator: ClimateImpactEmulator,X_train: np.ndarray | pd.Da
         ax = plt.gca()
         #  Add grid on Y-axis and two lines
         ax.yaxis.grid()
-        y_true_label, y_predicted_label = get_labels(target_label, remove_units=True)
+        y_true_label, y_predicted_label = get_true_label_and_predicted_label(target_label, remove_units=True)
         ax.plot(years, y, label=y_true_label)
         ax.plot(years, y_predicted, label=y_predicted_label)
         # Annotate equation and metric box
@@ -33,7 +34,7 @@ def plot_time_series(emulator: ClimateImpactEmulator,X_train: np.ndarray | pd.Da
         add_metric_box(ax, y, y_predicted, target_label, split_name)
         #  Add legend and labels
         ax.set_xlabel('Years')
-        ax.set_ylabel(target_label)
+        ax.set_ylabel(get_label(target_label))
         ax.legend(loc='lower left')
         ax.set_ylim((ymin, ymax))
         show_or_save_plot(f'plot_time_series_{split_name}', show)
