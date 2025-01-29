@@ -39,7 +39,7 @@ def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_label_an
     loc1, loc2 = ('upper left', 'lower right') if increasing_trend else ('upper right', 'lower left')
     ax.legend(loc=loc1)
     #  Add a second legend to explain the dot and the line
-    legend_labels = ['Annual indicator', f'{window_size}-years average', 'Standard deviation']
+    legend_labels = ['Annual value', f'{window_size}-years average', 'Standard deviation']
     legend_handles = [
         plt.Line2D([0], [0], marker='o', linestyle='', color='k', markerfacecolor='w'),
         plt.Line2D([0], [0], marker='', linestyle='-', color='k'),

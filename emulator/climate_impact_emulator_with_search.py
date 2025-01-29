@@ -226,7 +226,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         """Load or run hyperparameter search to obtain df_ranked_results"""
         X_sum, y_sum = self.get_X_sum_and_y_sum(X, y)
         filepath_search = get_filepath_search(X_sum, y_sum, self.validation_size, self.search_cv_type, self.n_iter,
-                                              self.param_grid, self.select_k_features, **params_fit)
+                                              self.param_grid, self.feature_selection_name, self.select_k_features, **params_fit)
         if op.exists(filepath_search) and self.save_or_load_csv_of_search_results:
             log_info('Load df_ranked_results from csv file')
             df_ranked_results = pd.read_csv(filepath_search, index_col=0)

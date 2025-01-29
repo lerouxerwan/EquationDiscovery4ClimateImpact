@@ -14,7 +14,7 @@ def main_workflow(fast: bool = False):
             "feature_selection_name": 'ExpertKnowledge',
         }
     else:
-        nb_features_list = [4]
+        nb_features_list = [5]
         params_emulator = {
             "n_iter": 100,
             "n_jobs": 1,
@@ -24,12 +24,10 @@ def main_workflow(fast: bool = False):
             "binary_operators": ["+", "*", "/", "-"],
             # Hyperparameter to optimize around (/2, x2) their default or specified value
             "scaling_factor": 2,
-            "adaptive_parsimony_scaling": 2000.,
-            "niterations": 1000.,
             "param_list_to_optimize_around_default": ['niterations', 'adaptive_parsimony_scaling',
                                                       'fraction_replaced_hof', 'populations',
                                                       'population_size'],
-            "feature_selection_name": 'ExpertKnowledge',
+            "feature_selection_name": ['PySRDefault', 'ExpertKnowledge'][0],
         }
     # Run workflow for several number of features
     for nb_features in nb_features_list:
@@ -37,7 +35,7 @@ def main_workflow(fast: bool = False):
 
 
 if __name__ == '__main__':
-    fast = True
+    fast = False
     main_workflow(fast)
 
 
