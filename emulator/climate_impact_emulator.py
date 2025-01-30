@@ -8,11 +8,10 @@ from numpy import ndarray
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
 from pysr.denoising import multi_denoise, denoise
 from pysr.utils import ArrayLike
-from sklearn.metrics import mean_squared_error
 from sklearn.utils.validation import _check_feature_names_in
 from sympy import Expr
 
-from emulator.utils_feature_selection.feature_selection import get_selection_mask
+from emulator.utils_hyperparameter_search.utils_feature_selection import get_selection_mask
 from emulator.utils_metric.metric import Metric, metric_to_function
 from utils.utils_log import log_info
 from utils.utils_run import random_seed

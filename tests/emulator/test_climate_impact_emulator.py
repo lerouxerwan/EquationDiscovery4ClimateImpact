@@ -3,11 +3,7 @@ import pytest
 from sympy import Symbol
 
 from data.dataset.utils_dataset import load_dataset_ndarray
-from emulator.climate_impact_emulator import ClimateImpactEmulator
-from emulator.utils_feature_selection.feature_selection import get_selection_mask
-from emulator.utils_plots.plot_by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
-from emulator.utils_plots.plot_by_split.plot_scatter import plot_scatter
-from emulator.utils_plots.plot_by_split.plot_time_series import plot_time_series
+from emulator.utils_hyperparameter_search.utils_feature_selection import get_selection_mask
 from tests.emulator.utils_tests_emulator import load_climate_impact_emulator_for_test, \
     run_three_main_functions, load_X_and_y_for_test
 from utils.utils_run import random_seed

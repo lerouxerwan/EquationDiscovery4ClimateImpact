@@ -15,7 +15,7 @@ from data.search.utils_search import get_filepath_search
 from emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs
 from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_cv, get_X_and_y
-from emulator.utils_optimize_threshold.utils_threshold import get_param_grid_with_thresholds
+from emulator.utils_hyperparameter_search.utils_threshold import get_param_grid_with_thresholds
 from utils.utils_log import log_info
 
 

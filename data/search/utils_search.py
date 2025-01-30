@@ -3,7 +3,7 @@ from typing import Optional
 
 from sklearn.model_selection import RandomizedSearchCV
 
-from emulator.utils_optimize_threshold.utils_threshold import NB_THRESHOLDS
+from emulator.utils_hyperparameter_search.utils_threshold import NB_THRESHOLDS
 from utils.utils_path import SEARCH_CSV_PATH
 
 NDIGITS = 1

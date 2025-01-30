@@ -2,6 +2,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from sklearn.model_selection._search import BaseSearchCV
 
 NB_THRESHOLDS = 20
 
@@ -11,7 +12,7 @@ def get_threshold_values() -> list[float]:
     all_thresholds = [float(f) for f in all_thresholds] + [2.]
     return all_thresholds
 
-def get_param_grid_with_thresholds(search_cv):
+def get_param_grid_with_thresholds(search_cv: BaseSearchCV) -> list[dict[str, Any]]:
     #  Build param_grid_list from param_list
     params_list = pd.DataFrame(search_cv.cv_results_)['params'].to_list()
     # For each param we build a param_grid where all hyperparameters have a fixed value,
