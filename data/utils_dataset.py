@@ -14,7 +14,9 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, Optional[np.ndar
     (X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, rcp_name_train, rcp_name_test,
      variable_names, target_label, nb_historical_years) = load_dataset_dataframe(filename_dataset)
     variable_names = X_train.columns.values
-    return (X_train.values, y_train.values, X_test.values, y_test.values, X_units, y_units,
+    X_test_values = None if X_test is None else X_test.values
+    y_test_values = None if y_test is None else y_test.values
+    return (X_train.values, y_train.values, X_test_values, y_test_values, X_units, y_units,
             years_train, years_test, rcp_name_train, rcp_name_test, variable_names, target_label, nb_historical_years)
 
 

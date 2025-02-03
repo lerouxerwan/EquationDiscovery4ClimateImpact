@@ -1,0 +1,30 @@
+import pandas as pd
+from matplotlib import pyplot as plt
+
+from projects.paper.results.train.utils_ranked_features import compute_sorted_features
+from utils.utils_latex import print_df_latex
+from utils.utils_plot import show_or_save_plot
+
+
+def main_plot_ranked_features():
+    select_k_features = 10
+    sorted_importance, sorted_names = compute_sorted_features(select_k_features)
+
+    df_latex = pd.DataFrame(data={"Feature name": sorted_names, "Feature importance": sorted_importance},
+                            index=[f'#{i + 1}' for i in range(len(sorted_names))])
+    df_latex['Feature importance'] = df_latex['Feature importance'].apply(lambda x: round(x, 3))
+    df_latex.index.name = "Rank"
+    df_latex.reset_index(inplace=True)
+    print_df_latex(df_latex)
+    fix, ax = plt.subplots()
+    ax.axis('off')
+    table = pd.plotting.table(ax, df_latex, loc='center', cellLoc='center')
+    table.auto_set_font_size(True)
+    table.set_fontsize(16)
+    show_or_save_plot(f'selected_features', True)
+
+
+
+
+if __name__ == '__main__':
+    main_plot_ranked_features()
