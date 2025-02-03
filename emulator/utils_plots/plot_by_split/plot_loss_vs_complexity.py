@@ -25,7 +25,8 @@ def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, X_train: np.ndarray
     split_name_to_x_and_y = load_split_name_to_X_and_y(emulator, X_train, y_train, X_test, y_test, years_train, years_test)
     fig, ax = plt.subplots(figsize=(16, 9))
     complexity_list = emulator.complexity_list
-    nb_bars = 1 + len(split_name_to_x_and_y)
+    # Detailed plot adds one bar for PySR score
+    nb_bars = len(split_name_to_x_and_y) + int(detailed_plot)
     width, coordinate_list = load_bar_attributes(nb_bars=nb_bars, complexity_list=complexity_list)
     # One bar plot for each split
     loss_list = []
@@ -83,7 +84,7 @@ def plot_threshold(ax, emulator, metric, xmax, xmin):
 
 def load_bar_attributes(nb_bars: int, complexity_list: list[int]):
     # assert all([c % 2 == 1 for c in complexity_list]), 'A case with pair complexity must be implemented'
-    width = 1 / (1 + nb_bars) # add one for the blank bar
+    width = (2 if nb_bars == 2 else 1) / (1 + nb_bars) # add one for the blank bar
     coordinates_list = [[c  + width * (bar_id - nb_bars / 2 + 0.5) for c in complexity_list] for bar_id in range(nb_bars)]
     return width, coordinates_list
 

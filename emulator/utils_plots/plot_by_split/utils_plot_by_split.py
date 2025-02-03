@@ -33,7 +33,9 @@ def load_split_name_to_X_and_y_and_y_predicted_and_years(emulator: ClimateImpact
     assert (years_train is None) or (years_train.ndim == 1)
     # Cast all X and y as ndarray (instead of Dataframe and Series) if it is not already done
     if isinstance(X_train, pd.DataFrame):
-        X_train, y_train, X_test, y_test = X_train.values, y_train.values, X_test.values, y_test.values
+        X_train, y_train = X_train.values, y_train.values
+        if X_test is not None:
+            X_test, y_test = X_test.values, y_test.values
     # Set default for years_train and years_test if needed
     years_test, years_train = set_default_years(y_test, y_train, years_test, years_train)
     # Three splits for ClimateImpactEmulatorWithSearch

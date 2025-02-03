@@ -8,8 +8,8 @@ from pysr.utils import ArrayLike
 from utils.utils_path import DATASET_CSV_PATH
 
 
-def load_dataset_ndarray(filename_dataset: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray,
-Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, str, str, np.ndarray[str], str, int]:
+def load_dataset_ndarray(filename_dataset: str) -> tuple[np.ndarray, np.ndarray, Optional[np.ndarray], Optional[np.ndarray],
+Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, Optional[np.ndarray], str, Optional[str], np.ndarray[str], str, int]:
     """Load dataset parameters from a csv file, with X and y as ndarrays"""
     (X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, rcp_name_train, rcp_name_test,
      variable_names, target_label, nb_historical_years) = load_dataset_dataframe(filename_dataset)
@@ -18,28 +18,36 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, str,
             years_train, years_test, rcp_name_train, rcp_name_test, variable_names, target_label, nb_historical_years)
 
 
-def load_dataset_dataframe(filename_dataset: str) -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series,
-Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, np.ndarray, str, str, Optional[np.ndarray[str]], str, int]:
+def load_dataset_dataframe(filename_dataset: str) -> tuple[pd.DataFrame, pd.Series, Optional[pd.DataFrame], Optional[pd.Series],
+Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, Optional[np.ndarray], str, Optional[str], Optional[np.ndarray[str]], str, int]:
     """Load dataset parameters from a csv file, with X and y as pandas Dataframe and Series"""
     df = pd.read_csv(op.join(DATASET_CSV_PATH, filename_dataset), index_col=0)
     # Remove blank space from columns
     df.rename(columns={c: c.replace(' ', '_') for c in df.columns}, inplace=True)
     # Load features units and dataframe, target units and its series
     df, X, X_units, y, y_units = load_units(df)
-    # Identify the two RCP scenarios
+    years = np.array([int(i.split('_')[-1]) for i in df.index.values])
+
+    # Identify RCP scenarios
     prefix_set =  set([i.split('_')[0] for i in df.index.values])
     assert 1 <= len(prefix_set) <= 3
     rcp_name_train = 'RCP85'
-    rcp_scenarios = [prefix for prefix in prefix_set if prefix.startswith('RCP') and (prefix != rcp_name_train)]
-    rcp_name_test = rcp_scenarios[0]
-    # Split features X and target y between train split and test split
-    ind_test = df.index.str.startswith(rcp_name_test)
-    X_test, y_test = X.loc[ind_test, :], y.loc[ind_test]
-    X_train, y_train = X.loc[~ind_test, :], y.loc[~ind_test]
-    # Load corresponding years for the data
-    years = np.array([int(i.split('_')[-1]) for i in df.index.values])
-    years_train = years[~ind_test]
-    years_test = years[ind_test]
+    other_rcp_scenarios = [prefix for prefix in prefix_set if prefix.startswith('RCP') and (prefix != rcp_name_train)]
+    # Extract ind_test, a boolean arrays that indicate test datapoints
+    #  Split features X and target y between train split and test split
+    if other_rcp_scenarios:
+        rcp_name_test = other_rcp_scenarios[0]
+        ind_test = df.index.str.startswith(rcp_name_test)
+        X_test, y_test = X.loc[ind_test, :], y.loc[ind_test]
+        X_train, y_train = X.loc[~ind_test, :], y.loc[~ind_test]
+        years_train = years[~ind_test]
+        years_test = years[ind_test]
+    else:
+        rcp_name_test = None
+        X_train, y_train = X, y
+        X_test, y_test = None, None
+        years_train = years
+        years_test = None
     # Load feature names and target name
     target_name = df.columns[:1].values[0]
     target_label = f'{target_name} ({'' if y_units is None else y_units[0]})'
@@ -76,6 +84,6 @@ def load_units(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, Optional[l
 
 
 if __name__ == '__main__':
-    filename = r"NPP_month.csv"
+    filename = r"NPP_season.csv"
     res = load_dataset_dataframe(filename)
     print(res[-1])

@@ -18,7 +18,9 @@ def load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train: np.ndarray
     assert (years_train is None) or (years_train.ndim == 1)
     # Cast all y as ndarray (instead of Series) if it is not already done
     if isinstance(y_train, pd.Series):
-        y_train, y_test = y_train.values, y_test.values
+        y_train = y_train.values
+        if y_test is not None:
+            y_test = y_test.values
     # Set default for years_train and years_test if needed
     years_test, years_train = set_default_years(y_test, y_train, years_test, years_train)
     # Add rcp_name_train

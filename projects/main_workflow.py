@@ -4,7 +4,6 @@ from utils.utils_run import NB_CORES
 FILENAME = r"NPP_season.csv"
 
 
-
 def main_workflow(fast: bool = False):
     if fast:
         params_emulator = {
@@ -36,7 +35,7 @@ def main_workflow(fast: bool = False):
 
 
 if __name__ == '__main__':
-    fast = False
+    fast = True
     main_workflow(fast)
 
 
