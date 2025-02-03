@@ -1,14 +1,17 @@
 import pandas as pd
 from matplotlib import pyplot as plt
 
+from data.utils_dataset import load_dataset_ndarray
 from projects.paper.results.train.utils_ranked_features import compute_sorted_features
+from projects.paper.utils_paper import filename_dataset_paper
 from utils.utils_latex import print_df_latex
 from utils.utils_plot import show_or_save_plot
 
 
 def main_plot_ranked_features():
-    select_k_features = 10
-    sorted_importance, sorted_names = compute_sorted_features(select_k_features)
+    (X_train, y_train, _, _, _, _, years_train, _, rcp_name_train, _, variable_names, _, nb_historical_years) = load_dataset_ndarray(filename_dataset_paper)
+    sorted_importance, sorted_names = compute_sorted_features(X_train, y_train, variable_names, nb_historical_years,
+                                                              select_k_features=10)
 
     df_latex = pd.DataFrame(data={"Feature name": sorted_names, "Feature importance": sorted_importance},
                             index=[f'#{i + 1}' for i in range(len(sorted_names))])
