@@ -8,12 +8,13 @@ from emulator.utils_plots.plot_by_split.utlis_plot_selected_equation import get_
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_label_and_color, y_train, target_label, prefix,
+def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, target_label, prefix,
                                     show, ymin_and_ymax: tuple[float, float] = None):
     ax = plt.gca()
     window_size = 30
     all_dates = []
-    for rcp_name, list_of_y_and_years_and_color_and_label in rcp_name_to_list_of_years_and_y_and_label_and_color.items():
+    rcp_name_to_std_values_and_years_and_color = {}
+    for rcp_name, list_of_y_and_years_and_color_and_label in rcp_name_to_list_of_years_and_y_and_color_and_label.items():
         dates, values = [], []
         #  Plot for each sub period the points in their respective color
         for years, y, color, label in list_of_y_and_years_and_color_and_label:
@@ -22,7 +23,8 @@ def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_label_an
             dates.append(years)
         dates, values = np.concat(dates), np.concat(values)
         #  Plot the average mean/std with the last color, i.e. the color of the RCP,
-        plot_average_value(ax, color, values, dates, window_size)
+        years_average, std_values = plot_average_value(ax, color, values, dates, window_size)
+        rcp_name_to_std_values_and_years_and_color[rcp_name] = (std_values, years_average, color)
         all_dates.append(dates)
     #  Set custom X-axis
     xmin = int(math.floor(np.min(np.concat(all_dates)) / 10.0)) * 10
@@ -54,3 +56,4 @@ def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_label_an
     ax_twin.legend(legend_handles, legend_labels, loc=loc2)
     ax.yaxis.grid()
     show_or_save_plot(f'climatological_series_{prefix}', show)
+    return rcp_name_to_std_values_and_years_and_color

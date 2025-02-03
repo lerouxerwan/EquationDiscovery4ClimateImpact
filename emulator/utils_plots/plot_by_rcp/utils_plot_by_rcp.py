@@ -55,4 +55,5 @@ def plot_average_value(ax: Axes, color: str, values: np.ndarray, dates: np.ndarr
             half_std_values = [np.std(window_values, ddof=1) / 2 for window_values in window_values_list]
             averaged_values, half_std_values = np.array(averaged_values), np.array(half_std_values)
             ax.fill_between(years_average, averaged_values - half_std_values, averaged_values + half_std_values, color=color, alpha=0.4)
+            return years_average, [2.*v for v in half_std_values]
 
