@@ -1,4 +1,4 @@
-from data.search.utils_json_loader import string_to_dict
+from utils.utils_json_loader import string_to_dict
 
 
 def test_json_loader():

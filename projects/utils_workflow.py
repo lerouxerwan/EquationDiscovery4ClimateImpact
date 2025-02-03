@@ -1,4 +1,4 @@
-from data.dataset.utils_dataset import load_dataset_dataframe
+from data.utils_dataset import load_dataset_dataframe
 from emulator.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
 from emulator.utils_plots.plot_by_rcp.plot_climato import plot_errors_climato, plot_climato
 from emulator.utils_plots.plot_by_split.plot_loss_vs_complexity import plot_loss_vs_complexity

@@ -9,7 +9,7 @@ CURRENT_PATH = os.getcwd()
 
 #  Data parameters
 DATA_PATH = op.join(ROOT, 'data')
-DATASET_CSV_PATH = op.join(DATA_PATH, 'dataset', 'csv')
+DATASET_CSV_PATH = op.join(DATA_PATH, 'dataset')
 SEARCH_CSV_PATH = op.join(DATA_PATH, 'search', 'csv')
 
 #  Result parameters

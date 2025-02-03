@@ -76,6 +76,6 @@ def load_units(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, Optional[l
 
 
 if __name__ == '__main__':
-    filename = r"v5_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_25_month_season.csv"
+    filename = r"NPP_month.csv"
     res = load_dataset_dataframe(filename)
     print(res[-1])

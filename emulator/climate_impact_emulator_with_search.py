@@ -10,8 +10,8 @@ from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
-from data.search.utils_json_loader import string_to_dict
-from data.search.utils_search import get_filepath_search
+from utils.utils_json_loader import string_to_dict
+from data.utils_search import get_filepath_search
 from emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs
 from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_cv, get_X_and_y
@@ -264,7 +264,6 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                                    scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
                                    cv=get_cv(self.ind_validation_), n_jobs=self.n_jobs, refit=False,
                                    return_train_score=True,
-                                   error_score='raise',
                                    **get_search_cv_kwargs(search_cv_type, param_grid, self.n_iter))
         search_cv.fit(X, y, **params_fit)
         return search_cv

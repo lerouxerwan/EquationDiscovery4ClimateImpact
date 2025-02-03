@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from sympy import Symbol
 
-from data.dataset.utils_dataset import load_dataset_ndarray
+from data.utils_dataset import load_dataset_ndarray
 from emulator.utils_hyperparameter_search.utils_feature_selection import get_selection_mask
 from tests.emulator.utils_tests_emulator import load_climate_impact_emulator_for_test, \
     run_three_main_functions, load_X_and_y_for_test
@@ -77,13 +77,13 @@ def test_composed_units():
 
 list_of_feature_selection_name_and_selected_features = [
     ('PySRDefault', ['PoDens_Mar', 'PoDens_May', 'SSH_May', 'SSS_Apr']),
-    ('ExpertKnowledge', ['Shortwave_Mar', 'Shortwave_Apr', 'MLD_Mar', 'MLD_Apr'])
+    ('ExpertKnowledgeMonth', ['Shortwave_Mar', 'Shortwave_Apr', 'MLD_Mar', 'MLD_Apr'])
 ]
 
 @pytest.mark.parametrize("feature_selection_name_and_selected_features", list_of_feature_selection_name_and_selected_features)
 def test_feature_selection(feature_selection_name_and_selected_features):
     feature_selection_name, selected_features_expected = feature_selection_name_and_selected_features
-    filename = r"v5_NPPz_annual_season_GOL4_allDepths_HIST_20_RCP85_94_RCP45_94_all_25_month_season.csv"
+    filename = r"NPP_month.csv"
     X, y, _, _, _, _, _, _, _, _, variable_names, _, _ = load_dataset_ndarray(filename)
     nb_features = 4
     selection_mask = get_selection_mask(X, y, nb_features, feature_selection_name, variable_names, random_seed)

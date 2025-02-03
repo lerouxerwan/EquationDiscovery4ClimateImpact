@@ -37,7 +37,7 @@ def plot_pareto_front_example(emulator: ClimateImpactEmulator, X: np.ndarray, y:
     set_x_axis_example(ax, x_ticks)
     ax.set_xticks(x_ticks)
     xticklabels = [get_equation_str(expr).replace('x0', 'x') for expr in emulator.expr_list]
-    xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True).replace('x0', 'x')
+    # xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True).replace('x0', 'x')
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     # Add y-axis with special scaling
     set_custom_y_axis_example(ax, loss_list, target_label, metric)
