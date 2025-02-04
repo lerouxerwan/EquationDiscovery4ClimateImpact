@@ -1,3 +1,4 @@
+import json
 import math
 import os
 import os.path as op
@@ -12,7 +13,7 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
 from utils.utils_json_loader import string_to_dict
-from data.utils_search import get_filepath_cv_results
+from data.utils_search import get_non_default_params, get_folder_path
 from emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs
 from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_cv, get_X_and_y
@@ -218,25 +219,33 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
 
     def get_df_cv_results_ranked(self, X, y, **params_fit) -> pd.DataFrame:
         """Load or run hyperparameter search to obtain df_cv_results_ranked"""
-        filepath_search = self.get_filepath_search(X, y)
-        if op.exists(filepath_search) and self.save_or_load_csv_of_search_results:
-            log_info('Load df_cv_results_ranked from csv file')
-            df_cv_results_ranked = pd.read_csv(filepath_search, index_col=0)
+        # Define files to save the results and the parameters of the emulator
+        folder_path = self.get_folder_path(X, y)
+        filepath_search_result = op.join(folder_path, 'cv_results.csv')
+        filepath_non_default_params = op.join(folder_path, 'params_emulator.json')
+        # Load or compute df_cv_results_ranked
+        if op.exists(filepath_search_result) and self.save_or_load_csv_of_search_results:
+            log_info('Load search results from files')
+            df_cv_results_ranked = pd.read_csv(filepath_search_result, index_col=0)
             df_cv_results_ranked['params'] = df_cv_results_ranked['params'].apply(string_to_dict)
         else:
-            log_info('Compute df_cv_results_ranked')
+            log_info('Compute search results')
             df_cv_results_ranked = self.compute_df_cv_results_ranked(X, y, **params_fit)
             if self.save_or_load_csv_of_search_results:
-                log_info('Save df_cv_results_ranked to csv file')
-                folder_path = op.dirname(filepath_search)
+                log_info('Save search results to files')
+                # Create folder if needed
                 if not op.exists(folder_path):
                     os.makedirs(folder_path)
-                df_cv_results_ranked.to_csv(filepath_search)
+                # Save a csv containing df_cv_results_ranked
+                df_cv_results_ranked.to_csv(filepath_search_result)
+                # Save the associated json config file
+                with open(filepath_non_default_params, 'w') as fp:
+                    json.dump(get_non_default_params(self), fp, sort_keys=True, indent=4)
         return df_cv_results_ranked
 
-    def get_filepath_search(self, X, y):
+    def get_folder_path(self, X, y):
         X_sum, y_sum = self.get_X_sum_and_y_sum(X, y)
-        return get_filepath_cv_results(X_sum, y_sum, self.validation_size, self.search_cv_type, self.n_iter,
+        return get_folder_path(X_sum, y_sum, self.validation_size, self.search_cv_type, self.n_iter,
                                                   self.param_grid, self.feature_selection_name, self.select_k_features)
 
     def compute_df_cv_results_ranked(self, X, y, **params_fit) -> pd.DataFrame:
