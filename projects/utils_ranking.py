@@ -6,6 +6,7 @@ import pandas as pd
 
 from data.utils_dataset import load_dataset_dataframe
 from data.utils_search import get_experiment_path, CSV_FILENAME, METRIC_COLUMN_NAME, JSON_FILENAME
+from utils.utils_json_loader import JsonLoader
 
 
 def ranking(X, y, validation_size: float = 0.3, feature_selection_name: str = 'PySRDefault', select_k_features: int = 5):
@@ -21,9 +22,15 @@ def ranking(X, y, validation_size: float = 0.3, feature_selection_name: str = 'P
     df_ranked = df.sort_values(by=METRIC_COLUMN_NAME, ascending=False).drop_duplicates(subset=METRIC_COLUMN_NAME)
     # Show the top 5 equations
     nb_top_values = 5
+    print(f'Top {nb_top_values} Equations:\n')
     for i, (_, row) in list(enumerate(df_ranked.iloc[:nb_top_values].iterrows(), 1))[::-1]:
-        line = f'#{i} RMSE={np.sqrt(-row[METRIC_COLUMN_NAME])} for {row["selected_expr"]}'
+        rmse = float(np.sqrt(-row[METRIC_COLUMN_NAME]))
+        selected_expr = row["selected_expr"]
+        params = JsonLoader.load(row["params"])
+        _ = params.pop('threshold_for_best_model_selection')
+        line = f'#{i} RMSE={round(rmse, 3)} for {params} with {selected_expr}'
         print(line)
+
     print('\nCommand to open the JSON file that generated the best equation:')
     json_filepath = op.join(experiment_path, df.iloc[0].loc['param_folder'], JSON_FILENAME)
     print(f'cat {json_filepath}')

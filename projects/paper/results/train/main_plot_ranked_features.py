@@ -1,11 +1,9 @@
 import pandas as pd
-from matplotlib import pyplot as plt
 
 from data.utils_dataset import load_dataset_ndarray
 from projects.paper.results.train.utils_ranked_features import compute_sorted_features
 from projects.paper.utils_paper import filename_dataset_paper
-from utils.utils_latex import print_df_latex
-from utils.utils_plot import show_or_save_plot
+from utils.utils_latex import print_df_latex, plot_df_latex
 
 
 def main_plot_ranked_features():
@@ -19,13 +17,7 @@ def main_plot_ranked_features():
     df_latex.index.name = "Rank"
     df_latex.reset_index(inplace=True)
     print_df_latex(df_latex)
-    fix, ax = plt.subplots()
-    ax.axis('off')
-    table = pd.plotting.table(ax, df_latex, loc='center', cellLoc='center')
-    table.auto_set_font_size(True)
-    table.set_fontsize(16)
-    show_or_save_plot(f'selected_features', True)
-
+    plot_df_latex(df_latex, show=True)
 
 
 
