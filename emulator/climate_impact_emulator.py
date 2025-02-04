@@ -11,6 +11,7 @@ from pysr.utils import ArrayLike
 from sklearn.utils.validation import _check_feature_names_in
 from sympy import Expr
 
+from data.utils_search import get_X_sum_and_y_sum
 from emulator.utils_hyperparameter_search.utils_feature_selection import get_selection_mask
 from emulator.utils_metric.metric import Metric, metric_to_function
 from utils.utils_log import log_info
@@ -162,7 +163,7 @@ class ClimateImpactEmulator(PySRRegressor):
             return super().fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
     def get_key_for_cache_dict(self, X, y):
-        return tuple(list(self.get_X_sum_and_y_sum(X, y)) + self.hash_params)
+        return tuple(list(get_X_sum_and_y_sum(X, y)) + self.hash_params)
 
     @property
     def hash_params(self) -> list[tuple[Any] | Any]:
@@ -205,12 +206,6 @@ class ClimateImpactEmulator(PySRRegressor):
     @property
     def selected_complexity(self) -> int:
         return self.get_best()['complexity']
-
-
-    def get_X_sum_and_y_sum(self, X, y) -> tuple[float, float]:
-        X_sum, y_sum = (X.sum(), y.sum()) if isinstance(X, np.ndarray) else (X.values.sum(), y.values.sum())
-        return float(X_sum), float(y_sum)
-
 
     def get_best(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
         """

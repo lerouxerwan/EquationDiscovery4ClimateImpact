@@ -13,7 +13,7 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
 from utils.utils_json_loader import string_to_dict
-from data.utils_search import get_non_default_params, get_folder_path
+from data.utils_search import get_non_default_params, get_folder_path, CSV_FILENAME, JSON_FILENAME, RANK_COLUMN_NAME
 from emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs
 from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_cv, get_X_and_y
@@ -220,9 +220,10 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
     def get_df_cv_results_ranked(self, X, y, **params_fit) -> pd.DataFrame:
         """Load or run hyperparameter search to obtain df_cv_results_ranked"""
         # Define files to save the results and the parameters of the emulator
-        folder_path = self.get_folder_path(X, y)
-        filepath_search_result = op.join(folder_path, 'cv_results.csv')
-        filepath_non_default_params = op.join(folder_path, 'params_emulator.json')
+        folder_path = get_folder_path(X, y, self.validation_size, self.feature_selection_name, self.select_k_features,
+                                      self.search_cv_type, self.n_iter, self.param_grid)
+        filepath_search_result = op.join(folder_path, CSV_FILENAME)
+        filepath_non_default_params = op.join(folder_path, JSON_FILENAME)
         # Load or compute df_cv_results_ranked
         if op.exists(filepath_search_result) and self.save_or_load_csv_of_search_results:
             log_info('Load search results from files')
@@ -243,11 +244,6 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                     json.dump(get_non_default_params(self), fp, sort_keys=True, indent=4)
         return df_cv_results_ranked
 
-    def get_folder_path(self, X, y):
-        X_sum, y_sum = self.get_X_sum_and_y_sum(X, y)
-        return get_folder_path(X_sum, y_sum, self.validation_size, self.search_cv_type, self.n_iter,
-                                                  self.param_grid, self.feature_selection_name, self.select_k_features)
-
     def compute_df_cv_results_ranked(self, X, y, **params_fit) -> pd.DataFrame:
         """Run 2 consecutive hyperparameter search (first self.search_cv_type, then a grid search for thresholds)
         and save the ranked results in the attribute df_cv_results_ranked"""
@@ -261,9 +257,8 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         search_cv = self.run_search_cv(GridSearchCV, X, y, get_param_grid_with_thresholds(search_cv), **params_fit)
         #  Transform cv_results from cv_search into a Dataframe sorted by ranking
         df_cv_results = pd.DataFrame(search_cv.cv_results_)
-        column_for_ranking = 'rank_test_MSE'
-        df_cv_results_ranked = df_cv_results.sort_values(by=column_for_ranking)
-        assert df_cv_results_ranked[column_for_ranking].values[0] == 1
+        df_cv_results_ranked = df_cv_results.sort_values(by=RANK_COLUMN_NAME)
+        assert df_cv_results_ranked[RANK_COLUMN_NAME].values[0] == 1
         # Add a column 'selected_expr' to df_cv_results_ranked
         emulator = self.load_climate_impact_emulator_with_same_attributes()
         X_train_train, y_train_train = get_X_and_y(X, y, self.ind_validation_, validation_set=False)
