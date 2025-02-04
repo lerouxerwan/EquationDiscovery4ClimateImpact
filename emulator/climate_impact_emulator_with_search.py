@@ -1,4 +1,5 @@
 import math
+import os
 import os.path as op
 from typing import Literal, Callable, Optional
 
@@ -11,7 +12,7 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
 from utils.utils_json_loader import string_to_dict
-from data.utils_search import get_filepath_search
+from data.utils_search import get_filepath_cv_results
 from emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs
 from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_cv, get_X_and_y
@@ -217,9 +218,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
 
     def get_df_cv_results_ranked(self, X, y, **params_fit) -> pd.DataFrame:
         """Load or run hyperparameter search to obtain df_cv_results_ranked"""
-        X_sum, y_sum = self.get_X_sum_and_y_sum(X, y)
-        filepath_search = get_filepath_search(X_sum, y_sum, self.validation_size, self.search_cv_type, self.n_iter,
-                                              self.param_grid, self.feature_selection_name, self.select_k_features, **params_fit)
+        filepath_search = self.get_filepath_search(X, y)
         if op.exists(filepath_search) and self.save_or_load_csv_of_search_results:
             log_info('Load df_cv_results_ranked from csv file')
             df_cv_results_ranked = pd.read_csv(filepath_search, index_col=0)
@@ -229,8 +228,16 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
             df_cv_results_ranked = self.compute_df_cv_results_ranked(X, y, **params_fit)
             if self.save_or_load_csv_of_search_results:
                 log_info('Save df_cv_results_ranked to csv file')
+                folder_path = op.dirname(filepath_search)
+                if not op.exists(folder_path):
+                    os.makedirs(folder_path)
                 df_cv_results_ranked.to_csv(filepath_search)
         return df_cv_results_ranked
+
+    def get_filepath_search(self, X, y):
+        X_sum, y_sum = self.get_X_sum_and_y_sum(X, y)
+        return get_filepath_cv_results(X_sum, y_sum, self.validation_size, self.search_cv_type, self.n_iter,
+                                                  self.param_grid, self.feature_selection_name, self.select_k_features)
 
     def compute_df_cv_results_ranked(self, X, y, **params_fit) -> pd.DataFrame:
         """Run 2 consecutive hyperparameter search (first self.search_cv_type, then a grid search for thresholds)
