@@ -34,10 +34,6 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         n_iter: int
             Number of parameter settings sampled for RandomSearchCV, which trades off runtime vs quality of the solution
             Default is 10
-        n_jobs : int
-            Number of jobs to run in parallel.
-            None means 1 unless in a joblib context. -1 means using all processors
-            Default is None
         param_grid : dict[str, list] | list[dict[str, list]]
             Dictionary with hyperparameters names (`str`) as keys and lists of hyperparameter settings to try as values,
             or a list of such dictionaries, in which case the grids spanned by each dictionary in the list are explored.
@@ -56,7 +52,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
             Default is True
 
     """
-    df_ranked_results_: Optional[pd.DataFrame]
+    df_cv_results_ranked_: Optional[pd.DataFrame]
     ind_validation_: Optional[np.ndarray[bool]]
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score"] = "best", *,
@@ -108,7 +104,6 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                  validation_size: float = 0.3,
                  search_cv_type: type = RandomizedSearchCV,
                  n_iter: int = 10,
-                 n_jobs: Optional[int] = None,
                  param_grid: dict[str, list] | list[dict[str, list]] = None,
                  param_list_to_optimize_around_default: Optional[list[str]] = None,
                  scaling_factor: int = 10,
@@ -159,7 +154,6 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         self.validation_size = validation_size
         self.search_cv_type = search_cv_type
         self.n_iter = n_iter
-        self.n_jobs = n_jobs
         self.param_grid = dict() if param_grid is None else param_grid
         self.param_list_to_optimize_around_default = param_list_to_optimize_around_default
         if self.param_list_to_optimize_around_default is None:
@@ -171,7 +165,6 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         assert isinstance(self.validation_size, float) and (0 < self.validation_size < 1)
         assert issubclass(self.search_cv_type, BaseSearchCV)
         assert isinstance(self.n_iter, int) and self.n_iter > 0
-        assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
         assert isinstance(self.param_grid, (dict, list))
         assert isinstance(self.param_list_to_optimize_around_default, list)
         assert isinstance(save_or_load_csv_of_search_results, bool)
@@ -192,7 +185,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                 (f"tournament_selection_n parameter (={self.tournament_selection_n}) "
                  f"must be smaller than the minimum population_size (={min_population_size})")
         # Create attributes
-        self.df_ranked_results_ = None
+        self.df_cv_results_ranked_ = None
         self.ind_validation_ = None
 
     def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, variable_names: ArrayLike[str] | None = None,
@@ -211,59 +204,68 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         assert isinstance(index_start_validation, int)
         # Compute an array of boolean such that ind_validation[i] = True if the index 'i' is in the validation set
         self.ind_validation_ = compute_ind_validation(len(y), self.validation_size, index_start_validation)
-        # Compute the attribute df_ranked_results_, a Dataframe with the result of the hyperparameter search
-        self.df_ranked_results_ = self.get_df_ranked_results(X, y, variable_names=variable_names,
-                                                             X_units=X_units, y_units=y_units,
-                                                             use_cache=True)
+        # Compute the attribute df_cv_results_ranked_, a Dataframe with the result of the hyperparameter search
+        self.df_cv_results_ranked_ = self.get_df_cv_results_ranked(X, y, variable_names=variable_names,
+                                                                   X_units=X_units, y_units=y_units,
+                                                                   use_cache=True)
         # Fit with the best setting of hyperparameter (best_params) on the train split
-        best_params = self.df_ranked_results_.iloc[0].loc['params']
+        best_params = self.df_cv_results_ranked_.iloc[0].loc['params']
         self.set_params(**best_params)
         X_train_train, y_train_train = get_X_and_y(X, y, self.ind_validation_, validation_set=False)
         return super().fit(X_train_train, y_train_train, variable_names=variable_names, X_units=X_units,
                            y_units=y_units, use_cache=False)
 
-    def get_df_ranked_results(self, X, y, **params_fit) -> pd.DataFrame:
-        """Load or run hyperparameter search to obtain df_ranked_results"""
+    def get_df_cv_results_ranked(self, X, y, **params_fit) -> pd.DataFrame:
+        """Load or run hyperparameter search to obtain df_cv_results_ranked"""
         X_sum, y_sum = self.get_X_sum_and_y_sum(X, y)
         filepath_search = get_filepath_search(X_sum, y_sum, self.validation_size, self.search_cv_type, self.n_iter,
                                               self.param_grid, self.feature_selection_name, self.select_k_features, **params_fit)
         if op.exists(filepath_search) and self.save_or_load_csv_of_search_results:
-            log_info('Load df_ranked_results from csv file')
-            df_ranked_results = pd.read_csv(filepath_search, index_col=0)
-            df_ranked_results['params'] = df_ranked_results['params'].apply(string_to_dict)
+            log_info('Load df_cv_results_ranked from csv file')
+            df_cv_results_ranked = pd.read_csv(filepath_search, index_col=0)
+            df_cv_results_ranked['params'] = df_cv_results_ranked['params'].apply(string_to_dict)
         else:
-            log_info('Compute df_ranked_results')
-            df_ranked_results = self.compute_df_ranked_results(X, y, **params_fit)
+            log_info('Compute df_cv_results_ranked')
+            df_cv_results_ranked = self.compute_df_cv_results_ranked(X, y, **params_fit)
             if self.save_or_load_csv_of_search_results:
-                log_info('Save df_ranked_results to csv file')
-                df_ranked_results.to_csv(filepath_search)
-        return df_ranked_results
+                log_info('Save df_cv_results_ranked to csv file')
+                df_cv_results_ranked.to_csv(filepath_search)
+        return df_cv_results_ranked
 
-    def compute_df_ranked_results(self, X, y, **params_fit) -> pd.DataFrame:
+    def compute_df_cv_results_ranked(self, X, y, **params_fit) -> pd.DataFrame:
         """Run 2 consecutive hyperparameter search (first self.search_cv_type, then a grid search for thresholds)
-        and save the ranked results in the attribute df_ranked_results_"""
+        and save the ranked results in the attribute df_cv_results_ranked"""
         #  Run hyperparameter search with respect to self.param_grid
         log_info('Start first hyperparameter search')
         search_cv = self.run_search_cv(self.search_cv_type, X, y, self.param_grid, **params_fit)
+        assert len(self.cache) > 0
         # Run a grid search that extends the first hyperparameter search with a list of thresholds to try.
         # This additional grid search for the threshold cost almost nothing because fit results have been cached
         log_info('Start second hyperparameter search for threshold')
         search_cv = self.run_search_cv(GridSearchCV, X, y, get_param_grid_with_thresholds(search_cv), **params_fit)
-        #  Extract best params from search cv results
-        df_results = pd.DataFrame(search_cv.cv_results_)
+        #  Transform cv_results from cv_search into a Dataframe sorted by ranking
+        df_cv_results = pd.DataFrame(search_cv.cv_results_)
         column_for_ranking = 'rank_test_MSE'
-        df_ranked_results_ = df_results.sort_values(by=column_for_ranking)
-        assert df_ranked_results_[column_for_ranking].values[0] == 1
-        return df_ranked_results_
+        df_cv_results_ranked = df_cv_results.sort_values(by=column_for_ranking)
+        assert df_cv_results_ranked[column_for_ranking].values[0] == 1
+        # Add a column 'selected_expr' to df_cv_results_ranked
+        emulator = self.load_climate_impact_emulator_with_same_attributes()
+        X_train_train, y_train_train = get_X_and_y(X, y, self.ind_validation_, validation_set=False)
+        selected_expressions = []
+        for line, params in enumerate(df_cv_results_ranked["params"].values, 1):
+                key = emulator.set_params(**params).get_key_for_cache_dict(X_train_train, y_train_train)
+                emulator.equations_ = self.cache[key][0]
+                selected_expressions.append(emulator.selected_expr.copy())
+        df_cv_results_ranked['selected_expr'] = selected_expressions
+        return df_cv_results_ranked
 
-    def run_search_cv(self, search_cv_type: type, X, y, param_grid: dict, **params_fit):
+    def run_search_cv(self, search_cv_type: type, X, y, param_grid: dict | list[dict], **params_fit):
         """Run hyperparameter search for a specific type of search (random, grid), a param_grid (all hyperparameters)
         and some parameters 'params_fit' that will be passed to the estimator"""
         assert issubclass(search_cv_type, BaseSearchCV)
         search_cv = search_cv_type(estimator=self.load_climate_impact_emulator_with_same_attributes(),
                                    scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
-                                   cv=get_cv(self.ind_validation_), n_jobs=self.n_jobs, refit=False,
-                                   return_train_score=True,
+                                   cv=get_cv(self.ind_validation_), refit=False, return_train_score=True,
                                    **get_search_cv_kwargs(search_cv_type, param_grid, self.n_iter))
         search_cv.fit(X, y, **params_fit)
         return search_cv

@@ -146,7 +146,7 @@ class ClimateImpactEmulator(PySRRegressor):
              use_cache: bool; whether fit results should be saved to/loaded from cache; Default is False
         """
         if use_cache:
-            key = tuple(list(self.get_X_sum_and_y_sum(X, y)) + self.hash_params)
+            key = self.get_key_for_cache_dict(X, y)
             if key in self.cache:
                 log_info('Load from cache')
                 (self.equations_, self.nout_, self.selection_mask_, self.julia_state_stream_,
@@ -160,6 +160,9 @@ class ClimateImpactEmulator(PySRRegressor):
             return self
         else:
             return super().fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
+
+    def get_key_for_cache_dict(self, X, y):
+        return tuple(list(self.get_X_sum_and_y_sum(X, y)) + self.hash_params)
 
     @property
     def hash_params(self) -> list[tuple[Any] | Any]:

@@ -9,7 +9,6 @@ def main_workflow(fast: bool = False):
         params_emulator = {
             "select_k_features": 3,
             "n_iter": 2,
-            "n_jobs": 1,
             "param_grid": {'populations': [10, 20]},
             "feature_selection_name": 'PySRDefault',
         }
@@ -17,7 +16,6 @@ def main_workflow(fast: bool = False):
         params_emulator = {
             "select_k_features": 5,
             "n_iter": 200,
-            "n_jobs": 1,
             "population_size": 31,
             "maxsize": 20,
             "unary_operators": ["exp", "log", "square", "sqrt"],
