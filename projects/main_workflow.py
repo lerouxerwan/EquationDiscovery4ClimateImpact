@@ -14,26 +14,24 @@ def main_workflow(fast: bool = False):
         }
     else:
         params_emulator = {
-            "select_k_features": 5,
-            "n_iter": 200,
+            "select_k_features": 10,
+            "n_iter": 500,
             "population_size": 31,
             "maxsize": 20,
             "unary_operators": ["exp", "log", "square", "sqrt"],
             "binary_operators": ["+", "*", "/", "-"],
             # Hyperparameter to optimize around (/2, x2) their default or specified value
             "scaling_factor": 2,
-            'niterations': 500,
             "param_list_to_optimize_around_default": ['niterations', 'adaptive_parsimony_scaling',
                                                       'fraction_replaced_hof', 'populations',
                                                       'population_size'],
-            "feature_selection_name": ['PySRDefault', 'ExpertKnowledgeSeason'][0],
         }
     # Run workflow for several number of features
     workflow(FILENAME, **params_emulator)
 
 
 if __name__ == '__main__':
-    fast = True
+    fast = False
     main_workflow(fast)
 
 

@@ -30,10 +30,14 @@ def get_param_folder(search_cv_type, n_iter, param_grid):
 
 def get_experiment_path(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, validation_size: float, feature_selection_name: str,
                     select_k_features: Optional[int]):
+    dataset_search_path = get_dataset_search_path(X, y, validation_size)
+    feature_selection_folder = f'{feature_selection_name}_{select_k_features}'
+    return op.join(dataset_search_path, feature_selection_folder)
+
+def get_dataset_search_path(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, validation_size: float):
     X_sum, y_sum = get_X_sum_and_y_sum(X, y)
     dataset_folder = f'{round(X_sum, DIGITS)}_{round(y_sum, DIGITS)}_{validation_size}'
-    feature_selection_folder = f'{feature_selection_name}_{select_k_features}'
-    return op.join(SEARCH_CSV_PATH, dataset_folder, feature_selection_folder)
+    return op.join(SEARCH_CSV_PATH, dataset_folder)
 
 
 def get_X_sum_and_y_sum(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame) -> tuple[float, float]:

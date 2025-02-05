@@ -5,42 +5,58 @@ import numpy as np
 import pandas as pd
 
 from data.utils_dataset import load_dataset_dataframe
-from data.utils_search import get_experiment_path, CSV_FILENAME, METRIC_COLUMN_NAME, JSON_FILENAME
+from data.utils_search import get_experiment_path, CSV_FILENAME, METRIC_COLUMN_NAME, JSON_FILENAME, \
+    get_dataset_search_path
 from utils.utils_json_loader import JsonLoader
 
+def ranking_global(X, y, validation_size: float = 0.3):
+    dataset_search_path = get_dataset_search_path(X, y, validation_size)
+    filepath_search_results = []
+    for experiment_folder in os.listdir(dataset_search_path):
+        for param_folder in os.listdir(op.join(dataset_search_path, experiment_folder)):
+            filepath_search_result = op.join(dataset_search_path, experiment_folder, param_folder, CSV_FILENAME)
+            filepath_search_results.append(filepath_search_result)
+    _ranking(filepath_search_results)
 
-def ranking(X, y, validation_size: float = 0.3, feature_selection_name: str = 'PySRDefault', select_k_features: int = 5):
+
+def ranking_local(X, y, validation_size: float = 0.3, feature_selection_name: str = 'PySRDefault', select_k_features: int = 5):
     experiment_path = get_experiment_path(X, y, validation_size, feature_selection_name, select_k_features)
     param_folders = os.listdir(experiment_path)
+    filepath_search_results = [str(op.join(experiment_path, param_folder, CSV_FILENAME)) for param_folder in param_folders]
+    _ranking(filepath_search_results)
+
+
+def _ranking(filepath_search_results):
     df_list = []
-    for param_folder in param_folders:
-        filepath_search_result = str(op.join(experiment_path, param_folder, CSV_FILENAME))
+    for filepath_search_result in filepath_search_results:
+        print(filepath_search_result)
         df_param = pd.read_csv(filepath_search_result, index_col=0)
-        df_param['param_folder'] = param_folder
+        df_param['filepath_search_result'] = filepath_search_result
+        print(float(np.sqrt(-df_param.iloc[0][METRIC_COLUMN_NAME])))
         df_list.append(df_param)
     df = pd.concat(df_list, axis=0)
-    df_ranked = df.sort_values(by=METRIC_COLUMN_NAME, ascending=False).drop_duplicates(subset=METRIC_COLUMN_NAME)
-    # Show the top 5 equations
+    df = df.sort_values(by=METRIC_COLUMN_NAME, ascending=False).drop_duplicates(subset=METRIC_COLUMN_NAME)
+    #  Show the top 5 equations
     nb_top_values = 5
     print(f'Top {nb_top_values} Equations:\n')
-    for i, (_, row) in list(enumerate(df_ranked.iloc[:nb_top_values].iterrows(), 1))[::-1]:
+    for i, (_, row) in list(enumerate(df.iloc[:nb_top_values].iterrows(), 1))[::-1]:
         rmse = float(np.sqrt(-row[METRIC_COLUMN_NAME]))
         selected_expr = row["selected_expr"]
         params = JsonLoader.load(row["params"])
         _ = params.pop('threshold_for_best_model_selection')
         line = f'#{i} RMSE={round(rmse, 3)} for {params} with {selected_expr}'
         print(line)
-
     print('\nCommand to open the JSON file that generated the best equation:')
-    json_filepath = op.join(experiment_path, df.iloc[0].loc['param_folder'], JSON_FILENAME)
+    json_filepath = df.iloc[0].loc['filepath_search_result'].replace(CSV_FILENAME, JSON_FILENAME)
     print(f'cat {json_filepath}')
 
 
 def main_ranking(filename):
-    fast = True
+    fast = False
     select_k_features = 3 if fast else 5
     X_train, y_train,  *_ = load_dataset_dataframe(filename)
-    ranking(X_train, y_train, select_k_features=select_k_features)
+    # ranking_local(X_train, y_train, select_k_features=select_k_features)
+    ranking_global(X_train, y_train)
 
 if __name__ == '__main__':
     main_ranking("NPP_season.csv")
