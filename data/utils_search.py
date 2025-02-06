@@ -46,10 +46,16 @@ def get_X_sum_and_y_sum(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFra
 
 
 def param_grid_signature(param_grid: dict) -> str:
-    efficient_param_grid = {}
+    efficient_param_grid = dict()
+    short_names = set()
     for name, values in param_grid.items():
         if len(values) > 1:
-            efficient_param_grid[name[:3]] = f'{round(min(values), DIGITS)}_{round(max(values), DIGITS)}'
+            short_name = name[:3]
+            if short_name in short_names:
+                short_name += name[-3:]
+            assert short_name not in short_names
+            short_names.add(short_name)
+            efficient_param_grid[short_name] = f'{round(min(values), DIGITS)}_{round(max(values), DIGITS)}'
     names_sorted = [name for name in sorted(list(efficient_param_grid.keys()))]
     return '_'.join([name + efficient_param_grid[name] for name in names_sorted])
 

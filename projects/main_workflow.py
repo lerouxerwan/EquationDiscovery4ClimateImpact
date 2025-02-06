@@ -14,7 +14,7 @@ def main_workflow(fast: bool = False):
         }
     else:
         params_emulator = {
-            "select_k_features": 10,
+            "select_k_features": 7,
             "n_iter": 500,
             "population_size": 31,
             "maxsize": 20,

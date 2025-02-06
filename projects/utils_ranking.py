@@ -36,15 +36,16 @@ def _ranking(filepath_search_results):
         df_list.append(df_param)
     df = pd.concat(df_list, axis=0)
     df = df.sort_values(by=METRIC_COLUMN_NAME, ascending=False).drop_duplicates(subset=METRIC_COLUMN_NAME)
-    #  Show the top 5 equations
+    #  Show the top equations
     nb_top_values = 5
     print(f'Top {nb_top_values} Equations:\n')
     for i, (_, row) in list(enumerate(df.iloc[:nb_top_values].iterrows(), 1))[::-1]:
         rmse = float(np.sqrt(-row[METRIC_COLUMN_NAME]))
         selected_expr = row["selected_expr"]
+        param_name = op.basename(op.dirname(op.dirname(row['filepath_search_result'])))
         params = JsonLoader.load(row["params"])
         _ = params.pop('threshold_for_best_model_selection')
-        line = f'#{i} RMSE={round(rmse, 3)} for {params} with {selected_expr}'
+        line = f'#{i} RMSE={round(rmse, 3)} for {param_name} {params} with {selected_expr}'
         print(line)
     print('\nCommand to open the JSON file that generated the best equation:')
     json_filepath = df.iloc[0].loc['filepath_search_result'].replace(CSV_FILENAME, JSON_FILENAME)

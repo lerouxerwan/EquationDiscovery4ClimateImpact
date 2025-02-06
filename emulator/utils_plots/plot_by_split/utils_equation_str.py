@@ -1,7 +1,7 @@
 import numpy as np
 from sympy import Expr, Number
 
-from utils.utils_date import get_short_month_names
+from utils.utils_date import get_short_month_names, get_season_short_names
 
 
 def get_equation_str(expr: Expr, add_bold=False) -> str:
@@ -10,9 +10,12 @@ def get_equation_str(expr: Expr, add_bold=False) -> str:
         equation_str  = '$\\mathbf{' + equation_str + '}$'
     else:
         equation_str = f'${equation_str}$'
-    # Replace the month
-    for short_month_name in get_short_month_names():
-        equation_str = equation_str.replace(f'_{short_month_name}', '_{' + short_month_name + '}')
+    # Replace the month or the season
+    for short_name in get_short_month_names() + get_season_short_names():
+        equation_str = equation_str.replace(f'_{short_name}', '_{' + short_name + '}')
+    # Remove the "_" after "Max", "Min" and "Mean"
+    for s in ["Max", "Min", "Mean"]:
+        equation_str = equation_str.replace(f'{s}_', s)
     # equation_str = text_on_two_lines_if_too_long(equation_str)
     return equation_str
 

@@ -226,7 +226,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         filepath_non_default_params = op.join(folder_path, JSON_FILENAME)
         # Load or compute df_cv_results_ranked
         if op.exists(filepath_search_result) and self.save_or_load_csv_of_search_results:
-            log_info('Load search results from files')
+            log_info(f'Load search results from file: {filepath_search_result}')
             df_cv_results_ranked = pd.read_csv(filepath_search_result, index_col=0)
             df_cv_results_ranked['params'] = df_cv_results_ranked['params'].apply(string_to_dict)
         else:
@@ -266,7 +266,11 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         for line, params in enumerate(df_cv_results_ranked["params"].values, 1):
                 key = emulator.set_params(**params).get_key_for_cache_dict(X_train_train, y_train_train)
                 emulator.equations_ = self.cache[key][0]
-                selected_expressions.append(emulator.selected_expr.copy())
+                try:
+                    selected_expr = emulator.selected_expr.copy()
+                except TypeError:
+                    selected_expr = ""
+                selected_expressions.append(selected_expr)
         df_cv_results_ranked['selected_expr'] = selected_expressions
         return df_cv_results_ranked
 
