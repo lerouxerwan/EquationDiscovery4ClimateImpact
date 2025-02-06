@@ -17,6 +17,7 @@ def main_workflow(fast: bool = False):
             "select_k_features": 7,
             "n_iter": 500,
             "population_size": 31,
+            "niterations": 10,
             "maxsize": 20,
             "unary_operators": ["exp", "log", "square", "sqrt"],
             "binary_operators": ["+", "*", "/", "-"],

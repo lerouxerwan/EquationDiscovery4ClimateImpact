@@ -27,8 +27,9 @@ def plot_time_series(emulator: ClimateImpactEmulator,X_train: np.ndarray | pd.Da
         #  Add grid on Y-axis and two lines
         ax.yaxis.grid()
         y_true_label, y_predicted_label = get_true_label_and_predicted_label(target_label, remove_units=True)
-        ax.plot(years, y, label=y_true_label)
-        ax.plot(years, y_predicted, label=y_predicted_label)
+        common_kwargs = {'marker': 'o', 'linestyle': '--'}
+        ax.plot(years, y, label=y_true_label, **common_kwargs)
+        ax.plot(years, y_predicted, label=y_predicted_label, **common_kwargs)
         # Annotate equation and metric box
         add_equation(ax, emulator.selected_expr)
         add_metric_box(ax, y, y_predicted, target_label, split_name)
