@@ -1,7 +1,5 @@
+from projects.paper.utils_paper import filename_dataset_paper
 from projects.utils_workflow import workflow
-from utils.utils_run import NB_CORES
-
-FILENAME = r"NPP_season.csv"
 
 
 def main_workflow(fast: bool = False):
@@ -28,7 +26,7 @@ def main_workflow(fast: bool = False):
                                                       'population_size'],
         }
     # Run workflow for several number of features
-    workflow(FILENAME, **params_emulator)
+    workflow(filename_dataset_paper, **params_emulator)
 
 
 if __name__ == '__main__':

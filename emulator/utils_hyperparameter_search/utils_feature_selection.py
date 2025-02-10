@@ -3,6 +3,7 @@ from typing import cast, Optional
 
 import numpy as np
 from numpy._typing import NDArray
+from numpy.random import RandomState
 from sklearn.utils import check_random_state
 
 
@@ -49,7 +50,7 @@ def run_feature_selection_PySR_that_returns_feature_importance(
     X: np.ndarray,
     y: np.ndarray,
     select_k_features: int,
-    random_state: np.random.RandomState | None = None,
+    random_state: np.random.RandomState,
 ) -> tuple[NDArray[np.bool_], list[float]]:
     """
     Find most important features.
@@ -58,6 +59,7 @@ def run_feature_selection_PySR_that_returns_feature_importance(
     the k most important features in X, returning indices for those
     features as output.
     """
+    assert isinstance(random_state, RandomState)
     from sklearn.ensemble import RandomForestRegressor
     from sklearn.feature_selection import SelectFromModel
 
@@ -68,7 +70,8 @@ def run_feature_selection_PySR_that_returns_feature_importance(
     selector = SelectFromModel(
         clf, threshold=-np.inf, max_features=select_k_features, prefit=True
     )
-    return cast(NDArray[np.bool_], selector.get_support(indices=False)), clf.feature_importances_
+    selection_mask = cast(NDArray[np.bool_], selector.get_support(indices=False))
+    return selection_mask, clf.feature_importances_
 
 
 
