@@ -2,7 +2,7 @@ import json
 import math
 import os
 import os.path as op
-from typing import Literal, Callable, Optional
+from typing import Literal, Callable, Optional, Any
 
 import numpy as np
 import pandas as pd
@@ -158,8 +158,6 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         self.n_iter = n_iter
         self.param_grid = dict() if param_grid is None else param_grid
         self.param_list_to_optimize_around_default = param_list_to_optimize_around_default
-        if self.param_list_to_optimize_around_default is None:
-            self.param_list_to_optimize_around_default = ['niterations', 'adaptive_parsimony_scaling', 'fraction_replaced_hof']
             # Hyperparameters that could be added: 'populations', 'population_size' (but can lead to long computation)
         self.scaling_factor = scaling_factor
         self.save_or_load_csv_of_search_results = save_or_load_csv_of_search_results
@@ -168,18 +166,17 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         assert issubclass(self.search_cv_type, BaseSearchCV)
         assert isinstance(self.n_iter, int) and self.n_iter > 0
         assert isinstance(self.param_grid, (dict, list))
-        assert isinstance(self.param_list_to_optimize_around_default, list)
         assert isinstance(save_or_load_csv_of_search_results, bool)
-        # Set param grid with param_list_to_optimize_around_default if it has not been specified by the user
+        # Set param grid using a param_list_to_optimize_around_default if it has not been specified by the user
         # Hyperparameters in the list should be sampled between [default_value / scaling_factor, default * scaling_factor]
         if not self.param_grid:
-            for key in self.param_list_to_optimize_around_default:
-                default_value = self.__getattribute__(key)
-                min_value = default_value / self.scaling_factor
-                max_value = default_value * self.scaling_factor
-                if isinstance(default_value, int):
-                    min_value = math.ceil(min_value)
-                self.param_grid[key] = [min_value, max_value]
+            if self.param_list_to_optimize_around_default is not None:
+                # Either the param_list_to_optimize_around_default has been specified by the user
+                self.param_grid = self.get_param_grid(self.param_list_to_optimize_around_default)
+            else:
+                # Or by default we consider a list with 3 hyperparameters
+                default_param_list = ['niterations', 'adaptive_parsimony_scaling', 'fraction_replaced_hof']
+                self.param_grid = self.get_param_grid(default_param_list)
         # Some checks
         if 'population_size' in self.param_grid:
             min_population_size = min(self.param_grid['population_size'])
@@ -189,6 +186,19 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         # Create attributes
         self.df_cv_results_ranked_ = None
         self.ind_validation_ = None
+
+    def get_param_grid(self, param_list_to_optimize_around_default: list[str]) -> dict[str, Any]:
+        assert isinstance(param_list_to_optimize_around_default, list)
+        param_grid = dict()
+        for key in param_list_to_optimize_around_default:
+            default_value = self.__getattribute__(key)
+            min_value = default_value / self.scaling_factor
+            max_value = default_value * self.scaling_factor
+            if isinstance(default_value, int):
+                min_value = math.ceil(min_value)
+            param_grid[key] = [min_value, max_value]
+        return param_grid
+
 
     def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, variable_names: ArrayLike[str] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
@@ -219,9 +229,11 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
 
     def get_df_cv_results_ranked(self, X, y, **params_fit) -> pd.DataFrame:
         """Load or run hyperparameter search to obtain df_cv_results_ranked"""
+        # Load a dictionary with non default parameters
+        non_default_params = get_non_default_params(self)
         # Define files to save the results and the parameters of the emulator
         folder_path = get_folder_path(X, y, self.validation_size, self.feature_selection_name, self.select_k_features,
-                                      self.search_cv_type, self.n_iter, self.param_grid)
+                                      self.search_cv_type, self.n_iter, non_default_params)
         filepath_search_result = op.join(folder_path, CSV_FILENAME)
         filepath_non_default_params = op.join(folder_path, JSON_FILENAME)
         # Load or compute df_cv_results_ranked
@@ -241,7 +253,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                 df_cv_results_ranked.to_csv(filepath_search_result)
                 # Save the associated json config file
                 with open(filepath_non_default_params, 'w') as fp:
-                    json.dump(get_non_default_params(self), fp, sort_keys=True, indent=4)
+                    json.dump(non_default_params, fp, sort_keys=True, indent=4)
         return df_cv_results_ranked
 
     def compute_df_cv_results_ranked(self, X, y, **params_fit) -> pd.DataFrame:

@@ -30,7 +30,6 @@ def plot_feature_nb_sensitivity(X, y, validation_size: float = 0.3, feature_sele
     # Sort the param_name_list
     param_folder_to_list_nb_features_and_filepath = {param_folder: list(sorted(v, key=itemgetter(0)))
                                                      for param_folder, v in param_folder_to_list_nb_features_and_filepath.items()}
-    print(param_folder_to_list_nb_features_and_filepath)
     # Create plot
     ax = plt.gca()
     colors = ['blue', "green", "grey"]
@@ -66,3 +65,4 @@ def main_ranking(filename):
 
 if __name__ == '__main__':
     main_ranking("NPP_season.csv")
+    main_ranking("NPP_season_25_variables.csv")

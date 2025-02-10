@@ -15,16 +15,19 @@ JSON_FILENAME = 'params_emulator.json'
 DIGITS = 1
 
 def get_folder_path(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, validation_size: float, feature_selection_name: str,
-                    select_k_features: Optional[int], search_cv_type: type, n_iter: int, param_grid: dict, ) -> str:
+                    select_k_features: Optional[int], search_cv_type: type, n_iter: int, non_default_params: dict) -> str:
     """Define a folder organization for a specific experiment"""
     experiment_path = get_experiment_path(X, y, validation_size, feature_selection_name, select_k_features)
-    param_folder = get_param_folder(search_cv_type, n_iter, param_grid)
+    for param_name in ['feature_selection_name', 'select_k_features']:
+        if param_name in non_default_params:
+            non_default_params.pop(param_name)
+    param_folder = get_param_folder(search_cv_type, n_iter, non_default_params)
     return op.join(experiment_path, param_folder)
 
 
-def get_param_folder(search_cv_type, n_iter, param_grid):
+def get_param_folder(search_cv_type: type, n_iter: int, non_default_params: dict):
     param_folder = f'{search_cv_type.__name__}_{n_iter if search_cv_type is RandomizedSearchCV else ""}'
-    param_folder += '_' + param_grid_signature(param_grid)
+    param_folder += '_' + search_signature_signature(non_default_params)
     return param_folder
 
 
@@ -44,6 +47,36 @@ def get_X_sum_and_y_sum(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFra
     X_sum, y_sum = (X.sum(), y.sum()) if isinstance(X, np.ndarray) else (X.values.sum(), y.values.sum())
     return float(X_sum), float(y_sum)
 
+
+def search_signature_signature(non_default_params: dict) -> str:
+    # If param grid has been specified by the user, 'param_list_to_optimize_around_default' has its default value (None)
+    param_grid_has_been_specified_by_user = 'param_list_to_optimize_around_default' not in non_default_params
+    if not param_grid_has_been_specified_by_user:
+        # In this case, we can remove 'param_grid' from the signature, because it can be deduced from the other infos
+        non_default_params.pop('param_grid')
+    # Create a unique signature, a string, containing all non default parameters
+    short_name_to_hash_str = dict()
+    short_names = set()
+    for name, value in non_default_params.items():
+        # Create unique short name
+        name_without_backspace = name.replace('_', '')
+        short_name = name_without_backspace[:3]
+        if short_name in short_names:
+            short_name += name_without_backspace[-3:]
+            assert short_name not in short_names
+        short_names.add(short_name)
+        # Map short name to hash_str
+        if isinstance(value, (int, float)):
+            hash_str = short_name + str(value)
+        elif isinstance(value, list):
+            hash_str = short_name + ''.join(['d' if s == '/' else str(s)[:1] for s in sorted(value)])
+        elif isinstance(value, dict) and (name == 'param_grid'):
+            hash_str = param_grid_signature(value)
+        else:
+            raise ValueError(f'value for {name} has type {type(value)}')
+        short_name_to_hash_str[short_name] = hash_str
+    short_names_sorted = [name for name in sorted(list(short_name_to_hash_str.keys()))]
+    return '_'.join([short_name_to_hash_str[short_name] for short_name in short_names_sorted])
 
 def param_grid_signature(param_grid: dict) -> str:
     efficient_param_grid = dict()
