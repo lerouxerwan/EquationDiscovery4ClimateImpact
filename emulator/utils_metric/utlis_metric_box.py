@@ -1,19 +1,19 @@
-from emulator.utils_metric.metric import Metric, metric_to_str, metric_to_function, is_metric_with_percentage
-from emulator.utils_metric.utils_metric_function import condition_for_climatological_metrics
+from emulator.utils_metric.metric import Metric, metric_to_str, metric_to_function, is_metric_with_percentage, \
+    is_metric_with_target_unit
 
 
 def add_metric_box(ax, y, y_predicted, target_label:str, split_name: str):
     assert y.ndim == 1
     assert y_predicted.ndim == 1
-    x_and_y_location = (0.5, 0.02)
+    x_and_y_location = (0.6, 0.1)
     coef = 0.95
-    metrics = [Metric.MRAE, Metric.RMSE, Metric.COR]
+    metrics = [Metric.MRAE, Metric.RMSE, Metric.MEDAE, Metric.COR]
     summary = []
     for metric in metrics:
         text = f'{metric_to_str[metric]}: {round(metric_to_function[metric](y, y_predicted), 2)}'
         if is_metric_with_percentage(metric):
             text += ' (%)'
-        if metric == Metric.RMSE:
+        if is_metric_with_target_unit(metric):
             if '(' in target_label:
                 text += ' (' + target_label.split('(')[-1]
         summary.append(text)

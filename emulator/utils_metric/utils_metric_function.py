@@ -13,6 +13,10 @@ def mean_relative_absolute_error(y_true: np.ndarray, y_pred: np.ndarray) -> floa
 def root_mean_squared_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return np.sqrt(mean_squared_error(y_true, y_pred))
 
+def median_absolute_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    return float(np.median([np.abs(true - pred) for true, pred in zip(y_true, y_pred)]))
+
+
 def correlation(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     assert (1 <= y_true.ndim <= 2)
     if y_true.ndim == 2:
