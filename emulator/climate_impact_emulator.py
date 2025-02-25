@@ -5,7 +5,7 @@ from typing import Literal, Callable, cast, Any
 import numpy as np
 import pandas as pd
 from numpy import ndarray
-from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
+from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec, TensorBoardLoggerSpec
 from pysr.denoising import multi_denoise, denoise
 from pysr.utils import ArrayLike
 from sklearn.utils.validation import _check_feature_names_in
@@ -29,7 +29,7 @@ class ClimateImpactEmulator(PySRRegressor):
             Name of the feature selection to use if select_k_features is not None
             Default is PySRDefault (the default feature selection used in PySR)
     and with some modification on the default value:
-        dimensional_constraint_penalty equals None by default, we set it to 10**8
+        dimensional_constraint_penalty equals is set by default to 10**8 (ensures dimension constraint are enforced)
     """
     cache = {}
 
@@ -135,6 +135,8 @@ class ClimateImpactEmulator(PySRRegressor):
         self.feature_selection_name = feature_selection_name
         assert isinstance(self.threshold_for_best_model_selection, float)
         assert self.threshold_for_best_model_selection >= 1.
+        assert isinstance(self.feature_selection_name, str)
+        # Change default dimensional_constraint_penalty
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
 

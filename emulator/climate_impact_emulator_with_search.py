@@ -6,7 +6,7 @@ from typing import Literal, Callable, Optional, Any
 
 import numpy as np
 import pandas as pd
-from pysr import AbstractExpressionSpec, AbstractLoggerSpec, PySRRegressor
+from pysr import AbstractExpressionSpec, AbstractLoggerSpec, PySRRegressor, TensorBoardLoggerSpec
 from pysr.utils import ArrayLike
 from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection import RandomizedSearchCV
@@ -221,19 +221,25 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                                                                    X_units=X_units, y_units=y_units,
                                                                    use_cache=True)
         # Fit with the best setting of hyperparameter (best_params) on the train split
+        # By default, we log with tensorboard the progress of this fit iteration by iteration
+        assert self.logger_spec is None
         best_params = self.df_cv_results_ranked_.iloc[0].loc['params']
+        log_dir = self.get_log_dir(X, y)
+        # Create a logger only if the log has not yet been saved
+        log_already_saved = op.exists(log_dir) and (len(os.listdir(log_dir)) == 1)
+        if not log_already_saved:
+            self.logger_spec = TensorBoardLoggerSpec(log_dir=log_dir, log_interval=1)
         self.set_params(**best_params)
         X_train_train, y_train_train = get_X_and_y(X, y, self.ind_validation_, validation_set=False)
-        return super().fit(X_train_train, y_train_train, variable_names=variable_names, X_units=X_units,
-                           y_units=y_units, use_cache=False)
+        super().fit(X_train_train, y_train_train, variable_names=variable_names, X_units=X_units,
+                    y_units=y_units, use_cache=False)
+        self.logger_spec = None
+        return self
 
     def get_df_cv_results_ranked(self, X, y, **params_fit) -> pd.DataFrame:
         """Load or run hyperparameter search to obtain df_cv_results_ranked"""
         # Load a dictionary with non default parameters
-        non_default_params = get_non_default_params(self)
-        # Define files to save the results and the parameters of the emulator
-        folder_path = get_folder_path(X, y, self.validation_size, self.feature_selection_name, self.select_k_features,
-                                      self.search_cv_type, self.n_iter, non_default_params)
+        folder_path = self.get_search_dir(X, y)
         filepath_search_result = op.join(folder_path, CSV_FILENAME)
         filepath_non_default_params = op.join(folder_path, JSON_FILENAME)
         # Load or compute df_cv_results_ranked
@@ -253,8 +259,17 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                 df_cv_results_ranked.to_csv(filepath_search_result)
                 # Save the associated json config file
                 with open(filepath_non_default_params, 'w') as fp:
-                    json.dump(non_default_params, fp, sort_keys=True, indent=4)
+                    json.dump(get_non_default_params(self), fp, sort_keys=True, indent=4)
         return df_cv_results_ranked
+
+    def get_search_dir(self, X, y):
+        """Define files to save the results and the parameters of the emulator"""
+        return get_folder_path(X, y, self.validation_size, self.feature_selection_name, self.select_k_features,
+                                      self.search_cv_type, self.n_iter, get_non_default_params(self))
+
+    def get_log_dir(self, X, y):
+        """Define files to save the log of the emulator (only for the best parameters)"""
+        return op.join(self.get_search_dir(X, y), 'logs')
 
     def compute_df_cv_results_ranked(self, X, y, **params_fit) -> pd.DataFrame:
         """Run 2 consecutive hyperparameter search (first self.search_cv_type, then a grid search for thresholds)
