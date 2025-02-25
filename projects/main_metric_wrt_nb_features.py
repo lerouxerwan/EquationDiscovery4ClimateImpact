@@ -32,10 +32,9 @@ def plot_feature_nb_sensitivity(X, y, validation_size: float = 0.3, feature_sele
                                                      for param_folder, v in param_folder_to_list_nb_features_and_filepath.items()}
     # Create plot
     ax = plt.gca()
-    colors = ['blue', "green", "grey"]
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
     for j, (label, list_nb_features_and_filepath) in enumerate(param_folder_to_list_nb_features_and_filepath.items()):
         color = colors[j]
-        # list_nb_features_and_filepath = list_nb_features_and_filepath[1:]
         nb_features_list = [nb_features for nb_features, _ in list_nb_features_and_filepath]
         mse_series_list = [-pd.read_csv(filepath)[METRIC_COLUMN_NAME] for _, filepath in list_nb_features_and_filepath]
         rmse_series_list = [mse_series.apply(np.sqrt) for mse_series in mse_series_list]
@@ -44,6 +43,7 @@ def plot_feature_nb_sensitivity(X, y, validation_size: float = 0.3, feature_sele
         ax.plot(nb_features_list, best_rmse, label=label, marker='x', color=color)
         ax.plot(nb_features_list, median_rmse, label=None, marker='o', color=color, linestyle=':')
     ax.legend(loc='upper right')
+    ax.set_xticks([int(t) for t in ax.get_xticks() if int(t) == t])
     ax.set_xlabel('Number of selected features')
     ax.set_ylabel('RMSE validation')
     #  Add a second legend to explain the dot and the line
@@ -65,4 +65,4 @@ def main_ranking(filename):
 
 if __name__ == '__main__':
     main_ranking("NPP_season.csv")
-    main_ranking("NPP_season_25_variables.csv")
+    # main_ranking("NPP_season_25_variables.csv")

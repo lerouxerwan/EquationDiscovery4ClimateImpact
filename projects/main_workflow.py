@@ -12,13 +12,13 @@ def main_workflow(fast: bool = False):
         }
     else:
         params_emulator = {
-            "select_k_features": 5,
+            "select_k_features": 3,
             "n_iter": 500,
             "population_size": 31,
             "niterations": 10,
-            "maxsize": 20,
-            "unary_operators": ["exp", "log", "square", "sqrt"],
+            "unary_operators": ["square", "sqrt"],
             "binary_operators": ["+", "*", "/", "-"],
+            'adaptive_parsimony_scaling': 500.,
             # Hyperparameter to optimize around (/2, x2) their default or specified value
             "scaling_factor": 2,
             "param_list_to_optimize_around_default": ['niterations', 'adaptive_parsimony_scaling',

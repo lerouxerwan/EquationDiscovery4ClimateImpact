@@ -53,11 +53,11 @@ def _ranking(filepath_search_results):
 
 
 def main_ranking(filename):
-    fast = False
-    select_k_features = 3 if fast else 5
     X_train, y_train,  *_ = load_dataset_dataframe(filename)
-    # ranking_local(X_train, y_train, select_k_features=select_k_features)
     ranking_global(X_train, y_train)
+    # fast = False
+    # select_k_features = 3 if fast else 5
+    # ranking_local(X_train, y_train, select_k_features=select_k_features)
 
 if __name__ == '__main__':
     main_ranking("NPP_season.csv")
