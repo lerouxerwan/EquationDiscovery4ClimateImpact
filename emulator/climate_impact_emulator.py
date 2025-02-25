@@ -5,13 +5,13 @@ from typing import Literal, Callable, cast, Any
 import numpy as np
 import pandas as pd
 from numpy import ndarray
-from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec, TensorBoardLoggerSpec
+from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
 from pysr.denoising import multi_denoise, denoise
 from pysr.utils import ArrayLike
 from sklearn.utils.validation import _check_feature_names_in
 from sympy import Expr
 
-from data.utils_search import get_X_sum_and_y_sum
+from emulator.utils_emulator import get_X_sum_and_y_sum
 from emulator.utils_hyperparameter_search.utils_feature_selection import get_selection_mask
 from emulator.utils_metric.metric import Metric, metric_to_function
 from utils.utils_log import log_info

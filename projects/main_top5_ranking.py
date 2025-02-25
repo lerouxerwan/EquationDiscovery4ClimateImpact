@@ -5,12 +5,12 @@ import numpy as np
 import pandas as pd
 
 from data.utils_dataset import load_dataset_dataframe
-from data.utils_search import get_experiment_path, CSV_FILENAME, METRIC_COLUMN_NAME, JSON_FILENAME, \
-    get_dataset_search_path
+from data.utils_search import get_feature_dir, CSV_FILENAME, METRIC_COLUMN_NAME, JSON_FILENAME, \
+    get_dataset_dir
 from utils.utils_json_loader import JsonLoader
 
 def ranking_global(X, y, validation_size: float = 0.3):
-    dataset_search_path = get_dataset_search_path(X, y, validation_size)
+    dataset_search_path = get_dataset_dir(X, y, validation_size)
     filepath_search_results = []
     for experiment_folder in os.listdir(dataset_search_path):
         for param_folder in os.listdir(op.join(dataset_search_path, experiment_folder)):
@@ -20,9 +20,9 @@ def ranking_global(X, y, validation_size: float = 0.3):
 
 
 def ranking_local(X, y, validation_size: float = 0.3, feature_selection_name: str = 'PySRDefault', select_k_features: int = 5):
-    experiment_path = get_experiment_path(X, y, validation_size, feature_selection_name, select_k_features)
-    param_folders = os.listdir(experiment_path)
-    filepath_search_results = [str(op.join(experiment_path, param_folder, CSV_FILENAME)) for param_folder in param_folders]
+    feature_dir_path = get_feature_dir(X, y, validation_size, feature_selection_name, select_k_features)
+    param_folders = os.listdir(feature_dir_path)
+    filepath_search_results = [str(op.join(feature_dir_path, param_folder, CSV_FILENAME)) for param_folder in param_folders]
     _ranking(filepath_search_results)
 
 

@@ -6,7 +6,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from data.utils_dataset import load_dataset_dataframe
-from data.utils_search import get_dataset_search_path, CSV_FILENAME, METRIC_COLUMN_NAME
+from data.utils_search import get_dataset_dir, CSV_FILENAME, METRIC_COLUMN_NAME
 import os.path as op
 
 from utils.utils_plot import show_or_save_plot
@@ -15,7 +15,7 @@ from utils.utils_plot import show_or_save_plot
 def plot_feature_nb_sensitivity(X, y, validation_size: float = 0.3, feature_selection_name: str = 'PySRDefault',
                                 show: bool = False):
     # Load param_name to a sorted list
-    dataset_search_path = get_dataset_search_path(X, y, validation_size)
+    dataset_search_path = get_dataset_dir(X, y, validation_size)
     param_folder_to_list_nb_features_and_filepath = dict()
     for experiment_folder in os.listdir(dataset_search_path):
         if experiment_folder.startswith(feature_selection_name):

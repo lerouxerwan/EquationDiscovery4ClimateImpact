@@ -12,8 +12,9 @@ from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
+from emulator.utils_emulator import get_non_default_params
 from utils.utils_json_loader import string_to_dict
-from data.utils_search import get_non_default_params, get_folder_path, CSV_FILENAME, JSON_FILENAME, RANK_COLUMN_NAME
+from data.utils_search import get_search_dir, CSV_FILENAME, JSON_FILENAME, RANK_COLUMN_NAME
 from emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs
 from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_cv, get_X_and_y
@@ -224,7 +225,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         # By default, we log with tensorboard the progress of this fit iteration by iteration
         assert self.logger_spec is None
         best_params = self.df_cv_results_ranked_.iloc[0].loc['params']
-        log_dir = self.get_log_dir(X, y)
+        log_dir = op.join(self.get_search_dir(X, y), 'logs')
         # Create a logger only if the log has not yet been saved
         log_already_saved = op.exists(log_dir) and (len(os.listdir(log_dir)) == 1)
         if not log_already_saved:
@@ -262,16 +263,12 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                     json.dump(get_non_default_params(self), fp, sort_keys=True, indent=4)
         return df_cv_results_ranked
 
-    def get_search_dir(self, X, y):
-        """Define files to save the results and the parameters of the emulator"""
-        return get_folder_path(X, y, self.validation_size, self.feature_selection_name, self.select_k_features,
-                                      self.search_cv_type, self.n_iter, get_non_default_params(self))
+    def get_search_dir(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series) -> str:
+        """Directory to save search results (df_cv_results_ranked_, non default params, tensorboard logs)"""
+        return get_search_dir(X, y, self.validation_size, self.feature_selection_name, self.select_k_features,
+                              self.search_cv_type, self.n_iter, get_non_default_params(self))
 
-    def get_log_dir(self, X, y):
-        """Define files to save the log of the emulator (only for the best parameters)"""
-        return op.join(self.get_search_dir(X, y), 'logs')
-
-    def compute_df_cv_results_ranked(self, X, y, **params_fit) -> pd.DataFrame:
+    def compute_df_cv_results_ranked(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, **params_fit) -> pd.DataFrame:
         """Run 2 consecutive hyperparameter search (first self.search_cv_type, then a grid search for thresholds)
         and save the ranked results in the attribute df_cv_results_ranked"""
         #  Run hyperparameter search with respect to self.param_grid

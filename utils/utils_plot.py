@@ -32,13 +32,9 @@ def subplots_custom(nrows, ncols, sharex=False, sharey=False, hspace=None, wspac
 
 def show_or_save_plot(plot_name: str, show: bool=False):
     plt.tight_layout()
-    if show:
-        plt.show()
-    else:
-        save_plot(plot_name)
+    plt.show() if show else save_plot(plot_name)
 
-
-def save_plot(plot_name):
+def save_plot(plot_name: str):
     for character in ['\n', ' ']:
         plot_name = plot_name.replace(character, '_')
     filepath = op.join(RESULT_PATH, VERSION, plot_name)
