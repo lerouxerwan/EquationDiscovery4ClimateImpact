@@ -18,7 +18,8 @@ def workflow(filename: str, show: bool = False, **params_emulator) -> None:
     # Plots
     # Plot diagnosis of this emulator by split
     for plot_function in [plot_loss_vs_complexity, plot_scatter, plot_time_series]:
-        plot_function(emulator, X_train, y_train, X_test, y_test, years_train, years_test, target_label, show)
+        plot_function(emulator, X_train, y_train, X_test, y_test, years_train, years_test, rcp_name_train,
+                      rcp_name_test, nb_historical_years, target_label, show)
     # # Plot diagnosis of this emulator by rcp
     for plot_function in [plot_climato, plot_errors_climato]:
         plot_function(emulator, X_train, y_train, X_test, y_test, years_train, years_test, rcp_name_train,

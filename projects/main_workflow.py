@@ -18,7 +18,6 @@ def main_workflow(fast: bool = False):
             "niterations": 10,
             "unary_operators": ["square", "sqrt"],
             "binary_operators": ["+", "*", "/", "-"],
-            'adaptive_parsimony_scaling': 500.,
             # Hyperparameter to optimize around (/2, x2) their default or specified value
             "scaling_factor": 2,
             "param_list_to_optimize_around_default": ['niterations', 'adaptive_parsimony_scaling',
