@@ -73,6 +73,7 @@ class Sbatch(ABC):
         # Lines of the bash file
         lines = [
             '#!/bin/bash',
+            f'cd {self.root}',
             self.python_exec,
             f'rm {self.bash_filepath}'
         ]
