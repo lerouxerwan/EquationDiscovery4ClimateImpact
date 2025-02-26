@@ -83,9 +83,9 @@ class Sbatch(ABC):
         # Run bash file
         command = (f'sbatch '
                    f'-p Odyssey '
-                   f'-c {NB_CORES} '
+                   f'-c {self.nb_cores} '
                    f'--time=2-00:00:00 '
                    f'-o {dirname}/%a.out'
                    f' {self.bash_filepath}')
         print(command)
-        bash_call(command)
+        # bash_call(command)

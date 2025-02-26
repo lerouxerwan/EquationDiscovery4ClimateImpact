@@ -1,11 +1,11 @@
 from slurm.sbatch import Sbatch
 
 
-class SBatchWorkflowV1(Sbatch):
+class SBatchExample(Sbatch):
 
     @property
     def filepath(self) -> str:
-        return 'slurm/workflow_v1/main_example.py'
+        return 'slurm/example/main_example.py'
 
     @property
     def nb_cores(self) -> int:
@@ -13,5 +13,5 @@ class SBatchWorkflowV1(Sbatch):
 
     @property
     def setting_name(self) -> str:
-        return f'{self.indices[0]}Features'
+        return f'{self.indices[0]}Index'
 
