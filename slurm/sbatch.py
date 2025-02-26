@@ -5,7 +5,6 @@ from dataclasses import dataclass
 
 from utils.utils_bash_call import bash_call
 from utils.utils_path import CURRENT_PATH
-from utils.utils_run import NB_CORES
 
 
 @dataclass
