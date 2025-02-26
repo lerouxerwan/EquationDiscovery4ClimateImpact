@@ -29,7 +29,6 @@ class Sbatch(ABC):
         pass
 
     @property
-    @abstractmethod
     def root(self) -> str:
         return "/homes/e23lerou/Documents/EquationDiscovery4ClimateImpact"
 
