@@ -88,4 +88,4 @@ class Sbatch(ABC):
                    f'-o {dirname}/%a.out'
                    f' {self.bash_filepath}')
         print(command)
-        # bash_call(command)
+        bash_call(command)
