@@ -33,6 +33,7 @@ def plot_feature_nb_sensitivity(X, y, validation_size: float = 0.3, feature_sele
     # Create plot
     ax = plt.gca()
     colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    colors = colors + colors + colors
     for j, (label, list_nb_features_and_filepath) in enumerate(param_folder_to_list_nb_features_and_filepath.items()):
         color = colors[j]
         nb_features_list = [nb_features for nb_features, _ in list_nb_features_and_filepath]
@@ -47,7 +48,7 @@ def plot_feature_nb_sensitivity(X, y, validation_size: float = 0.3, feature_sele
     ax.set_xlabel('Number of selected features')
     ax.set_ylabel('RMSE validation')
     #  Add a second legend to explain the dot and the line
-    legend_labels = ['Best RMSE', 'Average RMSE']
+    legend_labels = ['Best RMSE', 'Median RMSE']
     legend_handles = [
         plt.Line2D([0], [0], marker='x', linestyle='', color='k', markerfacecolor='w'),
         plt.Line2D([0], [0], marker='o', linestyle='-', color='k'),
