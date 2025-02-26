@@ -1,9 +1,11 @@
 import numpy as np
 import pytest
+from sklearn.utils import check_random_state
 from sympy import Symbol
 
 from data.utils_dataset import load_dataset_ndarray
 from emulator.utils_hyperparameter_search.utils_feature_selection import get_selection_mask
+from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_X_and_y
 from tests.emulator.utils_tests_emulator import load_climate_impact_emulator_for_test, \
     run_three_main_functions, load_X_and_y_for_test
 from utils.utils_run import random_seed
@@ -76,17 +78,21 @@ def test_composed_units():
 
 
 list_of_feature_selection_name_and_selected_features = [
-    ('PySRDefault', ['PoDens_Mar', 'PoDens_May', 'SSH_May', 'SSS_Apr']),
-    ('ExpertKnowledgeMonth', ['Shortwave_Mar', 'Shortwave_Apr', 'MLD_Mar', 'MLD_Apr'])
+    ('PySRDefault', ['Max_VEddyDiff_MAM', 'Mean_SSS_MAM', 'Mean_MLD_MAM', 'Max_MLD_DJF']),
 ]
 
 @pytest.mark.parametrize("feature_selection_name_and_selected_features", list_of_feature_selection_name_and_selected_features)
 def test_feature_selection(feature_selection_name_and_selected_features):
     feature_selection_name, selected_features_expected = feature_selection_name_and_selected_features
-    filename = r"NPP_month.csv"
-    X, y, _, _, _, _, _, _, _, _, variable_names, _, _ = load_dataset_ndarray(filename)
+    filename = r"NPP_season.csv"
+    X, y, _, _, _, _, _, _, _, _, variable_names, _, nb_historical_years = load_dataset_ndarray(filename)
     nb_features = 4
-    selection_mask = get_selection_mask(X, y, nb_features, feature_selection_name, variable_names, random_seed)
+    random_state = check_random_state(random_seed)
+    _ = random_state.randint(0, 2 ** 31 - 1)  # To have exactly the same random state as during the fit function
+
+    ind_validation = compute_ind_validation(len(y), 0.3, nb_historical_years)
+    X_train_train, y_train_train = get_X_and_y(X, y, ind_validation, validation_set=False)
+    selection_mask = get_selection_mask(X_train_train, y_train_train, nb_features, feature_selection_name, variable_names, random_state)
     assert sum(selection_mask) == nb_features
     # Check that selected features are as expected
     assert list(variable_names[selection_mask]) == list(selected_features_expected)

@@ -1,6 +1,7 @@
 from operator import itemgetter
 
 import numpy as np
+import pandas as pd
 from sklearn.utils import check_random_state
 
 from emulator.utils_hyperparameter_search.utils_feature_selection import \
@@ -15,7 +16,8 @@ def compute_sorted_features(X_train, y_train, variable_names, nb_historical_year
     emulator = load_climate_impact_emulator_with_search_for_test(select_k_features=select_k_features, n_iter=1)
     ind_validation = compute_ind_validation(len(y_train), emulator.validation_size, nb_historical_years)
     X_train_train, y_train_train = get_X_and_y(X_train, y_train, ind_validation, validation_set=False)
-    X_train_train, y_train_train = X_train_train.values, y_train_train.values
+    if isinstance(X_train_train, pd.DataFrame):
+        X_train_train, y_train_train = X_train_train.values, y_train_train.values
     # Create random test similar to ClimateImpactEmulator
     random_state = check_random_state(random_seed)
     _ = random_state.randint(0, 2 ** 31 - 1)  # To have exactly the same random state as during the fit function
