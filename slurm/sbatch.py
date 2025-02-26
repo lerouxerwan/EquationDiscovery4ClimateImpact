@@ -29,8 +29,9 @@ class Sbatch(ABC):
         pass
 
     @property
+    @abstractmethod
     def root(self) -> str:
-        return "/homes/e23lerou/Documents/tiphyc_wp3"
+        return "/homes/e23lerou/Documents/EquationDiscovery4ClimateImpact"
 
     @property
     def bash_filepath(self) -> str:
