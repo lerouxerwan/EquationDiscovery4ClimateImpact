@@ -23,9 +23,12 @@ def load_X_and_y_for_test(nb_features=1) -> tuple[np.ndarray, np.ndarray]:
         X = np.repeat(X, repeats=nb_features, axis=1)
     return X, y
 
-
-def run_three_main_functions(emulator: ClimateImpactEmulator):
+def run_three_main_functions_with_one_feature(emulator: ClimateImpactEmulator):
     X, y = load_X_and_y_for_test()
+    run_three_main_functions(emulator, X, y)
+
+
+def run_three_main_functions(emulator: ClimateImpactEmulator, X, y):
     emulator.fit(X, y)
     emulator.predict(X)
     emulator.predict(X, index=0)

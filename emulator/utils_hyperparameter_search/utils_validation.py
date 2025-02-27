@@ -40,3 +40,11 @@ def get_X_and_y(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, ind_val
         else:
             return X.loc[~ind_validation, :], y.loc[~ind_validation]
 
+def apply_mask(X: np.ndarray | pd.DataFrame, mask: np.ndarray):
+    assert mask is not None, mask
+    assert len(mask) == X.shape[1], len(mask)
+    if isinstance(X, np.ndarray):
+        return X[:, mask]
+    else:
+        return X.loc[:, mask]
+

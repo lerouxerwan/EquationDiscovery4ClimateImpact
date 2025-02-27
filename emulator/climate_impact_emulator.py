@@ -13,9 +13,11 @@ from sympy import Expr
 
 from emulator.utils_emulator import get_X_sum_and_y_sum
 from emulator.utils_hyperparameter_search.utils_feature_selection import get_selection_mask
+from emulator.utils_hyperparameter_search.utils_validation import apply_mask
 from emulator.utils_metric.metric import Metric, metric_to_function
 from utils.utils_log import log_info
 from utils.utils_run import random_seed
+from emulator.utils_remove_duplicates import compute_duplicate_mask
 
 
 class ClimateImpactEmulator(PySRRegressor):
@@ -28,6 +30,13 @@ class ClimateImpactEmulator(PySRRegressor):
         feature_selection_name: str
             Name of the feature selection to use if select_k_features is not None
             Default is PySRDefault (the default feature selection used in PySR)
+        remove_duplicate_features: bool
+            Boolean that indicates whether to remove duplicate features.
+            Default is False
+        duplicate_feature_threshold: float
+            Threshold between 0 and 1 to remove duplicate features. If the absolute correlation between the two features
+            is above this threshold, we keep the feature that has the best absolute correlation w.r.t. the target
+            Default is 0.9
     and with some modification on the default value:
         dimensional_constraint_penalty equals is set by default to 10**8 (ensures dimension constraint are enforced)
     """
@@ -80,6 +89,8 @@ class ClimateImpactEmulator(PySRRegressor):
                  # Additional attributes
                  threshold_for_best_model_selection: float = 1.5,
                  feature_selection_name: str = 'PySRDefault',
+                 remove_duplicate_features: bool = False,
+                 duplicate_feature_threshold: float = 0.9,
                  **kwargs):
         # Some default attributes of PySRRegressor are modified
         # Verbosity is removed
@@ -133,12 +144,19 @@ class ClimateImpactEmulator(PySRRegressor):
                          **kwargs)
         self.threshold_for_best_model_selection = threshold_for_best_model_selection
         self.feature_selection_name = feature_selection_name
+        self.remove_duplicate_features = remove_duplicate_features
+        self.duplicate_feature_threshold = duplicate_feature_threshold
         assert isinstance(self.threshold_for_best_model_selection, float)
         assert self.threshold_for_best_model_selection >= 1.
         assert isinstance(self.feature_selection_name, str)
+        assert isinstance(self.remove_duplicate_features, bool)
+        assert isinstance(self.duplicate_feature_threshold, float)
+        assert 0 < self.duplicate_feature_threshold <= 1.
         # Change default dimensional_constraint_penalty
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
+        # Create empty duplicate_mask
+        self.duplicate_mask_ = None
 
     def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, variable_names: ArrayLike[str] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
@@ -148,6 +166,19 @@ class ClimateImpactEmulator(PySRRegressor):
         We add one argument:
              use_cache: bool; whether fit results should be saved to/loaded from cache; Default is False
         """
+        # Compute and apply duplicate mask
+        log_info(f'Number of features: {X.shape[1]}')
+        if self.remove_duplicate_features:
+            self.duplicate_mask_ = np.array(compute_duplicate_mask(X, y, self.duplicate_feature_threshold))
+        else:
+            self.duplicate_mask_ = np.array([True for _ in range(X.shape[1])])
+        X = apply_mask(X, self.duplicate_mask_)
+        if variable_names is not None:
+            variable_names = list(np.array(variable_names)[self.duplicate_mask_])
+        if X_units is not None:
+            X_units = [str(v) for v in np.array(X_units)[self.duplicate_mask_]]
+        log_info(f'Number of features after removing duplicates: {X.shape[1]}')
+        # Fit using cache or without using it
         if use_cache:
             key = self.get_key_for_cache_dict(X, y)
             if key in self.cache:
@@ -163,6 +194,10 @@ class ClimateImpactEmulator(PySRRegressor):
             return self
         else:
             return super().fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
+
+    def predict(self, X, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
+        X = apply_mask(X, self.duplicate_mask_)
+        return super().predict(X, index, category=category)
 
     def get_key_for_cache_dict(self, X, y):
         return tuple(list(get_X_sum_and_y_sum(X, y)) + self.hash_params)

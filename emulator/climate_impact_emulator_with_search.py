@@ -103,6 +103,8 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                  extra_jax_mappings: dict[Callable, str] | None = None, denoise: bool = False,
                  select_k_features: int | None = None, threshold_for_best_model_selection: float = 1.5,
                  feature_selection_name: str = 'PySRDefault',
+                 remove_duplicate_features: bool = False,
+                 duplicate_feature_threshold: float = 0.9,
                  # Additional parameters
                  validation_size: float = 0.3,
                  search_cv_type: type = RandomizedSearchCV,
@@ -153,7 +155,9 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                          extra_sympy_mappings=extra_sympy_mappings, extra_torch_mappings=extra_torch_mappings,
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          threshold_for_best_model_selection=threshold_for_best_model_selection,
-                         feature_selection_name=feature_selection_name, **kwargs)
+                         feature_selection_name=feature_selection_name,
+                         remove_duplicate_features=remove_duplicate_features, duplicate_feature_threshold=duplicate_feature_threshold,
+                         **kwargs)
         self.validation_size = validation_size
         self.search_cv_type = search_cv_type
         self.n_iter = n_iter
@@ -314,7 +318,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         except additional attributes that are due to inheritance"""
         estimator = ClimateImpactEmulator()
         params = self.get_params()
-        params = {param_name: params[param_name] for param_name in estimator.__dict__}
+        params = {param_name: params[param_name] for param_name in estimator.__dict__ if param_name in params}
         estimator.set_params(**params)
         return estimator
 
