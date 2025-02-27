@@ -14,3 +14,5 @@ def test_load_dataset(load_dataset_function):
     assert (years_test[0] == 2006) and (years_test[-1] == 2099)
     assert rcp_name_train == 'RCP85'
     assert rcp_name_test == 'RCP45'
+    for units in [X_units, y_units]:
+        assert all([isinstance(unit, str) and (unit != 'nan') for unit in units])
