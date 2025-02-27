@@ -5,15 +5,18 @@ from projects.utils_workflow import workflow
 def main_workflow(fast: bool = False):
     if fast:
         params_emulator = {
-            "select_k_features": 3,
+            # "select_k_features": 3,
             "n_iter": 2,
-            "param_grid": {'populations': [10, 20]},
+            "param_grid": {'populations': [15, 20]},
             "feature_selection_name": 'PySRDefault',
-            "niterations": 10,
+            "niterations": 5,
+            "remove_duplicate_features": True,
         }
     else:
         params_emulator = {
-            "select_k_features": 5,
+            # "select_k_features": 5,
+            "remove_duplicate_features": True,
+            "duplicate_feature_threshold": 0.8,
             "n_iter": 50,
             "population_size": 31,
             'niterations': 10,

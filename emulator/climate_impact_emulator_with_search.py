@@ -233,7 +233,8 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         # Create a logger only if the log has not yet been saved
         log_already_saved = op.exists(log_dir) and (len(os.listdir(log_dir)) == 1)
         if not log_already_saved:
-            self.logger_spec = TensorBoardLoggerSpec(log_dir=log_dir, log_interval=1)
+            print('nout=', self.nout_)
+            self.logger_spec = TensorBoardLoggerSpec(log_dir=log_dir, log_interval=self.nout_ * self.populations)
         self.set_params(**best_params)
         X_train_train, y_train_train = get_X_and_y(X, y, self.ind_validation_, validation_set=False)
         super().fit(X_train_train, y_train_train, variable_names=variable_names, X_units=X_units,

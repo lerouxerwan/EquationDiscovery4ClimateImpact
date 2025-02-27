@@ -166,19 +166,24 @@ class ClimateImpactEmulator(PySRRegressor):
         We add one argument:
              use_cache: bool; whether fit results should be saved to/loaded from cache; Default is False
         """
-        log_info(f'Number of features: {X.shape[1]}')
+        key = self.get_key_for_cache_dict(X, y)
         # Compute and apply duplicate mask
+        log_info(f'Number of features: {X.shape[1]}')
         if self.remove_duplicate_features:
-            self.duplicate_mask_ = np.array(compute_duplicate_mask(X, y, self.duplicate_feature_threshold))
+            key_duplicate = self.get_key_for_cache(X, y, [self.duplicate_feature_threshold])
+            if key_duplicate in self.cache:
+                self.duplicate_mask_ = self.cache[key_duplicate].copy()
+            else:
+                self.duplicate_mask_ = np.array(compute_duplicate_mask(X, y, self.duplicate_feature_threshold))
+                self.cache[key_duplicate] = self.duplicate_mask_.copy()
             if variable_names is not None:
                 variable_names = list(np.array(variable_names)[self.duplicate_mask_])
             if X_units is not None:
                 X_units = [str(v) for v in np.array(X_units)[self.duplicate_mask_]]
-            log_info(f'Number of features after removing duplicates: {X.shape[1]}')
             X = apply_mask(X, self.duplicate_mask_)
+            log_info(f'Number of features after removing duplicates: {X.shape[1]}')
         # Fit using cache or without using it
         if use_cache:
-            key = self.get_key_for_cache_dict(X, y)
             if key in self.cache:
                 log_info('Load from cache')
                 (self.equations_, self.nout_, self.selection_mask_, self.julia_state_stream_,
@@ -200,6 +205,10 @@ class ClimateImpactEmulator(PySRRegressor):
 
     def get_key_for_cache_dict(self, X, y):
         return tuple(list(get_X_sum_and_y_sum(X, y)) + self.hash_params)
+
+    def get_key_for_cache(self, X, y, l: list[Any]):
+        return tuple(list(get_X_sum_and_y_sum(X, y)) + l)
+
 
     @property
     def hash_params(self) -> list[tuple[Any] | Any]:
