@@ -166,18 +166,16 @@ class ClimateImpactEmulator(PySRRegressor):
         We add one argument:
              use_cache: bool; whether fit results should be saved to/loaded from cache; Default is False
         """
-        # Compute and apply duplicate mask
         log_info(f'Number of features: {X.shape[1]}')
+        # Compute and apply duplicate mask
         if self.remove_duplicate_features:
             self.duplicate_mask_ = np.array(compute_duplicate_mask(X, y, self.duplicate_feature_threshold))
-        else:
-            self.duplicate_mask_ = np.array([True for _ in range(X.shape[1])])
-        X = apply_mask(X, self.duplicate_mask_)
-        if variable_names is not None:
-            variable_names = list(np.array(variable_names)[self.duplicate_mask_])
-        if X_units is not None:
-            X_units = [str(v) for v in np.array(X_units)[self.duplicate_mask_]]
-        log_info(f'Number of features after removing duplicates: {X.shape[1]}')
+            if variable_names is not None:
+                variable_names = list(np.array(variable_names)[self.duplicate_mask_])
+            if X_units is not None:
+                X_units = [str(v) for v in np.array(X_units)[self.duplicate_mask_]]
+            log_info(f'Number of features after removing duplicates: {X.shape[1]}')
+            X = apply_mask(X, self.duplicate_mask_)
         # Fit using cache or without using it
         if use_cache:
             key = self.get_key_for_cache_dict(X, y)
@@ -196,7 +194,8 @@ class ClimateImpactEmulator(PySRRegressor):
             return super().fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
     def predict(self, X, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
-        X = apply_mask(X, self.duplicate_mask_)
+        if self.remove_duplicate_features:
+            X = apply_mask(X, self.duplicate_mask_)
         return super().predict(X, index, category=category)
 
     def get_key_for_cache_dict(self, X, y):
