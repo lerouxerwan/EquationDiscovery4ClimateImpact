@@ -46,7 +46,13 @@ def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, X_train: np.ndarray
     x_ticks = complexity_list
     set_x_axis(ax, x_ticks)
     ax.set_xticks(x_ticks)
+    # Add equations as ticklabels
     xticklabels = [get_equation_str(expr) for expr in emulator.expr_list]
+    selected_series_with_default_pysr = emulator.get_best_pysr()
+    selected_complexity_with_default_pysr = selected_series_with_default_pysr['complexity']
+    selected_equation_with_default_pysr = selected_series_with_default_pysr['sympy_format']
+    xticklabels[complexity_list.index(selected_complexity_with_default_pysr)] \
+        = get_equation_str(selected_equation_with_default_pysr, add_underline=True)
     xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True)
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     # Add y-axis with special scaling

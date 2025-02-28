@@ -4,10 +4,12 @@ from sympy import Expr, Number
 from utils.utils_date import get_short_month_names, get_season_short_names
 
 
-def get_equation_str(expr: Expr, add_bold=False) -> str:
+def get_equation_str(expr: Expr, add_bold=False, add_underline=False) -> str:
     equation_str = str(round_expr(expr, 2))
     if add_bold:
-        equation_str  = '$\\mathbf{' + equation_str + '}$'
+        equation_str  = '$\\mathbf{' + equation_str + '}$ (selected equation)'
+    elif add_underline:
+        equation_str = '$\\mathbf{' + equation_str + '}$ (selected equation with PySR)'
     else:
         equation_str = f'${equation_str}$'
     # Replace the month or the season

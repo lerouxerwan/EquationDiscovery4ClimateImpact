@@ -197,8 +197,8 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         param_grid = dict()
         for key in param_list_to_optimize_around_default:
             default_value = self.__getattribute__(key)
-            min_value = default_value / self.scaling_factor
-            max_value = default_value * self.scaling_factor
+            min_value = default_value if self.scaling_factor == 0 else default_value / self.scaling_factor
+            max_value = default_value if self.scaling_factor == 0 else default_value * self.scaling_factor
             if isinstance(default_value, int):
                 min_value = math.ceil(min_value)
             param_grid[key] = [min_value, max_value]
@@ -233,8 +233,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         # Create a logger only if the log has not yet been saved
         log_already_saved = op.exists(log_dir) and (len(os.listdir(log_dir)) == 1)
         if not log_already_saved:
-            print('nout=', self.nout_)
-            self.logger_spec = TensorBoardLoggerSpec(log_dir=log_dir, log_interval=self.nout_ * self.populations)
+            self.logger_spec = TensorBoardLoggerSpec(log_dir=log_dir, log_interval=1 * self.populations)
         self.set_params(**best_params)
         X_train_train, y_train_train = get_X_and_y(X, y, self.ind_validation_, validation_set=False)
         super().fit(X_train_train, y_train_train, variable_names=variable_names, X_units=X_units,

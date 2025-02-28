@@ -279,6 +279,9 @@ class ClimateImpactEmulator(PySRRegressor):
             max_loss_for_filter = self.threshold_for_best_model_selection * min_loss_train
             filtered_equations = self.equations_.query(f"loss <= {max_loss_for_filter}")
             index = filtered_equations["score"].idxmax()
+        return self.get_best_pysr(index)
+
+    def get_best_pysr(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
         return super().get_best(index)
 
     def _pre_transform_training_data(self, X: ndarray, y: ndarray, Xresampled: ndarray | None,
