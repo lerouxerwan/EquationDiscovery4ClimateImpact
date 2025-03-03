@@ -23,7 +23,7 @@ from emulator.utils_remove_duplicates import compute_duplicate_mask
 class ClimateImpactEmulator(PySRRegressor):
     """ClimateImpactEmulator is a variant of PySRRegressor (deterministic, no verbose, hall of fame files are deleted)
     with several additional attributes:
-        threshold_for_best_model_selection : float
+        threshold_for_model_selection : float
             Threshold to select the best equation with the 'best' model selection
             this threshold must be larger or equal to 1
             Default is 1.5 (as specified in PySR).
@@ -87,7 +87,7 @@ class ClimateImpactEmulator(PySRRegressor):
                  extra_jax_mappings: dict[Callable, str] | None = None, denoise: bool = False,
                  select_k_features: int | None = None,
                  # Additional attributes
-                 threshold_for_best_model_selection: float = 1.5,
+                 threshold_for_model_selection: float = 1.5,
                  feature_selection_name: str = 'PySRDefault',
                  remove_duplicate_features: bool = False,
                  duplicate_feature_threshold: float = 0.9,
@@ -142,12 +142,12 @@ class ClimateImpactEmulator(PySRRegressor):
                          extra_sympy_mappings=extra_sympy_mappings, extra_torch_mappings=extra_torch_mappings,
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          **kwargs)
-        self.threshold_for_best_model_selection = threshold_for_best_model_selection
+        self.threshold_for_model_selection = threshold_for_model_selection
         self.feature_selection_name = feature_selection_name
         self.remove_duplicate_features = remove_duplicate_features
         self.duplicate_feature_threshold = duplicate_feature_threshold
-        assert isinstance(self.threshold_for_best_model_selection, float)
-        assert self.threshold_for_best_model_selection >= 1.
+        assert isinstance(self.threshold_for_model_selection, float)
+        assert self.threshold_for_model_selection >= 1.
         assert isinstance(self.feature_selection_name, str)
         assert isinstance(self.remove_duplicate_features, bool)
         assert isinstance(self.duplicate_feature_threshold, float)
@@ -214,8 +214,8 @@ class ClimateImpactEmulator(PySRRegressor):
     def hash_params(self) -> list[tuple[Any] | Any]:
         """All parameters except model_selection_threshold"""
         l = sorted(list(self.get_params().items()), key=itemgetter(0))
-        l2 = [tuple(v) if isinstance(v, list) else v for k, v in l if k != 'threshold_for_best_model_selection']
-        assert len(l2) == len(l) - 1, 'threshold_for_best_model_selection attribute must be removed from the list'
+        l2 = [tuple(v) if isinstance(v, list) else v for k, v in l if k != 'threshold_for_model_selection']
+        assert len(l2) == len(l) - 1, 'threshold_for_model_selection attribute must be removed from the list'
         return l2
 
     @property
@@ -274,15 +274,24 @@ class ClimateImpactEmulator(PySRRegressor):
         NotImplementedError
             Raised when an invalid model selection strategy is provided.
         """
-        if (index is None) and (self.model_selection == "best") and (self.threshold_for_best_model_selection != 1.5):
-            min_loss_train = self.equations_["loss"].min()
-            max_loss_for_filter = self.threshold_for_best_model_selection * min_loss_train
-            filtered_equations = self.equations_.query(f"loss <= {max_loss_for_filter}")
-            index = filtered_equations["score"].idxmax()
+        if (index is None) and (self.model_selection in ["best", "custom"]):
+            column = "score" if self.model_selection == "best" else "loss"
+            index = self.filtered_equations[column].idxmax()
         return self.get_best_pysr(index)
 
+    @property
+    def filtered_equations(self):
+        min_loss_train = self.equations_["loss"].min()
+        max_loss_for_filter = self.threshold_for_model_selection * min_loss_train
+        filtered_equations = self.equations_.query(f"loss <= {max_loss_for_filter}")
+        return filtered_equations
+
     def get_best_pysr(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
-        return super().get_best(index)
+        model_selection = self.model_selection[:]
+        self.model_selection = "best"
+        result = super().get_best(index)
+        self.model_selection = model_selection
+        return result
 
     def _pre_transform_training_data(self, X: ndarray, y: ndarray, Xresampled: ndarray | None,
                                      variable_names: ArrayLike[str],

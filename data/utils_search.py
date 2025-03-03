@@ -73,6 +73,8 @@ def search_signature_signature(non_default_params: dict) -> str:
         # Map short name to hash_str
         if isinstance(value, (int, float)):
             hash_str = short_name + str(value)
+        elif isinstance(value, str):
+            hash_str = short_name + value
         elif isinstance(value, list):
             hash_str = short_name + ''.join(['d' if s == '/' else str(s)[:1] for s in sorted(value)])
         elif isinstance(value, dict) and (name == 'param_grid'):

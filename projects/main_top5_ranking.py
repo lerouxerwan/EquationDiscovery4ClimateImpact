@@ -44,7 +44,7 @@ def _ranking(filepath_search_results):
         selected_expr = row["selected_expr"]
         param_name = op.basename(op.dirname(op.dirname(row['filepath_search_result'])))
         params = JsonLoader.load(row["params"])
-        _ = params.pop('threshold_for_best_model_selection')
+        _ = params.pop('threshold_for_model_selection')
         line = f'#{i} RMSE={round(rmse, 3)} for {param_name} {params} with {selected_expr}'
         print(line)
     print('\nCommand to open the JSON file that generated the best equation:')

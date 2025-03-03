@@ -9,6 +9,7 @@ def main_workflow(fast: bool = False):
             "n_iter": 1,
             "scaling_factor": 0,
             "unary_operators": ["square", "sqrt"],
+            "model_selection": "custom",
 
             # "param_grid": {'populations': [15, 20]},
             # "feature_selection_name": 'PySRDefault',
@@ -48,7 +49,7 @@ def main_workflow(fast: bool = False):
 
 
 if __name__ == '__main__':
-    fast = False
+    fast = True
     main_workflow(fast)
 
 

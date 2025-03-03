@@ -79,9 +79,9 @@ def add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width):
 def plot_threshold(ax, emulator, metric, xmax, xmin):
     # Add a line for PySR threshold
     if metric is Metric.MSE:
-        constant_value = emulator.threshold_for_best_model_selection
+        constant_value = emulator.threshold_for_model_selection
     elif metric is Metric.RMSE:
-        constant_value = np.sqrt(emulator.threshold_for_best_model_selection)
+        constant_value = np.sqrt(emulator.threshold_for_model_selection)
     else:
         raise NotImplementedError
     x_for_threshold = [xmin, xmax]

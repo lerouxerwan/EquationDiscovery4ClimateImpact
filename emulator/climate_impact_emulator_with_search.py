@@ -58,7 +58,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
     df_cv_results_ranked_: Optional[pd.DataFrame]
     ind_validation_: Optional[np.ndarray[bool]]
 
-    def __init__(self, model_selection: Literal["best", "accuracy", "score"] = "best", *,
+    def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "custom", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
                  expression_spec: AbstractExpressionSpec | None = None, niterations: int = 100, populations: int = 31,
                  population_size: int = 27, max_evals: int | None = None, maxsize: int = 30,
@@ -101,7 +101,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                  extra_sympy_mappings: dict[str, Callable] | None = None,
                  extra_torch_mappings: dict[Callable, Callable] | None = None,
                  extra_jax_mappings: dict[Callable, str] | None = None, denoise: bool = False,
-                 select_k_features: int | None = None, threshold_for_best_model_selection: float = 1.5,
+                 select_k_features: int | None = None, threshold_for_model_selection: float = 1.5,
                  feature_selection_name: str = 'PySRDefault',
                  remove_duplicate_features: bool = False,
                  duplicate_feature_threshold: float = 0.9,
@@ -154,7 +154,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
                          update=update, output_jax_format=output_jax_format, output_torch_format=output_torch_format,
                          extra_sympy_mappings=extra_sympy_mappings, extra_torch_mappings=extra_torch_mappings,
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
-                         threshold_for_best_model_selection=threshold_for_best_model_selection,
+                         threshold_for_model_selection=threshold_for_model_selection,
                          feature_selection_name=feature_selection_name,
                          remove_duplicate_features=remove_duplicate_features, duplicate_feature_threshold=duplicate_feature_threshold,
                          **kwargs)
