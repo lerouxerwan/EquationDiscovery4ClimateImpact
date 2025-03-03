@@ -8,7 +8,7 @@ def main_workflow(fast: bool = False):
             # "select_k_features": 3,
             "n_iter": 1,
             "scaling_factor": 0,
-            # "unary_operators": ["square", "sqrt"],
+            "unary_operators": ["square", "sqrt"],
 
             # "param_grid": {'populations': [15, 20]},
             # "feature_selection_name": 'PySRDefault',
@@ -18,11 +18,11 @@ def main_workflow(fast: bool = False):
     else:
         params_emulator = {
             # "select_k_features": 5,
-            "remove_duplicate_features": True,
-            "duplicate_feature_threshold": 0.6,
+            # "remove_duplicate_features": True,
+            # "duplicate_feature_threshold": 0.6,
             "n_iter": 500,
             "population_size": 31,
-            'niterations': 100,
+            # 'niterations': 100,
             "unary_operators": ["square", "sqrt"],
             "binary_operators": ["+", "*", "/", "-"],
             # Hyperparameter to optimize around (/2, x2) their default or specified value
@@ -48,7 +48,7 @@ def main_workflow(fast: bool = False):
 
 
 if __name__ == '__main__':
-    fast = True
+    fast = False
     main_workflow(fast)
 
 

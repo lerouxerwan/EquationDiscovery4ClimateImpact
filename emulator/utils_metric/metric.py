@@ -4,7 +4,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 from emulator.utils_metric.utils_metric_function import correlation, \
     root_mean_squared_error, mean_relative_absolute_error, \
-    median_absolute_error
+    median_absolute_error, spread_ratio
 
 
 class Metric(Enum):
@@ -14,6 +14,7 @@ class Metric(Enum):
     COR = 3
     RMSE = 4
     MEDAE = 5
+    SPREADRATIO = 6
 
 metric_to_function = {
     Metric.MSE: mean_squared_error,
@@ -22,6 +23,7 @@ metric_to_function = {
     Metric.COR: correlation,
     Metric.RMSE: root_mean_squared_error,
     Metric.MEDAE: median_absolute_error,
+    Metric.SPREADRATIO: spread_ratio,
 }
 
 
@@ -32,6 +34,7 @@ metric_to_label = {
     Metric.COR: 'Correlation',
     Metric.RMSE: 'Root mean squared error',
     Metric.MEDAE: 'Median absolute error',
+    Metric.SPREADRATIO: 'Spread ratio',
 }
 
 metric_to_str = {
@@ -41,6 +44,7 @@ metric_to_str = {
     Metric.COR: 'COR',
     Metric.RMSE: 'RMSE',
     Metric.MEDAE: 'MEDAE',
+    Metric.SPREADRATIO: 'SR',
 }
 
 str_to_metric = {v: k for k, v in metric_to_str.items()}
