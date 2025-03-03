@@ -34,14 +34,6 @@ def get_feature_dir(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, 
     feature_folder = f'{feature_selection_name}_{select_k_features}'
     return op.join(dataset_dir, feature_folder)
 
-def get_search_dir(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, validation_size: float,
-                   feature_selection_name: str, select_k_features: Optional[int],
-                   search_cv_type: type, n_iter: int, non_default_params: dict) -> str:
-    """Directory to save search results (df_cv_results_ranked_, non default params, tensorboard logs)"""
-    feature_dir = get_feature_dir(X, y, validation_size, feature_selection_name, select_k_features)
-    search_folder = get_search_folder(search_cv_type, n_iter, non_default_params)
-    return op.join(feature_dir, search_folder)
-
 def get_search_folder(search_cv_type: type, n_iter: int, non_default_params: dict) -> str:
     """Folder, whose name characterize the search (search type, number of iterations, non default hyperparameters)"""
     # Potentially remove feature selection and number of features from non default params

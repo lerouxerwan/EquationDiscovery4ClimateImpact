@@ -6,7 +6,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from utils.utils_dataset import load_dataset_dataframe
-from search.utils_search import get_dataset_dir, CSV_FILENAME, METRIC_COLUMN_NAME
+from search_dir.utils_search_dir import get_dataset_dir, CSV_FILENAME, METRIC_COLUMN_NAME
 import os.path as op
 
 from utils.utils_plot import show_or_save_plot

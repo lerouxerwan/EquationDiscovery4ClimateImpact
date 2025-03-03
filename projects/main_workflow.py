@@ -8,7 +8,7 @@ def main_workflow(fast: bool = False):
             # "select_k_features": 3,
             "n_iter": 1,
             "scaling_factor": 0,
-            "unary_operators": ["square", "sqrt"],
+            # "unary_operators": ["square", "sqrt"],
             "model_selection": "custom",
 
             # "param_grid": {'populations': [15, 20]},
