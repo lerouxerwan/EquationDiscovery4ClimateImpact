@@ -14,7 +14,7 @@ from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
 from emulator.utils_emulator import get_non_default_params
 from utils.utils_json_loader import string_to_dict
-from data.utils_search import get_search_dir, CSV_FILENAME, JSON_FILENAME, RANK_COLUMN_NAME
+from search.utils_search import get_search_dir, CSV_FILENAME, JSON_FILENAME, RANK_COLUMN_NAME
 from emulator.climate_impact_emulator import ClimateImpactEmulator
 from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs
 from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_cv, get_X_and_y

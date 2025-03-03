@@ -3,7 +3,7 @@ import pytest
 from sklearn.utils import check_random_state
 from sympy import Symbol
 
-from data.utils_dataset import load_dataset_ndarray
+from utils.utils_dataset import load_dataset_ndarray
 from emulator.utils_hyperparameter_search.utils_feature_selection import get_selection_mask
 from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_X_and_y
 from tests.emulator.utils_tests_emulator import load_climate_impact_emulator_for_test, \

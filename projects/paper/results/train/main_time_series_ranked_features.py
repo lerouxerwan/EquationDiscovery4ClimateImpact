@@ -1,6 +1,6 @@
 import numpy as np
 
-from data.utils_dataset import load_dataset_ndarray
+from utils.utils_dataset import load_dataset_ndarray
 from emulator.utils_plots.plot_by_rcp.plot_climato import _plot_climato
 from projects.paper.results.train.utils_ranked_features import compute_sorted_features
 from projects.paper.utils_paper import filename_dataset_paper

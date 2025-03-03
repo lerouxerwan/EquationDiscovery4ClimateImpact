@@ -4,12 +4,13 @@ import os.path as op
 import numpy as np
 import pandas as pd
 
-from data.utils_dataset import load_dataset_dataframe
-from data.utils_search import get_feature_dir, CSV_FILENAME, METRIC_COLUMN_NAME, JSON_FILENAME, \
+from search.utils_search import CSV_FILENAME, METRIC_COLUMN_NAME, JSON_FILENAME, \
     get_dataset_dir
+from utils.utils_dataset import load_dataset_dataframe
 from utils.utils_json_loader import JsonLoader
 
-def ranking_global(X, y, validation_size: float = 0.3):
+
+def ranking(X, y, validation_size: float = 0.3):
     dataset_search_path = get_dataset_dir(X, y, validation_size)
     filepath_search_results = []
     for experiment_folder in os.listdir(dataset_search_path):
@@ -18,12 +19,6 @@ def ranking_global(X, y, validation_size: float = 0.3):
             filepath_search_results.append(filepath_search_result)
     _ranking(filepath_search_results)
 
-
-def ranking_local(X, y, validation_size: float = 0.3, feature_selection_name: str = 'PySRDefault', select_k_features: int = 5):
-    feature_dir_path = get_feature_dir(X, y, validation_size, feature_selection_name, select_k_features)
-    param_folders = os.listdir(feature_dir_path)
-    filepath_search_results = [str(op.join(feature_dir_path, param_folder, CSV_FILENAME)) for param_folder in param_folders]
-    _ranking(filepath_search_results)
 
 
 def _ranking(filepath_search_results):
@@ -54,7 +49,7 @@ def _ranking(filepath_search_results):
 
 def main_ranking(filename):
     X_train, y_train,  *_ = load_dataset_dataframe(filename)
-    ranking_global(X_train, y_train)
+    ranking(X_train, y_train)
     # fast = False
     # select_k_features = 3 if fast else 5
     # ranking_local(X_train, y_train, select_k_features=select_k_features)

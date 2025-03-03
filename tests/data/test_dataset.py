@@ -1,6 +1,6 @@
 import pytest
 
-from data.utils_dataset import load_dataset_dataframe, load_dataset_ndarray
+from utils.utils_dataset import load_dataset_dataframe, load_dataset_ndarray
 
 
 @pytest.mark.parametrize("load_dataset_function", [load_dataset_dataframe, load_dataset_ndarray])
