@@ -1,5 +1,5 @@
 import os.path as op
-from typing import Optional
+from typing import Optional, Any
 
 import numpy as np
 import pandas as pd
@@ -90,3 +90,6 @@ def param_grid_signature(param_grid: dict) -> str:
             efficient_param_grid[short_name] = f'{round(min(values), DIGITS)}_{round(max(values), DIGITS)}'
     names_sorted = [name for name in sorted(list(efficient_param_grid.keys()))]
     return '_'.join([name + efficient_param_grid[name] for name in names_sorted])
+
+def get_best_params(df_cv_results_ranked: pd.DataFrame) -> dict[str, Any]:
+    return df_cv_results_ranked.iloc[0].loc['params']
