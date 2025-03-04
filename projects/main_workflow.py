@@ -1,5 +1,5 @@
 from projects.paper.utils_paper import filename_dataset_paper
-from projects.utils_workflow import workflow
+from projects.utils_workflow_root import workflow_root
 
 
 def main_workflow(fast: bool = False):
@@ -45,7 +45,7 @@ def main_workflow(fast: bool = False):
             #                                           "perturbation_factor"],
         }
     # Run workflow for several number of features
-    workflow(filename_dataset_paper, **params_emulator)
+    workflow_root(filename_dataset_paper, **params_emulator)
 
 
 if __name__ == '__main__':
