@@ -11,7 +11,8 @@ from pysr.utils import ArrayLike
 from sklearn.utils.validation import _check_feature_names_in
 from sympy import Expr
 
-from emulator.utils_cache.utils_key import get_X_sum_and_y_sum
+from emulator.utils_cache.utils_key import get_X_sum_and_y_sum, get_key_for_cache_duplicate_features, \
+    get_key_for_cache_fit
 from emulator.utils_attributes.utils_feature_selection import get_selection_mask
 from emulator_with_search.utils_attributes.utils_validation import apply_mask
 from emulator.utils_metric.metric import Metric, metric_to_function
@@ -24,7 +25,7 @@ class ClimateImpactEmulator(PySRRegressor):
     """ClimateImpactEmulator is a variant of PySRRegressor (deterministic, no verbose, hall of fame files are deleted)
     with several additional attributes:
         threshold_for_model_selection : float
-            Threshold to select the best equation with the 'best' model selection
+            Threshold to select the best equation with some model selection ('best' and 'custom')
             this threshold must be larger or equal to 1
             Default is 1.5 (as specified in PySR).
         feature_selection_name: str
@@ -37,8 +38,12 @@ class ClimateImpactEmulator(PySRRegressor):
             Threshold between 0 and 1 to remove duplicate features. If the absolute correlation between the two features
             is above this threshold, we keep the feature that has the best absolute correlation w.r.t. the target
             Default is 0.9
-    and with some modification on the default value:
-        dimensional_constraint_penalty equals is set by default to 10**8 (ensures dimension constraint are enforced)
+    with some modification on the default value:
+        -dimensional_constraint_penalty equals is set by default to 10**8 (ensures dimension constraint are enforced)
+        -temporary files are not saved, verbosity is deactivated, randomness is fixed (at the price of parallelization)
+    with a novel class attribute:
+        -cache: a dictionary to store intermediary results
+    -
     """
     cache = {}
 
@@ -166,11 +171,11 @@ class ClimateImpactEmulator(PySRRegressor):
         We add one argument:
              use_cache: bool; whether fit results should be saved to/loaded from cache; Default is False
         """
-        key = self.get_key_for_cache_dict(X, y)
+        key = get_key_for_cache_fit(X, y, self.get_params())
         # Compute and apply duplicate mask
         log_info(f'Number of features: {X.shape[1]}')
         if self.remove_duplicate_features:
-            key_duplicate = self.get_key_for_cache(X, y, [self.duplicate_feature_threshold])
+            key_duplicate = get_key_for_cache_duplicate_features(X, y, self.duplicate_feature_threshold)
             if key_duplicate in self.cache:
                 self.duplicate_mask_ = self.cache[key_duplicate].copy()
             else:
@@ -198,25 +203,21 @@ class ClimateImpactEmulator(PySRRegressor):
         else:
             return super().fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
-    def predict(self, X, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
+    def predict(self, X: np.ndarray | pd.DataFrame, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
         if self.remove_duplicate_features:
             X = apply_mask(X, self.duplicate_mask_)
         return super().predict(X, index, category=category)
 
-    def get_key_for_cache_dict(self, X, y):
-        return tuple(list(get_X_sum_and_y_sum(X, y)) + self.hash_params)
+    def compute_loss(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, metric=Metric.MSE) -> list[float]:
+        """Compute a loss function for every equation of the Pareto optimal set of equations"""
+        loss_function = metric_to_function[metric]
+        return [loss_function(y_true=y, y_pred=y_predicted) for y_predicted in self.compute_y_predicted_list(X)]
 
-    def get_key_for_cache(self, X, y, l: list[Any]):
-        return tuple(list(get_X_sum_and_y_sum(X, y)) + l)
+    def compute_y_predicted_list(self, X: np.ndarray | pd.DataFrame) -> list[np.ndarray]:
+        """Compute predicted vector for every equation of the Pareto front"""
+        return [self.predict(X, index=index) for index in range(len(self.equations_))]
 
-
-    @property
-    def hash_params(self) -> list[tuple[Any] | Any]:
-        """All parameters except model_selection_threshold"""
-        l = sorted(list(self.get_params().items()), key=itemgetter(0))
-        l2 = [tuple(v) if isinstance(v, list) else v for k, v in l if k != 'threshold_for_model_selection']
-        assert len(l2) == len(l) - 1, 'threshold_for_model_selection attribute must be removed from the list'
-        return l2
+    """Properties"""
 
     @property
     def complexity_list(self) -> list[int]:
@@ -226,7 +227,6 @@ class ClimateImpactEmulator(PySRRegressor):
     def loss_list(self) -> list[float]:
         return self.equations_['loss'].to_list()
 
-
     @property
     def score_list(self) -> list[float]:
         return self.equations_['score'].to_list()
@@ -235,15 +235,6 @@ class ClimateImpactEmulator(PySRRegressor):
     def expr_list(self) -> list[Expr]:
         return self.equations_['sympy_format'].to_list()
 
-    def compute_loss(self, X, y, metric=Metric.MSE) -> list[float]:
-        """Compute a loss function for every equation of the Pareto optimal set of equations"""
-        loss_function = metric_to_function[metric]
-        return [loss_function(y_true=y, y_pred=y_predicted) for y_predicted in self.compute_y_predicted_list(X)]
-
-    def compute_y_predicted_list(self, X) -> list[np.ndarray]:
-        """Compute predicted vector for every equation of the Pareto front"""
-        return [self.predict(X, index=index) for index in range(len(self.equations_))]
-
     @property
     def selected_expr(self) -> Expr:
         return self.get_best()['sympy_format']
@@ -251,6 +242,15 @@ class ClimateImpactEmulator(PySRRegressor):
     @property
     def selected_complexity(self) -> int:
         return self.get_best()['complexity']
+
+    """Model/equation selection"""
+
+    def get_best_pysr(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
+        model_selection = self.model_selection[:]
+        self.model_selection = "best"
+        result = super().get_best(index)
+        self.model_selection = model_selection
+        return result
 
     def get_best(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
         """
@@ -285,13 +285,6 @@ class ClimateImpactEmulator(PySRRegressor):
         max_loss_for_filter = self.threshold_for_model_selection * min_loss_train
         filtered_equations = self.equations_.query(f"loss <= {max_loss_for_filter}")
         return filtered_equations
-
-    def get_best_pysr(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
-        model_selection = self.model_selection[:]
-        self.model_selection = "best"
-        result = super().get_best(index)
-        self.model_selection = model_selection
-        return result
 
     def _pre_transform_training_data(self, X: ndarray, y: ndarray, Xresampled: ndarray | None,
                                      variable_names: ArrayLike[str],

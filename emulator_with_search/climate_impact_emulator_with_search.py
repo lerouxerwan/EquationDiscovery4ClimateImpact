@@ -11,6 +11,7 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
 from emulator.climate_impact_emulator import ClimateImpactEmulator
+from emulator.utils_cache.utils_key import get_key_for_cache_fit
 from emulator_with_search.search_dir.search_dir import SearchDir
 from emulator_with_search.search_dir.utils_search_dir import RANK_COLUMN_NAME
 from emulator_with_search.utils_attributes.utils_search_cv import get_search_cv_kwargs
@@ -256,7 +257,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         X_train_train, y_train_train = get_X_and_y(X, y, self.ind_validation_, validation_set=False)
         selected_expressions = []
         for line, params in enumerate(df_cv_results_ranked["params"].values, 1):
-                key = emulator.set_params(**params).get_key_for_cache_dict(X_train_train, y_train_train)
+                key = get_key_for_cache_fit(X_train_train, y_train_train, emulator.set_params(**params).get_params())
                 emulator.equations_ = self.cache[key][0]
                 try:
                     selected_expr = emulator.selected_expr.copy()
