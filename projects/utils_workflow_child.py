@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from emulator_with_search.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
-from emulator.utils_plots.utils_plots import plot_diagnosis
+from emulator.utils_plots.utils_plots import plot_diagnosis_fit
 from emulator_with_search.search_dir.search_dir import SearchDir
 from emulator_with_search.search_dir.utils_search_dir import METRIC_COLUMN_NAME
 from utils.utils_dataset import load_dataset_dataframe
@@ -42,7 +42,7 @@ def workflow_child(filename: str, parent_search_dir: Optional[str] = None,
             ax = plt.gca()
             ax.plot(sorted_param_values, min_loss_list)
             plt.show()
-    plot_diagnosis(emulator, X_train, y_train, X_test, y_test, years_train, years_test, rcp_name_train, rcp_name_test, nb_historical_years, target_label, False)
+    plot_diagnosis_fit(emulator, X_train, y_train, X_test, y_test, years_train, years_test, rcp_name_train, rcp_name_test, nb_historical_years, target_label, False)
 
 
 
