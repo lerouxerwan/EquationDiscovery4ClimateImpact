@@ -4,8 +4,8 @@ from sklearn.utils import check_random_state
 from sympy import Symbol
 
 from utils.utils_dataset import load_dataset_ndarray
-from emulator.utils_hyperparameter_search.utils_feature_selection import get_selection_mask
-from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_X_and_y
+from emulator.utils_attributes.utils_feature_selection import get_selection_mask
+from emulator_with_search.utils_attributes.utils_validation import compute_ind_validation, get_X_and_y
 from tests.emulator.utils_tests_emulator import load_climate_impact_emulator_for_test, \
     run_three_main_functions_with_one_feature, load_X_and_y_for_test, run_three_main_functions
 from utils.utils_run import random_seed

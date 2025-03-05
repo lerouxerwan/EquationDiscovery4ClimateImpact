@@ -8,7 +8,7 @@ NB_THRESHOLDS = 20
 
 
 def get_threshold_values() -> list[float]:
-    all_thresholds = 1 + (np.geomspace(1, 1000, num=20 - 1) / 2000)
+    all_thresholds = 1 + (np.geomspace(1, 1000, num=NB_THRESHOLDS - 1) / 2000)
     all_thresholds = [float(f) for f in all_thresholds] + [2.]
     return all_thresholds
 

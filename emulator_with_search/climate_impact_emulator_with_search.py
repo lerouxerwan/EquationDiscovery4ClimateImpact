@@ -11,12 +11,11 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
 from emulator.climate_impact_emulator import ClimateImpactEmulator
-from emulator.utils_emulator import get_non_default_params
-from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs
-from emulator.utils_hyperparameter_search.utils_threshold import get_param_grid_with_thresholds
-from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_cv, get_X_and_y
-from search_dir.search_dir import SearchDir
-from search_dir.utils_search_dir import RANK_COLUMN_NAME
+from emulator_with_search.search_dir.search_dir import SearchDir
+from emulator_with_search.search_dir.utils_search_dir import RANK_COLUMN_NAME
+from emulator_with_search.utils_attributes.utils_search_cv import get_search_cv_kwargs
+from emulator.utils_attributes.utils_threshold import get_param_grid_with_thresholds
+from emulator_with_search.utils_attributes.utils_validation import compute_ind_validation, get_cv, get_X_and_y
 from utils.utils_log import log_info
 
 
@@ -212,8 +211,7 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         assert isinstance(index_start_validation, int)
         # Compute a directory to save search results
         self.search_dir_ = SearchDir.from_search_arguments(X, y, self.validation_size, self.feature_selection_name,
-                                                           self.select_k_features, self.search_cv_type, self.n_iter,
-                                                           get_non_default_params(self))
+                                                           self.select_k_features, self.search_cv_type, self.n_iter, self)
         # Compute an array of boolean such that ind_validation[i] = True if the index 'i' is in the validation set
         self.ind_validation_ = compute_ind_validation(len(y), self.validation_size, index_start_validation)
         # Compute the attribute df_cv_results_ranked_, a Dataframe with the result of the hyperparameter search
@@ -230,12 +228,12 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         self.logger_spec = None
         return self
 
-    def compute_df_cv_results_ranked(self, X, y, **params_fit) -> pd.DataFrame:
+    def compute_df_cv_results_ranked(self, X, y, **params_fit) -> None:
         """Run hyperparameter search to obtain df_cv_results_ranked, and save search results to file"""
         # Compute search results only it has not yet been computed
         if not op.exists(self.search_dir_.filepath_search_result):
             df_cv_results_ranked = self._compute_df_cv_results_ranked(X, y, **params_fit)
-            self.search_dir_.save_search_results(df_cv_results_ranked, get_non_default_params(self))
+            self.search_dir_.save_search_results(df_cv_results_ranked, self)
 
     def _compute_df_cv_results_ranked(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, **params_fit) -> pd.DataFrame:
         """Run 2 consecutive hyperparameter search (first self.search_cv_type, then a grid search for thresholds)

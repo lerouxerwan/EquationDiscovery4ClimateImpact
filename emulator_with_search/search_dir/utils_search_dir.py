@@ -3,9 +3,10 @@ from typing import Optional, Any
 
 import numpy as np
 import pandas as pd
+from sklearn.base import BaseEstimator
 from sklearn.model_selection import RandomizedSearchCV
 
-from emulator.utils_emulator import get_X_sum_and_y_sum
+from emulator.utils_cache.utils_key import get_X_sum_and_y_sum
 from utils.utils_path import SEARCH_CSV_PATH
 
 RANK_COLUMN_NAME = 'rank_test_MSE'
@@ -93,3 +94,8 @@ def param_grid_signature(param_grid: dict) -> str:
 
 def get_best_params(df_cv_results_ranked: pd.DataFrame) -> dict[str, Any]:
     return df_cv_results_ranked.iloc[0].loc['params']
+
+def get_non_default_params(estimator: BaseEstimator) -> dict[str, Any]:
+    """Return a dictionary that maps each the name of each non default parameter to its non default value"""
+    default_params = type(estimator)().get_params()
+    return {k: v for k, v in estimator.get_params().items() if v != default_params[k]}

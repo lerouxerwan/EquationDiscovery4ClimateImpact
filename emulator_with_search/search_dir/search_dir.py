@@ -7,8 +7,10 @@ from typing import Optional, Any
 import numpy as np
 import pandas as pd
 from pysr import TensorBoardLoggerSpec
+from sklearn.base import BaseEstimator
 
-from search_dir.utils_search_dir import get_feature_dir, get_search_folder, CSV_FILENAME, JSON_FILENAME, get_best_params
+from emulator_with_search.search_dir.utils_search_dir import get_feature_dir, get_search_folder, CSV_FILENAME, \
+    JSON_FILENAME, get_non_default_params
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -26,9 +28,9 @@ class SearchDir(object):
     @classmethod
     def from_search_arguments(cls, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, validation_size: float,
                               feature_selection_name: str, select_k_features: Optional[int],
-                              search_cv_type: type, n_iter: int, non_default_params: dict):
+                              search_cv_type: type, n_iter: int, estimator: BaseEstimator):
         feature_dir = get_feature_dir(X, y, validation_size, feature_selection_name, select_k_features)
-        search_folder = get_search_folder(search_cv_type, n_iter, non_default_params)
+        search_folder = get_search_folder(search_cv_type, n_iter, get_non_default_params(estimator))
         return cls(op.join(feature_dir, search_folder))
 
     """Search cv results"""
@@ -53,13 +55,13 @@ class SearchDir(object):
     def best_params(self) -> dict[str, Any]:
         return self.df_cv_results_ranked.iloc[0].loc['params']
 
-    def save_search_results(self, df_cv_results_ranked, non_default_params: dict[str, Any]):
+    def save_search_results(self, df_cv_results_ranked: pd.DataFrame, estimator:BaseEstimator) -> None:
         log_info('Save search results to files')
         #  Save a csv containing df_cv_results_ranked
         df_cv_results_ranked.to_csv(self.filepath_search_result)
         #  Save the associated json config file
         with open(self.filepath_non_default_params, 'w') as fp:
-            json.dump(non_default_params, fp, sort_keys=True, indent=4)
+            json.dump(get_non_default_params(estimator), fp, sort_keys=True, indent=4)
 
 
     """Tensorboard Logging"""

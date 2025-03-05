@@ -1,10 +1,6 @@
 from emulator.utils_plots.utils_plots import plot_diagnosis
 from utils.utils_dataset import load_dataset_dataframe
-from emulator.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
-from emulator.utils_plots.plot_by_rcp.plot_climato import plot_errors_climato, plot_climato
-from emulator.utils_plots.plot_by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
-from emulator.utils_plots.plot_by_split.plot_scatter import plot_scatter
-from emulator.utils_plots.plot_by_split.plot_time_series import plot_time_series
+from emulator_with_search.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
 
 
 def workflow_root(filename: str, show: bool = False, **params_emulator) -> None:

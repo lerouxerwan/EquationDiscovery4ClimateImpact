@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 
 from emulator.climate_impact_emulator import ClimateImpactEmulator
-from emulator.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
-from emulator.utils_hyperparameter_search.utils_validation import get_X_and_y
+from emulator_with_search.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
+from emulator_with_search.utils_attributes.utils_validation import get_X_and_y
 from emulator.utils_plots.plot_by_split.utils_plot_split_name import SPLIT_NAMES
 from utils.utils_plot import compute_axis_lim
 

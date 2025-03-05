@@ -11,13 +11,13 @@ from pysr.utils import ArrayLike
 from sklearn.utils.validation import _check_feature_names_in
 from sympy import Expr
 
-from emulator.utils_emulator import get_X_sum_and_y_sum
-from emulator.utils_hyperparameter_search.utils_feature_selection import get_selection_mask
-from emulator.utils_hyperparameter_search.utils_validation import apply_mask
+from emulator.utils_cache.utils_key import get_X_sum_and_y_sum
+from emulator.utils_attributes.utils_feature_selection import get_selection_mask
+from emulator_with_search.utils_attributes.utils_validation import apply_mask
 from emulator.utils_metric.metric import Metric, metric_to_function
 from utils.utils_log import log_info
 from utils.utils_run import random_seed
-from emulator.utils_remove_duplicates import compute_duplicate_mask
+from emulator.utils_attributes.utils_remove_duplicates import compute_duplicate_mask
 
 
 class ClimateImpactEmulator(PySRRegressor):
@@ -42,7 +42,7 @@ class ClimateImpactEmulator(PySRRegressor):
     """
     cache = {}
 
-    def __init__(self, model_selection: Literal["best", "accuracy", "score"] = "best", *,
+    def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
                  expression_spec: AbstractExpressionSpec | None = None, niterations: int = 100, populations: int = 31,
                  population_size: int = 27, max_evals: int | None = None, maxsize: int = 30,

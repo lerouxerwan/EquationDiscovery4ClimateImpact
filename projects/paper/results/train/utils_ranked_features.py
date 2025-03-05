@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 from sklearn.utils import check_random_state
 
-from emulator.utils_hyperparameter_search.utils_feature_selection import \
+from emulator.utils_attributes.utils_feature_selection import \
     run_feature_selection_PySR_that_returns_feature_importance
-from emulator.utils_hyperparameter_search.utils_validation import compute_ind_validation, get_X_and_y
+from emulator_with_search.utils_attributes.utils_validation import compute_ind_validation, get_X_and_y
 from tests.emulator.utils_tests_emulator import load_climate_impact_emulator_with_search_for_test
 from utils.utils_run import random_seed
 

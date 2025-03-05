@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import norm
 
 from emulator.climate_impact_emulator import ClimateImpactEmulator
-from emulator.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
+from emulator_with_search.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
 from utils.utils_run import random_seed
 
 

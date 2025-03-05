@@ -1,13 +1,12 @@
-from operator import itemgetter
 from typing import Optional
 
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from emulator.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
+from emulator_with_search.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
 from emulator.utils_plots.utils_plots import plot_diagnosis
-from search_dir.search_dir import SearchDir
-from search_dir.utils_search_dir import METRIC_COLUMN_NAME
+from emulator_with_search.search_dir.search_dir import SearchDir
+from emulator_with_search.search_dir.utils_search_dir import METRIC_COLUMN_NAME
 from utils.utils_dataset import load_dataset_dataframe
 
 
