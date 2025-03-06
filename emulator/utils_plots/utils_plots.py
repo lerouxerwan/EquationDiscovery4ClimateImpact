@@ -3,14 +3,14 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from emulator.climate_impact_emulator import ClimateImpactEmulator
+from emulator.pysr_emulator import PySREmulator
 from emulator.utils_plots.plot_by_rcp.plot_climato import plot_climato, plot_errors_climato
 from emulator.utils_plots.plot_by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
 from emulator.utils_plots.plot_by_split.plot_scatter import plot_scatter
 from emulator.utils_plots.plot_by_split.plot_time_series import plot_time_series
 
 
-def plot_diagnosis_fit(emulator: ClimateImpactEmulator, X_train: np.ndarray | pd.DataFrame,
+def plot_diagnosis_fit(emulator: PySREmulator, X_train: np.ndarray | pd.DataFrame,
                        y_train: np.ndarray | pd.Series,
                        X_test: Optional[np.ndarray | pd.DataFrame]=None,
                        y_test: Optional[np.ndarray | pd.Series]=None,

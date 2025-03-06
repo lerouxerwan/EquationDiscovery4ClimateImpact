@@ -21,8 +21,8 @@ from utils.utils_run import random_seed
 from emulator.utils_attributes.utils_remove_duplicates import compute_duplicate_mask
 
 
-class ClimateImpactEmulator(PySRRegressor):
-    """ClimateImpactEmulator is a variant of PySRRegressor (deterministic, no verbose, hall of fame files are deleted)
+class PySREmulator(PySRRegressor):
+    """PySREmulator is a variant of PySRRegressor (deterministic, no verbose, hall of fame files are deleted)
     with several additional attributes:
         threshold_for_model_selection : float
             Threshold to select the best equation with some model selection ('best' and 'custom')
@@ -40,7 +40,6 @@ class ClimateImpactEmulator(PySRRegressor):
             Default is 0.9
     with some modification on the default value:
         -dimensional_constraint_penalty equals is set by default to 10**8 (ensures dimension constraint are enforced)
-        -temporary files are not saved, verbosity is deactivated, randomness is fixed (at the price of parallelization)
     with a novel class attribute:
         -cache: a dictionary to store intermediary results
     -

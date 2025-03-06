@@ -1,6 +1,6 @@
 import numpy as np
 
-from tests.emulator.utils_tests_emulator import load_climate_impact_emulator_with_search_for_test, run_three_main_functions_with_one_feature
+from tests.utils_tests_emulator import load_climate_impact_emulator_with_search_for_test, run_three_main_functions_with_one_feature
 
 
 def test_one_hyperparameter():

@@ -3,7 +3,7 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from emulator_with_search.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
+from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
 from emulator.utils_plots.utils_plots import plot_diagnosis_fit
 from emulator_with_search.search_dir.search_dir import SearchDir
 from emulator_with_search.search_dir.utils_search_dir import METRIC_COLUMN_NAME
@@ -22,7 +22,7 @@ def workflow_child(filename: str, parent_search_dir: Optional[str] = None,
         parent_best_params.update(params_emulator)
         params_emulator = parent_best_params
     # Fit emulator with search
-    emulator = ClimateImpactEmulatorWithSearch(**params_emulator)
+    emulator = PySREmulatorWithSearch(**params_emulator)
     emulator.fit(X_train, y_train, variable_names=variable_names, X_units=X_units, y_units=y_units,
                  index_start_validation=nb_historical_years)
     # Plots

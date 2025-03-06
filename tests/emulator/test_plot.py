@@ -2,7 +2,7 @@ from emulator.utils_plots.plot_by_rcp.plot_climato import plot_errors_climato, p
 from emulator.utils_plots.plot_by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
 from emulator.utils_plots.plot_by_split.plot_scatter import plot_scatter
 from emulator.utils_plots.plot_by_split.plot_time_series import plot_time_series
-from tests.emulator.utils_tests_emulator import load_climate_impact_emulator_for_test, load_X_and_y_for_test
+from tests.utils_tests_emulator import load_climate_impact_emulator_for_test, load_X_and_y_for_test
 
 
 def test_plot_with_emulator():

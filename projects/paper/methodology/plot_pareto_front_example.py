@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.scale import FuncScale
 
-from emulator.climate_impact_emulator import ClimateImpactEmulator
+from emulator.pysr_emulator import PySREmulator
 from emulator.utils_metric.metric import Metric
 from emulator.utils_plots.plot_by_split.utils_axis import custom_functions_for_yaxis
 from emulator.utils_plots.plot_by_split.utils_equation_str import get_equation_str
@@ -12,8 +12,8 @@ from emulator.utils_plots.plot_by_split.utils_plot_split_name import SPLIT_NAMES
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_pareto_front_example(emulator: ClimateImpactEmulator, X: np.ndarray, y: np.ndarray,
-                            target_label: str = "Target (-)", show: bool = False, metric=Metric.MSE) -> None:
+def plot_pareto_front_example(emulator: PySREmulator, X: np.ndarray, y: np.ndarray,
+                              target_label: str = "Target (-)", show: bool = False, metric=Metric.MSE) -> None:
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""
     ax = plt.gca()

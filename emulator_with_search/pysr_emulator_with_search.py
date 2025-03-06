@@ -10,7 +10,7 @@ from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
-from emulator.climate_impact_emulator import ClimateImpactEmulator
+from emulator.pysr_emulator import PySREmulator
 from emulator.utils_cache.utils_key import get_key_for_cache_fit
 from emulator_with_search.search_dir.search_dir import SearchDir
 from emulator_with_search.search_dir.utils_search_dir import RANK_COLUMN_NAME
@@ -20,8 +20,8 @@ from emulator_with_search.utils_attributes.utils_validation import compute_ind_v
 from utils.utils_log import log_info
 
 
-class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
-    """This class is an extension of ClimateImpactEmulator with hyperparameter search. Hyperparameter settings are
+class PySREmulatorWithSearch(PySREmulator):
+    """This class is an extension of PySREmulator with hyperparameter search. Hyperparameter settings are
     compared on a validation set, and the best hyperparameter setting (minimizing validation error) is selected
 
     This extension has several additional attributes:
@@ -278,10 +278,10 @@ class ClimateImpactEmulatorWithSearch(ClimateImpactEmulator):
         search_cv.fit(X, y, **params_fit)
         return search_cv
 
-    def load_climate_impact_emulator_with_same_attributes(self) -> ClimateImpactEmulator:
+    def load_climate_impact_emulator_with_same_attributes(self) -> PySREmulator:
         """Load a climate_impact_emulator object with the same attributes as self,
         except additional attributes that are due to inheritance"""
-        estimator = ClimateImpactEmulator()
+        estimator = PySREmulator()
         params = self.get_params()
         params = {param_name: params[param_name] for param_name in estimator.__dict__ if param_name in params}
         estimator.set_params(**params)

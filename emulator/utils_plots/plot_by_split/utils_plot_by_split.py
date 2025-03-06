@@ -3,14 +3,14 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from emulator.climate_impact_emulator import ClimateImpactEmulator
-from emulator_with_search.climate_impact_emulator_with_search import ClimateImpactEmulatorWithSearch
+from emulator.pysr_emulator import PySREmulator
+from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
 from emulator_with_search.utils_attributes.utils_validation import get_X_and_y
 from emulator.utils_plots.plot_by_split.utils_plot_split_name import SPLIT_NAMES
 from utils.utils_plot import compute_axis_lim
 
 
-def load_split_name_to_X_and_y(emulator: ClimateImpactEmulator, X_train: np.ndarray | pd.DataFrame,
+def load_split_name_to_X_and_y(emulator: PySREmulator, X_train: np.ndarray | pd.DataFrame,
                                y_train: np.ndarray | pd.Series,
                                X_test: Optional[np.ndarray | pd.DataFrame]=None,
                                y_test: Optional[np.ndarray | pd.Series]=None,
@@ -20,7 +20,7 @@ def load_split_name_to_X_and_y(emulator: ClimateImpactEmulator, X_train: np.ndar
     split_name_to_X_and_y_and_y_predict_years = load_split_name_to_X_and_y_and_y_predicted_and_years(emulator, X_train, y_train, X_test, y_test, years_train, years_test)
     return {split_name: (X, y) for split_name, (X, y, _, _) in split_name_to_X_and_y_and_y_predict_years.items()}
 
-def load_split_name_to_X_and_y_and_y_predicted_and_years(emulator: ClimateImpactEmulator, X_train: np.ndarray | pd.DataFrame,
+def load_split_name_to_X_and_y_and_y_predicted_and_years(emulator: PySREmulator, X_train: np.ndarray | pd.DataFrame,
                                                          y_train: np.ndarray | pd.Series,
                                                          X_test: Optional[np.ndarray | pd.DataFrame]=None,
                                                          y_test: Optional[np.ndarray | pd.Series]=None,
@@ -38,8 +38,8 @@ def load_split_name_to_X_and_y_and_y_predicted_and_years(emulator: ClimateImpact
             X_test, y_test = X_test.values, y_test.values
     # Set default for years_train and years_test if needed
     years_test, years_train = set_default_years(y_test, y_train, years_test, years_train)
-    # Three splits for ClimateImpactEmulatorWithSearch
-    if isinstance(emulator, ClimateImpactEmulatorWithSearch):
+    # Three splits for PySREmulatorWithSearch
+    if isinstance(emulator, PySREmulatorWithSearch):
         #  Separate train data between train (train_train) and validation (train_validation) data
         X_train_train, y_train_train = get_X_and_y(X_train, y_train, emulator.ind_validation_, False)
         X_train_validation, y_train_validation = get_X_and_y(X_train, y_train, emulator.ind_validation_, True)
@@ -48,8 +48,8 @@ def load_split_name_to_X_and_y_and_y_predicted_and_years(emulator: ClimateImpact
         X_list = [X_train_train, X_train_validation, X_test]
         y_list = [y_train_train, y_train_validation, y_test]
         years_list = [years_train[~emulator.ind_validation_], years_train[emulator.ind_validation_], years_test]
-    # Two splits for ClimateImpactEmulator
-    elif isinstance(emulator, ClimateImpactEmulator):
+    # Two splits for PySREmulator
+    elif isinstance(emulator, PySREmulator):
         split_names = SPLIT_NAMES[::2]
         X_list = [X_train, X_test]
         y_list = [y_train, y_test]

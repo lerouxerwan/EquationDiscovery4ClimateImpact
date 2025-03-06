@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from emulator.climate_impact_emulator import ClimateImpactEmulator
+from emulator.pysr_emulator import PySREmulator
 from emulator.utils_metric.metric import Metric
 from emulator.utils_plots.plot_by_split.utils_axis import set_custom_y_axis, set_x_axis
 from emulator.utils_plots.plot_by_split.utils_plot_by_split import load_split_name_to_X_and_y
@@ -14,11 +14,11 @@ from emulator.utils_plots.plot_by_split.utils_plot_split_name import SPLIT_NAMES
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_loss_vs_complexity(emulator: ClimateImpactEmulator, X_train: np.ndarray | pd.DataFrame,
-                                         y_train: np.ndarray | pd.Series,
-                                         X_test: Optional[np.ndarray | pd.DataFrame]=None,
-                                         y_test: Optional[np.ndarray | pd.Series]=None,
-                               years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None,
+def plot_loss_vs_complexity(emulator: PySREmulator, X_train: np.ndarray | pd.DataFrame,
+                            y_train: np.ndarray | pd.Series,
+                            X_test: Optional[np.ndarray | pd.DataFrame]=None,
+                            y_test: Optional[np.ndarray | pd.Series]=None,
+                            years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None,
                             rcp_name_train: str= 'RCP85', rcp_name_test: Optional[str]=None, nb_historical_years: int = 0,
                             target_label: str = "Target (-)", show: bool = False, detailed_plot: bool = False) -> None:
     """Plot prediction loss as a function of complexity for several splits

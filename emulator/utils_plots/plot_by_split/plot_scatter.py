@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from emulator.climate_impact_emulator import ClimateImpactEmulator
+from emulator.pysr_emulator import PySREmulator
 from emulator.utils_metric.utlis_metric_box import add_metric_box
 from emulator.utils_plots.plot_by_split.utils_plot_by_split import load_split_name_to_X_and_y, \
     load_split_name_to_X_and_y_and_y_predicted_and_years, get_ymin_and_ymax
@@ -13,10 +13,10 @@ from emulator.utils_plots.plot_by_split.utlis_plot_selected_equation import get_
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_scatter(emulator: ClimateImpactEmulator, X_train: np.ndarray | pd.DataFrame,
-                                         y_train: np.ndarray | pd.Series,
-                                         X_test: Optional[np.ndarray | pd.DataFrame]=None,
-                                         y_test: Optional[np.ndarray | pd.Series]=None,
+def plot_scatter(emulator: PySREmulator, X_train: np.ndarray | pd.DataFrame,
+                 y_train: np.ndarray | pd.Series,
+                 X_test: Optional[np.ndarray | pd.DataFrame]=None,
+                 y_test: Optional[np.ndarray | pd.Series]=None,
                  years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None,
                  rcp_name_train: str = 'RCP85', rcp_name_test: Optional[str] = None, nb_historical_years: int = 0,
                  target_label: str = "Target (-)", show: bool = False) -> None:
