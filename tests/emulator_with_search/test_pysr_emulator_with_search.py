@@ -9,6 +9,6 @@ def test_one_hyperparameter():
                                                                  n_iter=2)
     run_three_main_functions_with_one_feature(emulator)
     total_loss_expected = -32.906312030116666
-    total_loss_computed = float(emulator.search_dir_.df_cv_results_ranked['mean_train_MSE'].values.sum())
-    emulator.search_dir_.remove_folder()
+    total_loss_computed = float(emulator.search_folder_.df_cv_results_ranked['mean_train_MSE'].values.sum())
+    emulator.search_folder_.remove_folder()
     np.testing.assert_almost_equal(total_loss_computed, total_loss_expected)

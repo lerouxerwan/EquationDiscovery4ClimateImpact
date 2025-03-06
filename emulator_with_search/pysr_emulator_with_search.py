@@ -12,8 +12,8 @@ from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
 from emulator.pysr_emulator import PySREmulator
 from emulator.utils_cache.utils_key import get_key_for_cache_fit
-from emulator_with_search.search_dir.search_dir import SearchDir
-from emulator_with_search.search_dir.utils_search_dir import RANK_COLUMN_NAME
+from emulator_with_search.search_folder.search_folder import SearchFolder
+from emulator_with_search.search_folder.utils_search_folder import RANK_COLUMN_NAME
 from emulator_with_search.utils_attributes.utils_search_cv import get_search_cv_kwargs
 from emulator.utils_attributes.utils_threshold import get_param_grid_with_thresholds
 from emulator_with_search.utils_attributes.utils_validation import compute_ind_validation, get_cv, get_X_and_y
@@ -50,7 +50,7 @@ class PySREmulatorWithSearch(PySREmulator):
             Default is 10
     """
     ind_validation_: Optional[np.ndarray[bool]]
-    search_dir_: Optional[SearchDir]
+    search_folder_: Optional[SearchFolder]
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "custom", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
@@ -181,7 +181,7 @@ class PySREmulatorWithSearch(PySREmulator):
                  f"must be smaller than the minimum population_size (={min_population_size})")
         # Create attributes
         self.ind_validation_ = None
-        self.search_dir_ = None
+        self.search_folder_ = None
 
     def get_param_grid(self, param_list_to_optimize_around_default: list[str]) -> dict[str, Any]:
         assert isinstance(param_list_to_optimize_around_default, list)
@@ -211,8 +211,8 @@ class PySREmulatorWithSearch(PySREmulator):
         assert X.shape[0] == y.shape[0]
         assert isinstance(index_start_validation, int)
         # Compute a directory to save search results
-        self.search_dir_ = SearchDir.from_search_arguments(X, y, self.validation_size, self.feature_selection_name,
-                                                           self.select_k_features, self.search_cv_type, self.n_iter, self)
+        self.search_folder_ = SearchFolder.from_search_arguments(X, y, self.validation_size, self.feature_selection_name,
+                                                                 self.select_k_features, self.search_cv_type, self.n_iter, self)
         # Compute an array of boolean such that ind_validation[i] = True if the index 'i' is in the validation set
         self.ind_validation_ = compute_ind_validation(len(y), self.validation_size, index_start_validation)
         # Compute the attribute df_cv_results_ranked_, a Dataframe with the result of the hyperparameter search
@@ -221,8 +221,8 @@ class PySREmulatorWithSearch(PySREmulator):
         # Fit with the best setting of hyperparameter (best_params) on the train split
         # By default, we log with tensorboard the progress of this fit iteration by iteration
         assert self.logger_spec is None
-        self.set_params(**self.search_dir_.best_params)
-        self.logger_spec = self.search_dir_.get_logger_spec(log_interval=1 * self.populations)
+        self.set_params(**self.search_folder_.best_params)
+        self.logger_spec = self.search_folder_.get_logger_spec(log_interval=1 * self.populations)
         X_train_train, y_train_train = get_X_and_y(X, y, self.ind_validation_, validation_set=False)
         super().fit(X_train_train, y_train_train, variable_names=variable_names, X_units=X_units,
                     y_units=y_units, use_cache=False)
@@ -232,9 +232,9 @@ class PySREmulatorWithSearch(PySREmulator):
     def compute_df_cv_results_ranked(self, X, y, **params_fit) -> None:
         """Run hyperparameter search to obtain df_cv_results_ranked, and save search results to file"""
         # Compute search results only it has not yet been computed
-        if not op.exists(self.search_dir_.filepath_search_result):
+        if not op.exists(self.search_folder_.filepath_search_result):
             df_cv_results_ranked = self._compute_df_cv_results_ranked(X, y, **params_fit)
-            self.search_dir_.save_search_results(df_cv_results_ranked, self)
+            self.search_folder_.save_search_results(df_cv_results_ranked, self)
 
     def _compute_df_cv_results_ranked(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, **params_fit) -> pd.DataFrame:
         """Run 2 consecutive hyperparameter search (first self.search_cv_type, then a grid search for thresholds)

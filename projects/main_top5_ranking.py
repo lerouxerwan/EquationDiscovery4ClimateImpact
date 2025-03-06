@@ -4,7 +4,7 @@ import os.path as op
 import numpy as np
 import pandas as pd
 
-from emulator_with_search.search_dir.utils_search_dir import CSV_FILENAME, METRIC_COLUMN_NAME, JSON_FILENAME, \
+from emulator_with_search.search_folder.utils_search_folder import CSV_FILENAME, METRIC_COLUMN_NAME, JSON_FILENAME, \
     get_dataset_dir
 from utils.utils_dataset import load_dataset_dataframe
 from utils.utils_json_loader import JsonLoader

@@ -9,21 +9,21 @@ import pandas as pd
 from pysr import TensorBoardLoggerSpec
 from sklearn.base import BaseEstimator
 
-from emulator_with_search.search_dir.utils_search_dir import get_feature_dir, get_search_folder, CSV_FILENAME, \
-    JSON_FILENAME, get_non_default_params
+from emulator_with_search.search_folder.utils_search_folder import get_feature_dir, get_search_folder, CSV_FILENAME, \
+    JSON_FILENAME, get_non_default_params, METRIC_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
 
 @dataclass
-class SearchDir(object):
-    """Directory to save search results (df_cv_results_ranked_, non default params, tensorboard logs)"""
-    search_dir: str
+class SearchFolder(object):
+    """Folder to save search results (df_cv_results_ranked_, non default params, tensorboard logs)"""
+    search_folder_path: str
 
     def __post_init__(self):
         #  Create folder if needed
-        if not op.exists(self.search_dir):
-            os.makedirs(self.search_dir)
+        if not op.exists(self.search_folder_path):
+            os.makedirs(self.search_folder_path)
 
     @classmethod
     def from_search_arguments(cls, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, validation_size: float,
@@ -31,17 +31,18 @@ class SearchDir(object):
                               search_cv_type: type, n_iter: int, estimator: BaseEstimator):
         feature_dir = get_feature_dir(X, y, validation_size, feature_selection_name, select_k_features)
         search_folder = get_search_folder(search_cv_type, n_iter, get_non_default_params(estimator))
-        return cls(op.join(feature_dir, search_folder))
+        search_folder_path = op.join(feature_dir, search_folder)
+        return cls(search_folder_path)
 
     """Search cv results"""
 
     @property
     def filepath_search_result(self) -> str:
-        return op.join(self.search_dir, CSV_FILENAME)
+        return op.join(self.search_folder_path, CSV_FILENAME)
 
     @property
     def filepath_non_default_params(self) -> str:
-        return op.join(self.search_dir, JSON_FILENAME)
+        return op.join(self.search_folder_path, JSON_FILENAME)
 
 
     @property
@@ -52,8 +53,16 @@ class SearchDir(object):
         return df_cv_results_ranked
 
     @property
+    def best_series(self) -> pd.Series:
+        return self.df_cv_results_ranked.iloc[0]
+
+    @property
     def best_params(self) -> dict[str, Any]:
-        return self.df_cv_results_ranked.iloc[0].loc['params']
+        return self.best_series.loc['params']
+
+    @property
+    def best_rmse_validation(self) -> float:
+        return float(self.best_series.loc[METRIC_COLUMN_NAME])
 
     def save_search_results(self, df_cv_results_ranked: pd.DataFrame, estimator:BaseEstimator) -> None:
         log_info('Save search results to files')
@@ -68,7 +77,7 @@ class SearchDir(object):
 
     @property
     def log_dir(self) -> str:
-        return op.join(self.search_dir, 'logs')
+        return op.join(self.search_folder_path, 'logs')
 
     def get_logger_spec(self, log_interval: int = 1) -> Optional[TensorBoardLoggerSpec]:
         """Create a logger only if the log has not yet been saved"""
@@ -85,7 +94,7 @@ class SearchDir(object):
             if op.exists(filepath):
                 os.remove(filepath)
         # Remove folders
-        for folder in [self.log_dir, self.search_dir]:
+        for folder in [self.log_dir, self.search_folder_path]:
             if op.exists(folder):
                 os.rmdir(folder)
 
