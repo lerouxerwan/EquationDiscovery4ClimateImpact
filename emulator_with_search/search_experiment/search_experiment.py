@@ -8,9 +8,10 @@ import numpy as np
 import pandas as pd
 from pysr import TensorBoardLoggerSpec
 from sklearn.base import BaseEstimator
+from sympy import Expr
 
-from emulator_with_search.search_experiment.utils_search_experiment import get_emulator_folder, CSV_FILENAME, \
-    JSON_FILENAME, get_non_default_params, METRIC_COLUMN_NAME, get_dataset_dir
+from emulator_with_search.search_experiment.utils_search_experiment import CSV_FILENAME, \
+    JSON_FILENAME, get_non_default_params, METRIC_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -50,10 +51,14 @@ class SearchExperiment(object):
     @property
     def best_params(self) -> dict[str, Any]:
         return self.best_series.loc['params']
+    
+    @property
+    def best_expr(self) -> Expr:
+        return self.best_series.loc["selected_expr"]
 
     @property
     def best_rmse_validation(self) -> float:
-        return float(self.best_series.loc[METRIC_COLUMN_NAME])
+        return np.sqrt(-float(self.best_series.loc[METRIC_COLUMN_NAME]))
 
     def save_search_results(self, df_cv_results_ranked: pd.DataFrame, estimator:BaseEstimator) -> None:
         log_info('Save search results to files')

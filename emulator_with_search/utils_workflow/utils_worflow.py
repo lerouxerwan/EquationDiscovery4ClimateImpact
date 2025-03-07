@@ -3,7 +3,7 @@ from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearc
 from emulator_with_search.search_experiment.search_experiment import SearchExperiment
 from emulator_with_search.search_experiment.utils_search_experiment_with_best_score import get_best_search_experiment
 from emulator_with_search.utils_plots.plot_diagnosis_search import plot_diagnosis_search
-from utils.utils_dataset import load_dataset_dataframe
+from utils.utils_dataset import load_dataset
 
 
 def workflow(dataset_filename: str, search_path_to_start_from: str | bool = False, **params_emulator):
@@ -16,7 +16,7 @@ def workflow(dataset_filename: str, search_path_to_start_from: str | bool = Fals
     """
     # Load dataset
     (X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, rcp_name_train, rcp_name_test,
-     variable_names, target_label, ind_validation) = load_dataset_dataframe(dataset_filename)
+     variable_names, target_label, ind_validation) = load_dataset(dataset_filename)
     # Start optimization from a previous search experiment
     if search_path_to_start_from:
         assert isinstance(search_path_to_start_from, str)

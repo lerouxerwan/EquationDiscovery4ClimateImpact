@@ -12,7 +12,7 @@ from sympy import Expr
 
 from emulator.utils_attributes.utils_feature_selection import get_selection_mask
 from emulator.utils_attributes.utils_remove_duplicates import compute_duplicate_mask
-from emulator.utils_cache.utils_key import get_key_for_cache_duplicate_features, \
+from emulator.utils_cache.utils_key import get_key_for_cache_duplicate, \
     get_key_for_cache_fit
 from emulator.utils_metric.metric import Metric, metric_to_function
 from emulator_with_search.utils_attributes.utils_validation import apply_mask
@@ -173,7 +173,7 @@ class PySREmulator(PySRRegressor):
         # Compute and apply duplicate mask
         log_info(f'Number of features: {X.shape[1]}')
         if self.remove_duplicate_features:
-            key_duplicate = get_key_for_cache_duplicate_features(X, y, self.duplicate_feature_threshold)
+            key_duplicate = get_key_for_cache_duplicate(X, y, self.duplicate_feature_threshold)
             if key_duplicate in self.cache:
                 self.duplicate_mask_ = self.cache[key_duplicate].copy()
             else:

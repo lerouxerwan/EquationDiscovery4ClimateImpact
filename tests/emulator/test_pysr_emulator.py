@@ -1,9 +1,11 @@
+from typing import Any
+
 import numpy as np
 import pytest
 from sklearn.utils import check_random_state
 from sympy import Symbol
 
-from utils.utils_dataset import load_dataset_ndarray
+from utils.utils_dataset import load_dataset
 from emulator.utils_attributes.utils_feature_selection import get_selection_mask
 from emulator_with_search.utils_attributes.utils_validation import compute_ind_validation, get_X_and_y
 from tests.utils_tests_emulator import load_climate_impact_emulator_for_test, \
@@ -80,11 +82,11 @@ list_of_feature_selection_name_and_selected_features = [
     ('PySRDefault', ['Max_VEddyDiff_MAM', 'Mean_SSS_MAM', 'Mean_MLD_MAM', 'Max_MLD_DJF']),
 ]
 
-def get_X_y_variable_names():
+def get_X_y_variable_names() -> tuple[np.ndarray, np.ndarray, np.ndarray[str]]:
     filename = r"NPP_season.csv"
-    X, y, _, _, _, _, _, _, _, _, variable_names, _, ind_validation = load_dataset_ndarray(filename)
+    X, y, _, _, _, _, _, _, _, _, variable_names, _, ind_validation = load_dataset(filename)
     X_train_train, y_train_train = get_X_and_y(X, y, ind_validation, validation_set=False)
-    return X_train_train, y_train_train, variable_names
+    return X_train_train, y_train_train, np.array(variable_names)
 
 @pytest.mark.parametrize("feature_selection_name_and_selected_features", list_of_feature_selection_name_and_selected_features)
 def test_feature_selection(feature_selection_name_and_selected_features):
