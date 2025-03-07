@@ -1,12 +1,12 @@
 import os.path as op
-from typing import Optional, Any
+from typing import Any
 
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import RandomizedSearchCV
 
-from emulator.utils_cache.utils_key import get_X_sum_and_y_sum
+from emulator.utils_cache.utils_key import get_hash_str
 from utils.utils_path import SEARCH_CSV_PATH
 
 RANK_COLUMN_NAME = 'rank_test_MSE'
@@ -29,8 +29,7 @@ def get_search_path(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, 
 
 def get_dataset_dir(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, ind_validation: np.ndarray[bool]):
     """Directory, containing subdirectories with search results, for a dataset and a validation size"""
-    X_sum, y_sum = get_X_sum_and_y_sum(X, y)
-    dataset_folder = f'{round(X_sum, DIGITS)}_{round(y_sum, DIGITS)}_{round(ind_validation.sum(), DIGITS)}'
+    dataset_folder = get_hash_str(X, y, ind_validation)
     return op.join(SEARCH_CSV_PATH, dataset_folder)
 
 def get_emulator_folder(search_cv_type: type, n_iter: int, non_default_params: dict) -> str:

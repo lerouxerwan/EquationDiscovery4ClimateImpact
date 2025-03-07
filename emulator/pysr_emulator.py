@@ -1,6 +1,5 @@
 import copy
-from operator import itemgetter
-from typing import Literal, Callable, cast, Any
+from typing import Literal, Callable, cast
 
 import numpy as np
 import pandas as pd
@@ -11,14 +10,14 @@ from pysr.utils import ArrayLike
 from sklearn.utils.validation import _check_feature_names_in
 from sympy import Expr
 
-from emulator.utils_cache.utils_key import get_X_sum_and_y_sum, get_key_for_cache_duplicate_features, \
-    get_key_for_cache_fit
 from emulator.utils_attributes.utils_feature_selection import get_selection_mask
-from emulator_with_search.utils_attributes.utils_validation import apply_mask
+from emulator.utils_attributes.utils_remove_duplicates import compute_duplicate_mask
+from emulator.utils_cache.utils_key import get_key_for_cache_duplicate_features, \
+    get_key_for_cache_fit
 from emulator.utils_metric.metric import Metric, metric_to_function
+from emulator_with_search.utils_attributes.utils_validation import apply_mask
 from utils.utils_log import log_info
 from utils.utils_run import random_seed
-from emulator.utils_attributes.utils_remove_duplicates import compute_duplicate_mask
 
 
 class PySREmulator(PySRRegressor):
