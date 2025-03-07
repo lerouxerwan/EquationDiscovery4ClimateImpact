@@ -32,4 +32,4 @@ def workflow(dataset_filename: str, search_path_to_start_from: str | bool = Fals
     #  Generate diagnosis plot
     plot_diagnosis_fit(emulator, X_train, y_train, X_test, y_test, years_train, years_test, rcp_name_train,
                        rcp_name_test, ind_validation, target_label, False)
-    plot_diagnosis_search(emulator)
+    plot_diagnosis_search(emulator.search_experiment_, False)
