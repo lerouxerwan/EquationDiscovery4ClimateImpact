@@ -7,9 +7,8 @@ from utils.utils_latex import print_df_latex, plot_df_latex
 
 
 def main_plot_ranked_features():
-    (X_train, y_train, _, _, _, _, years_train, _, rcp_name_train, _, variable_names, _, nb_historical_years) = load_dataset_ndarray(filename_dataset_paper)
-    sorted_importance, sorted_names = compute_sorted_features(X_train, y_train, variable_names, nb_historical_years,
-                                                              select_k_features=10)
+    (X_train, y_train, _, _, _, _, years_train, _, rcp_name_train, _, variable_names, _, ind_validation) = load_dataset_ndarray(filename_dataset_paper)
+    sorted_importance, sorted_names = compute_sorted_features(X_train, y_train, variable_names, ind_validation, select_k_features=10)
 
     df_latex = pd.DataFrame(data={"Feature name": sorted_names, "Feature importance": sorted_importance},
                             index=[f'#{i + 1}' for i in range(len(sorted_names))])

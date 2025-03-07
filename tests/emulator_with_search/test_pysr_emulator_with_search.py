@@ -8,7 +8,7 @@ def test_one_hyperparameter():
     emulator = load_climate_impact_emulator_with_search_for_test(param_grid={'populations': [10, 20]},
                                                                  n_iter=2)
     run_three_main_functions_with_one_feature(emulator)
-    total_loss_expected = -32.906312030116666
-    total_loss_computed = float(emulator.search_folder_.df_cv_results_ranked['mean_train_MSE'].values.sum())
-    emulator.search_folder_.remove_folder()
+    total_loss_expected = -36.56920542113631
+    total_loss_computed = float(emulator.search_experiment_.df_cv_results_ranked['mean_train_MSE'].values.sum())
+    emulator.search_experiment_.remove_folder()
     np.testing.assert_almost_equal(total_loss_computed, total_loss_expected)

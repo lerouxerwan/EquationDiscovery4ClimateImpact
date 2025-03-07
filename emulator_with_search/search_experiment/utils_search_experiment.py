@@ -16,35 +16,28 @@ JSON_FILENAME = 'params_emulator.json'
 DIGITS = 1
 
 """
-The tree structure of the search folders is as follows: dataset_dir/feature_folder/search_folder where:
+The tree structure of the search_path is as follows: dataset_dir/emulator_folder where:
     -dataset_dir is a path that characterizes a dataset and a validation setting
-    -feature_folder is a folder that characterizes a feature_selection_method and some number of features
-    -search_folder is a folder that characterizes a hyperparameter search (search type, and non default hyperparameters)    
+    -emulator_folder characterizes a hyperparameter search (search type, and non default hyperparameters)    
 """
 
-def get_dataset_dir(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, validation_size: float):
+def get_search_path(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, ind_validation: np.ndarray[bool],
+                    search_cv_type: type, n_iter: int, non_default_params: dict) -> str:
+    feature_dir = get_dataset_dir(X, y, ind_validation)
+    emulator_folder = get_emulator_folder(search_cv_type, n_iter, non_default_params)
+    return op.join(feature_dir, emulator_folder)
+
+def get_dataset_dir(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, ind_validation: np.ndarray[bool]):
     """Directory, containing subdirectories with search results, for a dataset and a validation size"""
     X_sum, y_sum = get_X_sum_and_y_sum(X, y)
-    dataset_folder = f'{round(X_sum, DIGITS)}_{round(y_sum, DIGITS)}_{validation_size}'
+    dataset_folder = f'{round(X_sum, DIGITS)}_{round(y_sum, DIGITS)}_{round(ind_validation.sum(), DIGITS)}'
     return op.join(SEARCH_CSV_PATH, dataset_folder)
 
-def get_feature_dir(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, validation_size: float,
-                    feature_selection_name: str, select_k_features: Optional[int]) -> str:
-    """Directory, containing subdirectories with search results, for a feature selection and number of features"""
-    dataset_dir = get_dataset_dir(X, y, validation_size)
-    feature_folder = f'{feature_selection_name}_{select_k_features}'
-    return op.join(dataset_dir, feature_folder)
-
-def get_search_folder(search_cv_type: type, n_iter: int, non_default_params: dict) -> str:
+def get_emulator_folder(search_cv_type: type, n_iter: int, non_default_params: dict) -> str:
     """Folder, whose name characterize the search (search type, number of iterations, non default hyperparameters)"""
-    # Potentially remove feature selection and number of features from non default params
-    # because these two settings are already contained in the search_dir
-    for param_name in ['feature_selection_name', 'select_k_features']:
-        if param_name in non_default_params:
-            non_default_params.pop(param_name)
-    search_folder = f'{search_cv_type.__name__}_{n_iter if search_cv_type is RandomizedSearchCV else ""}'
-    search_folder += '_' + search_signature_signature(non_default_params)
-    return search_folder
+    folder = f'{search_cv_type.__name__}_{n_iter if search_cv_type is RandomizedSearchCV else ""}'
+    folder += '_' + search_signature_signature(non_default_params)
+    return folder
 
 def search_signature_signature(non_default_params: dict) -> str:
     # If param grid has been specified by the user, 'param_list_to_optimize_around_default' has its default value (None)

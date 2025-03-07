@@ -11,10 +11,8 @@ from tests.utils_tests_emulator import load_climate_impact_emulator_with_search_
 from utils.utils_run import random_seed
 
 
-def compute_sorted_features(X_train, y_train, variable_names, nb_historical_years, select_k_features):
+def compute_sorted_features(X_train, y_train, variable_names, ind_validation, select_k_features):
     #  Load a fast emulator
-    emulator = load_climate_impact_emulator_with_search_for_test(select_k_features=select_k_features, n_iter=1)
-    ind_validation = compute_ind_validation(len(y_train), emulator.validation_size, nb_historical_years)
     X_train_train, y_train_train = get_X_and_y(X_train, y_train, ind_validation, validation_set=False)
     if isinstance(X_train_train, pd.DataFrame):
         X_train_train, y_train_train = X_train_train.values, y_train_train.values
@@ -24,7 +22,7 @@ def compute_sorted_features(X_train, y_train, variable_names, nb_historical_year
 
     selection_mask, feature_importance = run_feature_selection_PySR_that_returns_feature_importance(X_train_train,
                                                                                                     y_train_train,
-                                                                                                    emulator.select_k_features,
+                                                                                                    select_k_features,
                                                                                                     random_state)
     selected_feature_importance = [float(i) for i in feature_importance[selection_mask]]
     selected_variable_names = np.array(variable_names)[selection_mask]

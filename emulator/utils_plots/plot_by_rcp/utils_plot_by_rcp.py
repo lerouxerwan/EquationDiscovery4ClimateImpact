@@ -11,7 +11,7 @@ from emulator.utils_plots.plot_by_split.utils_plot_by_split import set_default_y
 def load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train: np.ndarray | pd.Series,
                                                              y_test: Optional[np.ndarray | pd.Series] = None,
                                                              years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None, rcp_name_train: str='RCP85',
-                                                             rcp_name_test: Optional[str]=None, nb_historical_years: int = 0):
+                                                             rcp_name_test: Optional[str]=None, ind_validation:Optional[np.ndarray[bool]] = None):
     rcp_name_to_list_of_years_and_y_and_color = dict()
     # Some checks
     assert y_train.ndim == 1
@@ -23,6 +23,8 @@ def load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train: np.ndarray
             y_test = y_test.values
     # Set default for years_train and years_test if needed
     years_test, years_train = set_default_years(y_test, y_train, years_test, years_train)
+    # Set value of nb_historical_years
+    nb_historical_years = 0 if ind_validation is None else list(ind_validation).index(True) + 1
     # Add rcp_name_train
     rcp_name_to_list_of_years_and_y_and_color[rcp_name_train] = [
         (years_train[:nb_historical_years], y_train[:nb_historical_years], 'k', 'Historical'),

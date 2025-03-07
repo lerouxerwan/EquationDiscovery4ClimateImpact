@@ -82,8 +82,7 @@ list_of_feature_selection_name_and_selected_features = [
 
 def get_X_y_variable_names():
     filename = r"NPP_season.csv"
-    X, y, _, _, _, _, _, _, _, _, variable_names, _, nb_historical_years = load_dataset_ndarray(filename)
-    ind_validation = compute_ind_validation(len(y), 0.3, nb_historical_years)
+    X, y, _, _, _, _, _, _, _, _, variable_names, _, ind_validation = load_dataset_ndarray(filename)
     X_train_train, y_train_train = get_X_and_y(X, y, ind_validation, validation_set=False)
     return X_train_train, y_train_train, variable_names
 

@@ -1,9 +1,12 @@
 from operator import itemgetter
-from typing import Any
+from typing import Any, Iterable
 
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator
+
+def get_hash(l: list[Iterable]):
+    pass
 
 def get_key_for_cache_fit(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, params: dict[str, Any]) -> tuple:
     """Create a complex tuple that can be used as a key for a dictionary"""

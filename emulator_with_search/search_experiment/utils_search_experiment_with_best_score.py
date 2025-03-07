@@ -1,13 +1,21 @@
+from emulator_with_search.search_experiment.search_experiment import SearchExperiment
+
 import os
 import os.path as op
 
 import numpy as np
 import pandas as pd
 
-from emulator_with_search.search_folder.utils_search_folder import CSV_FILENAME, METRIC_COLUMN_NAME, JSON_FILENAME, \
+from emulator_with_search.search_experiment.utils_search_experiment import CSV_FILENAME, METRIC_COLUMN_NAME, JSON_FILENAME, \
     get_dataset_dir
 from utils.utils_dataset import load_dataset_dataframe
 from utils.utils_json_loader import JsonLoader
+
+def get_best_search_experiment(X, y, ind_validation) -> SearchExperiment:
+    pass
+
+
+
 
 
 def ranking(X, y, validation_size: float = 0.3):
@@ -18,8 +26,6 @@ def ranking(X, y, validation_size: float = 0.3):
             filepath_search_result = op.join(dataset_search_path, experiment_folder, param_folder, CSV_FILENAME)
             filepath_search_results.append(filepath_search_result)
     _ranking(filepath_search_results)
-
-
 
 def _ranking(filepath_search_results):
     df_list = []
@@ -46,9 +52,8 @@ def _ranking(filepath_search_results):
     json_filepath = df.iloc[0].loc['filepath_search_result'].replace(CSV_FILENAME, JSON_FILENAME)
     print(f'cat {json_filepath}')
 
-
 def main_ranking(filename):
-    X_train, y_train,  *_ = load_dataset_dataframe(filename)
+    X_train, y_train, *_ = load_dataset_dataframe(filename)
     ranking(X_train, y_train)
     # fast = False
     # select_k_features = 3 if fast else 5

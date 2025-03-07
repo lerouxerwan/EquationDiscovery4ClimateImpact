@@ -7,8 +7,8 @@ from projects.paper.utils_paper import filename_dataset_paper
 
 
 def main_time_series_ranked_features(select_k_features, show):
-    (X_train, y_train, X_test, y_test, X_units, _, years_train, years_test, rcp_name_train, rcp_name_test, variable_names, _, nb_historical_years) = load_dataset_ndarray(filename_dataset_paper)
-    sorted_importance, sorted_names = compute_sorted_features(X_train, y_train, variable_names, nb_historical_years,
+    (X_train, y_train, X_test, y_test, X_units, _, years_train, years_test, rcp_name_train, rcp_name_test, variable_names, _, ind_validation) = load_dataset_ndarray(filename_dataset_paper)
+    sorted_importance, sorted_names = compute_sorted_features(X_train, y_train, variable_names, ind_validation,
                                                               select_k_features)
 
     for i, column_name in enumerate(sorted_names, 1):
@@ -20,7 +20,7 @@ def main_time_series_ranked_features(select_k_features, show):
             unit = '-'
         label = f'{column_name.replace('_', ' ')} (${unit}$)'
         _plot_climato(feature_values_train, feature_values_test, years_train, years_test, rcp_name_train, rcp_name_test,
-                      nb_historical_years=nb_historical_years, target_label=label, show=show,
+                      nb_historical_years=ind_validation, target_label=label, show=show,
                       prefix=f'Feature#{i}')
 
 if __name__ == '__main__':
