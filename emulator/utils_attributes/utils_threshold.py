@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection._search import BaseSearchCV
 
-NB_THRESHOLDS = 20
+NB_THRESHOLDS = 100
 
 
 def get_threshold_values() -> list[float]:

@@ -209,7 +209,14 @@ class PySREmulator(PySRRegressor):
     def compute_loss(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, metric=Metric.MSE) -> list[float]:
         """Compute a loss function for every equation of the Pareto optimal set of equations"""
         loss_function = metric_to_function[metric]
-        return [loss_function(y_true=y, y_pred=y_predicted) for y_predicted in self.compute_y_predicted_list(X)]
+        loss = []
+        for y_predicted in self.compute_y_predicted_list(X):
+            try:
+                res = loss_function(y_true=y, y_pred=y_predicted)
+            except ValueError:
+                res = np.nan
+            loss.append(res)
+        return loss
 
     def compute_y_predicted_list(self, X: np.ndarray | pd.DataFrame) -> list[np.ndarray]:
         """Compute predicted vector for every equation of the Pareto front"""
