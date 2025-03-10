@@ -13,6 +13,8 @@ RANK_COLUMN_NAME = 'rank_test_MSE'
 METRIC_COLUMN_NAME = 'mean_test_MSE'
 CSV_FILENAME = 'cv_results.csv'
 JSON_FILENAME = 'params_emulator.json'
+CHILDREN_FILENAME = 'children.txt'
+PARENT_FILENAME = 'parent.txt'
 DIGITS = 1
 
 """

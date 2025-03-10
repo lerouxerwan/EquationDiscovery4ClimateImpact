@@ -12,7 +12,7 @@ from sklearn.base import BaseEstimator
 from sympy import Expr
 
 from emulator_with_search.search_experiment.utils_search_experiment import CSV_FILENAME, \
-    JSON_FILENAME, get_non_default_params, METRIC_COLUMN_NAME
+    JSON_FILENAME, get_non_default_params, METRIC_COLUMN_NAME, CHILDREN_FILENAME, PARENT_FILENAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -37,6 +37,13 @@ class SearchExperiment(object):
     def filepath_non_default_params(self) -> str:
         return op.join(self.search_path, JSON_FILENAME)
 
+    @property
+    def filepath_children(self) -> str:
+        return op.join(self.search_path, CHILDREN_FILENAME)
+
+    @property
+    def filepath_parent(self) -> str:
+        return op.join(self.search_path, PARENT_FILENAME)
 
     @property
     def df_cv_results_ranked_augmented(self) -> pd.DataFrame:
@@ -95,7 +102,8 @@ class SearchExperiment(object):
 
     def remove_folder(self):
         # Remove files
-        filepaths = [self.filepath_non_default_params, self.filepath_search_result]
+        filepaths = [self.filepath_non_default_params, self.filepath_search_result,
+                     self.filepath_children, self.filepath_parent]
         filepaths += [op.join(self.log_dir, f) for f in os.listdir(self.log_dir)]
         for filepath in filepaths:
             if op.exists(filepath):

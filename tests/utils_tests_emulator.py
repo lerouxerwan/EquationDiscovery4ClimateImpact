@@ -13,6 +13,11 @@ def load_climate_impact_emulator_with_search_for_test(**kwargs) -> PySREmulatorW
     return PySREmulatorWithSearch(niterations=1, **kwargs)
 
 
+def load_X_and_y_ind_validation_for_test(nb_features=1) -> tuple[np.ndarray, np.ndarray, np.ndarray[bool]]:
+    X, y = load_X_and_y_for_test(nb_features)
+    ind_validation = np.array([i < 30 for i, _ in enumerate(y)])
+    return X, y, ind_validation
+
 
 def load_X_and_y_for_test(nb_features=1) -> tuple[np.ndarray, np.ndarray]:
     n = 100
