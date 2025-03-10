@@ -36,11 +36,15 @@ def get_dataset_dir(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, 
 
 def get_emulator_folder(search_cv_type: type, n_iter: int, non_default_params: dict) -> str:
     """Folder, whose name characterize the search (search type, number of iterations, non default hyperparameters)"""
-    folder = f'{search_cv_type.__name__}_{n_iter if search_cv_type is RandomizedSearchCV else ""}'
+    folder = f'{search_cv_type.__name__}_{n_iter}'
     folder += '_' + search_signature_signature(non_default_params)
     return folder
 
 def search_signature_signature(non_default_params: dict) -> str:
+    keys_to_remove = ['search_cv_type', 'n_iter', 'threshold_for_model_selection']
+    for key_to_remove in keys_to_remove:
+        if key_to_remove in non_default_params:
+            non_default_params.pop(key_to_remove)
     # If param grid has been specified by the user, 'param_list_to_optimize' has its default value (None)
     param_grid_has_been_specified_by_user = 'param_list_to_optimize' not in non_default_params
     if not param_grid_has_been_specified_by_user:
@@ -92,4 +96,9 @@ def get_best_params(df_cv_results_ranked: pd.DataFrame) -> dict[str, Any]:
 def get_non_default_params(estimator: BaseEstimator) -> dict[str, Any]:
     """Return a dictionary that maps each the name of each non default parameter to its non default value"""
     default_params = type(estimator)().get_params()
-    return {k: v for k, v in estimator.get_params().items() if v != default_params[k]}
+    non_default_params = {}
+    for param_name, param_value in estimator.get_params().items():
+        default_value = default_params[param_name]
+        if param_value != default_value:
+            non_default_params[param_name] = param_value
+    return non_default_params

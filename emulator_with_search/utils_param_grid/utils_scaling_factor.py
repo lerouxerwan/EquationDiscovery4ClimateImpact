@@ -28,5 +28,6 @@ def get_param_grid(estimator: BaseEstimator, scaling_factor: float, search_cv_ty
         param_grid[key] = [min_value, max_value]
     # For grid search, hyperparameters are evenly spaced (on a log scale)
     if search_cv_type is GridSearchCV:
-        param_grid = {k: np.geomspace(min_value, max_value, n_iter) for k, (min_value, max_value) in param_grid.items()}
+        param_grid = {param_name: [float(v) for v in np.geomspace(min_value, max_value, n_iter)]
+                      for param_name, (min_value, max_value) in param_grid.items()}
     return param_grid
