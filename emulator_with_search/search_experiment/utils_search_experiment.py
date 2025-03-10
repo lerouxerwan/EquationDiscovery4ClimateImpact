@@ -39,8 +39,8 @@ def get_emulator_folder(search_cv_type: type, n_iter: int, non_default_params: d
     return folder
 
 def search_signature_signature(non_default_params: dict) -> str:
-    # If param grid has been specified by the user, 'param_list_to_optimize_around_default' has its default value (None)
-    param_grid_has_been_specified_by_user = 'param_list_to_optimize_around_default' not in non_default_params
+    # If param grid has been specified by the user, 'param_list_to_optimize' has its default value (None)
+    param_grid_has_been_specified_by_user = 'param_list_to_optimize' not in non_default_params
     if not param_grid_has_been_specified_by_user:
         # In this case, we can remove 'param_grid' from the signature, because it can be deduced from the other infos
         non_default_params.pop('param_grid')

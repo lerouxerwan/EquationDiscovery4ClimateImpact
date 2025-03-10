@@ -18,6 +18,7 @@ from emulator_with_search.search_experiment.utils_search_experiment import RANK_
 from emulator_with_search.utils_attributes.utils_search_cv import get_search_cv_kwargs
 from emulator.utils_attributes.utils_threshold import get_param_grid_with_thresholds
 from emulator_with_search.utils_attributes.utils_validation import get_cv, get_X_and_y
+from emulator_with_search.utils_search.utils_scaling_factor import get_param_grid
 from utils.utils_log import log_info
 from utils.utils_run import random_seed
 
@@ -42,10 +43,10 @@ class PySREmulatorWithSearch(PySREmulator):
             or a list of such dictionaries, in which case the grids spanned by each dictionary in the list are explored.
             This enables searching over any sequence of hyperparameter settings.
             Default is None, this default is replaced by an empty dictionary in the __init__ method
-        param_list_to_optimize_around_default: list[str]
-            List of hyperparameter names that are optimized by random search around default
+        param_list_to_optimize: list[str]
+            List of hyperparameter names that are optimized, i.e. specified inside the param_grid
             If param_grid is specified, i.e. different from None, then this list is not accounted for
-            Default is None, this default is replaced by a list of 3 defaults hyperparameters that are optimized
+            Default is None, which leads to optimizing only the hyperparameter "niterations"
         scaling_factor: int
             Scaling factor to optimize around default.
             Hyperparameter are sampled in [default_value / scaling_factor, default * scaling_factor]
@@ -106,7 +107,7 @@ class PySREmulatorWithSearch(PySREmulator):
                  search_cv_type: type = RandomizedSearchCV,
                  n_iter: int = 10,
                  param_grid: dict[str, list] | list[dict[str, list]] = None,
-                 param_list_to_optimize_around_default: Optional[list[str]] = None,
+                 param_list_to_optimize: Optional[list[str]] = None,
                  scaling_factor: int = 10,
                  **kwargs):
         super().__init__(model_selection, binary_operators=binary_operators, unary_operators=unary_operators,
@@ -157,7 +158,7 @@ class PySREmulatorWithSearch(PySREmulator):
         self.search_cv_type = search_cv_type
         self.n_iter = n_iter
         self.param_grid = dict() if param_grid is None else param_grid
-        self.param_list_to_optimize_around_default = param_list_to_optimize_around_default
+        self.param_list_to_optimize = param_list_to_optimize
             # Hyperparameters that could be added: 'populations', 'population_size' (but can lead to long computation)
         self.scaling_factor = scaling_factor
         # Some checks
@@ -165,16 +166,10 @@ class PySREmulatorWithSearch(PySREmulator):
         assert issubclass(self.search_cv_type, BaseSearchCV)
         assert isinstance(self.n_iter, int) and self.n_iter > 0
         assert isinstance(self.param_grid, (dict, list))
-        # Set param grid using a param_list_to_optimize_around_default if it has not been specified by the user
-        # Hyperparameters in the list should be sampled between [default_value / scaling_factor, default * scaling_factor]
+        #  Set param grid using param_list_to_optimize if param_grid has not been specified by the user
         if not self.param_grid:
-            if self.param_list_to_optimize_around_default is not None:
-                # Either the param_list_to_optimize_around_default has been specified by the user
-                self.param_grid = self.get_param_grid(self.param_list_to_optimize_around_default)
-            else:
-                # Or by default we consider a list with 3 hyperparameters
-                default_param_list = ['niterations', 'adaptive_parsimony_scaling', 'fraction_replaced_hof']
-                self.param_grid = self.get_param_grid(default_param_list)
+            self.param_grid = get_param_grid(self, self.scaling_factor, self.search_cv_type, self.n_iter,
+                                             self.param_list_to_optimize)
         # Some checks
         if 'population_size' in self.param_grid:
             min_population_size = min(self.param_grid['population_size'])
@@ -184,19 +179,6 @@ class PySREmulatorWithSearch(PySREmulator):
         # Create attributes
         self.ind_validation_ = None
         self.search_experiment_ = None
-
-    def get_param_grid(self, param_list_to_optimize_around_default: list[str]) -> dict[str, Any]:
-        assert isinstance(param_list_to_optimize_around_default, list)
-        param_grid = dict()
-        for key in param_list_to_optimize_around_default:
-            default_value = self.__getattribute__(key)
-            min_value = default_value if self.scaling_factor == 0 else default_value / self.scaling_factor
-            max_value = default_value if self.scaling_factor == 0 else default_value * self.scaling_factor
-            if isinstance(default_value, int):
-                min_value = math.ceil(min_value)
-            param_grid[key] = [min_value, max_value]
-        return param_grid
-
 
     def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, variable_names: ArrayLike[str] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
