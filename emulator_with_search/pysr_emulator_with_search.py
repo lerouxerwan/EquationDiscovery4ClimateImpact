@@ -11,6 +11,7 @@ from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
 from emulator.pysr_emulator import PySREmulator
 from emulator.utils_cache.utils_key import get_key_for_cache_fit
+from emulator_with_search.utils_param_grid.utils_search_style import search_style_to_search_cv_type
 from emulator_with_search.utils_search_experiment.search_experiment import SearchExperiment
 from emulator_with_search.utils_search_experiment.utils_search_path import RANK_COLUMN_NAME, get_search_path, \
     get_non_default_params
@@ -31,9 +32,9 @@ class PySREmulatorWithSearch(PySREmulator):
         validation_size: float
             represent the proportion (between 0 and 1) of data to include in the validation split.
             Default is 0.3
-        search_cv_type: type
-            Class for hyperparameter search with a single validation
-            Default is RandomSearchCV
+        search_style: str
+            Style for hyperparameter search with a single validation, Possibilities include 'random' and 'grid' 
+            Default is None, which will be replaced by 'random'
         n_iter: int
             Number of parameter settings sampled for RandomSearchCV, which trades off runtime vs quality of the solution
             Default is 10
@@ -103,7 +104,7 @@ class PySREmulatorWithSearch(PySREmulator):
                  duplicate_feature_threshold: float = 0.9,
                  # Additional parameters
                  validation_size: float = 0.3,
-                 search_cv_type: type = RandomizedSearchCV,
+                 search_style: Optional[str] = None,
                  n_iter: int = 10,
                  param_grid: dict[str, list] | list[dict[str, list]] = None,
                  param_list_to_optimize: Optional[list[str]] = None,
@@ -154,7 +155,7 @@ class PySREmulatorWithSearch(PySREmulator):
                          remove_duplicate_features=remove_duplicate_features, duplicate_feature_threshold=duplicate_feature_threshold,
                          **kwargs)
         self.validation_size = validation_size
-        self.search_cv_type = search_cv_type
+        self.search_style = 'random' if search_style is None else search_style
         self.n_iter = n_iter
         self.param_grid = dict() if param_grid is None else param_grid
         self.param_list_to_optimize = param_list_to_optimize
@@ -162,12 +163,12 @@ class PySREmulatorWithSearch(PySREmulator):
         self.scaling_factor = scaling_factor
         # Some checks
         assert isinstance(self.validation_size, float) and (0 < self.validation_size < 1)
-        assert issubclass(self.search_cv_type, BaseSearchCV)
+        assert isinstance(self.search_style, str)
         assert isinstance(self.n_iter, int) and self.n_iter > 0
         assert isinstance(self.param_grid, (dict, list))
         #  Set param grid using param_list_to_optimize if param_grid has not been specified by the user
         if not self.param_grid:
-            self.param_grid = get_param_grid(self, self.scaling_factor, self.search_cv_type, self.n_iter,
+            self.param_grid = get_param_grid(self, self.scaling_factor, self.search_style, self.n_iter, 
                                              self.param_list_to_optimize)
         # Some checks
         if 'population_size' in self.param_grid:
@@ -202,7 +203,7 @@ class PySREmulatorWithSearch(PySREmulator):
         self.ind_validation_ =  ind_validation
         # Compute a directory to save search results
         non_default_params = get_non_default_params(self)
-        search_path = get_search_path(X, y, self.ind_validation_, self.search_cv_type, self.n_iter, non_default_params)
+        search_path = get_search_path(X, y, self.ind_validation_, self.search_style, self.n_iter, non_default_params)
         self.search_experiment_ = SearchExperiment(search_path)
         # Compute the attribute df_cv_results_ranked_, a Dataframe with the result of the hyperparameter search
         self.compute_df_cv_results_ranked(X, y, variable_names=variable_names,
@@ -226,12 +227,13 @@ class PySREmulatorWithSearch(PySREmulator):
             self.search_experiment_.save_search_results(df_cv_results_ranked, self)
 
     def _compute_df_cv_results_ranked(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, **params_fit) -> pd.DataFrame:
-        """Run 2 consecutive hyperparameter search (first self.search_cv_type, then a grid search for thresholds)
+        """Run 2 consecutive hyperparameter search (first search with search_style, then a grid search for thresholds)
         and save the ranked results in the attribute df_cv_results_ranked"""
         log_info('Compute search results')
         #  Run hyperparameter search with respect to self.param_grid
         log_info('Start first hyperparameter search')
-        search_cv = self.run_search_cv(self.search_cv_type, X, y, self.param_grid, **params_fit)
+        search_cv_type = search_style_to_search_cv_type[self.search_style]
+        search_cv = self.run_search_cv(search_cv_type, X, y, self.param_grid, **params_fit)
         assert len(self.cache) > 0
         # Run a grid search that extends the first hyperparameter search with a list of thresholds to try.
         # This additional grid search for the threshold cost almost nothing because fit results have been cached

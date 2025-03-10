@@ -1,5 +1,3 @@
-from sklearn.model_selection import GridSearchCV
-
 from projects.optimization.utils_worflow import workflow
 from projects.paper.utils_paper import filename_dataset_paper
 
@@ -10,7 +8,7 @@ def main_workflow_child():
     params_emulator_child = {
         "n_iter": 10,
         "scaling_factor": 10,
-        "search_cv_type": GridSearchCV,
+        "search_style": "grid",
     }
     workflow(filename_dataset_paper, search_path_to_start_from, **params_emulator_child)
 

@@ -24,9 +24,9 @@ The tree structure of the search_path is as follows: dataset_dir/emulator_folder
 """
 
 def get_search_path(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, ind_validation: np.ndarray[bool],
-                    search_cv_type: type, n_iter: int, non_default_params: dict) -> str:
+                    search_style: str, n_iter: int, non_default_params: dict) -> str:
     feature_dir = get_dataset_dir(X, y, ind_validation)
-    emulator_folder = get_emulator_folder(search_cv_type, n_iter, non_default_params)
+    emulator_folder = get_emulator_folder(search_style, n_iter, non_default_params)
     return op.join(feature_dir, emulator_folder)
 
 def get_dataset_dir(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, ind_validation: np.ndarray[bool]):
@@ -34,14 +34,14 @@ def get_dataset_dir(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, 
     dataset_folder = get_hash_str(X, y, ind_validation)
     return op.join(SEARCH_CSV_PATH, dataset_folder)
 
-def get_emulator_folder(search_cv_type: type, n_iter: int, non_default_params: dict) -> str:
+def get_emulator_folder(search_style: str, n_iter: int, non_default_params: dict) -> str:
     """Folder, whose name characterize the search (search type, number of iterations, non default hyperparameters)"""
-    folder = f'{search_cv_type.__name__}_{n_iter}'
+    folder = f'{search_style}_{n_iter}'
     folder += '_' + search_signature_signature(non_default_params)
     return folder
 
 def search_signature_signature(non_default_params: dict) -> str:
-    keys_to_remove = ['search_cv_type', 'n_iter', 'threshold_for_model_selection']
+    keys_to_remove = ['search_style', 'n_iter', 'threshold_for_model_selection']
     for key_to_remove in keys_to_remove:
         if key_to_remove in non_default_params:
             non_default_params.pop(key_to_remove)

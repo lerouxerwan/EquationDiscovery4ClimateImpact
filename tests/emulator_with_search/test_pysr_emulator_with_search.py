@@ -21,7 +21,7 @@ def test_one_hyperparameter():
 
 def test_scaling_factor_for_grid_search():
     scaling_factor = 2
-    search_cv = GridSearchCV
+    search_cv = 'grid'
     n_iter = 5
     # get_grid_search without specifying 'param_list_to_optimize'
     emulator = PySREmulatorWithSearch(niterations=10)
