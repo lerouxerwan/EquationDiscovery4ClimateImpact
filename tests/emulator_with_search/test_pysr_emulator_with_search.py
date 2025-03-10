@@ -2,8 +2,8 @@ import numpy as np
 from sklearn.model_selection import GridSearchCV
 
 from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
-from emulator_with_search.utils_search.utils_scaling_factor import get_param_grid
-from emulator_with_search.utils_workflow.utils_search_experiment_tree import add_heredity, \
+from emulator_with_search.utils_param_grid.utils_scaling_factor import get_param_grid
+from emulator_with_search.utils_search_experiment.utils_heredity_tree import add_heredity_link, \
     get_children, get_parent
 from tests.utils_tests_emulator import load_climate_impact_emulator_with_search_for_test, \
     run_three_main_functions_with_one_feature, load_X_and_y_ind_validation_for_test
@@ -54,7 +54,7 @@ def test_search_experiment_tree():
     emulator_child = PySREmulatorWithSearch(**params_emulator_child)
     emulator_child.fit(X, y, ind_validation=ind_validation)
     # Add heredity link (create parent and children files)
-    add_heredity(emulator_child.search_experiment_, emulator_parent.search_experiment_)
+    add_heredity_link(emulator_child.search_experiment_, emulator_parent.search_experiment_)
     # Test get functions for parent
     assert get_parent(emulator_parent.search_experiment_) is None
     assert get_parent(emulator_child.search_experiment_).search_path == emulator_parent.search_experiment_.search_path

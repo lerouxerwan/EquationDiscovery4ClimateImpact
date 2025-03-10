@@ -1,9 +1,9 @@
 from emulator.utils_plots.utils_plots import plot_diagnosis_fit
 from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
-from emulator_with_search.search_experiment.search_experiment import SearchExperiment
-from emulator_with_search.search_experiment.utils_search_experiment_with_best_score import get_best_search_experiment
+from emulator_with_search.utils_search_experiment.search_experiment import SearchExperiment
+from emulator_with_search.utils_search_experiment.utils_best_score import get_best_search_experiment
 from emulator_with_search.utils_plots.plot_diagnosis_search import plot_diagnosis_search
-from emulator_with_search.utils_workflow.utils_search_experiment_tree import add_heredity
+from emulator_with_search.utils_search_experiment.utils_heredity_tree import add_heredity_link
 from utils.utils_dataset import load_dataset
 
 
@@ -36,5 +36,5 @@ def workflow(dataset_filename: str, search_path_to_start_from: str | bool = Fals
     plot_diagnosis_search(emulator.search_experiment_, False)
     # Add a child/parent link if 'search_path_to_start_from' was used
     if search_path_to_start_from:
-        add_heredity(emulator.search_experiment_, search_experiment)
+        add_heredity_link(emulator.search_experiment_, search_experiment)
 

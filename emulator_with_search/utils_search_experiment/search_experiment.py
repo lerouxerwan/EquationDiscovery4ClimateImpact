@@ -11,7 +11,7 @@ from pysr import TensorBoardLoggerSpec
 from sklearn.base import BaseEstimator
 from sympy import Expr
 
-from emulator_with_search.search_experiment.utils_search_experiment import CSV_FILENAME, \
+from emulator_with_search.utils_search_experiment.utils_search_path import CSV_FILENAME, \
     JSON_FILENAME, get_non_default_params, METRIC_COLUMN_NAME, CHILDREN_FILENAME, PARENT_FILENAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info

@@ -1,11 +1,11 @@
 from typing import Optional
 
-from emulator_with_search.search_experiment.search_experiment import SearchExperiment
+from emulator_with_search.utils_search_experiment.search_experiment import SearchExperiment
 import os.path as op
 
 """Write text files"""
 
-def add_heredity(search_experiment_child: SearchExperiment, search_experiment_parent: SearchExperiment) -> None:
+def add_heredity_link(search_experiment_child: SearchExperiment, search_experiment_parent: SearchExperiment) -> None:
     """Create files that create some heredity link between the child and the parent"""
     # For the parent, we add the search_path of the children to a list of children (in a text file)
     filepath = search_experiment_parent.filepath_children

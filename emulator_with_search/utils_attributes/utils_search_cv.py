@@ -2,7 +2,7 @@ from typing import Optional
 
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 
-from emulator_with_search.utils_search.utils_params_distribution import get_param_distributions
+from emulator_with_search.utils_param_grid.utils_params_distribution import get_param_distributions
 from utils.utils_run import random_seed
 
 

@@ -3,8 +3,8 @@ import os.path as op
 
 import numpy as np
 
-from emulator_with_search.search_experiment.search_experiment import SearchExperiment
-from emulator_with_search.search_experiment.utils_search_experiment import get_dataset_dir
+from emulator_with_search.utils_search_experiment.search_experiment import SearchExperiment
+from emulator_with_search.utils_search_experiment.utils_search_path import get_dataset_dir
 
 
 def get_best_search_experiment(X: np.ndarray, y: np.ndarray, ind_validation: np.ndarray[bool]) -> SearchExperiment:

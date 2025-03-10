@@ -1,4 +1,4 @@
-from emulator_with_search.utils_workflow.utils_worflow import workflow
+from projects.optimization.utils_worflow import workflow
 from projects.paper.utils_paper import filename_dataset_paper
 
 

@@ -1,5 +1,4 @@
-from emulator_with_search.search_experiment.utils_search_experiment_with_best_score import get_best_search_experiment, \
-    get_best_search_experiments
+from emulator_with_search.utils_search_experiment.utils_best_score import get_best_search_experiments
 from projects.paper.utils_paper import filename_dataset_paper
 from utils.utils_dataset import load_dataset
 
