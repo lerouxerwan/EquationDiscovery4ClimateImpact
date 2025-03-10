@@ -87,6 +87,9 @@ class SearchExperiment(object):
         return combinations_of_param_names_in_param_grid
 
 
+    def __str__(self):
+        return f' RMSE Validation={round(self.best_rmse_validation, 3)} with {self.best_expr} for {self.best_params}'
+
     """Tensorboard Logging"""
 
     @property

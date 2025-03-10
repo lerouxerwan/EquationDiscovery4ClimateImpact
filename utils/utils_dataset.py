@@ -1,3 +1,4 @@
+import math
 import os.path as op
 from typing import Optional
 
@@ -5,7 +6,6 @@ import numpy as np
 import pandas as pd
 from pysr.utils import ArrayLike
 
-from emulator_with_search.utils_attributes.utils_validation import compute_ind_validation
 from utils.utils_path import DATASET_CSV_PATH
 
 
@@ -59,6 +59,22 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, Optional[np.ndar
     ind_validation = compute_ind_validation(len(y_train), validation_size, load_nb_historical_values(df))
     return (X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, rcp_name_train, rcp_name_test,
             variable_names, target_label, ind_validation)
+
+def compute_ind_validation(length: int, validation_size: float, index_start_validation: int) -> np.ndarray[bool]:
+    """Compute an array of boolean such that ind_validation[i] = True if the index 'i' is in the validation set
+    Parameters:
+        length: int, length of the full time series
+        validation_size: float, proportion (between 0 and 1) of data to include in the validation split
+        index_start_validation: int, first index for the validation set
+    Returns:
+        ind_validation: np.ndarray[bool], ind_validation[i] = True if the index 'i' is in the validation set"""
+    validation_length = math.ceil(length * validation_size)
+    ind_validation = np.zeros(length).astype(bool)
+    index_end_validation = validation_length + index_start_validation
+    assert (0 <= index_start_validation) and (index_end_validation <= length)
+    ind_validation[index_start_validation:index_end_validation] = True
+    return ind_validation
+
 
 
 def load_nb_historical_values(df: pd.DataFrame) -> int:
