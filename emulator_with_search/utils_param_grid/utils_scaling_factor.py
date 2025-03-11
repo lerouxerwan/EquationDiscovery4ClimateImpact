@@ -26,9 +26,11 @@ def get_param_grid(estimator: BaseEstimator, scaling_factor: float, search_style
         max_value = value if scaling_factor == 0 else value * scaling_factor
         if isinstance(value, int):
             min_value = math.ceil(min_value)
+            max_value = math.ceil(max_value)
         param_grid[key] = [min_value, max_value]
     # For grid search, hyperparameters are evenly spaced (on a log scale)
     if search_style == 'grid':
-        param_grid = {param_name: [float(v) for v in np.geomspace(min_value, max_value, n_iter)]
+        param_grid = {param_name: [math.ceil(v) if isinstance(min_value, int) else float(v)
+                                   for v in np.geomspace(min_value, max_value, n_iter)]
                       for param_name, (min_value, max_value) in param_grid.items()}
     return param_grid

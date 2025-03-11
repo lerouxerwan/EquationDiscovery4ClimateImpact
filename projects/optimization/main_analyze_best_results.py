@@ -12,11 +12,12 @@ def main_analyze_best_results(nb_top_experiments: int = 5):
      variable_names, target_label, ind_validation) = load_dataset(filename_dataset_paper)
     #  Get best search experiments
     search_experiments = get_best_search_experiments(X_train, y_train, ind_validation, nb_top_experiments)
+    print('Ranking of the best search experiments:')
     for rank, search_experiment in list(enumerate(search_experiments, 1))[::-1]:
         print(f'Rank #{rank} {search_experiment}')
     # Focus on the best search experiment
     best_search_experiment = search_experiments[0]
-    print('History to obtain the best search experiment:')
+    print('\nHistory to obtain the best search experiment:')
     for j, search_experiment in enumerate(get_search_history(best_search_experiment), 1):
         print(f'Step #{j} {search_experiment}')
     print('Json file for the best search experiment:', best_search_experiment.filepath_non_default_params)

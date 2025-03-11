@@ -47,7 +47,7 @@ class SearchExperiment(object):
 
     @property
     def df_cv_results_ranked_augmented(self) -> pd.DataFrame:
-        log_info(f'Load search results from file: {self.filepath_search_result}')
+        # log_info(f'Load search results from file: {self.filepath_search_result}')
         df_cv_results_ranked = pd.read_csv(self.filepath_search_result, index_col=0)
         df_cv_results_ranked['params'] = df_cv_results_ranked['params'].apply(string_to_dict)
         df_cv_results_ranked['RMSE_validation'] = df_cv_results_ranked[METRIC_COLUMN_NAME].apply(lambda x: np.sqrt(-x))
