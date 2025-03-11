@@ -1,3 +1,5 @@
+from collections import Counter
+
 import numpy as np
 import pytest
 from sklearn.utils import check_random_state
@@ -5,6 +7,7 @@ from sympy import Symbol
 
 from emulator.utils_attributes.utils_data_augmentation import apply_data_augmentation
 from emulator.utils_attributes.utils_feature_selection import get_selection_mask
+from emulator.utils_attributes.utils_weighted_loss import get_weights
 from emulator_with_search.utils_attributes.utils_validation import get_X_and_y
 from tests.utils_tests_emulator import load_climate_impact_emulator_for_test, \
     run_three_main_functions_with_one_feature, load_X_and_y_for_test, run_three_main_functions
@@ -118,5 +121,24 @@ def test_data_augmentation(data_augmentation_ratio: int):
     # data augmentation of y should only contain copies of y (no noise)
     assert y[0] == y_augmented[0]
     assert y[-1] == y_augmented[-1]
+
+@pytest.mark.parametrize("weighted_loss_ratio", [2, 10])
+def test_weighted_loss(weighted_loss_ratio):
+    X, y = load_X_and_y_for_test()
+    weights = get_weights(y, weighted_loss_ratio)
+    assert all([1. <= weight <= weighted_loss_ratio for weight in weights])
+    # Largest weights
+    assert weights[np.argmax(y)] == weighted_loss_ratio
+    assert weights[np.argmin(y)] == weighted_loss_ratio
+    # Smallest weight
+    assert 1 <= Counter(list(weights))[1.0] <= 2
+
+def test_weighted_loss_special_case():
+    weighted_loss_ratio = 3
+    assert [int(v) for v in get_weights(np.array([-2, -1, 0, 1, 2]), weighted_loss_ratio)] == [3, 2, 1, 2, 3]
+    assert [int(v) for v in get_weights(np.array([0, -1, 2, 1, -2]), weighted_loss_ratio)] == [1, 2, 3, 2, 3]
+    weighted_loss_ratio = 2
+    assert [int(v) for v in get_weights(np.array([10, 11, 12, 13]), weighted_loss_ratio)] == [2, 1, 1, 2]
+    assert [int(v) for v in get_weights(np.array([13, 10, 11, 12]), weighted_loss_ratio)] == [2, 2, 1, 1]
 
 

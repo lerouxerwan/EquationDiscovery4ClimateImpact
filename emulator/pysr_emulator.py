@@ -13,6 +13,7 @@ from sympy import Expr
 from emulator.utils_attributes.utils_data_augmentation import apply_data_augmentation
 from emulator.utils_attributes.utils_feature_selection import get_selection_mask
 from emulator.utils_attributes.utils_remove_duplicates import compute_duplicate_mask
+from emulator.utils_attributes.utils_weighted_loss import get_weights
 from emulator.utils_cache.utils_key import get_key_for_cache_duplicate, \
     get_key_for_cache_fit
 from emulator.utils_metric.metric import Metric, metric_to_function
@@ -45,6 +46,9 @@ class PySREmulator(PySRRegressor):
         data_augmentation_sigma: float
             Sigma for the noise to create new data by data augmentation
             Default is 1.
+        weighted_loss_ratio: float
+            Ratio between the largest weight (for most extreme values) and the smallest weight 1.0 (for middle values)
+            Default is 1., which means that weights are not considered
     with some modification on the default value:
         -dimensional_constraint_penalty equals is set by default to 10**8 (ensures dimension constraint are enforced)
     with a novel class attribute:
@@ -104,6 +108,7 @@ class PySREmulator(PySRRegressor):
                  duplicate_feature_threshold: float = 0.9,
                  data_augmentation_ratio: int = 1,
                  data_augmentation_sigma: float = 1.0,
+                 weighted_loss_ratio: float = 1.0,
                  **kwargs):
         # Some default attributes of PySRRegressor are modified
         # Verbosity is removed
@@ -161,6 +166,7 @@ class PySREmulator(PySRRegressor):
         self.duplicate_feature_threshold = duplicate_feature_threshold
         self.data_augmentation_ratio = data_augmentation_ratio
         self.data_augmentation_sigma = data_augmentation_sigma
+        self.weighted_loss_ratio = weighted_loss_ratio
         assert isinstance(self.threshold_for_model_selection, float)
         assert self.threshold_for_model_selection >= 1.
         assert isinstance(self.feature_selection_name, str)
@@ -168,6 +174,8 @@ class PySREmulator(PySRRegressor):
         assert isinstance(self.duplicate_feature_threshold, float)
         assert isinstance(self.data_augmentation_ratio, int)
         assert isinstance(self.data_augmentation_sigma, float)
+        assert isinstance(self.weighted_loss_ratio, float)
+        assert self.weighted_loss_ratio >= 1.
         assert 0 < self.duplicate_feature_threshold <= 1.
         # Change default dimensional_constraint_penalty
         if self.dimensional_constraint_penalty is None:
@@ -202,6 +210,8 @@ class PySREmulator(PySRRegressor):
         # Apply data augmentation
         if self.data_augmentation_ratio > 1:
             X, y = apply_data_augmentation(X, y, self.data_augmentation_ratio, self.data_augmentation_sigma)
+        # Compute weights
+        weights = get_weights(y, self.weighted_loss_ratio) if self.weighted_loss_ratio > 1. else None
         # Fit using cache or without using it
         if use_cache:
             if key in self.cache:
@@ -209,7 +219,7 @@ class PySREmulator(PySRRegressor):
                 (self.equations_, self.nout_, self.selection_mask_, self.julia_state_stream_,
                  self.julia_options_stream_, self.X_units_, self.y_units_, self.feature_names_in_) = self.cache[key]
             else:
-                super().fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
+                super().fit(X, y, weights=weights, variable_names=variable_names, X_units=X_units, y_units=y_units)
                 attributes = (self.equations_.copy(), self.nout_, self.selection_mask_, self.julia_state_stream_.copy(),
                               self.julia_options_stream_.copy(), self.X_units_, self.y_units_, self.feature_names_in_.copy())
                 log_info('Save to cache')

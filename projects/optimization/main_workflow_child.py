@@ -9,8 +9,7 @@ def main_workflow_child():
         # "n_iter": 10,
         # "scaling_factor": 2,
         "search_style": "grid",
-        "data_augmentation_ratio": 2,
-        "param_grid": {"data_augmentation_sigma": [0.5, 1.0, 2.0]}
+        "param_grid": {"weighted_loss_ratio": [1.0, 2.0, 3.0]}
     }
     workflow(filename_dataset_paper, search_path_to_start_from, **params_emulator_child)
 
