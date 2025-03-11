@@ -3,6 +3,7 @@ import pytest
 from sklearn.utils import check_random_state
 from sympy import Symbol
 
+from emulator.utils_attributes.utils_data_augmentation import apply_data_augmentation
 from emulator.utils_attributes.utils_feature_selection import get_selection_mask
 from emulator_with_search.utils_attributes.utils_validation import get_X_and_y
 from tests.utils_tests_emulator import load_climate_impact_emulator_for_test, \
@@ -104,5 +105,18 @@ def test_remove_duplicate_feature():
     X_train_train, y_train_train, _ = get_X_y_variable_names()
     run_three_main_functions(emulator, X_train_train, y_train_train)
     assert int(emulator.duplicate_mask_.sum()) == 141
+
+@pytest.mark.parametrize("data_augmentation_ratio", [2, 3])
+def test_data_augmentation(data_augmentation_ratio: int):
+    X, y = load_X_and_y_for_test()
+    X_augmented, y_augmented = apply_data_augmentation(X, y, data_augmentation_ratio, data_augmentation_sigma=1.0)
+    assert len(X_augmented) == data_augmentation_ratio * len(X)
+    assert len(y_augmented) == data_augmentation_ratio * len(y)
+    # data augmentation of X (with added noise) must be located in the end
+    assert X[0] == X_augmented[0]
+    assert X[-1] != X_augmented[-1]
+    # data augmentation of y should only contain copies of y (no noise)
+    assert y[0] == y_augmented[0]
+    assert y[-1] == y_augmented[-1]
 
 

@@ -5,8 +5,9 @@ from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearc
 from emulator_with_search.utils_param_grid.utils_scaling_factor import get_param_grid
 from emulator_with_search.utils_search_experiment.utils_heredity_tree import add_heredity_link, \
     get_children, get_parent
+from tests.utils_tests_dataset import load_X_and_y_ind_validation_for_test
 from tests.utils_tests_emulator import load_climate_impact_emulator_with_search_for_test, \
-    run_three_main_functions_with_one_feature, load_X_and_y_ind_validation_for_test
+    run_three_main_functions_with_one_feature
 
 
 def test_one_hyperparameter():

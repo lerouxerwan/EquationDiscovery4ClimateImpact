@@ -6,13 +6,13 @@ def main_workflow_child():
     # search_path_to_start_from = 'best'
     search_path_to_start_from = '/home/e23lerou/Documents/EquationDiscovery4ClimateImpact/data/search/6624636351014803864/random_1_nit100_100_sca0'
     params_emulator_child = {
-        "n_iter": 10,
-        "scaling_factor": 2,
+        # "n_iter": 10,
+        # "scaling_factor": 2,
         "search_style": "grid",
+        "data_augmentation_ratio": 2,
+        "param_grid": {"data_augmentation_sigma": [0.5, 1.0, 2.0]}
     }
-    for param_name in []:
-        params_emulator_child['param_list_to_optimize'] = [param_name]
-        workflow(filename_dataset_paper, search_path_to_start_from, **params_emulator_child)
+    workflow(filename_dataset_paper, search_path_to_start_from, **params_emulator_child)
 
 def main_workflow_child_marginal_analysis():
     search_path_to_start_from = '/home/e23lerou/Documents/EquationDiscovery4ClimateImpact/data/search/6624636351014803864/random_1_nit100_100_sca0'
@@ -28,7 +28,7 @@ def main_workflow_child_marginal_analysis():
 
 
 if __name__ == '__main__':
-    # main_workflow_child()
-    main_workflow_child_marginal_analysis()
+    main_workflow_child()
+    # main_workflow_child_marginal_analysis()
 
 

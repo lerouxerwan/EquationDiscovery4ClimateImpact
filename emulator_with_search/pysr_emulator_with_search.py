@@ -102,6 +102,8 @@ class PySREmulatorWithSearch(PySREmulator):
                  feature_selection_name: str = 'PySRDefault',
                  remove_duplicate_features: bool = False,
                  duplicate_feature_threshold: float = 0.9,
+                 data_augmentation_ratio: int = 1,
+                 data_augmentation_sigma: float = 1.0,
                  # Additional parameters
                  validation_size: float = 0.3,
                  search_style: Optional[str] = None,
@@ -153,6 +155,7 @@ class PySREmulatorWithSearch(PySREmulator):
                          threshold_for_model_selection=threshold_for_model_selection,
                          feature_selection_name=feature_selection_name,
                          remove_duplicate_features=remove_duplicate_features, duplicate_feature_threshold=duplicate_feature_threshold,
+                         data_augmentation_ratio=data_augmentation_ratio, data_augmentation_sigma=data_augmentation_sigma,
                          **kwargs)
         self.validation_size = validation_size
         self.search_style = 'random' if search_style is None else search_style

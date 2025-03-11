@@ -10,6 +10,7 @@ from pysr.utils import ArrayLike
 from sklearn.utils.validation import _check_feature_names_in
 from sympy import Expr
 
+from emulator.utils_attributes.utils_data_augmentation import apply_data_augmentation
 from emulator.utils_attributes.utils_feature_selection import get_selection_mask
 from emulator.utils_attributes.utils_remove_duplicates import compute_duplicate_mask
 from emulator.utils_cache.utils_key import get_key_for_cache_duplicate, \
@@ -30,6 +31,7 @@ class PySREmulator(PySRRegressor):
         feature_selection_name: str
             Name of the feature selection to use if select_k_features is not None
             Default is PySRDefault (the default feature selection used in PySR)
+    including some potential contributions/tricks that are deactivated by default
         remove_duplicate_features: bool
             Boolean that indicates whether to remove duplicate features.
             Default is False
@@ -37,6 +39,12 @@ class PySREmulator(PySRRegressor):
             Threshold between 0 and 1 to remove duplicate features. If the absolute correlation between the two features
             is above this threshold, we keep the feature that has the best absolute correlation w.r.t. the target
             Default is 0.9
+        data_augmentation_ratio: int
+            Number of times the number of datapoints augments with data augmentation
+            Default is 1, i.e. no data augmentation
+        data_augmentation_sigma: float
+            Sigma for the noise to create new data by data augmentation
+            Default is 1.
     with some modification on the default value:
         -dimensional_constraint_penalty equals is set by default to 10**8 (ensures dimension constraint are enforced)
     with a novel class attribute:
@@ -94,6 +102,8 @@ class PySREmulator(PySRRegressor):
                  feature_selection_name: str = 'PySRDefault',
                  remove_duplicate_features: bool = False,
                  duplicate_feature_threshold: float = 0.9,
+                 data_augmentation_ratio: int = 1,
+                 data_augmentation_sigma: float = 1.0,
                  **kwargs):
         # Some default attributes of PySRRegressor are modified
         # Verbosity is removed
@@ -149,11 +159,15 @@ class PySREmulator(PySRRegressor):
         self.feature_selection_name = feature_selection_name
         self.remove_duplicate_features = remove_duplicate_features
         self.duplicate_feature_threshold = duplicate_feature_threshold
+        self.data_augmentation_ratio = data_augmentation_ratio
+        self.data_augmentation_sigma = data_augmentation_sigma
         assert isinstance(self.threshold_for_model_selection, float)
         assert self.threshold_for_model_selection >= 1.
         assert isinstance(self.feature_selection_name, str)
         assert isinstance(self.remove_duplicate_features, bool)
         assert isinstance(self.duplicate_feature_threshold, float)
+        assert isinstance(self.data_augmentation_ratio, int)
+        assert isinstance(self.data_augmentation_sigma, float)
         assert 0 < self.duplicate_feature_threshold <= 1.
         # Change default dimensional_constraint_penalty
         if self.dimensional_constraint_penalty is None:
@@ -185,6 +199,9 @@ class PySREmulator(PySRRegressor):
                 X_units = [str(v) for v in np.array(X_units)[self.duplicate_mask_]]
             X = apply_mask(X, self.duplicate_mask_)
             log_info(f'Number of features after removing duplicates: {X.shape[1]}')
+        # Apply data augmentation
+        if self.data_augmentation_ratio > 1:
+            X, y = apply_data_augmentation(X, y, self.data_augmentation_ratio, self.data_augmentation_sigma)
         # Fit using cache or without using it
         if use_cache:
             if key in self.cache:
