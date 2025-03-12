@@ -20,7 +20,7 @@ def plot_loss_vs_complexity(emulator: PySREmulator, X_train: np.ndarray,
                             y_test: Optional[np.ndarray]=None,
                             years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None,
                             rcp_name_train: str= 'RCP85', rcp_name_test: Optional[str]=None, validation_mask:Optional[np.ndarray[bool]] = None,
-                            target_label: str = "Target (-)", show: bool = False, detailed_plot: bool = False) -> None:
+                            target_label: str = "Target (-)", show: Optional[bool] = False, detailed_plot: bool = False) -> None:
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""
     metric = Metric.RMSE

@@ -2,6 +2,7 @@ from datetime import datetime
 
 import os
 import os.path as op
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -30,9 +31,14 @@ def subplots_custom(nrows, ncols, sharex=False, sharey=False, hspace=None, wspac
     return fig, axs
 
 
-def show_or_save_plot(plot_name: str, show: bool=False):
-    plt.tight_layout()
-    plt.show() if show else save_plot(plot_name)
+def show_or_save_plot(plot_name: str, show: Optional[bool]=False):
+    """show = True displays the Figure, show = False saves the Figure, show = None clears the Figure (for testing)"""
+    if show is None:
+        plt.clf()
+        plt.close()
+    else:
+        plt.tight_layout()
+        plt.show() if show else save_plot(plot_name)
 
 def save_plot(plot_name: str):
     for character in ['\n', ' ']:

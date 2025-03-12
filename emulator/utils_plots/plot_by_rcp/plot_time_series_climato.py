@@ -1,4 +1,5 @@
 import math
+from typing import Optional, Any
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -8,12 +9,13 @@ from emulator.utils_plots.plot_by_split.utlis_plot_selected_equation import get_
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, target_label, prefix,
-                                    show, ymin_and_ymax: tuple[float, float] = None):
+def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label: dict[str, list[tuple[list[int], list[float], str, str]]],
+                                    y_train: np.ndarray, target_label: str, prefix: str,
+                                    show: Optional[bool], ymin_and_ymax: tuple[float, float] = None) -> dict[str, tuple[list[int], list[float], str]]:
     ax = plt.gca()
     window_size = 30
     all_dates = []
-    rcp_name_to_std_values_and_years_and_color = {}
+    rcp_name_to_years_and_std_values_and_color = {}
     for rcp_name, list_of_y_and_years_and_color_and_label in rcp_name_to_list_of_years_and_y_and_color_and_label.items():
         dates, values = [], []
         #  Plot for each sub period the points in their respective color
@@ -24,7 +26,7 @@ def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_an
         dates, values = np.concat(dates), np.concat(values)
         #  Plot the average mean/std with the last color, i.e. the color of the RCP,
         years_average, std_values = plot_average_value(ax, color, values, dates, window_size)
-        rcp_name_to_std_values_and_years_and_color[rcp_name] = (std_values, years_average, color)
+        rcp_name_to_years_and_std_values_and_color[rcp_name] = (years_average, std_values, color)
         all_dates.append(dates)
     #  Set custom X-axis
     xmin = int(math.floor(np.min(np.concat(all_dates)) / 10.0)) * 10
@@ -56,4 +58,4 @@ def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_an
     ax_twin.legend(legend_handles, legend_labels, loc=loc2)
     ax.yaxis.grid()
     show_or_save_plot(f'climatological_series_{prefix}', show)
-    return rcp_name_to_std_values_and_years_and_color
+    return rcp_name_to_years_and_std_values_and_color

@@ -259,6 +259,8 @@ class PySREmulatorWithSearch(PySREmulator):
                     selected_expr = emulator.selected_expr.copy()
                 except TypeError:
                     selected_expr = ""
+                    # Check the reason of the type error (likely due to a selected expression that was a constant float)
+                    assert isinstance(emulator.selected_expr, float)
                 selected_expressions.append(selected_expr)
         df_cv_results_ranked['selected_expr'] = selected_expressions
         return df_cv_results_ranked
