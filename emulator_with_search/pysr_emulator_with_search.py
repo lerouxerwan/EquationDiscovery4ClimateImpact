@@ -9,12 +9,12 @@ from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
+from data.utils_search.utils_non_default_params import get_non_default_params
 from emulator.pysr_emulator import PySREmulator
 from emulator.utils_cache.utils_key import get_key_for_cache_fit
 from emulator_with_search.utils_param_grid.utils_search_style import search_style_to_search_cv_type
 from data.utils_search.search_experiment import SearchExperiment
-from data.utils_search.utils_search_path import RANK_COLUMN_NAME, get_search_path, \
-    get_non_default_params
+from data.utils_search.utils_search_path import RANK_COLUMN_NAME, get_search_path
 from emulator_with_search.utils_attributes.utils_search_cv import get_search_cv_kwargs
 from emulator.utils_attributes.utils_threshold import get_param_grid_with_thresholds
 from emulator_with_search.utils_attributes.utils_validation import get_cv, get_X_and_y
@@ -210,7 +210,7 @@ class PySREmulatorWithSearch(PySREmulator):
         # Create non default params
         self.non_default_params_ = get_non_default_params(self)
         # Create a search experiment
-        self.search_experiment_ = self.compute_emulator_search_experiment(X, y, self.validation_mask_, self.non_default_params_)
+        self.search_experiment_ = SearchExperiment(get_search_path(X, y, validation_mask, self.non_default_params_))
         # Compute the attribute df_cv_results_ranked_, a Dataframe with the result of the hyperparameter search
         self.compute_df_cv_results_ranked(X, y, variable_names=variable_names,
                                           X_units=X_units, y_units=y_units, use_cache=True)
@@ -224,11 +224,6 @@ class PySREmulatorWithSearch(PySREmulator):
                     y_units=y_units, use_cache=False)
         self.logger_spec = None
         return self
-
-    def compute_emulator_search_experiment(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
-                                           non_default_params: dict[str, Any]) -> SearchExperiment:
-        path = get_search_path(X, y, validation_mask, self.search_style, self.n_iter, non_default_params)
-        return SearchExperiment(path)
 
     def compute_df_cv_results_ranked(self, X: np.ndarray, y: np.ndarray, **params_fit) -> None:
         """Run hyperparameter search to obtain df_cv_results_ranked, and save search results to file"""

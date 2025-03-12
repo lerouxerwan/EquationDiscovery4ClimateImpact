@@ -14,11 +14,10 @@ def main_workflow_root():
 
 def main_workflow_root_random():
     params_emulator_root = {
-        "n_iter": 100,
+        "n_iter": 1000,
         "scaling_factor": 2,
         "maxsize": 20,
         "population_size": 31,
-        "niterations": 150,
         "model_selection": "custom",
         "optimizer_f_calls_limit": 10_000,
         "unary_operators": ["square", "sqrt"],

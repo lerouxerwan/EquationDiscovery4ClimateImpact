@@ -2,8 +2,8 @@ from itertools import chain
 from operator import itemgetter
 from typing import Any
 
+import joblib
 import numpy as np
-import pandas as pd
 
 
 def get_hash_str(*iterables) -> str:
@@ -16,7 +16,7 @@ def get_hash_str(*iterables) -> str:
         else:
             raise ValueError(f'iterable {iterable} has type {type(iterable)}')
         tuples.append(tuple(list(iterable)))
-    return str(hash(tuple(chain.from_iterable(tuples))))
+    return str(joblib.hash(tuple(chain.from_iterable(tuples))))
 
 def get_key_for_cache_duplicate(X: np.ndarray, y: np.ndarray, threshold: float) -> str:
     return get_hash_str(X, y, [threshold])

@@ -5,6 +5,7 @@ from data.utils_search.utils_best_score import get_best_search_experiment
 from data.utils_search.plot_diagnosis_search import plot_diagnosis_search
 from data.utils_search.utils_heredity_tree import add_heredity_link
 from data.utils_dataset.utils_dataset import load_dataset
+from utils.utils_log import log_info
 
 
 def workflow(dataset_filename: str, search_path_to_start_from: str | bool = False, **params_emulator):
@@ -25,6 +26,7 @@ def workflow(dataset_filename: str, search_path_to_start_from: str | bool = Fals
             search_experiment = get_best_search_experiment(X_train, y_train, validation_mask)
         else:
             search_experiment = SearchExperiment(search_path_to_start_from)
+        log_info(f'Start optimization from: {search_experiment}')
         params_emulator = {**search_experiment.best_params, **params_emulator}
     # Fit emulator with search
     emulator = PySREmulatorWithSearch(**params_emulator)
