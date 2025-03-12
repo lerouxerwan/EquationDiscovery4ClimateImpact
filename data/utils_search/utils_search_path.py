@@ -24,9 +24,9 @@ The tree structure of the search_path is as follows: dataset_dir/emulator_folder
 
 def get_search_path(X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
                     search_style: str, n_iter: int, non_default_params: dict) -> str:
-    feature_dir = get_dataset_dir(X, y, validation_mask)
+    dataset_dir = get_dataset_dir(X, y, validation_mask)
     emulator_folder = get_emulator_folder(search_style, n_iter, non_default_params)
-    return op.join(feature_dir, emulator_folder)
+    return op.join(dataset_dir, emulator_folder)
 
 def get_dataset_dir(X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]):
     """Directory, containing subdirectories with search results, for a dataset and a validation size"""

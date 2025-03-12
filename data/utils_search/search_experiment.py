@@ -111,10 +111,15 @@ class SearchExperiment(object):
         for filepath in filepaths:
             if op.exists(filepath):
                 os.remove(filepath)
-        # Remove folders
+        # Remove folders log_dir and search_path
         for folder in [self.log_dir, self.search_path]:
             if op.exists(folder):
                 os.rmdir(folder)
+        # Remove even the dataset folder, if it is empty
+        dataset_dir = op.dirname(self.search_path)
+        if op.exists(dataset_dir) and (not os.listdir(dataset_dir)):
+            os.rmdir(dataset_dir)
+
 
 
 
