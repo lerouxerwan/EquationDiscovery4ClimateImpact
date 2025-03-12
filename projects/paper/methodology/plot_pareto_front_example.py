@@ -22,15 +22,15 @@ def plot_pareto_front_example(emulator: PySREmulator, X: np.ndarray, y: np.ndarr
     nb_bars = 1 + len(split_name_to_x_and_y)
     width, coordinate_list = load_bar_attributes(nb_bars=nb_bars, complexity_list=complexity_list)
     # One bar plot for each split
-    loss_list = []
+    all_loss_list = []
     valid_split_names = [split_name for split_name in SPLIT_NAMES if split_name in split_name_to_x_and_y]
     for bar_id, split_name in enumerate(valid_split_names):
         X, y = split_name_to_x_and_y[split_name]
         coordinates = coordinate_list[bar_id]
-        loss = emulator.compute_loss(X, y, metric=metric)
-        ax.bar(coordinates, loss, width=width,
+        loss_list = emulator.compute_loss_list(X, y, metric=metric)
+        ax.bar(coordinates, loss_list, width=width,
                label=split_name, color=split_name_to_color[split_name])
-        loss_list.extend(loss)
+        all_loss_list.extend(loss_list)
     ax.set_xlabel('Equation f')
     # Add rounded equations on the lower X axis
     x_ticks = complexity_list
@@ -40,7 +40,7 @@ def plot_pareto_front_example(emulator: PySREmulator, X: np.ndarray, y: np.ndarr
     # xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True).replace('x0', 'x')
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     # Add y-axis with special scaling
-    set_custom_y_axis_example(ax, loss_list, target_label, metric)
+    set_custom_y_axis_example(ax, all_loss_list, target_label, metric)
     # General settings for the plot
     # ax.legend(loc='upper right')
     show_or_save_plot(f'pareto_front_example', show)

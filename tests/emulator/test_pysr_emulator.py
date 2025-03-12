@@ -45,7 +45,7 @@ def test_loss():
     X, y = load_X_and_y_for_test()
     emulator.fit(X, y)
     # Assert that the method compute_loss of the emulator work well
-    for loss1, loss2 in zip(emulator.loss_list, emulator.compute_loss(X, y)):
+    for loss1, loss2 in zip(emulator.loss_list, emulator.compute_loss_list(X, y)):
         np.testing.assert_almost_equal(float(loss1), loss2, decimal=0)
 
 list_of_X_units_and_expected_variable_names = [

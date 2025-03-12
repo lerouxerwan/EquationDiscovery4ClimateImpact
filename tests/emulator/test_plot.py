@@ -15,10 +15,7 @@ def test_plot_with_emulator():
         plot_function(emulator, X, y)
 
 
-# def test_plot_without_emulator():
-#     _, y = load_X_and_y_for_test()
-#     for nb_historical_years in [0, 20]:
-#         plot_observed_climato(y, nb_historical_years=nb_historical_years)
+
 
 
 

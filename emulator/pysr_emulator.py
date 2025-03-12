@@ -233,8 +233,8 @@ class PySREmulator(PySRRegressor):
             X = apply_mask(X, self.duplicate_mask_)
         return super().predict(X, index, category=category)
 
-    def compute_loss(self, X: np.ndarray, y: np.ndarray, metric=Metric.MSE) -> list[float]:
-        """Compute a loss function for every equation of the Pareto optimal set of equations"""
+    def compute_loss_list(self, X: np.ndarray, y: np.ndarray, metric=Metric.MSE) -> list[float]:
+        """Compute a list of loss: one loss for every equation of the Pareto optimal set of equations"""
         loss_function = metric_to_function[metric]
         loss = []
         for y_predicted in self.compute_y_predicted_list(X):
