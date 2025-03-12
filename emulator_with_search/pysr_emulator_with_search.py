@@ -1,5 +1,5 @@
 import os.path as op
-from typing import Literal, Callable, Optional
+from typing import Literal, Callable, Optional, Any
 
 import numpy as np
 import pandas as pd
@@ -184,6 +184,7 @@ class PySREmulatorWithSearch(PySREmulator):
         # Create attributes
         self.validation_mask_ = None
         self.search_experiment_ = None
+        self.non_default_params_ = None
 
     def fit(self, X: np.ndarray, y: np.ndarray, variable_names: ArrayLike[str] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
@@ -198,7 +199,7 @@ class PySREmulatorWithSearch(PySREmulator):
         """
         # Some standard checks
         assert X.shape[0] == y.shape[0]
-        # Create
+        # Compute validation_mask if is None
         if validation_mask is None:
             # By default, create a random split with 30% and 70%
             indices = list(range(len(y)))
@@ -206,10 +207,10 @@ class PySREmulatorWithSearch(PySREmulator):
             indices_validation_set = set(indices_validation)
             validation_mask = np.array([i in indices_validation_set for i in indices])
         self.validation_mask_ =  validation_mask
-        # Compute a directory to save search results
-        non_default_params = get_non_default_params(self)
-        search_path = get_search_path(X, y, self.validation_mask_, self.search_style, self.n_iter, non_default_params)
-        self.search_experiment_ = SearchExperiment(search_path)
+        # Create non default params
+        self.non_default_params_ = get_non_default_params(self)
+        # Create a search experiment
+        self.search_experiment_ = self.compute_emulator_search_experiment(X, y, self.validation_mask_, self.non_default_params_)
         # Compute the attribute df_cv_results_ranked_, a Dataframe with the result of the hyperparameter search
         self.compute_df_cv_results_ranked(X, y, variable_names=variable_names,
                                           X_units=X_units, y_units=y_units, use_cache=True)
@@ -224,12 +225,17 @@ class PySREmulatorWithSearch(PySREmulator):
         self.logger_spec = None
         return self
 
-    def compute_df_cv_results_ranked(self, X, y, **params_fit) -> None:
+    def compute_emulator_search_experiment(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+                                           non_default_params: dict[str, Any]) -> SearchExperiment:
+        path = get_search_path(X, y, validation_mask, self.search_style, self.n_iter, non_default_params)
+        return SearchExperiment(path)
+
+    def compute_df_cv_results_ranked(self, X: np.ndarray, y: np.ndarray, **params_fit) -> None:
         """Run hyperparameter search to obtain df_cv_results_ranked, and save search results to file"""
         # Compute search results only it has not yet been computed
         if not op.exists(self.search_experiment_.filepath_search_result):
             df_cv_results_ranked = self._compute_df_cv_results_ranked(X, y, **params_fit)
-            self.search_experiment_.save_search_results(df_cv_results_ranked, self)
+            self.search_experiment_.save_search_results(df_cv_results_ranked, self.non_default_params_)
 
     def _compute_df_cv_results_ranked(self, X: np.ndarray, y: np.ndarray, **params_fit) -> pd.DataFrame:
         """Run 2 consecutive hyperparameter search (first search with search_style, then a grid search for thresholds)

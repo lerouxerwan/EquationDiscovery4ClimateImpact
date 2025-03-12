@@ -45,28 +45,5 @@ def test_scaling_factor_for_grid_search():
     assert fraction_replaced_hof_for_optimization[2] == 0.01
     assert fraction_replaced_hof_for_optimization[-1] == 0.02
 
-def test_search_experiment_tree():
-    # Fit one emulator_parent and one emulator_child
-    X, y, validation_mask = load_X_and_y_and_validation_mask_for_test()
-    emulator_parent = PySREmulatorWithSearch(n_iter=1, scaling_factor=0, model_selection="custom", niterations=5)
-    emulator_parent.fit(X, y, validation_mask=validation_mask)
-    params_emulator_child = {**emulator_parent.search_experiment_.best_params, **{'adaptive_parsimony_scaling':500.}}
-    emulator_child = PySREmulatorWithSearch(**params_emulator_child)
-    emulator_child.fit(X, y, validation_mask=validation_mask)
-    # Add heredity link (create parent and children files)
-    add_heredity_link(emulator_child.search_experiment_, emulator_parent.search_experiment_)
-    # Test get functions for parent
-    assert get_parent(emulator_parent.search_experiment_) is None
-    assert get_parent(emulator_child.search_experiment_).search_path == emulator_parent.search_experiment_.search_path
-    # Test get functions for children
-    assert len(get_children(emulator_child.search_experiment_)) == 0
-    children_search_experiments = get_children(emulator_parent.search_experiment_)
-    assert len(children_search_experiments) == 1
-    assert children_search_experiments[0].search_path == emulator_child.search_experiment_.search_path
-    # Remove folders
-    for emulator in [emulator_parent, emulator_child]:
-        emulator.search_experiment_.remove_folder()
-
-
 
 

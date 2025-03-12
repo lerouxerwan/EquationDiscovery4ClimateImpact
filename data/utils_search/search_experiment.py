@@ -8,11 +8,10 @@ from typing import Optional, Any
 import numpy as np
 import pandas as pd
 from pysr import TensorBoardLoggerSpec
-from sklearn.base import BaseEstimator
 from sympy import Expr
 
 from data.utils_search.utils_search_path import CSV_FILENAME, \
-    JSON_FILENAME, get_non_default_params, METRIC_COLUMN_NAME, CHILDREN_FILENAME, PARENT_FILENAME
+    JSON_FILENAME, METRIC_COLUMN_NAME, CHILDREN_FILENAME, PARENT_FILENAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -69,13 +68,13 @@ class SearchExperiment(object):
     def best_rmse_validation(self) -> float:
         return self.best_series.loc['RMSE_validation']
 
-    def save_search_results(self, df_cv_results_ranked: pd.DataFrame, estimator:BaseEstimator) -> None:
+    def save_search_results(self, df_cv_results_ranked: pd.DataFrame, non_default_params: dict[str, Any]) -> None:
         log_info('Save search results to files')
         #  Save a csv containing df_cv_results_ranked
         df_cv_results_ranked.to_csv(self.filepath_search_result)
         #  Save the associated json config file
         with open(self.filepath_non_default_params, 'w') as fp:
-            json.dump(get_non_default_params(estimator), fp, sort_keys=True, indent=4)
+            json.dump(non_default_params, fp, sort_keys=True, indent=4)
 
     def get_combinations_of_param_names_in_param_grid(self, nb_elements: int) -> list[tuple]:
         """Return combinations of nb_elements of param names in param_grid with float/int values"""
@@ -107,7 +106,8 @@ class SearchExperiment(object):
         # Remove files
         filepaths = [self.filepath_non_default_params, self.filepath_search_result,
                      self.filepath_children, self.filepath_parent]
-        filepaths += [op.join(self.log_dir, f) for f in os.listdir(self.log_dir)]
+        if op.exists(self.log_dir):
+            filepaths += [op.join(self.log_dir, f) for f in os.listdir(self.log_dir)]
         for filepath in filepaths:
             if op.exists(filepath):
                 os.remove(filepath)
