@@ -1,8 +1,8 @@
-from emulator_with_search.utils_search_experiment.utils_best_score import get_best_search_experiments
-from emulator_with_search.utils_search_experiment.utils_search_history import get_search_history
+from data.utils_search.utils_best_score import get_best_search_experiments
+from data.utils_search.utils_search_history import get_search_history
 from projects.paper.utils_paper import filename_dataset_paper
 from utils.utils_bash_call import bash_call
-from utils.utils_dataset import load_dataset
+from data.utils_dataset.utils_dataset import load_dataset
 
 
 

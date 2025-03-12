@@ -1,6 +1,6 @@
 from typing import Optional
 
-from emulator_with_search.utils_search_experiment.search_experiment import SearchExperiment
+from data.utils_search.search_experiment import SearchExperiment
 import os.path as op
 
 """Write text files"""

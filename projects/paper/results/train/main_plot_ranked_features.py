@@ -1,6 +1,6 @@
 import pandas as pd
 
-from utils.utils_dataset import load_dataset
+from data.utils_dataset.utils_dataset import load_dataset
 from projects.paper.results.train.utils_ranked_features import compute_sorted_features
 from projects.paper.utils_paper import filename_dataset_paper
 from utils.utils_latex import print_df_latex, plot_df_latex

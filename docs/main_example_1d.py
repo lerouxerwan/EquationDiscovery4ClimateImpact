@@ -1,8 +1,5 @@
 from emulator.pysr_emulator import PySREmulator
-from emulator.utils_plots.plot_by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
-from emulator.utils_plots.plot_by_split.plot_scatter import plot_scatter
-from emulator.utils_plots.plot_by_split.plot_time_series import plot_time_series
-from tests.utils_tests_dataset import load_X_and_y_for_test
+from tests.data.utils_tests_dataset import load_X_and_y_for_test
 
 
 def main_example_1d():

@@ -22,6 +22,7 @@ def get_param_grid(estimator: BaseEstimator, scaling_factor: float, search_style
     param_grid = dict()
     for key in param_list_to_optimize:
         value = estimator.__getattribute__(key)
+        assert value is not None, f'value is None for {key}'
         min_value = value if scaling_factor == 0 else value / scaling_factor
         max_value = value if scaling_factor == 0 else value * scaling_factor
         if isinstance(value, int):

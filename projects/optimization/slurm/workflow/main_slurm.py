@@ -1,4 +1,4 @@
-from slurm.workflow_v1.sbatch_workflow_v1 import SBatchWorkflowV1
+from projects.optimization.slurm.workflow.sbatch_workflow_v1 import SBatchWorkflowV1
 
 
 def main_run_multiple_sbatch():

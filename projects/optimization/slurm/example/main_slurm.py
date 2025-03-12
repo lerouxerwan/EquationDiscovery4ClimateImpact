@@ -1,4 +1,4 @@
-from slurm.example.sbatch_example import SBatchExample
+from projects.optimization.slurm.example.sbatch_example import SBatchExample
 
 
 def main_run_multiple_sbatch():

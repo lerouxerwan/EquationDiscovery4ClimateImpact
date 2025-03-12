@@ -1,7 +1,7 @@
 from copy import deepcopy
 
-from emulator_with_search.utils_search_experiment.search_experiment import SearchExperiment
-from emulator_with_search.utils_search_experiment.utils_heredity_tree import get_parent
+from data.utils_search.search_experiment import SearchExperiment
+from data.utils_search.utils_heredity_tree import get_parent
 
 
 def get_search_history(search_experiment: SearchExperiment) -> list[SearchExperiment]:

@@ -1,6 +1,6 @@
 from emulator.pysr_emulator import PySREmulator
 from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
-from tests.utils_tests_dataset import load_X_and_y_for_test
+from tests.data.utils_tests_dataset import load_X_and_y_for_test
 
 
 def load_climate_impact_emulator_for_test(**kwargs) -> PySREmulator:

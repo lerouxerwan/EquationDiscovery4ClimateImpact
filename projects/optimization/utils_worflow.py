@@ -1,10 +1,10 @@
 from emulator.utils_plots.utils_plots import plot_diagnosis_fit
 from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
-from emulator_with_search.utils_search_experiment.search_experiment import SearchExperiment
-from emulator_with_search.utils_search_experiment.utils_best_score import get_best_search_experiment
-from emulator_with_search.utils_plots.plot_diagnosis_search import plot_diagnosis_search
-from emulator_with_search.utils_search_experiment.utils_heredity_tree import add_heredity_link
-from utils.utils_dataset import load_dataset
+from data.utils_search.search_experiment import SearchExperiment
+from data.utils_search.utils_best_score import get_best_search_experiment
+from data.utils_search.plot_diagnosis_search import plot_diagnosis_search
+from data.utils_search.utils_heredity_tree import add_heredity_link
+from data.utils_dataset.utils_dataset import load_dataset
 
 
 def workflow(dataset_filename: str, search_path_to_start_from: str | bool = False, **params_emulator):

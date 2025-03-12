@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from tests.utils_tests_dataset import load_X_and_y_for_test
+from tests.data.utils_tests_dataset import load_X_and_y_for_test
 
 
 def apply_data_augmentation(X: np.ndarray, y: np.ndarray, data_augmentation_ratio: int, data_augmentation_sigma: float) -> tuple[np.ndarray, np.ndarray]:

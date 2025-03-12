@@ -1,7 +1,7 @@
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from emulator_with_search.utils_search_experiment.search_experiment import SearchExperiment
+from data.utils_search.search_experiment import SearchExperiment
 from utils.utils_plot import show_or_save_plot
 
 

@@ -4,7 +4,6 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator
-from sklearn.model_selection import RandomizedSearchCV
 
 from emulator.utils_cache.utils_key import get_hash_str
 from utils.utils_path import SEARCH_CSV_PATH

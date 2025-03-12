@@ -1,4 +1,4 @@
-from utils.utils_dataset import load_dataset
+from data.utils_dataset.utils_dataset import load_dataset
 
 
 def test_load_dataset():

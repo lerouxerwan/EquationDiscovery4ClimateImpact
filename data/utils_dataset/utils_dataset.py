@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 from pysr.utils import ArrayLike
 
+from data.utils_dataset.utils_units import load_units
+from data.utils_dataset.utils_validation import compute_ind_validation
 from utils.utils_path import DATASET_CSV_PATH
 
 
@@ -56,53 +58,9 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, Optional[np.ndar
     target_label = f'{target_name} ({'' if y_units is None else y_units[0]})'
     variable_names = None
     # Load index to create a validation split
-    ind_validation = compute_ind_validation(len(y_train), validation_size, load_nb_historical_values(df))
+    ind_validation = compute_ind_validation(y_train, validation_size, df)
     return (X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, rcp_name_train, rcp_name_test,
             variable_names, target_label, ind_validation)
-
-def compute_ind_validation(length: int, validation_size: float, index_start_validation: int) -> np.ndarray[bool]:
-    """Compute an array of boolean such that ind_validation[i] = True if the index 'i' is in the validation set
-    Parameters:
-        length: int, length of the full time series
-        validation_size: float, proportion (between 0 and 1) of data to include in the validation split
-        index_start_validation: int, first index for the validation set
-    Returns:
-        ind_validation: np.ndarray[bool], ind_validation[i] = True if the index 'i' is in the validation set"""
-    validation_length = math.ceil(length * validation_size)
-    ind_validation = np.zeros(length).astype(bool)
-    index_end_validation = validation_length + index_start_validation
-    assert (0 <= index_start_validation) and (index_end_validation <= length)
-    ind_validation[index_start_validation:index_end_validation] = True
-    return ind_validation
-
-
-
-def load_nb_historical_values(df: pd.DataFrame) -> int:
-    """This index corresponds to the start of the rcp scenario, i.e. the start of the RCP scenario for training"""
-    for index, (index_name, _) in enumerate(df.iterrows()):
-        prefix = index_name[:3]
-        if prefix == 'RCP':
-            return index
-        else:
-            assert prefix == 'HIS'
-    raise ValueError('No row of the dataframe starts with "RCP"')
-
-def load_units(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, Optional[list[str]], pd.Series, Optional[list[str]]]:
-    """Extract the row 'UNIT' then remove it from df (if the row exists)"""
-    if 'UNIT' in df.index:
-        series_units = df.loc['UNIT']
-        X_units = _load_units(series_units.iloc[1:])
-        y_units = _load_units(series_units.iloc[:1])
-        df = df.iloc[1:, :]
-        # See https://symbolicml.org/DynamicQuantities.jl/dev/units/ for a list of accepted units
-    else:
-        X_units, y_units = None, None
-    series_y = df.iloc[:, 0].astype(float)
-    df_X = df.iloc[:, 1:].astype(float)
-    return df, df_X, X_units, series_y, y_units
-
-def _load_units(series_units: pd.Series) -> list[str]:
-    return [unit if isinstance(unit, str) else '' for unit in series_units.to_list()]
 
 
 if __name__ == '__main__':
