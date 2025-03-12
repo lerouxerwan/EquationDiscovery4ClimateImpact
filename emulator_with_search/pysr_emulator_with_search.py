@@ -185,7 +185,7 @@ class PySREmulatorWithSearch(PySREmulator):
         self.ind_validation_ = None
         self.search_experiment_ = None
 
-    def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, variable_names: ArrayLike[str] | None = None,
+    def fit(self, X: np.ndarray, y: np.ndarray, variable_names: ArrayLike[str] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
             ind_validation: np.ndarray[bool] = None) -> "PySRRegressor":
         """
@@ -231,7 +231,7 @@ class PySREmulatorWithSearch(PySREmulator):
             df_cv_results_ranked = self._compute_df_cv_results_ranked(X, y, **params_fit)
             self.search_experiment_.save_search_results(df_cv_results_ranked, self)
 
-    def _compute_df_cv_results_ranked(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, **params_fit) -> pd.DataFrame:
+    def _compute_df_cv_results_ranked(self, X: np.ndarray, y: np.ndarray, **params_fit) -> pd.DataFrame:
         """Run 2 consecutive hyperparameter search (first search with search_style, then a grid search for thresholds)
         and save the ranked results in the attribute df_cv_results_ranked"""
         log_info('Compute search results')

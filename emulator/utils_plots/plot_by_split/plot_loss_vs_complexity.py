@@ -14,10 +14,10 @@ from emulator.utils_plots.plot_by_split.utils_plot_split_name import SPLIT_NAMES
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_loss_vs_complexity(emulator: PySREmulator, X_train: np.ndarray | pd.DataFrame,
-                            y_train: np.ndarray | pd.Series,
-                            X_test: Optional[np.ndarray | pd.DataFrame]=None,
-                            y_test: Optional[np.ndarray | pd.Series]=None,
+def plot_loss_vs_complexity(emulator: PySREmulator, X_train: np.ndarray,
+                            y_train: np.ndarray,
+                            X_test: Optional[np.ndarray]=None,
+                            y_test: Optional[np.ndarray]=None,
                             years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None,
                             rcp_name_train: str= 'RCP85', rcp_name_test: Optional[str]=None, ind_validation:Optional[np.ndarray[bool]] = None,
                             target_label: str = "Target (-)", show: bool = False, detailed_plot: bool = False) -> None:

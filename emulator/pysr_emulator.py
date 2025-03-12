@@ -183,7 +183,7 @@ class PySREmulator(PySRRegressor):
         # Create empty duplicate_mask
         self.duplicate_mask_ = None
 
-    def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, variable_names: ArrayLike[str] | None = None,
+    def fit(self, X: np.ndarray, y: np.ndarray, variable_names: ArrayLike[str] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
             use_cache: bool = False) -> "PySRRegressor":
         """
@@ -228,12 +228,12 @@ class PySREmulator(PySRRegressor):
         else:
             return super().fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
-    def predict(self, X: np.ndarray | pd.DataFrame, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
+    def predict(self, X: np.ndarray, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
         if self.remove_duplicate_features:
             X = apply_mask(X, self.duplicate_mask_)
         return super().predict(X, index, category=category)
 
-    def compute_loss(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, metric=Metric.MSE) -> list[float]:
+    def compute_loss(self, X: np.ndarray, y: np.ndarray, metric=Metric.MSE) -> list[float]:
         """Compute a loss function for every equation of the Pareto optimal set of equations"""
         loss_function = metric_to_function[metric]
         loss = []
@@ -245,7 +245,7 @@ class PySREmulator(PySRRegressor):
             loss.append(res)
         return loss
 
-    def compute_y_predicted_list(self, X: np.ndarray | pd.DataFrame) -> list[np.ndarray]:
+    def compute_y_predicted_list(self, X: np.ndarray) -> list[np.ndarray]:
         """Compute predicted vector for every equation of the Pareto front"""
         return [self.predict(X, index=index) for index in range(len(self.equations_))]
 

@@ -18,11 +18,11 @@ def get_hash_str(*iterables) -> str:
         tuples.append(tuple(list(iterable)))
     return str(hash(tuple(chain.from_iterable(tuples))))
 
-def get_key_for_cache_duplicate(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, threshold: float) -> str:
+def get_key_for_cache_duplicate(X: np.ndarray, y: np.ndarray, threshold: float) -> str:
     return get_hash_str(X, y, [threshold])
 
 
-def get_key_for_cache_fit(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, params: dict[str, Any]) -> str:
+def get_key_for_cache_fit(X: np.ndarray, y: np.ndarray, params: dict[str, Any]) -> str:
     return get_hash_str(X, y, get_hash_params(params))
 
 def get_hash_params(params: dict[str, Any]) -> list[tuple[Any] | Any]:

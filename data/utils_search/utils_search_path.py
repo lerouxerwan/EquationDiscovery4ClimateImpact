@@ -22,13 +22,13 @@ The tree structure of the search_path is as follows: dataset_dir/emulator_folder
     -emulator_folder characterizes a hyperparameter search (search type, and non default hyperparameters)    
 """
 
-def get_search_path(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, ind_validation: np.ndarray[bool],
+def get_search_path(X: np.ndarray, y: np.ndarray, ind_validation: np.ndarray[bool],
                     search_style: str, n_iter: int, non_default_params: dict) -> str:
     feature_dir = get_dataset_dir(X, y, ind_validation)
     emulator_folder = get_emulator_folder(search_style, n_iter, non_default_params)
     return op.join(feature_dir, emulator_folder)
 
-def get_dataset_dir(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame, ind_validation: np.ndarray[bool]):
+def get_dataset_dir(X: np.ndarray, y: np.ndarray, ind_validation: np.ndarray[bool]):
     """Directory, containing subdirectories with search results, for a dataset and a validation size"""
     dataset_folder = get_hash_str(X, y, ind_validation)
     return op.join(SEARCH_CSV_PATH, dataset_folder)

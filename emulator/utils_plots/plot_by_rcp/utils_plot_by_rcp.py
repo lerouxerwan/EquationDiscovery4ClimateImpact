@@ -8,8 +8,8 @@ from emulator.utils_plots.plot_by_rcp.utils_rcp import rcp_name_to_color, get_rc
 from emulator.utils_plots.plot_by_split.utils_plot_by_split import set_default_years
 
 
-def load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train: np.ndarray | pd.Series,
-                                                             y_test: Optional[np.ndarray | pd.Series] = None,
+def load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train: np.ndarray,
+                                                             y_test: Optional[np.ndarray] = None,
                                                              years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None, rcp_name_train: str='RCP85',
                                                              rcp_name_test: Optional[str]=None, ind_validation:Optional[np.ndarray[bool]] = None):
     rcp_name_to_list_of_years_and_y_and_color = dict()

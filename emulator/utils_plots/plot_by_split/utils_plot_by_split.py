@@ -10,20 +10,20 @@ from emulator.utils_plots.plot_by_split.utils_plot_split_name import SPLIT_NAMES
 from utils.utils_plot import compute_axis_lim
 
 
-def load_split_name_to_X_and_y(emulator: PySREmulator, X_train: np.ndarray | pd.DataFrame,
-                               y_train: np.ndarray | pd.Series,
-                               X_test: Optional[np.ndarray | pd.DataFrame]=None,
-                               y_test: Optional[np.ndarray | pd.Series]=None,
+def load_split_name_to_X_and_y(emulator: PySREmulator, X_train: np.ndarray,
+                               y_train: np.ndarray,
+                               X_test: Optional[np.ndarray]=None,
+                               y_test: Optional[np.ndarray]=None,
                                years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None) \
         -> dict[str, tuple[np.ndarray, np.ndarray]]:
     """Returns a dictionary that maps each split_name to a tuple (X,y)"""
     split_name_to_X_and_y_and_y_predict_years = load_split_name_to_X_and_y_and_y_predicted_and_years(emulator, X_train, y_train, X_test, y_test, years_train, years_test)
     return {split_name: (X, y) for split_name, (X, y, _, _) in split_name_to_X_and_y_and_y_predict_years.items()}
 
-def load_split_name_to_X_and_y_and_y_predicted_and_years(emulator: PySREmulator, X_train: np.ndarray | pd.DataFrame,
-                                                         y_train: np.ndarray | pd.Series,
-                                                         X_test: Optional[np.ndarray | pd.DataFrame]=None,
-                                                         y_test: Optional[np.ndarray | pd.Series]=None,
+def load_split_name_to_X_and_y_and_y_predicted_and_years(emulator: PySREmulator, X_train: np.ndarray,
+                                                         y_train: np.ndarray,
+                                                         X_test: Optional[np.ndarray]=None,
+                                                         y_test: Optional[np.ndarray]=None,
                                                          years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None) \
         -> dict[str, tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
     """Returns a dictionary that maps each split_name to a tuple (X,y,years)"""

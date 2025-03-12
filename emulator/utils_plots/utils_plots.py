@@ -10,10 +10,10 @@ from emulator.utils_plots.plot_by_split.plot_scatter import plot_scatter
 from emulator.utils_plots.plot_by_split.plot_time_series import plot_time_series
 
 
-def plot_diagnosis_fit(emulator: PySREmulator, X_train: np.ndarray | pd.DataFrame,
-                       y_train: np.ndarray | pd.Series,
-                       X_test: Optional[np.ndarray | pd.DataFrame]=None,
-                       y_test: Optional[np.ndarray | pd.Series]=None,
+def plot_diagnosis_fit(emulator: PySREmulator, X_train: np.ndarray,
+                       y_train: np.ndarray,
+                       X_test: Optional[np.ndarray]=None,
+                       y_test: Optional[np.ndarray]=None,
                        years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None,
                        rcp_name_train: str= 'RCP85', rcp_name_test: Optional[str]=None, ind_validation:Optional[np.ndarray[bool]] = None,
                        target_label: str = "Target (-)", show: bool = False):

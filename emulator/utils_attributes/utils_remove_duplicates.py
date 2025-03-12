@@ -9,7 +9,7 @@ from utils.utils_log import log_info
 def absolute_correlation(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return float(np.abs(correlation(y_true, y_pred)))
 
-def compute_duplicate_mask(X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series, threshold: float) -> list[bool]:
+def compute_duplicate_mask(X: np.ndarray, y: np.ndarray, threshold: float) -> list[bool]:
     """Compute a boolean mask of length m, where m is the number of columns/features in the matrix X, which indicates
     the features to keep. A feature is discarded, i.e. equal to False in the duplicate mask, it is a duplicate.
     We define a duplicate as a feature Xj such as there exists another feature Xi where:

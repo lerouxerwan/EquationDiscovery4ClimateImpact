@@ -10,9 +10,9 @@ from emulator.utils_plots.plot_by_rcp.utils_plot_by_rcp import load_rcp_name_to_
 from utils.utils_plot import compute_axis_lim
 
 
-def plot_climato(emulator: PySREmulator, X_train: np.ndarray | pd.DataFrame,
-                 y_train: np.ndarray | pd.Series, X_test: Optional[np.ndarray | pd.DataFrame] = None,
-                 y_test: Optional[np.ndarray | pd.Series] = None,
+def plot_climato(emulator: PySREmulator, X_train: np.ndarray,
+                 y_train: np.ndarray, X_test: Optional[np.ndarray] = None,
+                 y_test: Optional[np.ndarray] = None,
                  years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None, rcp_name_train: str= 'RCP85',
                  rcp_name_test: Optional[str]=None, ind_validation:Optional[np.ndarray[bool]] = None,
                  target_label: str = "Target (-)", show: bool = False):
@@ -37,7 +37,7 @@ def plot_climato(emulator: PySREmulator, X_train: np.ndarray | pd.DataFrame,
 
 
 
-def _plot_climato(y_train: np.ndarray | pd.Series, y_test: Optional[np.ndarray | pd.Series] = None,
+def _plot_climato(y_train: np.ndarray, y_test: Optional[np.ndarray] = None,
                   years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None, rcp_name_train: str= 'RCP85',
                   rcp_name_test: Optional[str]=None, ind_validation:Optional[np.ndarray[bool]] = None,
                   target_label: str = "Target (-)", prefix: str = "", show: bool = False, ymin_and_ymax: Optional[tuple[float, float]] = None):
@@ -46,9 +46,9 @@ def _plot_climato(y_train: np.ndarray | pd.Series, y_test: Optional[np.ndarray |
     return plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, target_label, prefix, show, ymin_and_ymax)
 
 
-def plot_errors_climato(emulator: PySREmulator, X_train: np.ndarray | pd.DataFrame,
-                        y_train: np.ndarray | pd.Series, X_test: Optional[np.ndarray | pd.DataFrame] = None,
-                        y_test: Optional[np.ndarray | pd.Series] = None,
+def plot_errors_climato(emulator: PySREmulator, X_train: np.ndarray,
+                        y_train: np.ndarray, X_test: Optional[np.ndarray] = None,
+                        y_test: Optional[np.ndarray] = None,
                         years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None, rcp_name_train: str= 'RCP85',
                         rcp_name_test: Optional[str]=None, ind_validation:Optional[np.ndarray[bool]] = None,
                         target_label: str = "Target (-)", show: bool = False):
@@ -58,7 +58,7 @@ def plot_errors_climato(emulator: PySREmulator, X_train: np.ndarray | pd.DataFra
     plot_climatological_time_series(rcp_name_to_list_of_years_and_errors_and_color_and_label, errors_train, target_label,
                                     f'Error for', show)
 
-def compute_differences(emulator: PySREmulator, X: Optional[np.ndarray | pd.DataFrame], y: Optional[np.ndarray | pd.Series]) -> Optional[np.ndarray]:
+def compute_differences(emulator: PySREmulator, X: Optional[np.ndarray], y: Optional[np.ndarray]) -> Optional[np.ndarray]:
     if X is None:
         return None
     else:
