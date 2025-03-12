@@ -86,8 +86,8 @@ list_of_feature_selection_name_and_selected_features = [
 
 def get_X_y_variable_names() -> tuple[np.ndarray, np.ndarray, np.ndarray[str]]:
     filename = r"NPP_season.csv"
-    X, y, _, _, _, _, _, _, _, _, variable_names, _, ind_validation = load_dataset(filename)
-    X_train_train, y_train_train = get_X_and_y(X, y, ind_validation, validation_set=False)
+    X, y, _, _, _, _, _, _, _, _, variable_names, _, validation_mask = load_dataset(filename)
+    X_train_train, y_train_train = get_X_and_y(X, y, validation_mask, validation_set=False)
     return X_train_train, y_train_train, np.array(variable_names)
 
 @pytest.mark.parametrize("feature_selection_name_and_selected_features", list_of_feature_selection_name_and_selected_features)

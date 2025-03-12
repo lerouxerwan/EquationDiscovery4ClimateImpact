@@ -41,13 +41,13 @@ def load_split_name_to_X_and_y_and_y_predicted_and_years(emulator: PySREmulator,
     # Three splits for PySREmulatorWithSearch
     if isinstance(emulator, PySREmulatorWithSearch):
         #  Separate train data between train (train_train) and validation (train_validation) data
-        X_train_train, y_train_train = get_X_and_y(X_train, y_train, emulator.ind_validation_, False)
-        X_train_validation, y_train_validation = get_X_and_y(X_train, y_train, emulator.ind_validation_, True)
+        X_train_train, y_train_train = get_X_and_y(X_train, y_train, emulator.validation_mask_, False)
+        X_train_validation, y_train_validation = get_X_and_y(X_train, y_train, emulator.validation_mask_, True)
         #  Prepare ordered list with split_name, X, y and years
         split_names = SPLIT_NAMES
         X_list = [X_train_train, X_train_validation, X_test]
         y_list = [y_train_train, y_train_validation, y_test]
-        years_list = [years_train[~emulator.ind_validation_], years_train[emulator.ind_validation_], years_test]
+        years_list = [years_train[~emulator.validation_mask_], years_train[emulator.validation_mask_], years_test]
     # Two splits for PySREmulator
     elif isinstance(emulator, PySREmulator):
         split_names = SPLIT_NAMES[::2]

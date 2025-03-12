@@ -9,9 +9,9 @@ from data.utils_dataset.utils_dataset import load_dataset
 def main_analyze_best_results(nb_top_experiments: int = 5):
     #  Load dataset
     (X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, rcp_name_train, rcp_name_test,
-     variable_names, target_label, ind_validation) = load_dataset(filename_dataset_paper)
+     variable_names, target_label, validation_mask) = load_dataset(filename_dataset_paper)
     #  Get best search experiments
-    search_experiments = get_best_search_experiments(X_train, y_train, ind_validation, nb_top_experiments)
+    search_experiments = get_best_search_experiments(X_train, y_train, validation_mask, nb_top_experiments)
     print('Ranking of the best search experiments:')
     for rank, search_experiment in list(enumerate(search_experiments, 1))[::-1]:
         print(f'Rank #{rank} {search_experiment}')

@@ -4,24 +4,24 @@ import numpy as np
 import pandas as pd
 
 
-def compute_ind_validation(y_train: np.ndarray, validation_size: float, df: pd.DataFrame):
-    return _compute_ind_validation(len(y_train), validation_size, load_nb_historical_values(df))
+def compute_validation_mask(y_train: np.ndarray, validation_size: float, df: pd.DataFrame):
+    return _compute_validation_mask(len(y_train), validation_size, load_nb_historical_values(df))
 
 
-def _compute_ind_validation(length: int, validation_size: float, index_start_validation: int) -> np.ndarray[bool]:
-    """Compute an array of boolean such that ind_validation[i] = True if the index 'i' is in the validation set
+def _compute_validation_mask(length: int, validation_size: float, index_start_validation: int) -> np.ndarray[bool]:
+    """Compute an array of boolean such that validation_mask[i] = True if the index 'i' is in the validation set
     Parameters:
         length: int, length of the full time series
         validation_size: float, proportion (between 0 and 1) of data to include in the validation split
         index_start_validation: int, first index for the validation set
     Returns:
-        ind_validation: np.ndarray[bool], ind_validation[i] = True if the index 'i' is in the validation set"""
+        validation_mask: np.ndarray[bool], validation_mask[i] = True if the index 'i' is in the validation set"""
     validation_length = math.ceil(length * validation_size)
-    ind_validation = np.zeros(length).astype(bool)
+    validation_mask = np.zeros(length).astype(bool)
     index_end_validation = validation_length + index_start_validation
     assert (0 <= index_start_validation) and (index_end_validation <= length)
-    ind_validation[index_start_validation:index_end_validation] = True
-    return ind_validation
+    validation_mask[index_start_validation:index_end_validation] = True
+    return validation_mask
 
 
 def load_nb_historical_values(df: pd.DataFrame) -> int:

@@ -4,7 +4,7 @@ from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearc
 from emulator_with_search.utils_param_grid.utils_scaling_factor import get_param_grid
 from data.utils_search.utils_heredity_tree import add_heredity_link, \
     get_children, get_parent
-from tests.data.utils_tests_dataset import load_X_and_y_ind_validation_for_test
+from tests.data.utils_tests_dataset import load_X_and_y_and_validation_mask_for_test
 from tests.emulator.utils_tests_emulator import load_climate_impact_emulator_with_search_for_test, \
     run_three_main_functions_with_one_feature
 
@@ -47,12 +47,12 @@ def test_scaling_factor_for_grid_search():
 
 def test_search_experiment_tree():
     # Fit one emulator_parent and one emulator_child
-    X, y, ind_validation = load_X_and_y_ind_validation_for_test()
+    X, y, validation_mask = load_X_and_y_and_validation_mask_for_test()
     emulator_parent = PySREmulatorWithSearch(n_iter=1, scaling_factor=0, model_selection="custom", niterations=5)
-    emulator_parent.fit(X, y, ind_validation=ind_validation)
+    emulator_parent.fit(X, y, validation_mask=validation_mask)
     params_emulator_child = {**emulator_parent.search_experiment_.best_params, **{'adaptive_parsimony_scaling':500.}}
     emulator_child = PySREmulatorWithSearch(**params_emulator_child)
-    emulator_child.fit(X, y, ind_validation=ind_validation)
+    emulator_child.fit(X, y, validation_mask=validation_mask)
     # Add heredity link (create parent and children files)
     add_heredity_link(emulator_child.search_experiment_, emulator_parent.search_experiment_)
     # Test get functions for parent

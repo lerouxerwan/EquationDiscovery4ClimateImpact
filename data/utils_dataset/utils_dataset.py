@@ -7,7 +7,7 @@ import pandas as pd
 from pysr.utils import ArrayLike
 
 from data.utils_dataset.utils_units import load_units
-from data.utils_dataset.utils_validation import compute_ind_validation
+from data.utils_dataset.utils_validation import compute_validation_mask
 from utils.utils_path import DATASET_CSV_PATH
 
 
@@ -15,12 +15,12 @@ def load_dataset(filename_dataset: str, validation_size=0.3) -> tuple[np.ndarray
 Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, Optional[np.ndarray], str, Optional[str], list[str], str, np.ndarray[bool]]:
     """Load dataset parameters from a csv file, with X and y as ndarrays"""
     (X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, rcp_name_train, rcp_name_test,
-     variable_names, target_label, ind_validation) = _load_dataset_dataframe(filename_dataset, validation_size)
+     variable_names, target_label, validation_mask) = _load_dataset_dataframe(filename_dataset, validation_size)
     variable_names = X_train.columns.to_list()
     X_test_values = None if X_test is None else X_test.values
     y_test_values = None if y_test is None else y_test.values
     return (X_train.values, y_train.values, X_test_values, y_test_values, X_units, y_units,
-            years_train, years_test, rcp_name_train, rcp_name_test, variable_names, target_label, ind_validation)
+            years_train, years_test, rcp_name_train, rcp_name_test, variable_names, target_label, validation_mask)
 
 
 def _load_dataset_dataframe(filename_dataset: str, validation_size=0.3) -> tuple[pd.DataFrame, pd.Series, Optional[pd.DataFrame], Optional[pd.Series],
@@ -58,9 +58,9 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, Optional[np.ndar
     target_label = f'{target_name} ({'' if y_units is None else y_units[0]})'
     variable_names = None
     # Load index to create a validation split
-    ind_validation = compute_ind_validation(y_train, validation_size, df)
+    validation_mask = compute_validation_mask(y_train, validation_size, df)
     return (X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, rcp_name_train, rcp_name_test,
-            variable_names, target_label, ind_validation)
+            variable_names, target_label, validation_mask)
 
 
 if __name__ == '__main__':

@@ -52,7 +52,7 @@ class PySREmulatorWithSearch(PySREmulator):
             Hyperparameter are sampled in [default_value / scaling_factor, default * scaling_factor]
             Default is 10
     """
-    ind_validation_: Optional[np.ndarray[bool]]
+    validation_mask_: Optional[np.ndarray[bool]]
     search_experiment_: Optional[SearchExperiment]
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "custom", *,
@@ -182,33 +182,33 @@ class PySREmulatorWithSearch(PySREmulator):
                 (f"tournament_selection_n parameter (={self.tournament_selection_n}) "
                  f"must be smaller than the minimum population_size (={min_population_size})")
         # Create attributes
-        self.ind_validation_ = None
+        self.validation_mask_ = None
         self.search_experiment_ = None
 
     def fit(self, X: np.ndarray, y: np.ndarray, variable_names: ArrayLike[str] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
-            ind_validation: np.ndarray[bool] = None) -> "PySRRegressor":
+            validation_mask: np.ndarray[bool] = None) -> "PySRRegressor":
         """
         Fit where many hyperparameters settings are compared on a single validation set, and the hyperparameter
         setting that minimizes the validation error is selected
         Some arguments from the fit() method of PySR, are not yet handled (weights, Xresampled, ...)
         because we would need to modify search path for every variation of these arguments.
         We add one optional argument:
-             ind_validation: array of boolean s.t. ind_validation[i] indicates if the index 'i' is in the validation set
+             validation_mask: array of boolean s.t. validation_mask[i] indicates if the index 'i' is in the validation set
         """
         # Some standard checks
         assert X.shape[0] == y.shape[0]
         # Create
-        if ind_validation is None:
+        if validation_mask is None:
             # By default, create a random split with 30% and 70%
             indices = list(range(len(y)))
             _, indices_validation = train_test_split(np.array(indices), test_size=0.3, random_state=random_seed)
             indices_validation_set = set(indices_validation)
-            ind_validation = np.array([i in indices_validation_set for i in indices])
-        self.ind_validation_ =  ind_validation
+            validation_mask = np.array([i in indices_validation_set for i in indices])
+        self.validation_mask_ =  validation_mask
         # Compute a directory to save search results
         non_default_params = get_non_default_params(self)
-        search_path = get_search_path(X, y, self.ind_validation_, self.search_style, self.n_iter, non_default_params)
+        search_path = get_search_path(X, y, self.validation_mask_, self.search_style, self.n_iter, non_default_params)
         self.search_experiment_ = SearchExperiment(search_path)
         # Compute the attribute df_cv_results_ranked_, a Dataframe with the result of the hyperparameter search
         self.compute_df_cv_results_ranked(X, y, variable_names=variable_names,
@@ -218,7 +218,7 @@ class PySREmulatorWithSearch(PySREmulator):
         assert self.logger_spec is None
         self.set_params(**self.search_experiment_.best_params)
         self.logger_spec = self.search_experiment_.get_logger_spec(log_interval=1 * self.populations)
-        X_train_train, y_train_train = get_X_and_y(X, y, self.ind_validation_, validation_set=False)
+        X_train_train, y_train_train = get_X_and_y(X, y, self.validation_mask_, validation_set=False)
         super().fit(X_train_train, y_train_train, variable_names=variable_names, X_units=X_units,
                     y_units=y_units, use_cache=False)
         self.logger_spec = None
@@ -250,7 +250,7 @@ class PySREmulatorWithSearch(PySREmulator):
         assert df_cv_results_ranked[RANK_COLUMN_NAME].values[0] == 1
         # Add a column 'selected_expr' to df_cv_results_ranked
         emulator = self.load_climate_impact_emulator_with_same_attributes()
-        X_train_train, y_train_train = get_X_and_y(X, y, self.ind_validation_, validation_set=False)
+        X_train_train, y_train_train = get_X_and_y(X, y, self.validation_mask_, validation_set=False)
         selected_expressions = []
         for line, params in enumerate(df_cv_results_ranked["params"].values, 1):
                 key = get_key_for_cache_fit(X_train_train, y_train_train, emulator.set_params(**params).get_params())
@@ -269,7 +269,7 @@ class PySREmulatorWithSearch(PySREmulator):
         assert issubclass(search_cv_type, BaseSearchCV)
         search_cv = search_cv_type(estimator=self.load_climate_impact_emulator_with_same_attributes(),
                                    scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
-                                   cv=get_cv(self.ind_validation_), refit=False, return_train_score=True,
+                                   cv=get_cv(self.validation_mask_), refit=False, return_train_score=True,
                                    **get_search_cv_kwargs(search_cv_type, param_grid, self.n_iter))
         search_cv.fit(X, y, **params_fit)
         return search_cv

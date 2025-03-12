@@ -4,10 +4,10 @@ from scipy.stats import norm
 from utils.utils_run import random_seed
 
 
-def load_X_and_y_ind_validation_for_test(nb_features=1) -> tuple[np.ndarray, np.ndarray, np.ndarray[bool]]:
+def load_X_and_y_and_validation_mask_for_test(nb_features=1) -> tuple[np.ndarray, np.ndarray, np.ndarray[bool]]:
     X, y = load_X_and_y_for_test(nb_features)
-    ind_validation = np.array([i < 30 for i, _ in enumerate(y)])
-    return X, y, ind_validation
+    validation_mask = np.array([i < 30 for i, _ in enumerate(y)])
+    return X, y, validation_mask
 
 
 def load_X_and_y_for_test(nb_features=1) -> tuple[np.ndarray, np.ndarray]:

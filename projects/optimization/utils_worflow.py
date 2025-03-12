@@ -17,22 +17,22 @@ def workflow(dataset_filename: str, search_path_to_start_from: str | bool = Fals
     """
     # Load dataset
     (X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, rcp_name_train, rcp_name_test,
-     variable_names, target_label, ind_validation) = load_dataset(dataset_filename)
+     variable_names, target_label, validation_mask) = load_dataset(dataset_filename)
     # Start optimization from a previous search experiment
     if search_path_to_start_from:
         assert isinstance(search_path_to_start_from, str)
         if search_path_to_start_from == 'best':
-            search_experiment = get_best_search_experiment(X_train, y_train, ind_validation)
+            search_experiment = get_best_search_experiment(X_train, y_train, validation_mask)
         else:
             search_experiment = SearchExperiment(search_path_to_start_from)
         params_emulator = {**search_experiment.best_params, **params_emulator}
     # Fit emulator with search
     emulator = PySREmulatorWithSearch(**params_emulator)
     emulator.fit(X_train, y_train, variable_names=variable_names, X_units=X_units, y_units=y_units,
-                 ind_validation=ind_validation)
+                 validation_mask=validation_mask)
     #  Generate diagnosis plot
     plot_diagnosis_fit(emulator, X_train, y_train, X_test, y_test, years_train, years_test, rcp_name_train,
-                       rcp_name_test, ind_validation, target_label, False)
+                       rcp_name_test, validation_mask, target_label, False)
     plot_diagnosis_search(emulator.search_experiment_, False)
     # Add a child/parent link if 'search_path_to_start_from' was used
     if search_path_to_start_from:
