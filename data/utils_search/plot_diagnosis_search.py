@@ -2,17 +2,21 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from data.utils_search.search_experiment import SearchExperiment
+from emulator_with_search.utils_cv_results.utils_df_results import RMSE_VALIDATION_COLUMN_NAME, \
+    PARAMS_EMULATOR_COLUMN_NAME
+from utils.utils_log import log_info
 from utils.utils_plot import show_or_save_plot
 
 
 def plot_diagnosis_search(search_experiment: SearchExperiment, show: bool = False):
+    log_info('Start plot diagnosis search')
     plot_diagnosis_search_1d(search_experiment, show)
 
 def plot_diagnosis_search_1d(search_experiment: SearchExperiment, show: bool):
     """Plot the variation of RMSE validation for each hyperparameter in the param_grid"""
-    df = search_experiment.df_cv_results_ranked_and_augmented
-    params_list = df['params'].to_list()
-    metric_name = 'RMSE_validation'
+    df = search_experiment.df_cv_results
+    params_list = df[PARAMS_EMULATOR_COLUMN_NAME].to_list()
+    metric_name = RMSE_VALIDATION_COLUMN_NAME
     for param_name in search_experiment.get_combinations_of_param_names_in_param_grid(nb_elements=1):
         param_name = param_name[0]
         ax = plt.gca()

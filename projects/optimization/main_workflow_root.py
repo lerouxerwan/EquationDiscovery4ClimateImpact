@@ -2,19 +2,19 @@ from projects.optimization.utils_worflow import workflow
 from projects.paper.utils_paper import filename_dataset_paper
 
 
-def main_workflow_root():
+def main_workflow_root_one_hyperparameter_setting():
     params_emulator_root = {
         "n_iter": 1,
         "scaling_factor": 0,
         "model_selection": "custom",
     }
     # Run workflow for several number of features
-    workflow(filename_dataset_paper, **params_emulator_root)
+    workflow(filename_dataset_paper, False, **params_emulator_root)
 
 
-def main_workflow_root_random():
+def main_workflow_root_random_hyperparameter_settings():
     params_emulator_root = {
-        "n_iter": 1000,
+        "n_iter": 100,
         "scaling_factor": 2,
         "maxsize": 20,
         "population_size": 31,
@@ -39,6 +39,6 @@ def main_workflow_root_random():
 
 
 if __name__ == '__main__':
-    # main_workflow_root()
-    main_workflow_root_random()
+    # main_workflow_root_one_hyperparameter_setting()
+    main_workflow_root_random_hyperparameter_settings()
 

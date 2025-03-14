@@ -6,8 +6,9 @@ def main_workflow_child():
     search_path_to_start_from = 'best'
     # search_path_to_start_from = '/home/e23lerou/Documents/EquationDiscovery4ClimateImpact/data/search/6624636351014803864/random_1_nit100_100_sca0'
     params_emulator_child = {
-        "n_iter": 10,
+        "n_iter": 2,
         "scaling_factor": 1.2,
+        'param_list_to_optimize': ['populations', 'niterations', 'fraction_replaced_hof']
     }
     workflow(filename_dataset_paper, search_path_to_start_from, **params_emulator_child)
 

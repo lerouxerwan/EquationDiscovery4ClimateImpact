@@ -2,6 +2,7 @@ import json
 import os
 import os.path as op
 from dataclasses import dataclass
+from functools import cached_property
 from itertools import combinations
 from typing import Optional, Any
 
@@ -12,13 +13,15 @@ from sympy import Expr
 
 from data.utils_search.utils_search_path import CSV_FILENAME, \
     JSON_FILENAME, METRIC_COLUMN_NAME, CHILDREN_FILENAME, PARENT_FILENAME
+from emulator_with_search.utils_cv_results.utils_df_results import RMSE_VALIDATION_COLUMN_NAME, \
+    PARAMS_EMULATOR_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
 
 @dataclass
 class SearchExperiment(object):
-    """Handle results from search experiments (df_cv_results_ranked_, non default params, tensorboard logs)"""
+    """Handle results from search experiments (df_cv_results, non default params, tensorboard logs)"""
     search_path: str
 
     def __post_init__(self):
@@ -45,20 +48,18 @@ class SearchExperiment(object):
         return op.join(self.search_path, PARENT_FILENAME)
 
     @property
-    def df_cv_results_ranked_and_augmented(self) -> pd.DataFrame:
-        # log_info(f'Load search results from file: {self.filepath_search_result}')
-        df_cv_results_ranked = pd.read_csv(self.filepath_search_result, index_col=0)
-        df_cv_results_ranked['params'] = df_cv_results_ranked['params'].apply(string_to_dict)
-        df_cv_results_ranked['RMSE_validation'] = df_cv_results_ranked[METRIC_COLUMN_NAME].apply(lambda x: np.sqrt(-x))
-        return df_cv_results_ranked
+    def df_cv_results(self) -> pd.DataFrame:
+        df_cv_results = pd.read_csv(self.filepath_search_result, index_col=0)
+        df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].apply(string_to_dict)
+        return df_cv_results
 
-    @property
+    @cached_property
     def best_series(self) -> pd.Series:
-        return self.df_cv_results_ranked_and_augmented.iloc[0]
+        return self.df_cv_results.iloc[0]
 
     @property
     def best_params(self) -> dict[str, Any]:
-        return self.best_series.loc['params']
+        return self.best_series.loc[PARAMS_EMULATOR_COLUMN_NAME]
     
     @property
     def best_expr(self) -> Expr:
@@ -70,12 +71,12 @@ class SearchExperiment(object):
 
     @property
     def best_rmse_validation(self) -> float:
-        return self.best_series.loc['RMSE_validation']
+        return self.best_series.loc[RMSE_VALIDATION_COLUMN_NAME]
 
-    def save_search_results(self, df_cv_results_ranked: pd.DataFrame, non_default_params: dict[str, Any]) -> None:
+    def save_search_results(self, df_cv_results: pd.DataFrame, non_default_params: dict[str, Any]) -> None:
         log_info('Save search results to files')
-        #  Save a csv containing df_cv_results_ranked
-        df_cv_results_ranked.to_csv(self.filepath_search_result)
+        #  Save a csv containing df_cv_results
+        df_cv_results.to_csv(self.filepath_search_result)
         #  Save the associated json config file
         with open(self.filepath_non_default_params, 'w') as fp:
             json.dump(non_default_params, fp, sort_keys=True, indent=4)

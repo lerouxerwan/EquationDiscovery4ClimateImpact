@@ -1,27 +1,25 @@
 import os.path as op
-from typing import Literal, Callable, Optional, Any
+from typing import Literal, Callable, Optional
 
 import numpy as np
 import pandas as pd
 from pysr import AbstractExpressionSpec, AbstractLoggerSpec, PySRRegressor
 from pysr.utils import ArrayLike
 from sklearn.metrics import make_scorer, mean_squared_error
-from sklearn.model_selection import train_test_split
 from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
 from data.utils_dataset.utils_validation import compute_default_validation_mask
-from data.utils_search.utils_non_default_params import get_non_default_params
-from emulator.pysr_emulator import PySREmulator
-from emulator.utils_cache.utils_key import get_key_for_cache_fit
-from emulator_with_search.utils_param_grid.utils_search_style import search_style_to_search_cv_type
 from data.utils_search.search_experiment import SearchExperiment
-from data.utils_search.utils_search_path import RANK_COLUMN_NAME, get_search_path
-from emulator_with_search.utils_attributes.utils_search_cv import get_search_cv_kwargs
+from data.utils_search.utils_non_default_params import get_non_default_params
+from data.utils_search.utils_search_path import get_search_path
+from emulator.pysr_emulator import PySREmulator
 from emulator.utils_attributes.utils_threshold import get_param_grid_with_thresholds
+from emulator_with_search.utils_attributes.utils_search_cv import get_search_cv_kwargs
 from emulator_with_search.utils_attributes.utils_validation import get_cv, get_X_and_y
+from emulator_with_search.utils_cv_results.utils_df_results import get_df_cv_results
 from emulator_with_search.utils_param_grid.utils_scaling_factor import get_param_grid
+from emulator_with_search.utils_param_grid.utils_search_style import search_style_to_search_cv_type
 from utils.utils_log import log_info
-from utils.utils_run import random_seed
 
 
 class PySREmulatorWithSearch(PySREmulator):
@@ -222,16 +220,15 @@ class PySREmulatorWithSearch(PySREmulator):
         log_info(f'Run hyperparameter search with param grid = {self.param_grid}')
         non_default_params = get_non_default_params(self)
         search_experiment = SearchExperiment(get_search_path(X, y, self.validation_mask_, non_default_params))
-        # Compute search results only it has not yet been computed
+        # Compute and save search results only it has not yet been saved
         if not op.exists(search_experiment.filepath_search_result):
-            df_cv_results_ranked = self._compute_df_cv_results_ranked(X, y, **params_fit)
-            search_experiment.save_search_results(df_cv_results_ranked, non_default_params)
-        log_info(f'Best params from the hyperparameter search: {self.search_experiment_}')
+            search_experiment.save_search_results(self.compute_df_cv_results(X, y, **params_fit), non_default_params)
+        log_info(f'Best results from the hyperparameter search:\n{search_experiment}')
         return search_experiment
 
-    def _compute_df_cv_results_ranked(self, X: np.ndarray, y: np.ndarray, **params_fit) -> pd.DataFrame:
+    def compute_df_cv_results(self, X: np.ndarray, y: np.ndarray, **params_fit) -> pd.DataFrame:
         """Run 2 consecutive hyperparameter search (first search with search_style, then a grid search for thresholds)
-        and save the ranked results in the attribute df_cv_results_ranked"""
+        and return the results transformed as a DataFrame called df_cv_results"""
         log_info('Compute search results')
 
         # Hyperparameter search #1: Run hyperparameter search with respect to self.param_grid
@@ -250,44 +247,23 @@ class PySREmulatorWithSearch(PySREmulator):
         log_info('Start second hyperparameter search for threshold')
         search_cv = self.run_search_cv(GridSearchCV, X, y, get_param_grid_with_thresholds(search_cv), **params_fit)
 
-        #  Transform cv_results from cv_search into a Dataframe sorted by ranking
-        df_cv_results = pd.DataFrame(search_cv.cv_results_)
-        df_cv_results_ranked = df_cv_results.sort_values(by=RANK_COLUMN_NAME)
-        assert df_cv_results_ranked[RANK_COLUMN_NAME].values[0] == 1
-        # Add a column 'selected_expr' to df_cv_results_ranked
-        emulator = self.load_climate_impact_emulator_with_same_attributes()
+        #  Transform cv_results into a Dataframe sorted by ranking with additional columns
         X_train_train, y_train_train = get_X_and_y(X, y, self.validation_mask_, validation_set=False)
-        selected_expressions = []
-        selected_complexities = []
-        for line, params in enumerate(df_cv_results_ranked["params"].values, 1):
-                key = get_key_for_cache_fit(X_train_train, y_train_train, emulator.set_params(**params).get_params())
-                emulator.equations_ = self.cache[key][0]
-                try:
-                    selected_expr = emulator.selected_expr.copy()
-                    selected_complexity = emulator.selected_complexity
-                except TypeError:
-                    selected_expr = ""
-                    selected_complexity = ""
-                    # Check the reason of the type error (likely due to a selected expression that was a constant float)
-                    assert isinstance(emulator.selected_expr, float)
-                selected_expressions.append(selected_expr)
-                selected_complexities.append(selected_complexity)
-        df_cv_results_ranked['selected_expr'] = selected_expressions
-        df_cv_results_ranked['selected_complexity'] = selected_complexities
-        return df_cv_results_ranked
+        emulator = self.load_pysr_emulator_with_same_attributes()
+        return get_df_cv_results(search_cv.cv_results_, emulator, X_train_train, y_train_train)
 
     def run_search_cv(self, search_cv_type: type, X, y, param_grid: dict | list[dict], **params_fit):
         """Run hyperparameter search for a specific type of search (random, grid), a param_grid (all hyperparameters)
         and some parameters 'params_fit' that will be passed to the estimator"""
         assert issubclass(search_cv_type, BaseSearchCV)
-        search_cv = search_cv_type(estimator=self.load_climate_impact_emulator_with_same_attributes(),
+        search_cv = search_cv_type(estimator=self.load_pysr_emulator_with_same_attributes(),
                                    scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
                                    cv=get_cv(self.validation_mask_), refit=False, return_train_score=True,
                                    **get_search_cv_kwargs(search_cv_type, param_grid, self.n_iter))
         search_cv.fit(X, y, **params_fit)
         return search_cv
 
-    def load_climate_impact_emulator_with_same_attributes(self) -> PySREmulator:
+    def load_pysr_emulator_with_same_attributes(self) -> PySREmulator:
         """Load a climate_impact_emulator object with the same attributes as self,
         except additional attributes that are due to inheritance"""
         estimator = PySREmulator()
