@@ -9,6 +9,7 @@ from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
 
+from data.utils_dataset.utils_validation import compute_default_validation_mask
 from data.utils_search.utils_non_default_params import get_non_default_params
 from emulator.pysr_emulator import PySREmulator
 from emulator.utils_cache.utils_key import get_key_for_cache_fit
@@ -184,7 +185,6 @@ class PySREmulatorWithSearch(PySREmulator):
         # Create attributes
         self.validation_mask_ = None
         self.search_experiment_ = None
-        self.non_default_params_ = None
 
     def fit(self, X: np.ndarray, y: np.ndarray, variable_names: ArrayLike[str] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
@@ -197,25 +197,17 @@ class PySREmulatorWithSearch(PySREmulator):
         We add one optional argument:
              validation_mask: array of boolean s.t. validation_mask[i] indicates if the index 'i' is in the validation set
         """
-        # Some standard checks
-        assert X.shape[0] == y.shape[0]
-        # Compute validation_mask if is None
-        if validation_mask is None:
-            # By default, create a random split with 30% and 70%
-            indices = list(range(len(y)))
-            _, indices_validation = train_test_split(np.array(indices), test_size=0.3, random_state=random_seed)
-            indices_validation_set = set(indices_validation)
-            validation_mask = np.array([i in indices_validation_set for i in indices])
-        self.validation_mask_ =  validation_mask
-        # Create non default params
-        self.non_default_params_ = get_non_default_params(self)
-        # Create a search experiment
-        self.search_experiment_ = SearchExperiment(get_search_path(X, y, validation_mask, self.non_default_params_))
-        # Compute the attribute df_cv_results_ranked_, a Dataframe with the result of the hyperparameter search
-        self.compute_df_cv_results_ranked(X, y, variable_names=variable_names,
-                                          X_units=X_units, y_units=y_units, use_cache=True)
-        # Fit with the best setting of hyperparameter (best_params) on the train split
-        # By default, we log with tensorboard the progress of this fit iteration by iteration
+        # Set validation_mask
+        self.validation_mask_ =  compute_default_validation_mask(y) if validation_mask is None else validation_mask
+        # Run hyperparameter search experiment
+        self.search_experiment_ = self.run_hyperparameter_search(X, y, variable_names=variable_names,
+                                                                 X_units=X_units, y_units=y_units, use_cache=True)
+        # Fit with the best setting of hyperparameter on the train split
+        return self.fit_with_best_params(X, y, variable_names, X_units, y_units)
+
+    def fit_with_best_params(self, X: np.ndarray, y: np.ndarray, variable_names: ArrayLike[str] | None = None,
+            X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None):
+        #  By default, we log with tensorboard the progress of this fit iteration by iteration
         assert self.logger_spec is None
         self.set_params(**self.search_experiment_.best_params)
         self.logger_spec = self.search_experiment_.get_logger_spec(log_interval=1 * self.populations)
@@ -225,12 +217,17 @@ class PySREmulatorWithSearch(PySREmulator):
         self.logger_spec = None
         return self
 
-    def compute_df_cv_results_ranked(self, X: np.ndarray, y: np.ndarray, **params_fit) -> None:
-        """Run hyperparameter search to obtain df_cv_results_ranked, and save search results to file"""
+    def run_hyperparameter_search(self, X: np.ndarray, y: np.ndarray, **params_fit) -> SearchExperiment:
+        """Run hyperparameter search, save search results to file, and return search_experiment"""
+        log_info(f'Run hyperparameter search with param grid = {self.param_grid}')
+        non_default_params = get_non_default_params(self)
+        search_experiment = SearchExperiment(get_search_path(X, y, self.validation_mask_, non_default_params))
         # Compute search results only it has not yet been computed
-        if not op.exists(self.search_experiment_.filepath_search_result):
+        if not op.exists(search_experiment.filepath_search_result):
             df_cv_results_ranked = self._compute_df_cv_results_ranked(X, y, **params_fit)
-            self.search_experiment_.save_search_results(df_cv_results_ranked, self.non_default_params_)
+            search_experiment.save_search_results(df_cv_results_ranked, non_default_params)
+        log_info(f'Best params from the hyperparameter search: {self.search_experiment_}')
+        return search_experiment
 
     def _compute_df_cv_results_ranked(self, X: np.ndarray, y: np.ndarray, **params_fit) -> pd.DataFrame:
         """Run 2 consecutive hyperparameter search (first search with search_style, then a grid search for thresholds)
@@ -261,17 +258,22 @@ class PySREmulatorWithSearch(PySREmulator):
         emulator = self.load_climate_impact_emulator_with_same_attributes()
         X_train_train, y_train_train = get_X_and_y(X, y, self.validation_mask_, validation_set=False)
         selected_expressions = []
+        selected_complexities = []
         for line, params in enumerate(df_cv_results_ranked["params"].values, 1):
                 key = get_key_for_cache_fit(X_train_train, y_train_train, emulator.set_params(**params).get_params())
                 emulator.equations_ = self.cache[key][0]
                 try:
                     selected_expr = emulator.selected_expr.copy()
+                    selected_complexity = emulator.selected_complexity
                 except TypeError:
                     selected_expr = ""
+                    selected_complexity = ""
                     # Check the reason of the type error (likely due to a selected expression that was a constant float)
                     assert isinstance(emulator.selected_expr, float)
                 selected_expressions.append(selected_expr)
+                selected_complexities.append(selected_complexity)
         df_cv_results_ranked['selected_expr'] = selected_expressions
+        df_cv_results_ranked['selected_complexity'] = selected_complexities
         return df_cv_results_ranked
 
     def run_search_cv(self, search_cv_type: type, X, y, param_grid: dict | list[dict], **params_fit):

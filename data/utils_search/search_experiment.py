@@ -45,7 +45,7 @@ class SearchExperiment(object):
         return op.join(self.search_path, PARENT_FILENAME)
 
     @property
-    def df_cv_results_ranked_augmented(self) -> pd.DataFrame:
+    def df_cv_results_ranked_and_augmented(self) -> pd.DataFrame:
         # log_info(f'Load search results from file: {self.filepath_search_result}')
         df_cv_results_ranked = pd.read_csv(self.filepath_search_result, index_col=0)
         df_cv_results_ranked['params'] = df_cv_results_ranked['params'].apply(string_to_dict)
@@ -54,7 +54,7 @@ class SearchExperiment(object):
 
     @property
     def best_series(self) -> pd.Series:
-        return self.df_cv_results_ranked_augmented.iloc[0]
+        return self.df_cv_results_ranked_and_augmented.iloc[0]
 
     @property
     def best_params(self) -> dict[str, Any]:
@@ -63,6 +63,10 @@ class SearchExperiment(object):
     @property
     def best_expr(self) -> Expr:
         return self.best_series.loc["selected_expr"]
+
+    @property
+    def best_complexity(self) -> int:
+        return self.best_series.loc["selected_complexity"]
 
     @property
     def best_rmse_validation(self) -> float:
@@ -87,7 +91,8 @@ class SearchExperiment(object):
 
 
     def __str__(self):
-        return f' RMSE Validation={round(self.best_rmse_validation, 3)} with {self.best_expr} for {self.best_params}'
+        return (f' RMSE Validation={round(self.best_rmse_validation, 3)} with equation of complexity {self.best_complexity}: {self.best_expr}\n '
+                f'using the hyperparameters: {self.best_params}')
 
     """Tensorboard Logging"""
 

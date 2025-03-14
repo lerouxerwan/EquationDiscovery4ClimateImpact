@@ -10,7 +10,7 @@ def plot_diagnosis_search(search_experiment: SearchExperiment, show: bool = Fals
 
 def plot_diagnosis_search_1d(search_experiment: SearchExperiment, show: bool):
     """Plot the variation of RMSE validation for each hyperparameter in the param_grid"""
-    df = search_experiment.df_cv_results_ranked_augmented
+    df = search_experiment.df_cv_results_ranked_and_augmented
     params_list = df['params'].to_list()
     metric_name = 'RMSE_validation'
     for param_name in search_experiment.get_combinations_of_param_names_in_param_grid(nb_elements=1):

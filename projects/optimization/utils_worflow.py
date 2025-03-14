@@ -30,7 +30,6 @@ def workflow(dataset_filename: str, search_path_to_start_from: str | bool = Fals
         params_emulator = {**search_experiment.best_params, **params_emulator}
     # Fit emulator with search
     emulator = PySREmulatorWithSearch(**params_emulator)
-    log_info(f'Param grid to optimize emulator = {emulator.param_grid}')
     emulator.fit(X_train, y_train, variable_names=variable_names, X_units=X_units, y_units=y_units,
                  validation_mask=validation_mask)
     #  Generate diagnosis plot
