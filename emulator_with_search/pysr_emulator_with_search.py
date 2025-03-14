@@ -236,15 +236,23 @@ class PySREmulatorWithSearch(PySREmulator):
         """Run 2 consecutive hyperparameter search (first search with search_style, then a grid search for thresholds)
         and save the ranked results in the attribute df_cv_results_ranked"""
         log_info('Compute search results')
-        #  Run hyperparameter search with respect to self.param_grid
+
+        # Hyperparameter search #1: Run hyperparameter search with respect to self.param_grid
         log_info('Start first hyperparameter search')
         search_cv_type = search_style_to_search_cv_type[self.search_style]
         search_cv = self.run_search_cv(search_cv_type, X, y, self.param_grid, **params_fit)
-        assert len(self.cache) > 0
-        # Run a grid search that extends the first hyperparameter search with a list of thresholds to try.
+        # Check that the cache contains one result for each hyperparameter
+        assert len(self.cache) == (self.n_iter if self.search_style == "random" else len(self.param_grid)), \
+            ("Cache contains less results than expected, "
+             "Check that param_grid does not contain duplicate (for grid search)"
+             "or that the intervals in param grid are wide enough (for random search). "
+             f"For your information: param_grid={self.param_grid}")
+
+        # Hyperparameter search #2: Run a grid search that extends the first search with a list of thresholds to try.
         # This additional grid search for the threshold cost almost nothing because fit results have been cached
         log_info('Start second hyperparameter search for threshold')
         search_cv = self.run_search_cv(GridSearchCV, X, y, get_param_grid_with_thresholds(search_cv), **params_fit)
+
         #  Transform cv_results from cv_search into a Dataframe sorted by ranking
         df_cv_results = pd.DataFrame(search_cv.cv_results_)
         df_cv_results_ranked = df_cv_results.sort_values(by=RANK_COLUMN_NAME)

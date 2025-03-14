@@ -35,7 +35,7 @@ def main_workflow_root_random():
                                    "probability_negate_constant", "tournament_selection_n"]
     }
     # Run workflow for several number of features
-    workflow(filename_dataset_paper, **params_emulator_root)
+    workflow(filename_dataset_paper, False, **params_emulator_root)
 
 
 if __name__ == '__main__':

@@ -56,6 +56,7 @@ class PySREmulator(PySRRegressor):
     -
     """
     cache = {}
+    cache_duplicate_features = {}
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
@@ -196,11 +197,11 @@ class PySREmulator(PySRRegressor):
         log_info(f'Number of features: {X.shape[1]}')
         if self.remove_duplicate_features:
             key_duplicate = get_key_for_cache_duplicate(X, y, self.duplicate_feature_threshold)
-            if key_duplicate in self.cache:
-                self.duplicate_mask_ = self.cache[key_duplicate].copy()
+            if key_duplicate in self.cache_duplicate_features:
+                self.duplicate_mask_ = self.cache_duplicate_features[key_duplicate].copy()
             else:
                 self.duplicate_mask_ = np.array(compute_duplicate_mask(X, y, self.duplicate_feature_threshold))
-                self.cache[key_duplicate] = self.duplicate_mask_.copy()
+                self.cache_duplicate_features[key_duplicate] = self.duplicate_mask_.copy()
             if variable_names is not None:
                 variable_names = list(np.array(variable_names)[self.duplicate_mask_])
             if X_units is not None:
