@@ -9,12 +9,12 @@ def main_workflow_root_one_hyperparameter_setting():
         "model_selection": "custom",
     }
     # Run workflow for several number of features
-    workflow(filename_dataset_paper, False, **params_emulator_root)
+    workflow(filename_dataset_paper, **params_emulator_root)
 
 
 def main_workflow_root_random_hyperparameter_settings():
     params_emulator_root = {
-        "n_iter": 100,
+        "n_iter": 1000,
         "scaling_factor": 2,
         "maxsize": 20,
         "population_size": 31,
@@ -35,7 +35,7 @@ def main_workflow_root_random_hyperparameter_settings():
                                    "probability_negate_constant", "tournament_selection_n"]
     }
     # Run workflow for several number of features
-    workflow(filename_dataset_paper, False, **params_emulator_root)
+    workflow(filename_dataset_paper, **params_emulator_root)
 
 
 if __name__ == '__main__':
