@@ -18,10 +18,7 @@ from sklearn.utils.validation import _check_method_params
 
 
 class BaseSearchCVPySR(BaseSearchCV):
-    """The only change is that for the variable 'fit_and_score_kwargs' we set:
-        return_parameters = True
-        return_estimators = True
-    """
+    """The only change is that for the variable 'fit_and_score_kwargs' we set 'return_estimators = True'    """
 
     @_fit_context(
         # *SearchCV.estimator is not validated yet
@@ -83,7 +80,7 @@ class BaseSearchCVPySR(BaseSearchCV):
             return_train_score=self.return_train_score,
             return_n_test_samples=True,
             return_times=True,
-            return_parameters=True,
+            return_parameters=False,
             return_estimator=True,
             error_score=self.error_score,
             verbose=self.verbose,
@@ -302,9 +299,8 @@ class BaseSearchCVPySR(BaseSearchCV):
                     train_scores_dict[scorer_name],
                     splits=True,
                 )
-        # Store parameters and estimator
-        for key in ['parameters', 'estimator']:
-            results[key] = out[key]
+        # Save estimator
+        results['estimator'] = out['estimator']
 
         return results
 

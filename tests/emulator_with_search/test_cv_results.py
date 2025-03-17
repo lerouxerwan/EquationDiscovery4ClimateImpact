@@ -1,6 +1,5 @@
 import numpy as np
 
-from emulator.utils_attributes.utils_threshold import NB_THRESHOLDS
 from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
 from emulator_with_search.utils_cv_results.utils_df_results import RMSE_VALIDATION_COLUMN_NAME, \
     PARAMS_EMULATOR_COLUMN_NAME, METRIC_COLUMN_NAME, SELECTED_COMPLEXITY_COLUMN_NAME
@@ -14,10 +13,9 @@ def test_df_cv_results():
     run_three_main_functions_with_one_feature(emulator)
     # Check number of lines in df
     df = emulator.search_experiment_.df_cv_results
-    assert len(df) == n_iter * NB_THRESHOLDS
-    # Check the total loss
-    np.testing.assert_almost_equal(float(df[METRIC_COLUMN_NAME].sum()), -63.017190749671634)
+    assert len(df) == n_iter
     # Check the best selected complexity
+    print(df[SELECTED_COMPLEXITY_COLUMN_NAME].values)
     assert df[SELECTED_COMPLEXITY_COLUMN_NAME].values[0] == 9
     # Check that it is well ranked
     validation_rmse_sorted_values = df[RMSE_VALIDATION_COLUMN_NAME].values

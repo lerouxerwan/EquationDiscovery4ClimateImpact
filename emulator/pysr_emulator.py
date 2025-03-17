@@ -1,5 +1,5 @@
 import copy
-from typing import Literal, Callable, cast
+from typing import Literal, Callable, cast, Any
 
 import numpy as np
 import pandas as pd
@@ -45,7 +45,6 @@ class PySREmulator(PySRRegressor):
         -cache: a dictionary to store intermediary results
     -
     """
-    cache = {}
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
@@ -164,50 +163,42 @@ class PySREmulator(PySRRegressor):
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
 
-    def fit(self, X: np.ndarray, y: np.ndarray, variable_names: ArrayLike[str] | None = None,
+    def fit(self, X, y, *, Xresampled=None, weights=None, variable_names: ArrayLike[str] | None = None,
+            complexity_of_variables: int | float | list[int | float] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
-            use_cache: bool = False) -> "PySRRegressor":
-        """
-        Some arguments from the fit() method of PySR, are not handled (weights, Xresampled, ...)
-        We add one argument:
-             use_cache: bool; whether fit results should be saved to/loaded from cache; Default is False
-        """
-        key = get_key_for_cache_fit(X, y, self.get_params())
+            category: ndarray | None = None) -> "PySRRegressor":
+        # For simplicity, the code only handles X and y as numpy arrays, not as dataframes
+        assert isinstance(X, np.ndarray)
+        assert isinstance(y, np.ndarray)
         # Apply data augmentation
         if self.data_augmentation_ratio > 1:
             X, y = apply_data_augmentation(X, y, self.data_augmentation_ratio, self.data_augmentation_sigma)
         # Compute weights
-        weights = get_weights(y, self.weighted_loss_ratio) if self.weighted_loss_ratio > 1. else None
-        # Fit using cache or without using it
-        if use_cache:
-            if key in self.cache:
-                log_info('Load from cache')
-                (self.equations_, self.nout_, self.selection_mask_, self.julia_state_stream_,
-                 self.julia_options_stream_, self.X_units_, self.y_units_, self.feature_names_in_) = self.cache[key]
-            else:
-                super().fit(X, y, weights=weights, variable_names=variable_names, X_units=X_units, y_units=y_units)
-                attributes = (self.equations_.copy(), self.nout_, self.selection_mask_, self.julia_state_stream_.copy(),
-                              self.julia_options_stream_.copy(), self.X_units_, self.y_units_, self.feature_names_in_.copy())
-                log_info('Save to cache')
-                self.cache[key] = attributes
-            return self
-        else:
-            return super().fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
+        if self.weighted_loss_ratio > 1.:
+            assert weights is None, "two weights are provided (one with the fit method, one with the __init__ method)"
+            weights = get_weights(y, self.weighted_loss_ratio)
+        return super().fit(X, y, Xresampled=Xresampled, weights=weights, variable_names=variable_names,
+                           complexity_of_variables=complexity_of_variables, X_units=X_units, y_units=y_units,
+                           category=category)
 
     def predict(self, X: np.ndarray, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
         return super().predict(X, index, category=category)
 
+    def compute_loss(self, X: np.ndarray, y: np.ndarray, metric=Metric.MSE) -> float:
+        """Compute loss for the selected function"""
+        return self._compute_loss(y, self.predict(X), metric)
+
     def compute_loss_list(self, X: np.ndarray, y: np.ndarray, metric=Metric.MSE) -> list[float]:
         """Compute a list of loss: one loss for every equation of the Pareto optimal set of equations"""
+        return [self._compute_loss(y, y_predicted, metric) for y_predicted in self.compute_y_predicted_list(X)]
+
+    @staticmethod
+    def _compute_loss(y_true, y_predicted, metric: Metric):
         loss_function = metric_to_function[metric]
-        loss = []
-        for y_predicted in self.compute_y_predicted_list(X):
-            try:
-                res = loss_function(y_true=y, y_pred=y_predicted)
-            except ValueError:
-                res = np.nan
-            loss.append(res)
-        return loss
+        try:
+            return loss_function(y_true=y_true, y_pred=y_predicted)
+        except ValueError:
+            return  np.nan
 
     def compute_y_predicted_list(self, X: np.ndarray) -> list[np.ndarray]:
         """Compute predicted vector for every equation of the Pareto front"""

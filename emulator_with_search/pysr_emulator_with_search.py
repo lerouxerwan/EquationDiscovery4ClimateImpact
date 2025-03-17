@@ -3,23 +3,25 @@ from typing import Literal, Callable, Optional
 
 import numpy as np
 import pandas as pd
+from numpy import ndarray
 from pysr import AbstractExpressionSpec, AbstractLoggerSpec, PySRRegressor
 from pysr.utils import ArrayLike
 from sklearn.metrics import make_scorer, mean_squared_error
-from sklearn.model_selection._search import BaseSearchCV, GridSearchCV
+from sklearn.model_selection._search import BaseSearchCV
 
 from data.utils_dataset.utils_validation import compute_default_validation_mask
 from data.utils_search.search_experiment import SearchExperiment
 from data.utils_search.utils_non_default_params import get_non_default_params
 from data.utils_search.utils_search_path import get_search_path
 from emulator.pysr_emulator import PySREmulator
-from emulator.utils_attributes.utils_threshold import get_param_grid_with_thresholds
+from emulator.utils_metric.metric import Metric, metric_to_function
 from emulator_with_search.utils_attributes.utils_search_cv import get_search_cv_kwargs
 from emulator_with_search.utils_attributes.utils_validation import get_cv, get_X_and_y
-from emulator_with_search.utils_cv_results.utils_df_results import get_df_cv_results
+from emulator_with_search.utils_cv_results.utils_df_results import get_df_cv_results, METRIC_COLUMN_NAME, \
+    RMSE_VALIDATION_COLUMN_NAME
+from emulator_with_search.utils_cv_results.utils_optimize_threshold import compute_optimal_threshold
 from emulator_with_search.utils_param_grid.utils_scaling_factor import get_param_grid
 from emulator_with_search.utils_param_grid.utils_search_style import search_style_to_search_cv_type
-from emulator_with_search.utils_search.base_search_cv_pysr import GridSearchPySR
 from utils.utils_log import log_info
 
 
@@ -182,9 +184,10 @@ class PySREmulatorWithSearch(PySREmulator):
         self.validation_mask_ = None
         self.search_experiment_ = None
 
-    def fit(self, X: np.ndarray, y: np.ndarray, variable_names: ArrayLike[str] | None = None,
+    def fit(self, X, y, *, Xresampled=None, weights=None, variable_names: ArrayLike[str] | None = None,
+            complexity_of_variables: int | float | list[int | float] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
-            validation_mask: np.ndarray[bool] = None) -> "PySRRegressor":
+            category: ndarray | None = None, validation_mask: np.ndarray[bool] = None) -> "PySRRegressor":
         """
         Fit where many hyperparameters settings are compared on a single validation set, and the hyperparameter
         setting that minimizes the validation error is selected
@@ -197,19 +200,17 @@ class PySREmulatorWithSearch(PySREmulator):
         self.validation_mask_ =  compute_default_validation_mask(y) if validation_mask is None else validation_mask
         # Run hyperparameter search experiment
         self.search_experiment_ = self.run_hyperparameter_search(X, y, variable_names=variable_names,
-                                                                 X_units=X_units, y_units=y_units, use_cache=True)
+                                                                 X_units=X_units, y_units=y_units)
         # Fit with the best setting of hyperparameter on the train split
-        return self.fit_with_best_params(X, y, variable_names, X_units, y_units)
+        return self.fit_with_best_params(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
-    def fit_with_best_params(self, X: np.ndarray, y: np.ndarray, variable_names: ArrayLike[str] | None = None,
-            X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None):
+    def fit_with_best_params(self, X: np.ndarray, y: np.ndarray, **params_fit):
         #  By default, we log with tensorboard the progress of this fit iteration by iteration
         assert self.logger_spec is None
         self.set_params(**self.search_experiment_.best_params)
         self.logger_spec = self.search_experiment_.get_logger_spec(log_interval=1 * self.populations)
         X_train_train, y_train_train = get_X_and_y(X, y, self.validation_mask_, validation_set=False)
-        super().fit(X_train_train, y_train_train, variable_names=variable_names, X_units=X_units,
-                    y_units=y_units, use_cache=False)
+        super().fit(X_train_train, y_train_train, **params_fit)
         self.logger_spec = None
         return self
 
@@ -225,19 +226,26 @@ class PySREmulatorWithSearch(PySREmulator):
         return search_experiment
 
     def compute_df_cv_results(self, X: np.ndarray, y: np.ndarray, **params_fit) -> pd.DataFrame:
-        """Run 2 consecutive hyperparameter search (first search with search_style, then a grid search for thresholds)
-        and return the results transformed as a DataFrame called df_cv_results"""
+        """Run  hyperparameter search and return the results transformed as a DataFrame called df_cv_results"""
         log_info('Compute search results')
 
-        # Hyperparameter search #1: Run hyperparameter search with respect to self.param_grid
-        log_info('Start first hyperparameter search')
+        # Run hyperparameter search with respect to self.param_grid
+        log_info('Start hyperparameter search')
         search_cv_type = search_style_to_search_cv_type[self.search_style]
         search_cv = self.run_search_cv(search_cv_type, X, y, self.param_grid, **params_fit)
 
-        # Hyperparameter search #2: Run a grid search that extends the first search with a list of thresholds to try.
-        # This additional grid search for the threshold cost almost nothing because fit results have been cached
-        log_info('Start second hyperparameter search for threshold')
-        search_cv = self.run_search_cv(GridSearchPySR, X, y, get_param_grid_with_thresholds(search_cv), **params_fit)
+        # Compute optimal threshold for each emulator
+        log_info('Compute optimal threshold')
+        X_validation, y_validation = get_X_and_y(X, y, self.validation_mask_, validation_set=True)
+        emulators = search_cv.cv_results_['estimator']
+        for j, emulator in enumerate(emulators):
+            assert isinstance(emulator, PySREmulator)
+            optimal_threshold = compute_optimal_threshold(emulator, X_validation, y_validation)
+            emulator.threshold_for_model_selection = optimal_threshold
+            search_cv.cv_results_['params'][j]['threshold_for_model_selection'] = optimal_threshold
+        # Add RMSE validation information
+        rmse_validation_list = [emulator.compute_loss(X_validation, y_validation, Metric.RMSE) for emulator in emulators]
+        search_cv.cv_results_[RMSE_VALIDATION_COLUMN_NAME] = rmse_validation_list
 
         #  Transform cv_results into a Dataframe sorted by ranking with additional columns
         return get_df_cv_results(search_cv.cv_results_)
@@ -248,13 +256,13 @@ class PySREmulatorWithSearch(PySREmulator):
         assert issubclass(search_cv_type, BaseSearchCV)
         search_cv = search_cv_type(estimator=self.load_pysr_emulator_with_same_attributes(),
                                    scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
-                                   cv=get_cv(self.validation_mask_), refit=False, return_train_score=True,
+                                   cv=get_cv(self.validation_mask_), refit=False, return_train_score=False,
                                    **get_search_cv_kwargs(search_cv_type, param_grid, self.n_iter))
         search_cv.fit(X, y, **params_fit)
         return search_cv
 
     def load_pysr_emulator_with_same_attributes(self) -> PySREmulator:
-        """Load a climate_impact_emulator object with the same attributes as self,
+        """Load a pysr_emulator object with the same attributes as self,
         except additional attributes that are due to inheritance"""
         estimator = PySREmulator()
         params = self.get_params()
