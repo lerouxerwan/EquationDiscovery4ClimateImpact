@@ -12,12 +12,9 @@ from sympy import Expr
 
 from emulator.utils_attributes.utils_data_augmentation import apply_data_augmentation
 from emulator.utils_attributes.utils_feature_selection import get_selection_mask
-from emulator.utils_attributes.utils_remove_duplicates import compute_duplicate_mask
 from emulator.utils_attributes.utils_weighted_loss import get_weights
-from emulator.utils_cache.utils_key import get_key_for_cache_duplicate, \
-    get_key_for_cache_fit
+from emulator.utils_cache.utils_key import get_key_for_cache_fit
 from emulator.utils_metric.metric import Metric, metric_to_function
-from emulator_with_search.utils_attributes.utils_validation import apply_mask
 from utils.utils_log import log_info
 from utils.utils_run import random_seed
 
@@ -33,13 +30,6 @@ class PySREmulator(PySRRegressor):
             Name of the feature selection to use if select_k_features is not None
             Default is PySRDefault (the default feature selection used in PySR)
     including some potential contributions/tricks that are deactivated by default
-        remove_duplicate_features: bool
-            Boolean that indicates whether to remove duplicate features.
-            Default is False
-        duplicate_feature_threshold: float
-            Threshold between 0 and 1 to remove duplicate features. If the absolute correlation between the two features
-            is above this threshold, we keep the feature that has the best absolute correlation w.r.t. the target
-            Default is 0.9
         data_augmentation_ratio: int
             Number of times the number of datapoints augments with data augmentation
             Default is 1, i.e. no data augmentation
@@ -56,7 +46,6 @@ class PySREmulator(PySRRegressor):
     -
     """
     cache = {}
-    cache_duplicate_features = {}
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
@@ -105,8 +94,6 @@ class PySREmulator(PySRRegressor):
                  # Additional attributes
                  threshold_for_model_selection: float = 1.5,
                  feature_selection_name: str = 'PySRDefault',
-                 remove_duplicate_features: bool = False,
-                 duplicate_feature_threshold: float = 0.9,
                  data_augmentation_ratio: int = 1,
                  data_augmentation_sigma: float = 1.0,
                  weighted_loss_ratio: float = 1.0,
@@ -163,26 +150,19 @@ class PySREmulator(PySRRegressor):
                          **kwargs)
         self.threshold_for_model_selection = threshold_for_model_selection
         self.feature_selection_name = feature_selection_name
-        self.remove_duplicate_features = remove_duplicate_features
-        self.duplicate_feature_threshold = duplicate_feature_threshold
         self.data_augmentation_ratio = data_augmentation_ratio
         self.data_augmentation_sigma = data_augmentation_sigma
         self.weighted_loss_ratio = weighted_loss_ratio
         assert isinstance(self.threshold_for_model_selection, float)
         assert self.threshold_for_model_selection >= 1.
         assert isinstance(self.feature_selection_name, str)
-        assert isinstance(self.remove_duplicate_features, bool)
-        assert isinstance(self.duplicate_feature_threshold, float)
         assert isinstance(self.data_augmentation_ratio, int)
         assert isinstance(self.data_augmentation_sigma, float)
         assert isinstance(self.weighted_loss_ratio, float)
         assert self.weighted_loss_ratio >= 1.
-        assert 0 < self.duplicate_feature_threshold <= 1.
         # Change default dimensional_constraint_penalty
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
-        # Create empty duplicate_mask
-        self.duplicate_mask_ = None
 
     def fit(self, X: np.ndarray, y: np.ndarray, variable_names: ArrayLike[str] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
@@ -193,21 +173,6 @@ class PySREmulator(PySRRegressor):
              use_cache: bool; whether fit results should be saved to/loaded from cache; Default is False
         """
         key = get_key_for_cache_fit(X, y, self.get_params())
-        # Compute and apply duplicate mask
-        log_info(f'Number of features: {X.shape[1]}')
-        if self.remove_duplicate_features:
-            key_duplicate = get_key_for_cache_duplicate(X, y, self.duplicate_feature_threshold)
-            if key_duplicate in self.cache_duplicate_features:
-                self.duplicate_mask_ = self.cache_duplicate_features[key_duplicate].copy()
-            else:
-                self.duplicate_mask_ = np.array(compute_duplicate_mask(X, y, self.duplicate_feature_threshold))
-                self.cache_duplicate_features[key_duplicate] = self.duplicate_mask_.copy()
-            if variable_names is not None:
-                variable_names = list(np.array(variable_names)[self.duplicate_mask_])
-            if X_units is not None:
-                X_units = [str(v) for v in np.array(X_units)[self.duplicate_mask_]]
-            X = apply_mask(X, self.duplicate_mask_)
-            log_info(f'Number of features after removing duplicates: {X.shape[1]}')
         # Apply data augmentation
         if self.data_augmentation_ratio > 1:
             X, y = apply_data_augmentation(X, y, self.data_augmentation_ratio, self.data_augmentation_sigma)
@@ -230,8 +195,6 @@ class PySREmulator(PySRRegressor):
             return super().fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
     def predict(self, X: np.ndarray, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
-        if self.remove_duplicate_features:
-            X = apply_mask(X, self.duplicate_mask_)
         return super().predict(X, index, category=category)
 
     def compute_loss_list(self, X: np.ndarray, y: np.ndarray, metric=Metric.MSE) -> list[float]:

@@ -100,8 +100,6 @@ class PySREmulatorWithSearch(PySREmulator):
                  extra_jax_mappings: dict[Callable, str] | None = None, denoise: bool = False,
                  select_k_features: int | None = None, threshold_for_model_selection: float = 1.5,
                  feature_selection_name: str = 'PySRDefault',
-                 remove_duplicate_features: bool = False,
-                 duplicate_feature_threshold: float = 0.9,
                  data_augmentation_ratio: int = 1,
                  data_augmentation_sigma: float = 1.0,
                  weighted_loss_ratio: float = 1.0,
@@ -155,7 +153,6 @@ class PySREmulatorWithSearch(PySREmulator):
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          threshold_for_model_selection=threshold_for_model_selection,
                          feature_selection_name=feature_selection_name,
-                         remove_duplicate_features=remove_duplicate_features, duplicate_feature_threshold=duplicate_feature_threshold,
                          data_augmentation_ratio=data_augmentation_ratio, data_augmentation_sigma=data_augmentation_sigma,
                          weighted_loss_ratio=weighted_loss_ratio,
                          **kwargs)

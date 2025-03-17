@@ -103,12 +103,6 @@ def test_feature_selection(feature_selection_name_and_selected_features):
     # Check that selected features are as expected
     assert list(variable_names[selection_mask]) == list(selected_features_expected)
 
-def test_remove_duplicate_feature():
-    emulator = load_climate_impact_emulator_for_test(remove_duplicate_features=True)
-    X_train_train, y_train_train, _ = get_X_y_variable_names()
-    run_three_main_functions(emulator, X_train_train, y_train_train)
-    assert int(emulator.duplicate_mask_.sum()) == 141
-
 @pytest.mark.parametrize("data_augmentation_ratio", [2, 3])
 def test_data_augmentation(data_augmentation_ratio: int):
     X, y = load_X_and_y_for_test()
