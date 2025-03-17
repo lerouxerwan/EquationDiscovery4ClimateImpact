@@ -19,6 +19,7 @@ from emulator_with_search.utils_attributes.utils_validation import get_cv, get_X
 from emulator_with_search.utils_cv_results.utils_df_results import get_df_cv_results
 from emulator_with_search.utils_param_grid.utils_scaling_factor import get_param_grid
 from emulator_with_search.utils_param_grid.utils_search_style import search_style_to_search_cv_type
+from emulator_with_search.utils_search.base_search_cv_pysr import GridSearchPySR
 from utils.utils_log import log_info
 
 
@@ -235,22 +236,14 @@ class PySREmulatorWithSearch(PySREmulator):
         log_info('Start first hyperparameter search')
         search_cv_type = search_style_to_search_cv_type[self.search_style]
         search_cv = self.run_search_cv(search_cv_type, X, y, self.param_grid, **params_fit)
-        # Check that the cache contains one result for each hyperparameter
-        assert len(self.cache) == (self.n_iter if self.search_style == "random" else len(self.param_grid)), \
-            ("Cache contains less results than expected, "
-             "Check that param_grid does not contain duplicate (for grid search)"
-             "or that the intervals in param grid are wide enough (for random search). "
-             f"For your information: param_grid={self.param_grid}")
 
         # Hyperparameter search #2: Run a grid search that extends the first search with a list of thresholds to try.
         # This additional grid search for the threshold cost almost nothing because fit results have been cached
         log_info('Start second hyperparameter search for threshold')
-        search_cv = self.run_search_cv(GridSearchCV, X, y, get_param_grid_with_thresholds(search_cv), **params_fit)
+        search_cv = self.run_search_cv(GridSearchPySR, X, y, get_param_grid_with_thresholds(search_cv), **params_fit)
 
         #  Transform cv_results into a Dataframe sorted by ranking with additional columns
-        X_train_train, y_train_train = get_X_and_y(X, y, self.validation_mask_, validation_set=False)
-        emulator = self.load_pysr_emulator_with_same_attributes()
-        return get_df_cv_results(search_cv.cv_results_, emulator, X_train_train, y_train_train)
+        return get_df_cv_results(search_cv.cv_results_)
 
     def run_search_cv(self, search_cv_type: type, X, y, param_grid: dict | list[dict], **params_fit):
         """Run hyperparameter search for a specific type of search (random, grid), a param_grid (all hyperparameters)
