@@ -5,5 +5,6 @@ random_seed = 42
 
 NB_CORES = cpu_count() - 1
 
-LOCAL_COMPUTER = socket.gethostname().startswith('IMT-MEE')
+LOCAL_COMPUTER = socket.gethostname() == "IMT-MEE-20241210"
+
 
