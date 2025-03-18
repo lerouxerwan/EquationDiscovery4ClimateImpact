@@ -16,10 +16,11 @@ from utils.utils_plot import show_or_save_plot
 
 def plot_loss_vs_complexity(emulator: PySREmulator, X_train: np.ndarray,
                             y_train: np.ndarray,
+                            validation_mask: np.ndarray[bool],
                             X_test: Optional[np.ndarray]=None,
                             y_test: Optional[np.ndarray]=None,
                             years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None,
-                            rcp_name_train: str= 'RCP85', rcp_name_test: Optional[str]=None, validation_mask:Optional[np.ndarray[bool]] = None,
+                            rcp_name_train: str= 'RCP85', rcp_name_test: Optional[str]=None,
                             target_label: str = "Target (-)", show: Optional[bool] = False, detailed_plot: bool = False) -> None:
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""

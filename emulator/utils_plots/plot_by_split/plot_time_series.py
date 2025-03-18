@@ -15,10 +15,11 @@ from utils.utils_plot import show_or_save_plot
 
 def plot_time_series(emulator: PySREmulator, X_train: np.ndarray,
                      y_train: np.ndarray,
+                     validation_mask: np.ndarray[bool],
                      X_test: Optional[np.ndarray]=None,
                      y_test: Optional[np.ndarray]=None,
                      years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None,
-                     rcp_name_train: str = 'RCP85', rcp_name_test: Optional[str] = None, validation_mask:Optional[np.ndarray[bool]] = None,
+                     rcp_name_train: str = 'RCP85', rcp_name_test: Optional[str] = None,
                      target_label: str = "Target (-)", show: Optional[bool] = False) -> None:
     """Plot predicted values VS True values (as 2 time series)"""
     split_name_to_X_and_y_and_y_predicted_and_years = load_split_name_to_X_and_y_and_y_predicted_and_years(emulator, X_train, y_train, X_test, y_test, years_train, years_test,

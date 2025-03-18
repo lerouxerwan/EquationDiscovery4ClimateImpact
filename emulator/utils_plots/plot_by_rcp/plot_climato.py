@@ -11,10 +11,12 @@ from utils.utils_plot import compute_axis_lim
 
 
 def plot_climato(emulator: PySREmulator, X_train: np.ndarray,
-                 y_train: np.ndarray, X_test: Optional[np.ndarray] = None,
+                 y_train: np.ndarray,
+                 validation_mask: np.ndarray[bool],
+                 X_test: Optional[np.ndarray] = None,
                  y_test: Optional[np.ndarray] = None,
                  years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None, rcp_name_train: str= 'RCP85',
-                 rcp_name_test: Optional[str]=None, validation_mask:Optional[np.ndarray[bool]] = None,
+                 rcp_name_test: Optional[str]=None,
                  target_label: str = "Target (-)", show: Optional[bool] = False):
     y_train_predicted = emulator.predict(X_train)
     y_test_predicted = None if X_test is None else emulator.predict(X_test)
@@ -47,10 +49,12 @@ def _plot_climato(y_train: np.ndarray, y_test: Optional[np.ndarray] = None,
 
 
 def plot_errors_climato(emulator: PySREmulator, X_train: np.ndarray,
-                        y_train: np.ndarray, X_test: Optional[np.ndarray] = None,
+                        y_train: np.ndarray,
+                        validation_mask: np.ndarray[bool],
+                        X_test: Optional[np.ndarray] = None,
                         y_test: Optional[np.ndarray] = None,
                         years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None, rcp_name_train: str= 'RCP85',
-                        rcp_name_test: Optional[str]=None, validation_mask:Optional[np.ndarray[bool]] = None,
+                        rcp_name_test: Optional[str]=None,
                         target_label: str = "Target (-)", show: Optional[bool] = False):
     errors_train = compute_differences(emulator, X_train, y_train)
     errors_test = compute_differences(emulator, X_test, y_test)

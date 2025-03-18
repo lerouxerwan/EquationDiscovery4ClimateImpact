@@ -40,6 +40,10 @@ class PySREmulatorWithSearch(PySREmulator):
         n_iter: int
             Number of parameter settings sampled for RandomSearchCV, which trades off runtime vs quality of the solution
             Default is 10
+        n_jobs : int
+            Number of jobs to run in parallel.
+            None means 1 unless in a joblib context. -1 means using all processors
+            Default is None
         param_grid : dict[str, list] | list[dict[str, list]]
             Dictionary with hyperparameters names (`str`) as keys and lists of hyperparameter settings to try as values,
             or a list of such dictionaries, in which case the grids spanned by each dictionary in the list are explored.
@@ -109,6 +113,7 @@ class PySREmulatorWithSearch(PySREmulator):
                  validation_size: float = 0.3,
                  search_style: Optional[str] = None,
                  n_iter: int = 10,
+                 n_jobs: Optional[int] = None,
                  param_grid: dict[str, list] | list[dict[str, list]] = None,
                  param_list_to_optimize: Optional[list[str]] = None,
                  scaling_factor: int = 10,
@@ -161,6 +166,7 @@ class PySREmulatorWithSearch(PySREmulator):
         self.validation_size = validation_size
         self.search_style = 'random' if search_style is None else search_style
         self.n_iter = n_iter
+        self.n_jobs = n_jobs
         self.param_grid = dict() if param_grid is None else param_grid
         self.param_list_to_optimize = param_list_to_optimize
             # Hyperparameters that could be added: 'populations', 'population_size' (but can lead to long computation)
@@ -170,6 +176,7 @@ class PySREmulatorWithSearch(PySREmulator):
         assert isinstance(self.search_style, str)
         assert isinstance(self.n_iter, int) and self.n_iter > 0
         assert isinstance(self.param_grid, (dict, list))
+        assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
         #  Set param grid using param_list_to_optimize if param_grid has not been specified by the user
         if not self.param_grid:
             self.param_grid = get_param_grid(self, self.scaling_factor, self.search_style, self.n_iter, 
@@ -257,6 +264,7 @@ class PySREmulatorWithSearch(PySREmulator):
         search_cv = search_cv_type(estimator=self.load_pysr_emulator_with_same_attributes(),
                                    scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
                                    cv=get_cv(self.validation_mask_), refit=False, return_train_score=False,
+                                   n_jobs=self.n_jobs,
                                    **get_search_cv_kwargs(search_cv_type, param_grid, self.n_iter))
         search_cv.fit(X, y, **params_fit)
         return search_cv

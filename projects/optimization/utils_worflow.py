@@ -24,8 +24,8 @@ def workflow(dataset_filename: str, params_emulator: dict[str, Any], params_sear
         emulator = PySREmulatorWithSearch(**params_emulator, **params_search)
         emulator.fit(X_train, y_train, variable_names=variable_names, X_units=X_units, y_units=y_units, validation_mask=validation_mask)
     #  Generate diagnosis plot for the fit
-    plot_diagnosis_fit(emulator, X_train, y_train, X_test, y_test, years_train, years_test, rcp_name_train,
-                       rcp_name_test, validation_mask, target_label, False)
+    plot_diagnosis_fit(emulator, X_train, y_train, validation_mask, X_test, y_test, years_train, years_test, rcp_name_train,
+                       rcp_name_test, target_label, False)
     #  Generate diagnosis plot for the search
     if params_search is not None:
         plot_diagnosis_search(emulator.search_experiment_, False)
