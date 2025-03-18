@@ -13,13 +13,14 @@ def main_workflow_slurm():
             "maxsize": 20,
             "model_selection": "custom",
             "optimizer_f_calls_limit": 10_000,
+            "population_size": 31,
             "unary_operators": ["square", "sqrt"],
         }
         params_search = {
             "scaling_factor": scaling_factor,
             "n_jobs": -1,
-            "n_iter": 100,
-            'param_list_to_optimize': ['populations', 'population_size', 'niterations', 'fraction_replaced_hof',
+            "n_iter": 10,
+            'param_list_to_optimize': ['populations', 'niterations', 'fraction_replaced_hof',
                                        "adaptive_parsimony_scaling", "ncycles_per_iteration",
                                        "fraction_replaced", "weight_add_node",
                                        "weight_insert_node", "weight_delete_node",
@@ -30,7 +31,7 @@ def main_workflow_slurm():
                                        "topn", "optimizer_nrestarts",
                                        "optimizer_f_calls_limit", "optimize_probability",
                                        "optimizer_iterations", "perturbation_factor",
-                                       "probability_negate_constant", "tournament_selection_n"]
+                                       "probability_negate_constant"]
         }
         workflow(filename_dataset_paper, params_emulator, params_search)
 
