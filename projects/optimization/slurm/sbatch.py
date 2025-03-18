@@ -91,4 +91,5 @@ class Sbatch(ABC):
                    f' {self.bash_filepath}')
         print(command)
         if not LOCAL_COMPUTER:
+            bash_call(f"chmod +x {self.bash_filepath}")
             bash_call(command)

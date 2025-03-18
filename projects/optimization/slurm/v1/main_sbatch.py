@@ -16,8 +16,8 @@ class SBatchWorkflowV1(Sbatch):
         return 'workflowV1_scaling' + str(self.indices[0])
 
 def main_run_multiple_sbatch():
-    for scaling in  [1.5, 2., 4.]:
-        SBatchWorkflowV1([scaling]).run()
+    for index in range(4):
+        SBatchWorkflowV1(indices=[index]).run()
 
 
 if __name__ == '__main__':

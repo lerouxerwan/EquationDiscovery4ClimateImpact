@@ -6,7 +6,8 @@ from projects.paper.utils_paper import filename_dataset_paper
 
 def main_workflow_slurm():
         indices = [int(s) for s in sys.argv[1:]]
-        scaling_factor = indices[0]
+        scaling_factor = [1.5, 2., 4., 6.][indices[0]]
+
 
         params_emulator = {
             "maxsize": 20,
