@@ -181,12 +181,6 @@ class PySREmulatorWithSearch(PySREmulator):
         if not self.param_grid:
             self.param_grid = get_param_grid(self, self.scaling_factor, self.search_style, self.n_iter, 
                                              self.param_list_to_optimize)
-        # Some checks
-        if 'population_size' in self.param_grid:
-            min_population_size = min(self.param_grid['population_size'])
-            assert self.tournament_selection_n < min_population_size, \
-                (f"tournament_selection_n parameter (={self.tournament_selection_n}) "
-                 f"must be smaller than the minimum population_size (={min_population_size})")
         # Create attributes
         self.validation_mask_ = None
         self.search_experiment_ = None

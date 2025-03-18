@@ -159,6 +159,13 @@ class PySREmulator(PySRRegressor):
         assert isinstance(self.data_augmentation_sigma, float)
         assert isinstance(self.weighted_loss_ratio, float)
         assert self.weighted_loss_ratio >= 1.
+        # Avoid some cases where the Julia code of PySR crashes
+        assert self.population_size > 0
+        assert self.tournament_selection_n > 0
+        shift = 4
+        if self.tournament_selection_n + shift > self.population_size:
+            self.population_size = self.tournament_selection_n + shift
+            log_info(f'population_size is set to {self.population_size} to avoid a bug w.r.t. tournament_selection_n')
         # Change default dimensional_constraint_penalty
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8

@@ -5,11 +5,12 @@ import pytest
 from sklearn.utils import check_random_state
 from sympy import Symbol
 
+from emulator.pysr_emulator import PySREmulator
 from emulator.utils_attributes.utils_data_augmentation import apply_data_augmentation
 from emulator.utils_attributes.utils_feature_selection import get_selection_mask
 from emulator.utils_attributes.utils_weighted_loss import get_weights
 from emulator_with_search.utils_attributes.utils_validation import get_X_and_y
-from tests.emulator.utils_tests_emulator import load_climate_impact_emulator_for_test, \
+from tests.emulator.utils_tests_emulator import load_pysr_emulator_for_test, \
     run_three_main_functions_with_one_feature, load_X_and_y_for_test, run_three_main_functions
 from data.utils_dataset.utils_dataset import load_dataset
 from utils.utils_run import random_seed
@@ -17,7 +18,7 @@ from utils.utils_run import random_seed
 
 @pytest.mark.parametrize("threshold_for_model_selection", [1.0, 1.5, 2.0])
 def test_threshold_for_model_selection(threshold_for_model_selection):
-    emulator = load_climate_impact_emulator_for_test(threshold_for_model_selection=threshold_for_model_selection)
+    emulator = load_pysr_emulator_for_test(threshold_for_model_selection=threshold_for_model_selection)
     run_three_main_functions_with_one_feature(emulator)
     # For threshold=1.0, we check that equation with maximal complexity is selected (because threshold=1.0 selects
     # the equation that minimizes the loss, i.e. the equation with maximum complexity of the Pareto front)
@@ -29,19 +30,19 @@ def test_threshold_for_model_selection(threshold_for_model_selection):
 @pytest.mark.parametrize("threshold_for_model_selection", [0.5, 2])
 def test_invalid_threshold_for_model_selection(threshold_for_model_selection):
     with pytest.raises(AssertionError):
-        load_climate_impact_emulator_for_test(threshold_for_model_selection=threshold_for_model_selection)
+        load_pysr_emulator_for_test(threshold_for_model_selection=threshold_for_model_selection)
 
 
 @pytest.mark.repeat(2)
 def test_deterministic_and_compute_loss():
-    emulator = load_climate_impact_emulator_for_test()
+    emulator = load_pysr_emulator_for_test()
     X, y = load_X_and_y_for_test()
     emulator.fit(X, y)
     # Assert that the fit of the emulator is deterministic
     np.testing.assert_almost_equal(float(sum(emulator.loss_list)), 35698078.93297232)
 
 def test_loss():
-    emulator = load_climate_impact_emulator_for_test()
+    emulator = load_pysr_emulator_for_test()
     X, y = load_X_and_y_for_test()
     emulator.fit(X, y)
     # Assert that the method compute_loss of the emulator work well
@@ -58,7 +59,7 @@ list_of_X_units_and_expected_variable_names = [
 def test_units(X_units_and_expected_variable_names):
     # We force dimensionless constants for the test, because otherwise any variable (with any unit)
     # could be used in the equation, as long as it is multiplied by a constant that map its unit to the expected unit
-    emulator = load_climate_impact_emulator_for_test(dimensionless_constants_only=True)
+    emulator = load_pysr_emulator_for_test(dimensionless_constants_only=True)
     X_units, expected_variable_names = X_units_and_expected_variable_names
     y_units = ['m']
     nb_features = len(X_units)
@@ -71,7 +72,7 @@ def test_units(X_units_and_expected_variable_names):
     assert list(sorted_selected_variable_names) == expected_variable_names
 
 def test_composed_units():
-    emulator = load_climate_impact_emulator_for_test(dimensionless_constants_only=True)
+    emulator = load_pysr_emulator_for_test(dimensionless_constants_only=True)
     X_units = ['', 'yr', 's^-1', 'm/s']
     y_units = ['m']
     nb_features = len(X_units)
@@ -134,5 +135,14 @@ def test_weighted_loss_special_case():
     weighted_loss_ratio = 2
     assert [int(v) for v in get_weights(np.array([10, 11, 12, 13]), weighted_loss_ratio)] == [2, 1, 1, 2]
     assert [int(v) for v in get_weights(np.array([13, 10, 11, 12]), weighted_loss_ratio)] == [2, 2, 1, 1]
+
+@pytest.mark.parametrize("tournament_selection_n_and_population_size", [(10, 11), (8, 10), (8, 11), (10, 9)])
+def test_adapt_tournament_selection_n(tournament_selection_n_and_population_size):
+    tournament_selection_n, population_size = tournament_selection_n_and_population_size
+    X, y = load_X_and_y_for_test()
+    emulator = load_pysr_emulator_for_test(tournament_selection_n=tournament_selection_n, population_size=population_size)
+    emulator.fit(X, y)
+
+
 
 
