@@ -227,7 +227,7 @@ class PySREmulatorWithSearch(PySREmulator):
         return search_experiment
 
     def compute_df_cv_results(self, X: np.ndarray, y: np.ndarray, **params_fit) -> pd.DataFrame:
-        """Run  hyperparameter search and return the results transformed as a DataFrame called df_cv_results"""
+        """Run hyperparameter search and return the results transformed as a DataFrame called df_cv_results"""
         log_info('Compute search results')
 
         # Run hyperparameter search with respect to self.param_grid
@@ -241,6 +241,7 @@ class PySREmulatorWithSearch(PySREmulator):
         emulators = search_cv.cv_results_['estimator']
         for j, emulator in enumerate(emulators):
             assert isinstance(emulator, PySREmulator)
+            assert emulator.equations_ is not None
             optimal_threshold = compute_optimal_threshold(emulator, X_validation, y_validation)
             emulator.threshold_for_model_selection = optimal_threshold
             search_cv.cv_results_['params'][j]['threshold_for_model_selection'] = optimal_threshold
