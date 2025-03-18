@@ -13,7 +13,7 @@ class SBatchWorkflowV1(Sbatch):
 
     @property
     def setting_name(self) -> str:
-        return f'workflowV1_scaling={self.indices[0]}'
+        return 'workflowV1_scaling' + str(self.indices[0])
 
 def main_run_multiple_sbatch():
     for scaling in  [1.5, 2., 4.]:

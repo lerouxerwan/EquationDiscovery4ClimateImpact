@@ -35,8 +35,8 @@ class Sbatch(ABC):
 
     @property
     def bash_filepath(self) -> str:
-        short_setting_name = '_'.join([s[:2] for s in self.setting_name.split('_')])
-        return op.join(CURRENT_PATH, f'xp_{self.setting_name}', f'{short_setting_name}.sh')
+        # short_setting_name = '_'.join([s[:2] for s in self.setting_name.split('_')])
+        return op.join(CURRENT_PATH, f'xp_{self.setting_name}', 'run_job.sh')
 
 
     @property
