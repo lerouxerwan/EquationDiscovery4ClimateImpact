@@ -19,7 +19,7 @@ def main_workflow_slurm():
         params_search = {
             "scaling_factor": scaling_factor,
             "n_jobs": -1,
-            "n_iter": 10,
+            "n_iter": 100,
             'param_list_to_optimize': ['populations', 'niterations', 'fraction_replaced_hof',
                                        "adaptive_parsimony_scaling", "ncycles_per_iteration",
                                        "fraction_replaced", "weight_add_node",
