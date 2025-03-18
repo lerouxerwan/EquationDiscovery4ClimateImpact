@@ -12,7 +12,7 @@ from utils.utils_log import log_info
 
 def plot_diagnosis_fit(emulator: PySREmulator, X_train: np.ndarray,
                        y_train: np.ndarray,
-                    validation_mask: np.ndarray[bool],
+                       validation_mask: np.ndarray[bool],
                        X_test: Optional[np.ndarray]=None,
                        y_test: Optional[np.ndarray]=None,
                        years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None,
