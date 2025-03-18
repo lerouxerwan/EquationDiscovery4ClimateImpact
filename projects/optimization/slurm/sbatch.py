@@ -41,7 +41,7 @@ class Sbatch(ABC):
 
     @property
     def python_exec(self):
-        return f'{self.root}/venv/bin/python {self.root}/{self.filepath} {" ".join([str(i) for i in self.indices])}'
+        return f'{self.root}/venv2/bin/python {self.root}/{self.filepath} {" ".join([str(i) for i in self.indices])}'
 
     @property
     def job_already_run(self) -> bool:

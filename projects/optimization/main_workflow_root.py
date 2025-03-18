@@ -8,8 +8,9 @@ def main_workflow_root_one_hyperparameter_setting():
         "niterations": 2,
     }
     params_search = {
-        "n_iter": 1,
-        "scaling_factor": 0,
+        "n_iter": 6,
+        "scaling_factor": 2,
+        "n_jobs": -1,
     }
     workflow(filename_dataset_paper, params_emulator, params_search)
 
