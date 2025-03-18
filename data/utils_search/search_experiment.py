@@ -85,10 +85,7 @@ class SearchExperiment(object):
         """Return combinations of nb_elements of param names in param_grid with float/int values"""
         param_names_in_param_grid = [param_name for param_name, param_value in self.best_params.items()
                                      if isinstance(param_value, (int, float))]
-        # We remove threshold_for_model_selection
-        param_names_in_param_grid.remove('threshold_for_model_selection')
-        combinations_of_param_names_in_param_grid = list(combinations(param_names_in_param_grid, nb_elements))
-        return combinations_of_param_names_in_param_grid
+        return list(combinations(param_names_in_param_grid, nb_elements))
 
 
     def __str__(self):

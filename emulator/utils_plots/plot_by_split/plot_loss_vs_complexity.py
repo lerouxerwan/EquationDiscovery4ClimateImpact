@@ -24,7 +24,7 @@ def plot_loss_vs_complexity(emulator: PySREmulator, X_train: np.ndarray,
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""
     metric = Metric.RMSE
-    split_name_to_x_and_y = load_split_name_to_X_and_y(emulator, X_train, y_train, X_test, y_test, years_train, years_test)
+    split_name_to_x_and_y = load_split_name_to_X_and_y(emulator, X_train, y_train, X_test, y_test, years_train, years_test, validation_mask)
     fig, ax = plt.subplots(figsize=(16, 9))
     complexity_list = emulator.complexity_list
     # Detailed plot adds one bar for PySR score

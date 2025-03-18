@@ -3,25 +3,28 @@ from projects.paper.utils_paper import filename_dataset_paper
 
 
 def main_workflow_root_one_hyperparameter_setting():
-    params_emulator_root = {
-        "n_iter": 1,
-        "scaling_factor": 0,
+    params_emulator = {
         "model_selection": "custom",
         "niterations": 2,
     }
-    # Run workflow for several number of features
-    workflow(filename_dataset_paper, **params_emulator_root)
+    params_search = {
+        "n_iter": 1,
+        "scaling_factor": 0,
+    }
+    workflow(filename_dataset_paper, params_emulator, params_search)
 
 
 def main_workflow_root_random_hyperparameter_settings():
-    params_emulator_root = {
-        "n_iter": 1000,
-        "scaling_factor": 2,
+    params_emulator = {
         "maxsize": 20,
         "population_size": 31,
         "model_selection": "custom",
         "optimizer_f_calls_limit": 10_000,
         "unary_operators": ["square", "sqrt"],
+    }
+    params_search = {
+        "n_iter": 1000,
+        "scaling_factor": 2,
         'param_list_to_optimize': ['populations', 'niterations', 'fraction_replaced_hof',
                                    "adaptive_parsimony_scaling", "ncycles_per_iteration",
                                    "fraction_replaced", "weight_add_node",
@@ -35,11 +38,10 @@ def main_workflow_root_random_hyperparameter_settings():
                                    "optimizer_iterations", "perturbation_factor",
                                    "probability_negate_constant", "tournament_selection_n"]
     }
-    # Run workflow for several number of features
-    workflow(filename_dataset_paper, **params_emulator_root)
+    workflow(filename_dataset_paper, params_emulator, params_search)
 
 
 if __name__ == '__main__':
-    main_workflow_root_one_hyperparameter_setting()
-    # main_workflow_root_random_hyperparameter_settings()
+    # main_workflow_root_one_hyperparameter_setting()
+    main_workflow_root_random_hyperparameter_settings()
 
