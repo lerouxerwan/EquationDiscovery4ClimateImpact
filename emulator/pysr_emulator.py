@@ -15,8 +15,9 @@ from utils.utils_run import random_seed
 
 
 class PySREmulator(PySRRegressor):
-    """PySREmulator is a variant of PySRRegressor (deterministic, no verbose, hall of fame files are deleted)
-    with several additional attributes:
+    """PySREmulator is a variant of PySRRegressor (by default no verbose & hall of fame files are deleted)
+    For reproducibility, randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
+    with some additional attributes:
         threshold_for_model_selection : float
             Threshold to select the best equation with some model selection ('best' and 'custom')
             this threshold must be larger or equal to 1
@@ -32,11 +33,7 @@ class PySREmulator(PySRRegressor):
             Ratio between the largest weight (for most extreme values) and the smallest weight 1.0 (for middle values)
             Default is 1., which means that weights are not considered
     with some modification on the default value:
-        -dimensional_constraint_penalty equals is set by default to 10**8 (ensures dimension constraint are enforced)
-    with a novel class attribute:
-        -cache: a dictionary to store intermediary results
-    -
-    """
+        -dimensional_constraint_penalty equals is set by default to 10**8 (to enforce dimension constraint)"""
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
@@ -65,18 +62,16 @@ class PySREmulator(PySRRegressor):
                  optimizer_f_calls_limit: int | None = None, optimize_probability: float = 0.14,
                  optimizer_iterations: int = 8, perturbation_factor: float = 0.129,
                  probability_negate_constant: float = 0.00743, tournament_selection_n: int = 15,
-                 tournament_selection_p: float = 0.982, parallelism: (
-                    Literal["serial", "multithreading", "multiprocessing"] | None
-            ) = None, procs: int | None = None, cluster_manager: (
+                 tournament_selection_p: float = 0.982, procs: int | None = None, cluster_manager: (
                     Literal["slurm", "pbs", "lsf", "sge", "qrsh", "scyld", "htc"] | None
             ) = None, heap_size_hint_in_bytes: int | None = None, batching: bool = False, batch_size: int = 50,
                  fast_cycle: bool = False, turbo: bool = False, bumper: bool = False,
                  precision: Literal[16, 32, 64] = 32, autodiff_backend: Literal["Zygote"] | None = None,
-                 random_state: int | np.random.RandomState | None = None, deterministic: bool = False,
-                 warm_start: bool = False, verbosity: int = 1, update_verbosity: int | None = None,
+                 random_state: int | np.random.RandomState | None = None,
+                 warm_start: bool = False, verbosity: int = 0, update_verbosity: int | None = None,
                  print_precision: int = 5, progress: bool = True, logger_spec: AbstractLoggerSpec | None = None,
                  input_stream: str = "stdin", run_id: str | None = None, output_directory: str | None = None,
-                 temp_equation_file: bool = False, tempdir: str | None = None, delete_tempfiles: bool = True,
+                 temp_equation_file: bool = True, tempdir: str | None = None, delete_tempfiles: bool = True,
                  update: bool = False, output_jax_format: bool = False, output_torch_format: bool = False,
                  extra_sympy_mappings: dict[str, Callable] | None = None,
                  extra_torch_mappings: dict[Callable, Callable] | None = None,
@@ -88,14 +83,10 @@ class PySREmulator(PySRRegressor):
                  data_augmentation_sigma: float = 1.0,
                  weighted_loss_ratio: float = 1.0,
                  **kwargs):
-        # Some default attributes of PySRRegressor are modified
-        # Verbosity is removed
-        verbosity = 0
-        # All files are deleted
-        temp_equation_file = True
-        # Randomness is fixed, see PySRRegressor documentation for more details
+        # Randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
+        if random_state is None:
+            random_state = random_seed
         deterministic = True
-        random_state = random_seed
         parallelism = "serial"
         super().__init__(model_selection, binary_operators=binary_operators, unary_operators=unary_operators,
                          expression_spec=expression_spec, niterations=niterations, populations=populations,
@@ -159,10 +150,12 @@ class PySREmulator(PySRRegressor):
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
 
-    def fit(self, X, y, *, Xresampled=None, weights=None, variable_names: ArrayLike[str] | None = None,
+    def fit(self, X: np.ndarray, y: np.ndarray, *, Xresampled=None, weights=None, variable_names: ArrayLike[str] | None = None,
             complexity_of_variables: int | float | list[int | float] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
             category: ndarray | None = None) -> "PySRRegressor":
+        """Fit method of PySR preceded by some potential preprocessing (data augmentation, weights computing...)
+        By simplicity for coding preprocessing functions, for the moment this method only handles np.ndarray as input"""
         # For simplicity, the code only handles X and y as numpy arrays, not as dataframes
         assert isinstance(X, np.ndarray)
         assert isinstance(y, np.ndarray)
@@ -205,27 +198,32 @@ class PySREmulator(PySRRegressor):
 
     @property
     def complexity_list(self) -> list[int]:
-        """List of complexity for the equations of the Pareto front (thus in increasing order) """
+        """List of complexity for the equations of the Pareto front (thus in increasing order)"""
         return self.equations_['complexity'].to_list()
 
     @property
     def loss_list(self) -> list[float]:
+        """List of Train loss (Mean squared error) for the equations of the Pareto front"""
         return self.equations_['loss'].to_list()
 
     @property
     def score_list(self) -> list[float]:
+        """List of score (some heuristic defined in PySR) for the equations of the Pareto front"""
         return self.equations_['score'].to_list()
 
     @property
     def expr_list(self) -> list[Expr]:
+        """List of sympy expressions for the equations of the Pareto front"""
         return self.equations_['sympy_format'].to_list()
 
     @property
     def selected_expr(self) -> Expr:
+        """Sympy expressions for the selected equation"""
         return self.get_best()['sympy_format']
 
     @property
     def selected_complexity(self) -> int:
+        """Complexity for the selected equation"""
         return self.get_best()['complexity']
 
     """Model/equation selection"""
