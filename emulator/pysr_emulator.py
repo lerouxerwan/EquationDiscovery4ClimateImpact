@@ -13,7 +13,6 @@ from sympy import Expr
 from emulator.utils_attributes.utils_data_augmentation import apply_data_augmentation
 from emulator.utils_attributes.utils_feature_selection import get_selection_mask
 from emulator.utils_attributes.utils_weighted_loss import get_weights
-from emulator.utils_cache.utils_key import get_key_for_cache_fit
 from emulator.utils_metric.metric import Metric, metric_to_function
 from utils.utils_log import log_info
 from utils.utils_run import random_seed
@@ -200,7 +199,8 @@ class PySREmulator(PySRRegressor):
         return [self._compute_loss(y, y_predicted, metric) for y_predicted in self.compute_y_predicted_list(X)]
 
     @staticmethod
-    def _compute_loss(y_true, y_predicted, metric: Metric):
+    def _compute_loss(y_true: np.ndarray, y_predicted: np.ndarray, metric: Metric) -> float:
+        """Compute loss for a given metric, if the computation raises a ValueError we return np.nan as result"""
         loss_function = metric_to_function[metric]
         try:
             return loss_function(y_true=y_true, y_pred=y_predicted)
@@ -215,6 +215,7 @@ class PySREmulator(PySRRegressor):
 
     @property
     def complexity_list(self) -> list[int]:
+        """List of complexity for the equations of the Pareto front (thus in increasing order) """
         return self.equations_['complexity'].to_list()
 
     @property
@@ -239,42 +240,26 @@ class PySREmulator(PySRRegressor):
 
     """Model/equation selection"""
 
-    def get_best_pysr(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
+    def get_best_pysr(self) -> pd.Series:
+        """Compute a Series representing the selected equation (complexity, loss, ...) with the PySR heuristic"""
         model_selection = self.model_selection[:]
         self.model_selection = "best"
-        result = super().get_best(index)
+        result = super().get_best()
         self.model_selection = model_selection
         return result
 
     def get_best(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
-        """
-        Get best equation using `model_selection`.
-
-        Parameters
-        ----------
-        index : int | list[int]
-            If you wish to select a particular equation from `self.equations_`,
-            give the row number here. This overrides the `model_selection`
-            parameter. If there are multiple output features, then pass
-            a list of indices with the order the same as the output feature.
-
-        Returns
-        -------
-        best_equation : pandas.Series
-            Dictionary representing the best expression found.
-
-        Raises
-        ------
-        NotImplementedError
-            Raised when an invalid model selection strategy is provided.
-        """
+        """Compute a Series (or list of Series) representing the selected equations (complexity, loss, ...)
+         If index=None, then the equation is selected using self.model_selection"""
         if (index is None) and (self.model_selection in ["best", "custom"]):
             column = "score" if self.model_selection == "best" else "loss"
             index = self.filtered_equations[column].idxmax()
         return self.get_best_pysr(index)
 
     @property
-    def filtered_equations(self):
+    def filtered_equations(self) -> pd.DataFrame:
+        """Extract a Dataframe, containing only a subset of rows from self.equations,
+        such that selected rows are equations such that loss < min_loss * self.threshold_for_model_selection"""
         min_loss_train = self.equations_["loss"].min()
         max_loss_for_filter = self.threshold_for_model_selection * min_loss_train
         filtered_equations = self.equations_.query(f"loss <= {max_loss_for_filter}")
