@@ -1,17 +1,13 @@
-import copy
-from typing import Literal, Callable, cast, Any
+from typing import Literal, Callable
 
 import numpy as np
 import pandas as pd
 from numpy import ndarray
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
-from pysr.denoising import multi_denoise, denoise
 from pysr.utils import ArrayLike
-from sklearn.utils.validation import _check_feature_names_in
 from sympy import Expr
 
 from emulator.utils_attributes.utils_data_augmentation import apply_data_augmentation
-from emulator.utils_attributes.utils_feature_selection import get_selection_mask
 from emulator.utils_attributes.utils_weighted_loss import get_weights
 from emulator.utils_metric.metric import Metric, metric_to_function
 from utils.utils_log import log_info
@@ -25,9 +21,6 @@ class PySREmulator(PySRRegressor):
             Threshold to select the best equation with some model selection ('best' and 'custom')
             this threshold must be larger or equal to 1
             Default is 1.5 (as specified in PySR).
-        feature_selection_name: str
-            Name of the feature selection to use if select_k_features is not None
-            Default is PySRDefault (the default feature selection used in PySR)
     including some potential contributions/tricks that are deactivated by default
         data_augmentation_ratio: int
             Number of times the number of datapoints augments with data augmentation
@@ -91,7 +84,6 @@ class PySREmulator(PySRRegressor):
                  select_k_features: int | None = None,
                  # Additional attributes
                  threshold_for_model_selection: float = 1.5,
-                 feature_selection_name: str = 'PySRDefault',
                  data_augmentation_ratio: int = 1,
                  data_augmentation_sigma: float = 1.0,
                  weighted_loss_ratio: float = 1.0,
@@ -147,13 +139,11 @@ class PySREmulator(PySRRegressor):
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          **kwargs)
         self.threshold_for_model_selection = threshold_for_model_selection
-        self.feature_selection_name = feature_selection_name
         self.data_augmentation_ratio = data_augmentation_ratio
         self.data_augmentation_sigma = data_augmentation_sigma
         self.weighted_loss_ratio = weighted_loss_ratio
         assert isinstance(self.threshold_for_model_selection, float)
         assert self.threshold_for_model_selection >= 1.
-        assert isinstance(self.feature_selection_name, str)
         assert isinstance(self.data_augmentation_ratio, int)
         assert isinstance(self.data_augmentation_sigma, float)
         assert isinstance(self.weighted_loss_ratio, float)
@@ -254,7 +244,7 @@ class PySREmulator(PySRRegressor):
         if (index is None) and (self.model_selection in ["best", "custom"]):
             column = "score" if self.model_selection == "best" else "loss"
             index = self.filtered_equations[column].idxmax()
-        return self.get_best_pysr(index)
+        return super().get_best(index)
 
     @property
     def filtered_equations(self) -> pd.DataFrame:
@@ -264,65 +254,6 @@ class PySREmulator(PySRRegressor):
         max_loss_for_filter = self.threshold_for_model_selection * min_loss_train
         filtered_equations = self.equations_.query(f"loss <= {max_loss_for_filter}")
         return filtered_equations
-
-    def _pre_transform_training_data(self, X: ndarray, y: ndarray, Xresampled: ndarray | None,
-                                     variable_names: ArrayLike[str],
-                                     complexity_of_variables: int | float | list[int | float] | None,
-                                     X_units: ArrayLike[str] | None, y_units: ArrayLike[str] | str | None,
-                                     random_state: np.random.RandomState):
-        # Feature selection transformation
-        if self.select_k_features:
-            selection_mask = get_selection_mask(
-                X, y, self.select_k_features, self.feature_selection_name, self.feature_names_in_, random_state)
-            X = X[:, selection_mask]
-
-            if Xresampled is not None:
-                Xresampled = Xresampled[:, selection_mask]
-
-            # Reduce variable_names to selection
-            variable_names = cast(
-                ArrayLike[str],
-                [
-                    variable_names[i]
-                    for i in range(len(variable_names))
-                    if selection_mask[i]
-                ],
-            )
-
-            if isinstance(complexity_of_variables, list):
-                complexity_of_variables = [
-                    complexity_of_variables[i]
-                    for i in range(len(complexity_of_variables))
-                    if selection_mask[i]
-                ]
-                self.complexity_of_variables_ = copy.deepcopy(complexity_of_variables)
-
-            if X_units is not None:
-                X_units = cast(
-                    ArrayLike[str],
-                    [X_units[i] for i in range(len(X_units)) if selection_mask[i]],
-                )
-                self.X_units_ = copy.deepcopy(X_units)
-
-            # Re-perform data validation and feature name updating
-            X, y = self._validate_data_X_y(X, y)
-            # Update feature names with selected variable names
-            self.selection_mask_ = selection_mask
-            self.feature_names_in_ = _check_feature_names_in(self, variable_names)
-            self.display_feature_names_in_ = self.feature_names_in_
-            log_info(f"Using features {self.feature_names_in_}")
-
-        # Denoising transformation
-        if self.denoise:
-            if self.nout_ > 1:
-                X, y = multi_denoise(
-                    X, y, Xresampled=Xresampled, random_state=random_state
-                )
-            else:
-                X, y = denoise(X, y, Xresampled=Xresampled, random_state=random_state)
-
-        return X, y, variable_names, complexity_of_variables, X_units, y_units
-
 
 
 

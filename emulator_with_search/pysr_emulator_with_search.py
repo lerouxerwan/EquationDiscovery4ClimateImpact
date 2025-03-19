@@ -105,7 +105,6 @@ class PySREmulatorWithSearch(PySREmulator):
                  extra_torch_mappings: dict[Callable, Callable] | None = None,
                  extra_jax_mappings: dict[Callable, str] | None = None, denoise: bool = False,
                  select_k_features: int | None = None, threshold_for_model_selection: float = 1.5,
-                 feature_selection_name: str = 'PySRDefault',
                  data_augmentation_ratio: int = 1,
                  data_augmentation_sigma: float = 1.0,
                  weighted_loss_ratio: float = 1.0,
@@ -159,7 +158,6 @@ class PySREmulatorWithSearch(PySREmulator):
                          extra_sympy_mappings=extra_sympy_mappings, extra_torch_mappings=extra_torch_mappings,
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          threshold_for_model_selection=threshold_for_model_selection,
-                         feature_selection_name=feature_selection_name,
                          data_augmentation_ratio=data_augmentation_ratio, data_augmentation_sigma=data_augmentation_sigma,
                          weighted_loss_ratio=weighted_loss_ratio,
                          **kwargs)

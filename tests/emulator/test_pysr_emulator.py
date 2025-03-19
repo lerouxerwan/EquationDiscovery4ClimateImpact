@@ -2,18 +2,14 @@ from collections import Counter
 
 import numpy as np
 import pytest
-from sklearn.utils import check_random_state
 from sympy import Symbol
 
-from emulator.pysr_emulator import PySREmulator
+from data.utils_dataset.utils_dataset import load_dataset
 from emulator.utils_attributes.utils_data_augmentation import apply_data_augmentation
-from emulator.utils_attributes.utils_feature_selection import get_selection_mask
 from emulator.utils_attributes.utils_weighted_loss import get_weights
 from emulator_with_search.utils_attributes.utils_validation import get_X_and_y
 from tests.emulator.utils_tests_emulator import load_pysr_emulator_for_test, \
-    run_three_main_functions_with_one_feature, load_X_and_y_for_test, run_three_main_functions
-from data.utils_dataset.utils_dataset import load_dataset
-from utils.utils_run import random_seed
+    run_three_main_functions_with_one_feature, load_X_and_y_for_test
 
 
 @pytest.mark.parametrize("threshold_for_model_selection", [1.0, 1.5, 2.0])
@@ -91,18 +87,6 @@ def get_X_y_variable_names() -> tuple[np.ndarray, np.ndarray, np.ndarray[str]]:
     X_train_train, y_train_train = get_X_and_y(X, y, validation_mask, validation_set=False)
     return X_train_train, y_train_train, np.array(variable_names)
 
-@pytest.mark.parametrize("feature_selection_name_and_selected_features", list_of_feature_selection_name_and_selected_features)
-def test_feature_selection(feature_selection_name_and_selected_features):
-    random_state = check_random_state(random_seed)
-    _ = random_state.randint(0, 2 ** 31 - 1)  # To have exactly the same random state as during the fit function
-
-    feature_selection_name, selected_features_expected = feature_selection_name_and_selected_features
-    nb_features = 4
-    X_train_train, y_train_train, variable_names = get_X_y_variable_names()
-    selection_mask = get_selection_mask(X_train_train, y_train_train, nb_features, feature_selection_name, variable_names, random_state)
-    assert sum(selection_mask) == nb_features
-    # Check that selected features are as expected
-    assert list(variable_names[selection_mask]) == list(selected_features_expected)
 
 @pytest.mark.parametrize("data_augmentation_ratio", [2, 3])
 def test_data_augmentation(data_augmentation_ratio: int):
