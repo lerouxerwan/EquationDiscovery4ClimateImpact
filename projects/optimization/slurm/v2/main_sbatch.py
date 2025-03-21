@@ -5,7 +5,7 @@ class SBatchWorkflowV1(Sbatch):
 
     @property
     def filepath(self) -> str:
-        return 'projects/optimization/slurm/v1/main_workflow.py'
+        return 'projects/optimization/slurm/v2/main_workflow.py'
 
     @property
     def nb_cores(self) -> int:

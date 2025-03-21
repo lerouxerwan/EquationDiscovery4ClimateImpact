@@ -77,10 +77,6 @@ def test_composed_units():
     emulator.fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
 
-list_of_feature_selection_name_and_selected_features = [
-    ('PySRDefault', ['Max_VEddyDiff_MAM', 'Mean_SSS_MAM', 'Mean_MLD_MAM', 'Max_MLD_DJF']),
-]
-
 def get_X_y_variable_names() -> tuple[np.ndarray, np.ndarray, np.ndarray[str]]:
     filename = r"NPP_season.csv"
     X, y, _, _, _, _, _, _, _, _, variable_names, _, validation_mask = load_dataset(filename)
