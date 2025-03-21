@@ -62,12 +62,14 @@ class PySREmulator(PySRRegressor):
                  optimizer_f_calls_limit: int | None = None, optimize_probability: float = 0.14,
                  optimizer_iterations: int = 8, perturbation_factor: float = 0.129,
                  probability_negate_constant: float = 0.00743, tournament_selection_n: int = 15,
-                 tournament_selection_p: float = 0.982, procs: int | None = None, cluster_manager: (
+                 tournament_selection_p: float = 0.982, parallelism: (
+                    Literal["serial", "multithreading", "multiprocessing"] | None
+            ) = None, procs: int | None = None, cluster_manager: (
                     Literal["slurm", "pbs", "lsf", "sge", "qrsh", "scyld", "htc"] | None
             ) = None, heap_size_hint_in_bytes: int | None = None, batching: bool = False, batch_size: int = 50,
                  fast_cycle: bool = False, turbo: bool = False, bumper: bool = False,
                  precision: Literal[16, 32, 64] = 32, autodiff_backend: Literal["Zygote"] | None = None,
-                 random_state: int | np.random.RandomState | None = None,
+                 random_state: int | np.random.RandomState | None = None, deterministic: bool = True,
                  warm_start: bool = False, verbosity: int = 0, update_verbosity: int | None = None,
                  print_precision: int = 5, progress: bool = True, logger_spec: AbstractLoggerSpec | None = None,
                  input_stream: str = "stdin", run_id: str | None = None, output_directory: str | None = None,
@@ -86,6 +88,7 @@ class PySREmulator(PySRRegressor):
         # Randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
         if random_state is None:
             random_state = random_seed
+        # Ensures that deterministic is True and parallelism is "serial"
         deterministic = True
         parallelism = "serial"
         super().__init__(model_selection, binary_operators=binary_operators, unary_operators=unary_operators,

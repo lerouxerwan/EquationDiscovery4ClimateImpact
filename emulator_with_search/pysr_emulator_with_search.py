@@ -88,12 +88,14 @@ class PySREmulatorWithSearch(PySREmulator):
                  optimizer_f_calls_limit: int | None = None, optimize_probability: float = 0.14,
                  optimizer_iterations: int = 8, perturbation_factor: float = 0.129,
                  probability_negate_constant: float = 0.00743, tournament_selection_n: int = 15,
-                 tournament_selection_p: float = 0.982, procs: int | None = None, cluster_manager: (
+                 tournament_selection_p: float = 0.982, parallelism: (
+                    Literal["serial", "multithreading", "multiprocessing"] | None
+            ) = None, procs: int | None = None, cluster_manager: (
                     Literal["slurm", "pbs", "lsf", "sge", "qrsh", "scyld", "htc"] | None
             ) = None, heap_size_hint_in_bytes: int | None = None, batching: bool = False, batch_size: int = 50,
                  fast_cycle: bool = False, turbo: bool = False, bumper: bool = False,
                  precision: Literal[16, 32, 64] = 32, autodiff_backend: Literal["Zygote"] | None = None,
-                 random_state: int | np.random.RandomState | None = None,
+                 random_state: int | np.random.RandomState | None = None, deterministic: bool = True,
                  warm_start: bool = False, verbosity: int = 0, update_verbosity: int | None = None,
                  print_precision: int = 5, progress: bool = True, logger_spec: AbstractLoggerSpec | None = None,
                  input_stream: str = "stdin", run_id: str | None = None, output_directory: str | None = None,
@@ -144,10 +146,10 @@ class PySREmulatorWithSearch(PySREmulator):
                          perturbation_factor=perturbation_factor,
                          probability_negate_constant=probability_negate_constant,
                          tournament_selection_n=tournament_selection_n, tournament_selection_p=tournament_selection_p,
-                         procs=procs, cluster_manager=cluster_manager,
+                         parallelism=parallelism, procs=procs, cluster_manager=cluster_manager,
                          heap_size_hint_in_bytes=heap_size_hint_in_bytes, batching=batching, batch_size=batch_size,
                          fast_cycle=fast_cycle, turbo=turbo, bumper=bumper, precision=precision,
-                         autodiff_backend=autodiff_backend, random_state=random_state,
+                         autodiff_backend=autodiff_backend, random_state=random_state, deterministic=deterministic,
                          warm_start=warm_start, verbosity=verbosity, update_verbosity=update_verbosity,
                          print_precision=print_precision, progress=progress, logger_spec=logger_spec,
                          input_stream=input_stream, run_id=run_id, output_directory=output_directory,
