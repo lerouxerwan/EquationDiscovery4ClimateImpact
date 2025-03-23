@@ -18,14 +18,12 @@ def main_workflow_root_one_hyperparameter_setting():
 def main_workflow_root_random_hyperparameter_settings():
     params_emulator = {
         "maxsize": 20,
-        "population_size": 31,
         "model_selection": "custom",
-        "optimizer_f_calls_limit": 10_000,
         "unary_operators": ["square", "sqrt"],
     }
     params_search = {
-        "n_iter": 100,
-        "scaling_factor": 2,
+        "n_iter": 1000,
+        "scaling_factor": 1.1,
         'param_list_to_optimize': ['populations', 'niterations', 'fraction_replaced_hof',
                                    "adaptive_parsimony_scaling", "ncycles_per_iteration",
                                    "fraction_replaced", "weight_add_node",

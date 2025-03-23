@@ -13,7 +13,7 @@ class SBatchWorkflowMeanV2(Sbatch):
 
     @property
     def setting_name(self) -> str:
-        return 'workflow_mean_v2_' + str(self.indices[0])
+        return 'mean_v2_' + str(self.indices[0])
 
 def main_run_multiple_sbatch():
     for index in range(4):

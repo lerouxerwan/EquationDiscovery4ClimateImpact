@@ -85,7 +85,7 @@ class PySREmulatorWithSearch(PySREmulator):
                  skip_mutation_failures: bool = True, migration: bool = True, hof_migration: bool = True,
                  topn: int = 12, should_simplify: bool = True, should_optimize_constants: bool = True,
                  optimizer_algorithm: Literal["BFGS", "NelderMead"] = "BFGS", optimizer_nrestarts: int = 2,
-                 optimizer_f_calls_limit: int | None = None, optimize_probability: float = 0.14,
+                 optimizer_f_calls_limit: int | None = 10_000, optimize_probability: float = 0.14,
                  optimizer_iterations: int = 8, perturbation_factor: float = 0.129,
                  probability_negate_constant: float = 0.00743, tournament_selection_n: int = 15,
                  tournament_selection_p: float = 0.982, parallelism: (
