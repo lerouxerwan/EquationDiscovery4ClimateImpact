@@ -13,6 +13,16 @@ def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_an
                                     y_train: np.ndarray, target_label: str, prefix: str,
                                     show: Optional[bool], ymin_and_ymax: tuple[float, float] = None) -> dict[str, tuple[list[int], list[float], str]]:
     ax = plt.gca()
+    rcp_name_to_years_and_std_values_and_color = _plot_climatological_time_series(ax,
+                                                                                  rcp_name_to_list_of_years_and_y_and_color_and_label,
+                                                                                  y_train, target_label, prefix,
+                                                                                  ymin_and_ymax)
+    show_or_save_plot(f'climatological_series_{prefix}', show)
+    return rcp_name_to_years_and_std_values_and_color
+
+
+def _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, target_label,
+                                     prefix, ymin_and_ymax):
     window_size = 30
     all_dates = []
     rcp_name_to_years_and_std_values_and_color = {}
@@ -42,7 +52,7 @@ def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_an
     ax.set_ylabel(f'{prefix} {get_label(target_label)}')
     #  Add first legend
     increasing_trend = (y_train[0] < y_train[-1]) if isinstance(y_train, np.ndarray) else (
-                y_train.values[0] < y_train.values[-1])
+            y_train.values[0] < y_train.values[-1])
     loc1, loc2 = ('upper left', 'lower right') if increasing_trend else ('upper right', 'lower left')
     ax.legend(loc=loc1)
     #  Add a second legend to explain the dot and the line
@@ -57,5 +67,4 @@ def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_an
     ax_twin.set_yticks([])
     ax_twin.legend(legend_handles, legend_labels, loc=loc2)
     ax.yaxis.grid()
-    show_or_save_plot(f'climatological_series_{prefix}', show)
     return rcp_name_to_years_and_std_values_and_color
