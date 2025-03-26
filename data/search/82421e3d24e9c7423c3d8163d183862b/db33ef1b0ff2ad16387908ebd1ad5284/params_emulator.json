@@ -1,0 +1,136 @@
+{
+    "maxsize": 20,
+    "n_iter": 1000,
+    "n_jobs": -1,
+    "optimizer_f_calls_limit": 10000,
+    "param_grid": {
+        "adaptive_parsimony_scaling": [
+            693.3333333333334,
+            1560.0
+        ],
+        "crossover_probability": [
+            0.017266666666666666,
+            0.038849999999999996
+        ],
+        "fraction_replaced": [
+            0.00024,
+            0.00054
+        ],
+        "fraction_replaced_hof": [
+            0.040933333333333335,
+            0.0921
+        ],
+        "ncycles_per_iteration": [
+            254,
+            570
+        ],
+        "niterations": [
+            67,
+            150
+        ],
+        "optimize_probability": [
+            0.09333333333333334,
+            0.21000000000000002
+        ],
+        "optimizer_f_calls_limit": [
+            6667,
+            15000
+        ],
+        "optimizer_iterations": [
+            6,
+            12
+        ],
+        "optimizer_nrestarts": [
+            2,
+            3
+        ],
+        "perturbation_factor": [
+            0.08600000000000001,
+            0.1935
+        ],
+        "populations": [
+            21,
+            47
+        ],
+        "probability_negate_constant": [
+            0.004953333333333333,
+            0.011145
+        ],
+        "topn": [
+            8,
+            18
+        ],
+        "weight_add_node": [
+            1.6466666666666667,
+            3.705
+        ],
+        "weight_delete_node": [
+            0.58,
+            1.305
+        ],
+        "weight_do_nothing": [
+            0.18200000000000002,
+            0.40950000000000003
+        ],
+        "weight_insert_node": [
+            0.007466666666666667,
+            0.0168
+        ],
+        "weight_mutate_constant": [
+            0.023066666666666666,
+            0.0519
+        ],
+        "weight_mutate_operator": [
+            0.19533333333333333,
+            0.4395
+        ],
+        "weight_randomize": [
+            0.00033466666666666665,
+            0.000753
+        ],
+        "weight_rotate_tree": [
+            2.84,
+            6.39
+        ],
+        "weight_simplify": [
+            0.0013933333333333332,
+            0.0031349999999999998
+        ],
+        "weight_swap_operands": [
+            0.132,
+            0.29700000000000004
+        ]
+    },
+    "param_list_to_optimize": [
+        "populations",
+        "niterations",
+        "fraction_replaced_hof",
+        "adaptive_parsimony_scaling",
+        "ncycles_per_iteration",
+        "fraction_replaced",
+        "weight_add_node",
+        "weight_insert_node",
+        "weight_delete_node",
+        "weight_do_nothing",
+        "weight_mutate_constant",
+        "weight_mutate_operator",
+        "weight_swap_operands",
+        "weight_rotate_tree",
+        "weight_randomize",
+        "weight_simplify",
+        "crossover_probability",
+        "topn",
+        "optimizer_nrestarts",
+        "optimizer_f_calls_limit",
+        "optimize_probability",
+        "optimizer_iterations",
+        "perturbation_factor",
+        "probability_negate_constant"
+    ],
+    "population_size": 31,
+    "scaling_factor": 1.5,
+    "unary_operators": [
+        "square",
+        "sqrt"
+    ]
+}
