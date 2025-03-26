@@ -1,3 +1,5 @@
+import subprocess
+
 from data.utils_search.utils_best_score import get_best_search_experiments
 from data.utils_search.utils_search_history import get_search_history
 from projects.paper.utils_paper import filename_dataset_paper
@@ -22,7 +24,10 @@ def main_analyze_best_results(nb_top_experiments: int = 5):
         print(f'Step #{j} {search_experiment}')
     print('Json file for the best search experiment:', best_search_experiment.filepath_non_default_params)
     print('Best run is open in tensorboard')
-    bash_call(f'tensorboard --logdir {best_search_experiment.log_dir}')
+    try:
+        bash_call(f'tensorboard --logdir {best_search_experiment.log_dir}')
+    except subprocess.CalledProcessError as e:
+        print(e.__repr__())
 
 
 
