@@ -45,7 +45,7 @@ def plot_loss_vs_complexity(emulator: PySREmulator, X_train: np.ndarray,
         all_loss_list.extend(loss_list)
 
     # Add rounded equations on the lower X axis
-    ax.set_xlabel('Equations with rounded coefficients\n(which may explain why the complexity seems wrong)')
+    ax.set_xlabel('Equations with rounded coefficients')
     x_ticks = complexity_list
     set_x_axis(ax, x_ticks)
     ax.set_xticks(x_ticks)

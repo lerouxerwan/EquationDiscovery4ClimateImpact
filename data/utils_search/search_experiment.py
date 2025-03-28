@@ -90,7 +90,8 @@ class SearchExperiment(object):
 
     def __str__(self):
         return (f' RMSE Validation={round(self.best_rmse_validation, 3)} with equation of complexity {self.best_complexity}: {self.best_expr}\n '
-                f'using the hyperparameters: {self.best_params}')
+                f'using the hyperparameters: {self.best_params}\n'
+                f'search_path: {self.search_path}')
 
     """Tensorboard Logging"""
 

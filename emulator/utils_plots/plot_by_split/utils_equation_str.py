@@ -1,3 +1,5 @@
+from collections import Counter
+
 import numpy as np
 from sympy import Expr, Number
 
@@ -5,7 +7,7 @@ from utils.utils_date import get_short_month_names, get_season_short_names
 
 
 def get_equation_str(expr: Expr, add_bold=False, add_underline=False) -> str:
-    equation_str = str(round_expr(expr, 2))
+    equation_str = str(round_expr_v3(expr))
     if add_bold:
         equation_str  = '$\\mathbf{' + equation_str + '}$ (selected equation)'
     elif add_underline:
@@ -18,7 +20,7 @@ def get_equation_str(expr: Expr, add_bold=False, add_underline=False) -> str:
     # Remove the "_" after "Max", "Min" and "Mean"
     for s in ["Max", "Min", "Mean"]:
         equation_str = equation_str.replace(f'{s}_', s)
-    # equation_str = text_on_two_lines_if_too_long(equation_str)
+    equation_str = text_on_two_lines_if_too_long(equation_str)
     return equation_str
 
 def round_expr(expr: Expr, num_digits: int) -> Expr:
@@ -34,8 +36,30 @@ def round_expr(expr: Expr, num_digits: int) -> Expr:
     return expr
 
 
+def round_expr_v2(expr: Expr, num_digits: int) -> Expr:
+    numbers = expr.atoms(Number)
+    for number in numbers:
+        round_number = round(number, num_digits)
+        new_expr = expr.subs(number, round_number)
+        if len(new_expr.atoms(Number)) == len(numbers):
+            expr = new_expr
+    return expr
+
+
+def round_expr_v3(expr: Expr) -> Expr:
+    numbers = expr.atoms(Number)
+    for number in numbers:
+        for num_digits in range(5):
+            round_number = round(number, num_digits)
+            new_expr = expr.subs(number, round_number)
+            if len(new_expr.atoms(Number)) == len(numbers):
+                expr = new_expr
+                break
+    return expr
+
+
 def text_on_two_lines_if_too_long(text: str) -> str:
-    if len(text) <= 50:
+    if len(text) <= 100:
         return text
     else:
         characters = ['+', '-']
@@ -54,6 +78,11 @@ def text_on_two_lines_if_too_long(text: str) -> str:
                 middle_index = len(text) // 2
                 distance_to_middle_index = [abs(i - middle_index) for i in index_plus_and_minus]
                 index_minimize_distance = index_plus_and_minus[np.argmin(distance_to_middle_index)]
-                return text[:index_minimize_distance] + '\n' + text[index_minimize_distance:]
+                first_part, second_part = text[:index_minimize_distance], text[index_minimize_distance:]
+                separator = '$\n$'
+                counter_first_part = Counter(first_part)
+                if counter_first_part['{'] > counter_first_part['}']:
+                    separator = '}' + separator + '\\mathbf{'
+                return first_part + separator + second_part
         else:
             return text
