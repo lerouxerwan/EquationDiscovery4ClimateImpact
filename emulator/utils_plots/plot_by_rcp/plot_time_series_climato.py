@@ -11,18 +11,21 @@ from utils.utils_plot import show_or_save_plot
 
 def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label: dict[str, list[tuple[list[int], list[float], str, str]]],
                                     y_train: np.ndarray, target_label: str, prefix: str,
-                                    show: Optional[bool], ymin_and_ymax: tuple[float, float] = None) -> dict[str, tuple[list[int], list[float], str]]:
+                                    show: Optional[bool], ymin_and_ymax: tuple[float, float] = None, plot_std: bool = True,
+                                    suffix_plot_name=None) -> dict[str, tuple[list[int], list[float], str]]:
     ax = plt.gca()
     rcp_name_to_years_and_std_values_and_color = _plot_climatological_time_series(ax,
                                                                                   rcp_name_to_list_of_years_and_y_and_color_and_label,
                                                                                   y_train, target_label, prefix,
-                                                                                  ymin_and_ymax)
-    show_or_save_plot(f'climatological_series_{prefix}', show)
+                                                                                  ymin_and_ymax, plot_std)
+    if suffix_plot_name is None:
+        suffix_plot_name = prefix
+    show_or_save_plot(f'climatological_series_{suffix_plot_name}', show)
     return rcp_name_to_years_and_std_values_and_color
 
 
 def _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, target_label,
-                                     prefix, ymin_and_ymax):
+                                     prefix, ymin_and_ymax, plot_std: bool = True, plot_average: bool = True):
     window_size = 30
     all_dates = []
     rcp_name_to_years_and_std_values_and_color = {}
@@ -35,8 +38,9 @@ def _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_col
             dates.append(years)
         dates, values = np.concat(dates), np.concat(values)
         #  Plot the average mean/std with the last color, i.e. the color of the RCP,
-        years_average, std_values = plot_average_value(ax, color, values, dates, window_size)
-        rcp_name_to_years_and_std_values_and_color[rcp_name] = (years_average, std_values, color)
+        if plot_average:
+            years_average, std_values = plot_average_value(ax, color, values, dates, window_size, plot_std)
+            rcp_name_to_years_and_std_values_and_color[rcp_name] = (years_average, std_values, color)
         all_dates.append(dates)
     #  Set custom X-axis
     xmin = int(math.floor(np.min(np.concat(all_dates)) / 10.0)) * 10
@@ -63,6 +67,10 @@ def _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_col
         plt.Line2D([0], [0], marker='s', linestyle='', color='k', markerfacecolor='k', markersize=10,
                    alpha=0.5),
     ]
+    if not plot_average:
+        legend_handles, legend_labels = legend_handles[:1], legend_labels[:1]
+    elif not plot_std:
+        legend_handles, legend_labels = legend_handles[:-1], legend_labels[:-1]
     ax_twin = ax.twinx()
     ax_twin.set_yticks([])
     ax_twin.legend(legend_handles, legend_labels, loc=loc2)

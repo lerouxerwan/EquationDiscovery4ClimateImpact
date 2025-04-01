@@ -28,7 +28,7 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, Optional[np.ndar
     """Load dataset parameters from a csv file, with X and y as pandas Dataframe and Series"""
     df = pd.read_csv(op.join(DATASET_CSV_PATH, filename_dataset), index_col=0)
     # Remove blank space from columns
-    df.rename(columns={c: c.replace(' ', '_') for c in df.columns}, inplace=True)
+    df.rename(columns={c: '_'.join(c.split()[1:]) for c in df.columns[1:]}, inplace=True)
     # Load features units and dataframe, target units and its series
     df, X, X_units, y, y_units = load_units(df)
     years = np.array([int(i.split('_')[-1]) for i in df.index.values])
@@ -56,6 +56,7 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, Optional[np.ndar
     # Load feature names and target name
     target_name = df.columns[:1].values[0]
     target_label = f'{target_name} ({'' if y_units is None else y_units[0]})'
+    target_label = target_label.replace('g / yr', "gC $\;$ year$^{-1}$")
     variable_names = None
     # Load index to create a validation split
     validation_mask = compute_validation_mask(y_train, validation_size, df)

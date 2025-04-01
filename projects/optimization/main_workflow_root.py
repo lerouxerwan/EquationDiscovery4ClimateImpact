@@ -17,9 +17,9 @@ def main_workflow_root_one_hyperparameter_setting():
 
 def main_workflow_root_random_hyperparameter_settings():
     params_emulator = {
-        "maxsize": 20,
+        "maxsize": 30,
         "model_selection": "custom",
-        "unary_operators": ["square", "sqrt", "cube", "cbrt", "abs"],
+        "unary_operators": ["square", "sqrt"],
         "binary_operators": ["+", "-", "*", "/"],
         "population_size": 31,
         "topn": 2,
@@ -33,12 +33,11 @@ def main_workflow_root_random_hyperparameter_settings():
         "tournament_selection_n": 7,
         "ncycles_per_iteration": 100,
         "niterations": 140,
-        "constraints": {'abs': 1},
     }
     params_search = {
-        "n_iter": 100,
+        "n_iter": 1000,
         "n_jobs": -1,
-        "scaling_factor": 1.5,
+        "scaling_factor": 2.,
         'param_list_to_optimize': [
             "populations",
             "niterations",

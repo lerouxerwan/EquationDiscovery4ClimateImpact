@@ -10,8 +10,8 @@ def get_equation_str(expr: Expr, add_bold=False, add_underline=False) -> str:
     equation_str = str(round_expr_v3(expr))
     if add_bold:
         equation_str  = '$\\mathbf{' + equation_str + '}$ (selected equation)'
-    elif add_underline:
-        equation_str = '$\\mathbf{' + equation_str + '}$ (selected equation with PySR)'
+    # elif add_underline:
+    #     equation_str = '$\\mathbf{' + equation_str + '}$ (selected equation with PySR)'
     else:
         equation_str = f'${equation_str}$'
     # Replace the month or the season
