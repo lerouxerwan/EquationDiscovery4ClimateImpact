@@ -8,7 +8,8 @@ from projects.optimization.utils_worflow import workflow
 from utils.utils_log import log_info
 
 
-def workflow_child(dataset_filename: str, search_path_to_start_from: str, params_search: Optional[dict[str, Any]] = None):
+def workflow_child(dataset_filename: str, search_path_to_start_from: str, params_search: Optional[dict[str, Any]] = None,
+                   show: bool = False):
     """Workflow that fit an emulator with search to a dataset and generate diagnosis plots to assess fit quality
     This workflow takes as inputs: a dataset filename, some parameters for the emulator with search
     and a search folder path for parent:
@@ -22,7 +23,7 @@ def workflow_child(dataset_filename: str, search_path_to_start_from: str, params
     # Start optimization from a previous search experiment
     search_experiment = load_search_experiment(search_path_to_start_from, X_train, y_train, validation_mask)
     log_info(f'Load best emulator params from: {search_experiment}')
-    emulator = workflow(dataset_filename, search_experiment.best_params, params_search)
+    emulator = workflow(dataset_filename, search_experiment.best_params, params_search, show)
     # Add a child/parent link if 'search_path_to_start_from' was used
     if params_search is not None:
         add_heredity_link(emulator.search_experiment_, search_experiment)

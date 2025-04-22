@@ -8,7 +8,8 @@ from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearc
 from emulator_with_search.utils_attributes.utils_validation import get_X_and_y
 
 
-def workflow(dataset_filename: str, params_emulator: dict[str, Any], params_search: Optional[dict[str, Any]] = None) -> PySREmulatorWithSearch:
+def workflow(dataset_filename: str, params_emulator: dict[str, Any], params_search: Optional[dict[str, Any]] = None,
+             show: bool = False) -> PySREmulatorWithSearch:
     """Workflow that fit an emulator to a dataset and generate diagnosis plots to assess fit quality
     This workflow takes as compulsory inputs: a dataset filename & a dictionary of parameters for the emulator
     An optional input is 'params_search' which gives some argument for hyperparameter search """
@@ -25,9 +26,9 @@ def workflow(dataset_filename: str, params_emulator: dict[str, Any], params_sear
         emulator.fit(X_train, y_train, variable_names=variable_names, X_units=X_units, y_units=y_units, validation_mask=validation_mask)
     #  Generate diagnosis plot for the fit
     plot_diagnosis_fit(emulator, X_train, y_train, validation_mask, X_test, y_test, years_train, years_test, rcp_name_train,
-                       rcp_name_test, target_label, False)
+                       rcp_name_test, target_label, show)
     #  Generate diagnosis plot for the search
     if params_search is not None:
-        plot_diagnosis_search(emulator.search_experiment_, False)
+        plot_diagnosis_search(emulator.search_experiment_, show)
     return emulator
 
