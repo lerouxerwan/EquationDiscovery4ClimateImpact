@@ -8,7 +8,7 @@ from emulator.utils_metric.metric import Metric, metric_to_function, metric_to_l
 from emulator.utils_plots.plot_by_rcp.plot_time_series_climato import plot_climatological_time_series
 from emulator.utils_plots.plot_by_rcp.utils_plot_by_rcp import load_rcp_name_to_list_of_years_and_y_and_color_and_label
 from emulator.utils_plots.plot_by_split.utlis_plot_selected_equation import get_true_label_and_predicted_label, \
-    get_true_and_predicted_prefix, uncapitalize
+    get_true_and_predicted_prefix, uncapitalize, get_label, get_true_and_predicted_label
 from utils.utils_plot import compute_axis_lim
 
 
@@ -35,12 +35,13 @@ def plot_climato(emulator: PySREmulator, X_train: np.ndarray,
     for rcp_name, (years, observed_std_values, color) in rcp_name_to_years_and_observed_std_values_years_and_color.items():
         years, predicted_std_values, color = rcp_name_to_years_and_predicted_std_values_and_color[rcp_name]
         values = [predicted_v / observed_v for observed_v, predicted_v in zip(observed_std_values, predicted_std_values)]
-        true_prefix, predicted_prefix = get_true_and_predicted_prefix()
-        metric = 'std on 30-years'
-        prefix = f'{true_prefix} {metric} / {predicted_prefix} {metric}'
+        true_label, predicted_label = get_true_and_predicted_label()
+        metric = 'std 30-years'
+        prefix = f'{true_label} {metric} / {predicted_label} {metric}'
         rcp_name_to_list_of_years_and_y_and_color_and_label[rcp_name] = [(years, values, color, prefix)]
-    plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, target_label, f"{prefix}\nfor",
-                                    show, plot_std=False, suffix_plot_name='std')
+    y_label = f'{prefix}\nfor {uncapitalize(get_label(target_label))}'
+    plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, y_label,
+                                    "Std", show, plot_std=False)
 
 
 
@@ -50,7 +51,9 @@ def _plot_climato(y_train: np.ndarray, y_test: Optional[np.ndarray] = None,
                   target_label: str = "Target (-)", show: bool = False, ymin_and_ymax: Optional[tuple[float, float]] = None):
     """Plot several RCP climatological time series on the same graph"""
     rcp_name_to_list_of_years_and_y_and_color_and_label = load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train, y_test, years_train, years_test, rcp_name_train, rcp_name_test, validation_mask)
-    return plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, target_label, "", show, ymin_and_ymax, suffix_plot_name=target_label.split()[0])
+    y_label = get_label(target_label)
+    plot_name = y_label.split()[0]
+    return plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, y_label, plot_name, show, ymin_and_ymax)
 
 
 def plot_errors_climato(emulator: PySREmulator, X_train: np.ndarray,
@@ -61,18 +64,42 @@ def plot_errors_climato(emulator: PySREmulator, X_train: np.ndarray,
                         years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None, rcp_name_train: str= 'RCP85',
                         rcp_name_test: Optional[str]=None,
                         target_label: str = "Target (-)", show: Optional[bool] = False):
-    errors_train = compute_differences(emulator, X_train, y_train)
-    errors_test = compute_differences(emulator, X_test, y_test)
-    rcp_name_to_list_of_years_and_errors_and_color_and_label = load_rcp_name_to_list_of_years_and_y_and_color_and_label(errors_train, errors_test, years_train, years_test, rcp_name_train, rcp_name_test, validation_mask)
-    label = f'Error for {uncapitalize(target_label)}'
-    plot_climatological_time_series(rcp_name_to_list_of_years_and_errors_and_color_and_label, errors_train, label, f'', show)
+    for relative_error in [True, False]:
+        _plot_errors_climato(emulator, X_train, y_train, validation_mask, X_test, y_test, years_train, years_test, rcp_name_train,
+                      rcp_name_test, target_label, show, relative_error)
 
-def compute_differences(emulator: PySREmulator, X: Optional[np.ndarray], y: Optional[np.ndarray]) -> Optional[np.ndarray]:
+
+def _plot_errors_climato(emulator: PySREmulator, X_train: np.ndarray,
+                        y_train: np.ndarray,
+                        validation_mask: np.ndarray[bool],
+                        X_test: Optional[np.ndarray] = None,
+                        y_test: Optional[np.ndarray] = None,
+                        years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None, rcp_name_train: str= 'RCP85',
+                        rcp_name_test: Optional[str]=None,
+                        target_label: str = "Target (-)",
+                         show: Optional[bool] = False, relative_error: bool = False):
+    errors_train = compute_differences(emulator, X_train, y_train, relative_error)
+    errors_test = compute_differences(emulator, X_test, y_test, relative_error)
+    rcp_name_to_list_of_years_and_errors_and_color_and_label = load_rcp_name_to_list_of_years_and_y_and_color_and_label(errors_train, errors_test, years_train, years_test, rcp_name_train, rcp_name_test, validation_mask)
+    target_label = uncapitalize(get_label(target_label))
+    if relative_error:
+        y_label = f'Relative error of {target_label.split('(')[0]}(%)'
+    else:
+        y_label = f'Error of {target_label}'
+    plot_name = y_label.split()[0]
+    plot_climatological_time_series(rcp_name_to_list_of_years_and_errors_and_color_and_label, errors_train, y_label, plot_name, show)
+
+def compute_differences(emulator: PySREmulator, X: Optional[np.ndarray], y: Optional[np.ndarray],
+                        relative_error: bool = False) -> Optional[np.ndarray]:
     if X is None:
         return None
     else:
         y_predicted = emulator.predict(X)
-        errors = [y_predicted_value - y_value for y_value, y_predicted_value in zip(y, y_predicted)]
+        if relative_error:
+            errors = [100 * (y_predicted_value - y_value) / y_value for y_value, y_predicted_value in zip(y, y_predicted)]
+            print(max(errors))
+        else:
+            errors = [y_predicted_value - y_value for y_value, y_predicted_value in zip(y, y_predicted)]
         return np.array(errors)
 
 

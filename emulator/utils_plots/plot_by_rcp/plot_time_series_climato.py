@@ -10,22 +10,18 @@ from utils.utils_plot import show_or_save_plot
 
 
 def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label: dict[str, list[tuple[list[int], list[float], str, str]]],
-                                    y_train: np.ndarray, target_label: str, prefix: str,
-                                    show: Optional[bool], ymin_and_ymax: tuple[float, float] = None, plot_std: bool = True,
-                                    suffix_plot_name=None) -> dict[str, tuple[list[int], list[float], str]]:
+                                    y_train: np.ndarray, y_label: str, plot_name: str, show: Optional[bool], ymin_and_ymax: tuple[float, float] = None, plot_std: bool = True) -> dict[str, tuple[list[int], list[float], str]]:
     ax = plt.gca()
     rcp_name_to_years_and_std_values_and_color = _plot_climatological_time_series(ax,
                                                                                   rcp_name_to_list_of_years_and_y_and_color_and_label,
-                                                                                  y_train, target_label, prefix,
+                                                                                  y_train, y_label,
                                                                                   ymin_and_ymax, plot_std)
-    if suffix_plot_name is None:
-        suffix_plot_name = prefix
-    show_or_save_plot(f'climatological_series_{suffix_plot_name}', show)
+    show_or_save_plot(f'climatological_series_{plot_name}', show)
     return rcp_name_to_years_and_std_values_and_color
 
 
-def _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, target_label,
-                                     prefix, ymin_and_ymax, plot_std: bool = True, plot_average: bool = True):
+def _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, y_label,
+                                     ymin_and_ymax, plot_std: bool = True, plot_average: bool = True):
     window_size = 30
     all_dates = []
     rcp_name_to_years_and_std_values_and_color = {}
@@ -53,7 +49,7 @@ def _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_col
     #  Y axis
     if ymin_and_ymax is not None:
         ax.set_ylim(ymin_and_ymax)
-    ax.set_ylabel(f'{prefix} {get_label(target_label)}')
+    ax.set_ylabel(y_label)
     #  Add first legend
     increasing_trend = (y_train[0] < y_train[-1]) if isinstance(y_train, np.ndarray) else (
             y_train.values[0] < y_train.values[-1])
