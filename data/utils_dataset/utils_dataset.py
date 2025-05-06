@@ -56,7 +56,7 @@ Optional[ArrayLike[str]], Optional[ArrayLike[str]], np.ndarray, Optional[np.ndar
     # Load feature names and target name
     target_name = df.columns[:1].values[0]
     target_label = f'{target_name} ({'' if y_units is None else y_units[0]})'
-    target_label = target_label.replace('g / yr', "gC $\;$ year$^{-1}$")
+    target_label = target_label.replace('g / yr', "gC year$^{-1}$")
     variable_names = None
     # Load index to create a validation split
     validation_mask = compute_validation_mask(y_train, validation_size, df)

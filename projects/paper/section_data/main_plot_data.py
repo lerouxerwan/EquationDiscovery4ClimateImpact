@@ -8,7 +8,7 @@ from projects.paper.utils_paper import filename_dataset_paper
 from utils.utils_plot import subplots_custom, show_or_save_plot
 
 
-def plot_data(ax, y_train, y_test, years_train, years_test, rcp_name_train, rcp_name_test, target_label, validation_mask, show):
+def plot_data(ax, y_train, y_test, years_train, years_test, rcp_name_train, rcp_name_test, target_label, validation_mask):
     rcp_name_to_list_of_years_and_y_and_color_and_label = load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train, y_test, years_train, years_test, rcp_name_train, rcp_name_test, validation_mask)
     _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, target_label, f"", show)
     y_all = np.concat([y_train, y_test], axis=0)
@@ -22,8 +22,13 @@ def main_plot_data(show=False):
      variable_names, target_label, validation_mask) = load_dataset(filename_dataset_paper)
     # Add two plots
     label1 = 'Sea surface temperature in summer ($^o$C)'
-    plot_data(ax1, get_summer_sst(X_train, variable_names), get_summer_sst(X_test, variable_names), years_train, years_test, rcp_name_train, rcp_name_test, label1, validation_mask, show)
-    plot_data(ax2, y_train, y_test, years_train, years_test, rcp_name_train, rcp_name_test, target_label, validation_mask, show)
+    plot_data(ax1, get_summer_sst(X_train, variable_names), get_summer_sst(X_test, variable_names), years_train, years_test, rcp_name_train, rcp_name_test, label1, validation_mask)
+    plot_data(ax2, y_train, y_test, years_train, years_test, rcp_name_train, rcp_name_test, target_label, validation_mask)
+    # Some additional things for Slides
+    # for ax in [ax1, ax2]:
+    #     size = 13
+    #     ax.xaxis.label.set_size(size)
+    #     ax.yaxis.label.set_size(size)
     show_or_save_plot('data', show)
 
 

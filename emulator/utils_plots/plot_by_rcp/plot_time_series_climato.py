@@ -48,6 +48,7 @@ def _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_col
     ax.set_xlabel('Years')
     #  Y axis
     if ymin_and_ymax is not None:
+        assert len(ymin_and_ymax) == 2
         ax.set_ylim(ymin_and_ymax)
     ax.set_ylabel(y_label)
     #  Add first legend
