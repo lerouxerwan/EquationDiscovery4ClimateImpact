@@ -1,17 +1,14 @@
 import subprocess
 
+from data.utils_dataset.npp_season_v1 import dataset_values_npp_season_v1
 from data.utils_search.utils_best_score import get_best_search_experiments
 from data.utils_search.utils_search_history import get_search_history
-from projects.paper.utils_paper import filename_dataset_paper
 from utils.utils_bash_call import bash_call
-from data.utils_dataset.utils_dataset import load_dataset
-
 
 
 def main_analyze_best_results(nb_top_experiments: int = 5):
     #  Load dataset
-    (X_train, y_train, X_test, y_test, X_units, y_units, years_train, years_test, rcp_name_train, rcp_name_test,
-     variable_names, target_label, validation_mask) = load_dataset(filename_dataset_paper)
+    (X_train, y_train, *_, validation_mask) = dataset_values_npp_season_v1.values
     #  Get best search experiments
     search_experiments = get_best_search_experiments(X_train, y_train, validation_mask, nb_top_experiments)
     print('Ranking of the best search experiments:')

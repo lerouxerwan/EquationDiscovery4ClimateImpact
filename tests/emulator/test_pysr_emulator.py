@@ -4,10 +4,8 @@ import numpy as np
 import pytest
 from sympy import Symbol
 
-from data.utils_dataset.utils_dataset import load_dataset
 from emulator.utils_attributes.utils_data_augmentation import apply_data_augmentation
 from emulator.utils_attributes.utils_weighted_loss import get_weights
-from emulator_with_search.utils_attributes.utils_validation import get_X_and_y
 from tests.emulator.utils_tests_emulator import load_pysr_emulator_for_test, \
     run_three_main_functions_with_one_feature, load_X_and_y_for_test
 
@@ -75,13 +73,6 @@ def test_composed_units():
     X, y = load_X_and_y_for_test(nb_features=nb_features)
     variable_names = [f'x{i+1}' for i in range(nb_features)]
     emulator.fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
-
-
-def get_X_y_variable_names() -> tuple[np.ndarray, np.ndarray, np.ndarray[str]]:
-    filename = r"NPP_season.csv"
-    X, y, _, _, _, _, _, _, _, _, variable_names, _, validation_mask = load_dataset(filename)
-    X_train_train, y_train_train = get_X_and_y(X, y, validation_mask, validation_set=False)
-    return X_train_train, y_train_train, np.array(variable_names)
 
 
 @pytest.mark.parametrize("data_augmentation_ratio", [2, 3])

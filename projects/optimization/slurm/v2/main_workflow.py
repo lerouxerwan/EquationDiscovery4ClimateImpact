@@ -1,7 +1,7 @@
 import sys
 
+from data.utils_dataset.npp_season_v1 import dataset_values_npp_season_v1
 from projects.optimization.utils_worflow import workflow
-from projects.paper.utils_paper import filename_dataset_paper
 
 
 def main_workflow_slurm():
@@ -33,7 +33,7 @@ def main_workflow_slurm():
                                        "optimizer_iterations", "perturbation_factor",
                                        "probability_negate_constant"]
         }
-        workflow(filename_dataset_paper, params_emulator, params_search)
+        workflow(dataset_values_npp_season_v1, params_emulator, params_search)
 
 
 if __name__ == '__main__':

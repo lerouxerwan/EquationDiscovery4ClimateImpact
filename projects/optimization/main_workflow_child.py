@@ -1,5 +1,5 @@
+from data.utils_dataset.npp_season_v1 import dataset_values_npp_season_v1
 from projects.optimization.utils_workflow_child import workflow_child
-from projects.paper.utils_paper import filename_dataset_paper
 
 
 def main_workflow_child():
@@ -10,7 +10,7 @@ def main_workflow_child():
         "scaling_factor": 1.2,
         'param_list_to_optimize': ['populations', 'niterations', 'fraction_replaced_hof']
     }
-    workflow_child(filename_dataset_paper, search_path_to_start_from, params_emulator_child)
+    workflow_child(dataset_values_npp_season_v1, search_path_to_start_from, params_emulator_child)
 
 def main_workflow_child_marginal_analysis():
     search_path_to_start_from = '/home/e23lerou/Documents/EquationDiscovery4ClimateImpact/data/search/6624636351014803864/random_1_nit100_100_sca0'
@@ -22,13 +22,13 @@ def main_workflow_child_marginal_analysis():
     # 'adaptive_parsimony_scaling', 'fraction_replaced_hof', 'crossover_probability',
     for param_name in ['maxsize', 'ncycles_per_iteration', 'population_size', 'populations']:
         params_emulator_child['param_list_to_optimize'] = [param_name]
-        workflow_child(filename_dataset_paper, search_path_to_start_from, params_emulator_child)
+        workflow_child(dataset_values_npp_season_v1, search_path_to_start_from, params_emulator_child)
 
 def main_workflow_child_best():
     # workflow_child(filename_dataset_paper, "best")
     search_path = "/home/e23lerou/Documents/EquationDiscovery4ClimateImpact/data/search/82421e3d24e9c7423c3d8163d183862b/1d5d5580db592e245fc2b47770a0cefa"
     search_path = "/home/e23lerou/Documents/EquationDiscovery4ClimateImpact/data/search/82421e3d24e9c7423c3d8163d183862b/1d5d5580db592e245fc2b47770a0cefa"
-    workflow_child(filename_dataset_paper, search_path)
+    workflow_child(dataset_values_npp_season_v1, search_path)
 
 
 

@@ -9,16 +9,15 @@ from pysr.utils import ArrayLike
 from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection._search import BaseSearchCV
 
-from data.utils_dataset.utils_validation import compute_default_validation_mask
+from data.utils_dataset.utils_validation_split import get_validation_mask
 from data.utils_search.search_experiment import SearchExperiment
 from data.utils_search.utils_non_default_params import get_non_default_params
 from data.utils_search.utils_search_path import get_search_path
 from emulator.pysr_emulator import PySREmulator
-from emulator.utils_metric.metric import Metric, metric_to_function
+from emulator.utils_metric.metric import Metric
 from emulator_with_search.utils_attributes.utils_search_cv import get_search_cv_kwargs
 from emulator_with_search.utils_attributes.utils_validation import get_cv, get_X_and_y
-from emulator_with_search.utils_cv_results.utils_df_results import get_df_cv_results, METRIC_COLUMN_NAME, \
-    RMSE_VALIDATION_COLUMN_NAME
+from emulator_with_search.utils_cv_results.utils_df_results import get_df_cv_results, RMSE_VALIDATION_COLUMN_NAME
 from emulator_with_search.utils_cv_results.utils_optimize_threshold import compute_optimal_threshold
 from emulator_with_search.utils_param_grid.utils_scaling_factor import get_param_grid
 from emulator_with_search.utils_param_grid.utils_search_style import search_style_to_search_cv_type
@@ -196,7 +195,7 @@ class PySREmulatorWithSearch(PySREmulator):
              validation_mask: array of boolean s.t. validation_mask[i] indicates if the index 'i' is in the validation set
         """
         # Set validation_mask
-        self.validation_mask_ =  compute_default_validation_mask(y) if validation_mask is None else validation_mask
+        self.validation_mask_ = get_validation_mask(length_mask=len(y)) if validation_mask is None else validation_mask
         # Run hyperparameter search experiment
         self.search_experiment_ = self.run_hyperparameter_search(X, y, variable_names=variable_names,
                                                                  X_units=X_units, y_units=y_units)
