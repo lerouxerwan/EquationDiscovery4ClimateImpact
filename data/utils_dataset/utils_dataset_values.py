@@ -36,6 +36,8 @@ def load_dataset_values(csv_filename: str, rcp_name_train: str, rcp_name_test: O
     df, X_labels, y_labels = load_additional_row(df, 'LABEL')
     variable_names = list(df.columns)
     X_variables_names, y_variable_names = variable_names[1:], variable_names[:1]
+    # Cast dataframe to the float type
+    df = df.astype(float)
     # Check dataframe: at best 2 RCP scenarios should be in the index values (and that other prefix can only be 'HIST')
     prefixes = np.array([str(i.split('_')[0]) for i in df.index.values])
     prefix_set = set(list(prefixes))
@@ -53,7 +55,7 @@ def load_dataset_values(csv_filename: str, rcp_name_train: str, rcp_name_test: O
         years_train, years_test = years, None
     else:
         X_train, X_test = X.loc[~ind_test, :].values, X.loc[ind_test, :].values
-        y_train, y_test = y.loc[~ind_test].values, X.loc[ind_test].values
+        y_train, y_test = y.loc[~ind_test].values, y.loc[ind_test].values
         years_train, years_test = years[~ind_test], years[ind_test]
     # Load validation mask
     prefixes_train = prefixes if (ind_test is None) else prefixes[~ind_test]

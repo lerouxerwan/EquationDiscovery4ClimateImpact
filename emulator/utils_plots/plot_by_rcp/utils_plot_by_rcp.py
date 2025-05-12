@@ -24,16 +24,16 @@ def load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train: np.ndarray
     # Set default for years_train and years_test if needed
     years_test, years_train = set_default_years(y_test, y_train, years_test, years_train)
     # Set value of nb_historical_years
-    nb_historical_years = 0 if validation_mask is None else list(validation_mask).index(True) + 1
+    start_rcp_index = 0 if validation_mask is None else list(validation_mask).index(True)
     # Add rcp_name_train
     rcp_name_to_list_of_years_and_y_and_color[rcp_name_train] = [
-        (years_train[:nb_historical_years], y_train[:nb_historical_years], 'k', 'Historical'),
-        (years_train[nb_historical_years:], y_train[nb_historical_years:], rcp_name_to_color[rcp_name_train], get_rcp_label(rcp_name_train))
+        (years_train[:start_rcp_index], y_train[:start_rcp_index], 'k', 'Historical'),
+        (years_train[start_rcp_index:], y_train[start_rcp_index:], rcp_name_to_color[rcp_name_train], get_rcp_label(rcp_name_train))
     ]
     # Add rcp_name_test
     if rcp_name_test is not None:
         rcp_name_to_list_of_years_and_y_and_color[rcp_name_test] = [
-            (years_train[:nb_historical_years], y_train[:nb_historical_years], 'k', None),
+            (years_train[:start_rcp_index], y_train[:start_rcp_index], 'k', None),
             (years_test, y_test, rcp_name_to_color[rcp_name_test], get_rcp_label(rcp_name_test))
         ]
     # Some final checks
