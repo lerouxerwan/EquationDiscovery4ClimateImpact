@@ -55,6 +55,7 @@ class SearchExperiment(object):
 
     @cached_property
     def best_series(self) -> pd.Series:
+        """Series that corresponds to the set of hyperparameters with the best results"""
         return self.df_cv_results.iloc[0]
 
     @property

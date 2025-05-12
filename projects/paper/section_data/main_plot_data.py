@@ -23,7 +23,7 @@ def main_plot_data(show=False):
         validation_mask) = dataset_values.values
 
     # Add two plots
-    column_index = X_variables_names.index('SST_{JJA}')
+    column_index = X_variables_names.index('SST_JJA')
     sst_train = X_train[:, column_index] - 273.15
     sst_test = X_test[:, column_index] - 273.15
     label_sst = X_labels[column_index].replace('(K)', '($^o$C)')
@@ -48,24 +48,14 @@ def main_plot_all_features(show=False):
     (X_train, y_train, X_test, y_test, years_train, years_test,
         X_units, y_units, X_labels, y_labels, X_variables_names, y_variable_names,
         validation_mask) = dataset_values.values
-    variable_names = ['SSH_{DJF}', 'SSS_{MAM}', 'Shortwave_{DJF}', 'MerWindStr_{MAM}']
+    variable_names = ['SSH_DJF', 'SSS_MAM', 'Shortwave_DJF', 'MerWindStr_MAM']
     for variable_name in variable_names:
         ax = plt.gca()
         column_index = X_variables_names.index(variable_name)
         label_name = X_labels[column_index]
-        print(years_train)
-        print(years_test)
-        print(label_name)
         plot_data(ax, X_train[:, column_index], X_test[:, column_index], years_train, years_test,
                   dataset_values.rcp_name_train, dataset_values.rcp_name_test, label_name, validation_mask)
         show_or_save_plot(f'data_{variable_name}', show)
-
-
-
-def get_summer_sst(X, variable_names):
-    column_index = variable_names.index('SST_JJA')
-    return X[:, column_index] -  273.15
-
 
 
 if __name__ == '__main__':
