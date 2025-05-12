@@ -8,11 +8,11 @@ from utils.utils_plot import show_or_save_plot
 n = 100
 
 
-def main_example_1d():
+def main_example_1d(show: bool):
     X, y = get_data_example_1d()
     emulator = PySREmulator(niterations=5, maxsize=9)
     emulator.fit(X, y)
-    plot_pareto_front_example(emulator, X, y, show=False)
+    plot_pareto_front_example(emulator, X, y, show=show)
 
 
 def get_data_example_1d():
@@ -20,7 +20,7 @@ def get_data_example_1d():
     y = X[:, 0] ** 2 + 2 * X[:, 0] + 3
     return X, y
 
-def main_pareto_front_example_1d(show):
+def main_pareto_front_example_1d(show: bool):
     X, y = get_data_example_1d()
     ax = plt.gca()
     equation_str = '$x^2 + 2 \\times x + 3$'
@@ -36,5 +36,5 @@ def main_pareto_front_example_1d(show):
 
 
 if __name__ == '__main__':
-    # main_example_1d()
-    main_pareto_front_example_1d(show=True)
+    main_example_1d(show=True)
+    # main_pareto_front_example_1d(show=True)
