@@ -195,7 +195,7 @@ class PySREmulatorWithSearch(PySREmulator):
              validation_mask: array of boolean s.t. validation_mask[i] indicates if the index 'i' is in the validation set
         """
         # Set validation_mask
-        self.validation_mask_ = get_validation_mask(length_mask=len(y)) if validation_mask is None else validation_mask
+        self.validation_mask_ = get_validation_mask(y) if validation_mask is None else validation_mask
         # Run hyperparameter search experiment
         self.search_experiment_ = self.run_hyperparameter_search(X, y, variable_names=variable_names,
                                                                  X_units=X_units, y_units=y_units)

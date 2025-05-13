@@ -59,7 +59,7 @@ def load_dataset_values(csv_filename: str, rcp_name_train: str, rcp_name_test: O
         years_train, years_test = years[~ind_test], years[ind_test]
     # Load validation mask
     prefixes_train = prefixes if (ind_test is None) else prefixes[~ind_test]
-    validation_mask = get_validation_mask(len(prefixes_train), validation_size, validation_split,
+    validation_mask = get_validation_mask(y_train, validation_size, validation_split,
                                           list(years_train), rcp_name_train, list(prefixes_train))
     return (
         X_train, y_train, X_test, y_test, years_train, years_test,

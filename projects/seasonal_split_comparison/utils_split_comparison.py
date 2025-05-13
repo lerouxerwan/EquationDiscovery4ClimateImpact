@@ -19,12 +19,12 @@ def get_params_emulator():
         "maxsize": 20,
         "optimizer_f_calls_limit": 10000,
         "population_size": 31,
-        "unary_operators": ["square", "sqrt"]
+        "unary_operators": ["square"]
     }
 
 def get_params_search(fast: True):
     return {
-        "n_iter": 5 if fast else 100,
+        "n_iter": 10 if fast else 100,
         "n_jobs": -1,
         "scaling_factor": 2.,
         'param_list_to_optimize': [
