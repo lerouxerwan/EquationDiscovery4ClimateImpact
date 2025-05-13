@@ -1,4 +1,5 @@
 from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
+from emulator_with_search.utils_attributes.utils_search_cv import get_random_params_list_from_param_grid
 from emulator_with_search.utils_param_grid.utils_scaling_factor import get_param_grid
 
 
@@ -22,5 +23,11 @@ def test_scaling_factor_for_grid_search():
     param_values = param_grid['fraction_replaced_hof']
     assert (param_values[0] == 0.005) and (param_values[2] == 0.01) and (param_values[-1] == 0.02)
 
+def test_random_state_for_hyperparameter_search():
+    emulator = PySREmulatorWithSearch(niterations=10)
+    for _ in range(2):
+        random_params_list = get_random_params_list_from_param_grid(emulator.param_grid, emulator.n_iter)
+        sum_niterations = sum([params['niterations'] for params in random_params_list])
+        assert sum_niterations == 227
 
 
