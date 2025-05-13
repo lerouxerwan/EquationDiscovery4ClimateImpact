@@ -44,5 +44,5 @@ def main_workflow_root_random_hyperparameter_settings(n_iter: int):
 
 
 if __name__ == '__main__':
-    main_workflow_root_random_hyperparameter_settings(n_iter=10)
+    main_workflow_root_random_hyperparameter_settings(n_iter=1000)
 
