@@ -2,40 +2,15 @@ from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
 from projects.optimization.utils_worflow import workflow
 
 
-def main_workflow_root_one_hyperparameter_setting():
+def main_workflow_root_random_hyperparameter_settings(n_iter: int):
     params_emulator = {
-        "model_selection": "custom",
-        "niterations": 2,
-    }
-    params_search = {
-        "n_iter": 6,
-        "scaling_factor": 2,
-        "n_jobs": -1,
-    }
-    workflow(dataset_npp_season_v1, params_emulator, params_search)
-
-
-def main_workflow_root_random_hyperparameter_settings():
-    params_emulator = {
-        "maxsize": 30,
-        "model_selection": "custom",
-        "unary_operators": ["square", "sqrt"],
-        "binary_operators": ["+", "-", "*", "/"],
-        "population_size": 31,
-        "topn": 2,
-        "optimizer_nrestarts": 1,
-        "optimizer_iterations": 3,
-        'fraction_replaced_hof': 0.25,
-        "adaptive_parsimony_scaling": 300.,
+        "maxsize": 20,
         "optimizer_f_calls_limit": 10000,
-        "weight_rotate_tree": 3.,
-        "tournament_selection_n": 7,
-        "tournament_selection_n": 7,
-        "ncycles_per_iteration": 100,
-        "niterations": 140,
+        "population_size": 31,
+        "unary_operators": ["square", "sqrt"]
     }
     params_search = {
-        "n_iter": 1000,
+        "n_iter": n_iter,
         "n_jobs": -1,
         "scaling_factor": 2.,
         'param_list_to_optimize': [
@@ -69,6 +44,5 @@ def main_workflow_root_random_hyperparameter_settings():
 
 
 if __name__ == '__main__':
-    # main_workflow_root_one_hyperparameter_setting()
-    main_workflow_root_random_hyperparameter_settings()
+    main_workflow_root_random_hyperparameter_settings(n_iter=10)
 

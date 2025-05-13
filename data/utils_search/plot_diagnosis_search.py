@@ -1,16 +1,27 @@
 import pandas as pd
 from matplotlib import pyplot as plt
 
+from data.utils_dataset.dataset import Dataset
+from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
 from data.utils_search.search_experiment import SearchExperiment
 from emulator_with_search.utils_cv_results.utils_df_results import RMSE_VALIDATION_COLUMN_NAME, \
-    PARAMS_EMULATOR_COLUMN_NAME
+    PARAMS_EMULATOR_COLUMN_NAME, SELECTED_FEATURE_INDEXES_COLUMN_NAME
 from utils.utils_log import log_info
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_diagnosis_search(search_experiment: SearchExperiment, show: bool = False):
+def plot_diagnosis_search(dataset: Dataset, search_experiment: SearchExperiment, show: bool = False):
     log_info('Start plot diagnosis search')
-    plot_diagnosis_search_1d(search_experiment, show)
+    plot_selected_features(dataset, search_experiment, show)
+    # plot_diagnosis_search_1d(search_experiment, show)
+
+def plot_selected_features(dataset: Dataset, search_experiment: SearchExperiment, show: bool = False):
+    """Plot the selected features in the best equation"""
+    selected_feature_indexes = search_experiment.df_cv_results[SELECTED_FEATURE_INDEXES_COLUMN_NAME].values[0]
+    for selected_feature_index in selected_feature_indexes:
+        ax = plt.gca()
+        dataset.plot_values_feature(ax, selected_feature_index)
+        show_or_save_plot(f'feature_#{selected_feature_index}', show)
 
 def plot_diagnosis_search_1d(search_experiment: SearchExperiment, show: bool):
     """Plot the variation of RMSE validation for each hyperparameter in the param_grid"""
@@ -34,6 +45,5 @@ def plot_diagnosis_search_1d(search_experiment: SearchExperiment, show: bool):
         show_or_save_plot(f"diagnosis_1D_{param_name}", show)
 
 if __name__ == '__main__':
-    search_path = ("/home/e23lerou/Documents/EquationDiscovery4ClimateImpact/data/search/6624636351014803864/"
-                   "RandomizedSearchCV_10_fra0.06140000000000002_nit10_ada520.0_2080.0_fra0.0_0.1_nit5_20_sca2_thr1.0005")
-    plot_diagnosis_search_1d(SearchExperiment(search_path), show=True)
+    search_path = ("/home/e23lerou/Documents/EquationDiscovery4ClimateImpact/data/search/82421e3d24e9c7423c3d8163d183862b/b1f603382535a297e302ebec8e7961d4")
+    plot_diagnosis_search(dataset_npp_season_v1, SearchExperiment(search_path), show=True)

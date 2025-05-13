@@ -1,6 +1,6 @@
 import subprocess
 
-from data.utils_dataset.npp_season_v1 import dataset_values_npp_season_v1
+from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
 from data.utils_search.utils_best_score import get_best_search_experiments
 from data.utils_search.utils_search_history import get_search_history
 from utils.utils_bash_call import bash_call
@@ -8,7 +8,7 @@ from utils.utils_bash_call import bash_call
 
 def main_analyze_best_results(nb_top_experiments: int = 5):
     #  Load dataset
-    (X_train, y_train, *_, validation_mask) = dataset_values_npp_season_v1.values
+    (X_train, y_train, *_, validation_mask) = dataset_npp_season_v1.values
     #  Get best search experiments
     search_experiments = get_best_search_experiments(X_train, y_train, validation_mask, nb_top_experiments)
     print('Ranking of the best search experiments:')
