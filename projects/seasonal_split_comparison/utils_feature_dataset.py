@@ -11,7 +11,7 @@ from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
 def get_feature_datasets(original_dataset: Dataset) -> Generator[Dataset, Any, None]:
     """Generator of toy datasets, where for each dataset the target is composed/calculated from features"""
     physical_variables = set([variable_name.split('_')[0] for variable_name in original_dataset.X_variables_names])
-    for physical_variable in physical_variables:
+    for physical_variable in sorted(list(physical_variables)):
         yield get_feature_dataset(original_dataset, physical_variable)
 
 def get_feature_dataset(original_dataset: Dataset, physical_variable: str) -> Dataset:
