@@ -247,7 +247,8 @@ class PySREmulatorWithSearch(PySREmulator):
         search_cv.cv_results_[RMSE_VALIDATION_COLUMN_NAME] = rmse_validation_list
 
         #  Transform cv_results into a Dataframe sorted by ranking with additional columns
-        return get_df_cv_results(search_cv.cv_results_)
+        return get_df_cv_results(search_cv.cv_results_, variable_names=params_fit['variable_names'])
+
 
     def run_search_cv(self, search_cv_type: type, X, y, param_grid: dict | list[dict], **params_fit):
         """Run hyperparameter search for a specific type of search (random, grid), a param_grid (all hyperparameters)

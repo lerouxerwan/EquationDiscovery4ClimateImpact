@@ -2,7 +2,8 @@ import numpy as np
 
 from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
 from emulator_with_search.utils_cv_results.utils_df_results import RMSE_VALIDATION_COLUMN_NAME, \
-    PARAMS_EMULATOR_COLUMN_NAME, METRIC_COLUMN_NAME, SELECTED_COMPLEXITY_COLUMN_NAME
+    PARAMS_EMULATOR_COLUMN_NAME, SELECTED_COMPLEXITY_COLUMN_NAME, get_selected_feature_indexes, \
+    SELECTED_FEATURE_INDEXES_COLUMN_NAME
 from tests.emulator.utils_tests_emulator import run_three_main_functions_with_one_feature
 
 
@@ -15,8 +16,9 @@ def test_df_cv_results():
     df = emulator.search_experiment_.df_cv_results
     assert len(df) == n_iter
     # Check the best selected complexity
-    print(df[SELECTED_COMPLEXITY_COLUMN_NAME].values)
     assert df[SELECTED_COMPLEXITY_COLUMN_NAME].values[0] == 9
+    # Check the selected feature indexes
+    assert df[SELECTED_FEATURE_INDEXES_COLUMN_NAME].values[0] == [0]
     # Check that it is well ranked
     validation_rmse_sorted_values = df[RMSE_VALIDATION_COLUMN_NAME].values
     for rmse1, rmse2 in zip(validation_rmse_sorted_values[:-1], validation_rmse_sorted_values[1:]):
@@ -29,3 +31,13 @@ def test_df_cv_results():
     assert best_params['niterations'] == 1
     # Remove folders at the end of the test
     emulator.search_experiment_.remove_folder()
+
+def test_selected_feature_indexes():
+    selected_variable_names = ['x0', 'x10', 'x84']
+    # One test with variable_names = None
+    assert get_selected_feature_indexes(selected_variable_names) == [0, 10, 84]
+    # One test with specified variable_names
+    variables_names = [f'x{2 * i}' for i in range(50)]
+    assert get_selected_feature_indexes(selected_variable_names, variables_names) == [0, 5, 42]
+
+

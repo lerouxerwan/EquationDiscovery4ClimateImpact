@@ -6,15 +6,15 @@ from functools import cached_property
 from itertools import combinations
 from typing import Optional, Any
 
-import numpy as np
 import pandas as pd
 from pysr import TensorBoardLoggerSpec
 from sympy import Expr
 
+from data.utils_search.utils_search_experiment import string_to_list_int
 from data.utils_search.utils_search_path import CSV_FILENAME, \
-    JSON_FILENAME, METRIC_COLUMN_NAME, CHILDREN_FILENAME, PARENT_FILENAME
+    JSON_FILENAME, CHILDREN_FILENAME, PARENT_FILENAME
 from emulator_with_search.utils_cv_results.utils_df_results import RMSE_VALIDATION_COLUMN_NAME, \
-    PARAMS_EMULATOR_COLUMN_NAME
+    PARAMS_EMULATOR_COLUMN_NAME, SELECTED_FEATURE_INDEXES_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -51,6 +51,7 @@ class SearchExperiment(object):
     def df_cv_results(self) -> pd.DataFrame:
         df_cv_results = pd.read_csv(self.filepath_search_result, index_col=0)
         df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].apply(string_to_dict)
+        df_cv_results[SELECTED_FEATURE_INDEXES_COLUMN_NAME] = df_cv_results[SELECTED_FEATURE_INDEXES_COLUMN_NAME].apply(string_to_list_int)
         return df_cv_results
 
     @cached_property
