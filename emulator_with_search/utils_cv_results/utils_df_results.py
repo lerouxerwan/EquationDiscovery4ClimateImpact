@@ -28,7 +28,7 @@ def get_df_cv_results(cv_results: dict, variable_names: ArrayLike[str] | None = 
     selected_complexity_list = [emulator.selected_complexity for emulator in emulators]
     selected_expr_list = [emulator.selected_expr for emulator in emulators]
     params_emulator_list = [emulator.get_params().copy() for emulator in emulators]
-    selected_variable_names_list = [[str(s) for s in expr.atoms(Symbol)] for expr in selected_expr_list]
+    selected_variable_names_list = [emulator.selected_variable_names for emulator in emulators]
     selected_feature_indexes = [get_selected_feature_indexes(selected_variable_names, variable_names)
                                 for selected_variable_names in selected_variable_names_list]
     # Add columns to the DataFrame

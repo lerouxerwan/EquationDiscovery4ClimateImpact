@@ -12,7 +12,7 @@ class ValidationSplit(Enum):
     MIN = 7
     EXTREME = 8
 
-validation_split_to_name = {
+validation_split_to_validation_name = {
     ValidationSplit.RANDOM: 'random',
     ValidationSplit.RCP_START: 'start RCP',
     ValidationSplit.END: 'end',

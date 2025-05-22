@@ -7,12 +7,18 @@ from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearc
 
 def get_rmse_test(dataset: Dataset, params_emulator: dict[str, Any], params_search: Optional[dict[str, Any]] = None) -> float:
     """Load test RMSE"""
-    # return 2.0
+    y_test_predict = get_res(dataset, params_emulator, params_search)
+    return root_mean_squared_error(dataset.y_test, y_test_predict)
+
+
+def get_res(dataset, params_emulator, params_search):
     emulator = PySREmulatorWithSearch(**params_emulator, **params_search)
     emulator.fit(dataset.X_train, dataset.y_train, variable_names=dataset.X_variables_names, X_units=dataset.X_units,
                  y_units=dataset.y_units, validation_mask=dataset.validation_mask)
     y_test_predict = emulator.predict(dataset.X_test)
-    return root_mean_squared_error(dataset.y_test, y_test_predict)
+    infos = [f'${emulator.selected_expr}$', emulator.selected_complexity, emulator.selected_variable_names]
+    return dataset.y_test, y_test_predict, infos
+
 
 def get_params_emulator():
     return {
@@ -22,9 +28,12 @@ def get_params_emulator():
         "unary_operators": ["square"]
     }
 
-def get_params_search(fast: True):
+def get_niter(fast: True):
+    return 10 if fast else 100
+
+def get_params_search(n_iter: int):
     return {
-        "n_iter": 10 if fast else 100,
+        "n_iter": n_iter,
         "n_jobs": -1,
         "scaling_factor": 2.,
         'param_list_to_optimize': [

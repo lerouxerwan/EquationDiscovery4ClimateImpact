@@ -1,11 +1,11 @@
-from typing import Literal, Callable
+from typing import Literal, Callable, Any
 
 import numpy as np
 import pandas as pd
 from numpy import ndarray
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
 from pysr.utils import ArrayLike
-from sympy import Expr
+from sympy import Expr, Symbol
 
 from emulator.utils_attributes.utils_data_augmentation import apply_data_augmentation
 from emulator.utils_attributes.utils_weighted_loss import get_weights
@@ -228,6 +228,11 @@ class PySREmulator(PySRRegressor):
     def selected_complexity(self) -> int:
         """Complexity for the selected equation"""
         return self.get_best()['complexity']
+
+    @property
+    def selected_variable_names(self) -> list[str]:
+        """List of variables names in the selected equation"""
+        return [str(s) for s in self.selected_expr.atoms(Symbol)]
 
     """Model/equation selection"""
 

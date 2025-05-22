@@ -40,7 +40,6 @@ def get_feature_dataset(original_dataset: Dataset, physical_variable: str) -> Da
     feature_dataset.X_labels = [v for i, v in enumerate(feature_dataset.X_labels) if i not in set_feature_indexes]
     # Some checks and display
     feature_dataset.check()
-    print(str(feature_dataset))
     return feature_dataset
 
 if __name__ == '__main__':
