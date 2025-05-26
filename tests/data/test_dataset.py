@@ -10,7 +10,7 @@ def test_load_dataset():
     assert isinstance(any_value, float), type(any_value)
     assert len(X_train) == len(y_train) == len(years_train) == 114
     assert len(X_test) == len(y_test) == len(years_test) == 94
-    assert (X_train.shape[1] == 96) and  (X_test.shape[1] == 96)
+    assert (X_train.shape[1] == 92) and  (X_test.shape[1] == 92)
     assert (len(y_train.shape) == 1) and  (len(y_test.shape) == 1)
     assert sum(validation_mask) == 35
     assert (years_train[0] == 1986) and (years_train[-1] == 2099)
