@@ -9,6 +9,7 @@ from emulator.utils_plots.plot_by_rcp.plot_time_series_climato import plot_clima
 from emulator.utils_plots.plot_by_rcp.utils_plot_by_rcp import load_rcp_name_to_list_of_years_and_y_and_color_and_label
 from emulator.utils_plots.plot_by_split.utlis_plot_selected_equation import get_true_label_and_predicted_label, \
     get_true_and_predicted_prefix, uncapitalize, get_label, get_true_and_predicted_label
+from utils.utils_log import log_info
 from utils.utils_plot import compute_axis_lim
 
 
@@ -97,7 +98,7 @@ def compute_differences(emulator: PySREmulator, X: Optional[np.ndarray], y: Opti
         y_predicted = emulator.predict(X)
         if relative_error:
             errors = [100 * (y_predicted_value - y_value) / y_value for y_value, y_predicted_value in zip(y, y_predicted)]
-            print(max(errors))
+            log_info(f'Max absolute relative difference: {max(errors)}')
         else:
             errors = [y_predicted_value - y_value for y_value, y_predicted_value in zip(y, y_predicted)]
         return np.array(errors)

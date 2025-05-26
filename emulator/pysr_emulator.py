@@ -249,6 +249,7 @@ class PySREmulator(PySRRegressor):
          If index=None, then the equation is selected using self.model_selection"""
         if (index is None) and (self.model_selection in ["best", "custom"]):
             column = "score" if self.model_selection == "best" else "loss"
+            # Select the index with the maximum score (for 'best') ir with maximum train loss (for 'custom')
             index = self.filtered_equations[column].idxmax()
         return super().get_best(index)
 
@@ -258,7 +259,8 @@ class PySREmulator(PySRRegressor):
         such that selected rows are equations such that loss < min_loss * self.threshold_for_model_selection"""
         min_loss_train = self.equations_["loss"].min()
         max_loss_for_filter = self.threshold_for_model_selection * min_loss_train
-        filtered_equations = self.equations_.query(f"loss <= {max_loss_for_filter}")
+        epsilon = 1.00001 if self.model_selection == 'custom' else 1.
+        filtered_equations = self.equations_.query(f"loss <= {max_loss_for_filter * epsilon}")
         return filtered_equations
 
 
