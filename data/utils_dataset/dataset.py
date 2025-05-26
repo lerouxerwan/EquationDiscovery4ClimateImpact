@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib.axes import Axes
 
 from data.utils_dataset.utils_dataset_values import load_dataset_values
-from data.utils_dataset.validation_split import ValidationSplit
+from data.utils_dataset.validation_split import ValidationSplit, validation_split_to_validation_name
 from emulator.utils_plots.plot_by_rcp.plot_time_series_climato import _plot_climatological_time_series
 from emulator.utils_plots.plot_by_rcp.utils_plot_by_rcp import load_rcp_name_to_list_of_years_and_y_and_color_and_label
 from utils.utils_log import log_info
@@ -35,7 +35,8 @@ class Dataset(object):
 
     def __str__(self):
         return (f"Dataset with {self.X_train.shape[1]} features, "
-                f"{self.X_train.shape[0]} train datapoints, {self.X_test.shape[0]} test datapoints")
+                f"{self.X_train.shape[0]} train datapoints, {self.X_test.shape[0]} test datapoints, "
+                f"{validation_split_to_validation_name[self.validation_split]} validation split")
 
     def plot_values_feature(self, ax: Axes, feature_index: int):
         self.plot_values(ax, self.X_train[:, feature_index], self.X_test[:, feature_index], self.X_labels[feature_index])

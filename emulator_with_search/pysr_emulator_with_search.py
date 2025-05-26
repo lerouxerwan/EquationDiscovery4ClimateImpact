@@ -228,7 +228,7 @@ class PySREmulatorWithSearch(PySREmulator):
         log_info('Compute search results')
 
         # Run hyperparameter search with respect to self.param_grid
-        log_info('Start hyperparameter search')
+        log_info(f'Start hyperparameter search with {self.n_iter} combinations')
         search_cv_type = search_style_to_search_cv_type[self.search_style]
         search_cv = self.run_search_cv(search_cv_type, X, y, self.param_grid, **params_fit)
 

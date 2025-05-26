@@ -21,7 +21,7 @@ pyparsing==3.2.1
 PyQt5==5.15.11
 PyQt5-Qt5==5.15.16
 PyQt5_sip==12.17.0
-pysr==1.5.2
+pysr==1.5.8
 pytest==8.3.5
 pytest-repeat==0.9.3
 python-dateutil==2.9.0.post0
@@ -33,4 +33,5 @@ setuptools==77.0.3
 six==1.17.0
 sympy==1.13.3
 threadpoolctl==3.6.0
+typing_extensions==4.13.2
 tzdata==2025.1

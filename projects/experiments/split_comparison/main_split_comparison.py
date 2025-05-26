@@ -1,62 +1,66 @@
-from collections import OrderedDict
 import os.path as op
+from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit, validation_split_to_validation_name
+from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
 from projects.experiments.split_comparison.utils_feature_dataset import get_feature_datasets
-from projects.experiments.split_comparison.utils_split_comparison import get_params_search, \
-    get_params_emulator, get_res
-from utils.utils_latex import plot_df_latex, print_df_latex
+from projects.utils_params import get_params_search, get_params_emulator
+from utils.utils_latex import print_df_latex
 from utils.utils_log import log_info
 
 
 def main_split_comparison(show: bool = False, fast: bool = False):
     # Select and check validation split
-    niter = 100
-    validation_splits = [ValidationSplit.START, ValidationSplit.SYMMETRICAL,
-                         ValidationSplit.END, ValidationSplit.RCP_START,
-                         ValidationSplit.EXTREME][:]
+    niter = 10
+    validation_splits = [ValidationSplit.RCP_START, ValidationSplit.END,
+                         ValidationSplit.START, ValidationSplit.SYMMETRICAL,
+                         ValidationSplit.EXTREME][:2]
     # Start loop
     all_series_rmse = []
+    all_series_absolute_percentage = []
     all_series_equations = []
     for validation_split in validation_splits:
         df_true, df_predict, df_infos = compute_dataframes(validation_split, niter)
         df_squared_error = (df_true - df_predict)**2
         series_rmse = df_squared_error.mean(axis=0).apply(np.sqrt)
+        series_absolute_percentage = (100 * (df_predict - df_true) / df_true).apply(np.abs).mean(axis=0)
         validation_name = validation_split_to_validation_name[validation_split]
         series_rmse.name = validation_name
         all_series_rmse.append(series_rmse)
         series_equation = df_infos.iloc[0]
         series_equation.name = validation_name
         all_series_equations.append(series_equation)
-    # Compute df_equation
-    df_equation = pd.concat(all_series_equations, axis=1)
+        all_series_absolute_percentage.append(series_absolute_percentage)
+
     # Compute df_rmse
     df_rmse = pd.concat(all_series_rmse, axis=1)
-    # Remove the line where the predict is perfect
-    indexes_to_remove = [1, 6]
-    ind = [True] * len(df_equation)
-    for i in indexes_to_remove:
-        log_info(f'Field to remove for the ranking: {df_rmse.index.values[i]}', )
-        log_info(f'Equation found: {df_equation.iloc[i, 0]}')
-        ind[i] = False
-    ind = pd.Series(index=df_equation.index, data=ind)
-    df_rmse = df_rmse.loc[ind]
+    # Compute df_absolute_percentages
+    df_absolute_percentages = pd.concat(all_series_absolute_percentage, axis=1)
     # Compute df_ranks
     df_ranks = df_rmse.rank(axis=1)
     df_ranks.loc['Mean rank'] = df_ranks.mean()
     # Rounds dataframes
     df_rmse = df_rmse.round(decimals=2)
+    df_absolute_percentages = df_absolute_percentages.round(decimals=2)
     df_ranks = df_ranks.round(decimals=1)
     # Print all dataframes
-    for df in [df_rmse, df_ranks]:
+    for df in [df_rmse, df_ranks, df_absolute_percentages]:
         df = df.astype(str).replace(r'\.0$', '', regex=True)
         df.index.name = 'variable'
         df = df.reset_index()
         print_df_latex(df)
+
+    # Compute df_equation
+    df_equation = pd.concat(all_series_equations, axis=1)
+    # for i in [5, -6, -1]:
+    # for i in [6, 7]:
+    #     print(df_equation.iloc[i, 0])
+    #     print(df_equation.iloc[i, 1])
+    #     print('\n')
 
 
 def compute_dataframes(validation_split, niter) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -89,6 +93,16 @@ def compute_dataframes(validation_split, niter) -> tuple[pd.DataFrame, pd.DataFr
         filenames = [true_csv_filename, predict_csv_filename, infos_csv_filename]
         df_true, df_predict, df_infos = [pd.read_csv(filename, index_col=0) for filename in filenames]
     return df_true, df_predict, df_infos
+
+def get_res(dataset, params_emulator, params_search):
+    emulator = PySREmulatorWithSearch(**params_emulator, **params_search)
+    emulator.fit(dataset.X_train, dataset.y_train, variable_names=dataset.X_variables_names, X_units=dataset.X_units,
+                 y_units=dataset.y_units, validation_mask=dataset.validation_mask)
+    y_test_predict = emulator.predict(dataset.X_test)
+
+    infos = [f'${emulator.selected_expr}$', emulator.selected_complexity, emulator.selected_variable_names]
+    return dataset.y_test, y_test_predict, infos
+
 
 
 if __name__ == '__main__':

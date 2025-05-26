@@ -2,10 +2,9 @@ from copy import deepcopy
 from typing import Any, Generator
 
 import numpy as np
-from matplotlib import pyplot as plt
 
 from data.utils_dataset.dataset import Dataset
-from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
+from utils.utils_log import log_info
 
 
 def get_feature_datasets(original_dataset: Dataset) -> Generator[Dataset, Any, None]:
@@ -40,12 +39,6 @@ def get_feature_dataset(original_dataset: Dataset, physical_variable: str) -> Da
     feature_dataset.X_labels = [v for i, v in enumerate(feature_dataset.X_labels) if i not in set_feature_indexes]
     # Some checks and display
     feature_dataset.check()
+    log_info(str(feature_dataset))
     return feature_dataset
 
-if __name__ == '__main__':
-    old_dataset = dataset_npp_season_v1
-    for i, new_dataset in enumerate(get_feature_datasets(old_dataset)):
-        new_dataset.plot_values_target(plt.gca())
-        plt.show()
-        if i == 1:
-            break
