@@ -52,3 +52,7 @@ class Dataset(object):
         y_all = np.concat([values_train, values_test], axis=0)
         ymin, ymax = 0.99 * np.min(y_all), 1.01 * np.max(y_all)
         ax.set_ylim(ymin, ymax)
+
+    @property
+    def target_label(self) -> str:
+        return self.y_labels[0]

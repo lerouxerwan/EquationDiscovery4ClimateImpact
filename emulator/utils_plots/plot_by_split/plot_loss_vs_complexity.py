@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from data.utils_dataset.dataset import Dataset
 from emulator.pysr_emulator import PySREmulator
 from emulator.utils_metric.metric import Metric
 from emulator.utils_plots.plot_by_split.utils_axis import set_custom_y_axis, set_x_axis
@@ -14,18 +15,12 @@ from emulator.utils_plots.plot_by_split.utils_plot_split_name import SPLIT_NAMES
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_loss_vs_complexity(emulator: PySREmulator, X_train: np.ndarray,
-                            y_train: np.ndarray,
-                            validation_mask: np.ndarray[bool],
-                            X_test: Optional[np.ndarray]=None,
-                            y_test: Optional[np.ndarray]=None,
-                            years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None,
-                            rcp_name_train: str= 'RCP85', rcp_name_test: Optional[str]=None,
-                            target_label: str = "Target (-)", show: Optional[bool] = False, detailed_plot: bool = False) -> None:
+def plot_loss_vs_complexity(emulator: PySREmulator, dataset:Dataset, show: Optional[bool] = False, detailed_plot: bool = False) -> None:
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""
     metric = Metric.RMSE
-    split_name_to_x_and_y = load_split_name_to_X_and_y(emulator, X_train, y_train, X_test, y_test, years_train, years_test, validation_mask)
+    split_name_to_x_and_y = load_split_name_to_X_and_y(emulator, dataset.X_train, dataset.y_train, dataset.X_test,
+                                                       dataset.y_test, dataset.years_train, dataset.years_test, dataset.validation_mask)
     fig, ax = plt.subplots(figsize=(16, 9))
     complexity_list = emulator.complexity_list
     # Detailed plot adds one bar for PySR score
@@ -40,7 +35,7 @@ def plot_loss_vs_complexity(emulator: PySREmulator, X_train: np.ndarray,
         loss_list = emulator.compute_loss_list(X, y, metric=metric)
         # Filter values where the loss is equal np.nan
         coordinates, loss_list = list(zip(*[(coordinate, loss) for coordinate, loss in zip(coordinates, loss_list) if not np.isnan(loss)]))
-        ax.bar(coordinates, loss_list, width=width, label=get_label_split_name(split_name, rcp_name_train, rcp_name_test),
+        ax.bar(coordinates, loss_list, width=width, label=get_label_split_name(split_name, dataset.rcp_name_train, dataset.rcp_name_test),
                color=split_name_to_color[split_name])
         all_loss_list.extend(loss_list)
 
@@ -59,7 +54,7 @@ def plot_loss_vs_complexity(emulator: PySREmulator, X_train: np.ndarray,
     xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True)
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     # Add y-axis with special scaling
-    set_custom_y_axis(ax, all_loss_list, target_label, metric)
+    set_custom_y_axis(ax, all_loss_list, dataset.target_label, metric)
     # Potentially add detailed plots
     if detailed_plot:
         add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width)
