@@ -2,6 +2,7 @@ from collections import Counter
 
 import numpy as np
 import pytest
+from sklearn.metrics import mean_squared_error
 from sympy import Symbol
 
 from emulator.utils_attributes.utils_data_augmentation import apply_data_augmentation
@@ -17,9 +18,8 @@ def test_threshold_for_model_selection(threshold_for_model_selection):
     # For threshold=1.0, we check that equation with maximal complexity is selected (because threshold=1.0 selects
     # the equation that minimizes the loss, i.e. the equation with maximum complexity of the Pareto front)
     if threshold_for_model_selection == 1.0:
-        selected_complexity = emulator.get_best()['complexity']
         maximum_complexity = emulator.equations_['complexity'].iloc[-1]
-        assert selected_complexity == maximum_complexity
+        assert emulator.selected_complexity == maximum_complexity
 
 @pytest.mark.parametrize("threshold_for_model_selection", [0.5, 2])
 def test_invalid_threshold_for_model_selection(threshold_for_model_selection):
@@ -33,15 +33,20 @@ def test_deterministic_and_compute_loss():
     X, y = load_X_and_y_for_test()
     emulator.fit(X, y)
     # Assert that the fit of the emulator is deterministic
-    np.testing.assert_almost_equal(float(sum(emulator.loss_list)), 35698078.93297232)
+    np.testing.assert_almost_equal(float(sum(emulator.loss_list)), 35698077.642941765)
 
 def test_loss():
     emulator = load_pysr_emulator_for_test()
     X, y = load_X_and_y_for_test()
     emulator.fit(X, y)
-    # Assert that the method compute_loss of the emulator work well
+    # Assert that the method compute_loss of the emulator is consistent with the loss column
     for loss1, loss2 in zip(emulator.loss_list, emulator.compute_loss_list(X, y)):
-        np.testing.assert_almost_equal(float(loss1), loss2, decimal=0)
+        np.testing.assert_almost_equal(float(loss1), loss2)
+    # Predict with indexes that do not exist anymore
+    for removed_index in [6, 7, 8]:
+        with pytest.raises(IndexError):
+            emulator.predict(X, index=removed_index)
+
 
 list_of_X_units_and_expected_variable_names = [
     (['m', 's', 'mol', 'K', 'A', 'kg', 'cd'], ['x1']),

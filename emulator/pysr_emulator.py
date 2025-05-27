@@ -169,9 +169,16 @@ class PySREmulator(PySRRegressor):
         if self.weighted_loss_ratio > 1.:
             assert weights is None, "two weights are provided (one with the fit method, one with the __init__ method)"
             weights = get_weights(y, self.weighted_loss_ratio)
-        return super().fit(X, y, Xresampled=Xresampled, weights=weights, variable_names=variable_names,
+        super().fit(X, y, Xresampled=Xresampled, weights=weights, variable_names=variable_names,
                            complexity_of_variables=complexity_of_variables, X_units=X_units, y_units=y_units,
                            category=category)
+        # Recompute the loss (because PySR loss is not consistent with the predict method)
+        assert self.loss_function is None # check that the loss is the default MSE, otherwise update the code below
+        loss_list = self.compute_loss_list(X, y, metric=Metric.MSE)
+        self.equations_['loss'] = loss_list
+        pareto_indexes = [True] + [loss_list[i] < min(loss_list[:i]) for i in range(1, len(loss_list))]
+        self.equations_ = self.equations_.loc[pd.Series(pareto_indexes, index=self.equations_.index)]
+        return self
 
     def predict(self, X: np.ndarray, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
         return super().predict(X, index, category=category)
@@ -259,11 +266,13 @@ class PySREmulator(PySRRegressor):
         such that selected rows are equations such that loss < min_loss * self.threshold_for_model_selection"""
         min_loss_train = self.equations_["loss"].min()
         max_loss_for_filter = self.threshold_for_model_selection * min_loss_train
-        epsilon = 1.00001 if self.model_selection == 'custom' else 1.
-        filtered_equations = self.equations_.query(f"loss <= {max_loss_for_filter * epsilon}")
+        filtered_equations = self.equations_.query(f"loss <= {max_loss_for_filter}")
         return filtered_equations
 
 
-
+    def __repr__(self) -> str:
+        """If we do not override this method, then the __repr__ method from PySR fails
+        because it does not handle model_selection='custom'"""
+        pass
 
 
