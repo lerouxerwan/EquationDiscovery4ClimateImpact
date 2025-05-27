@@ -18,7 +18,7 @@ from utils.utils_log import log_info
 
 def main_split_comparison(show: bool = False, fast: bool = False):
     # Select and check validation split
-    niter = 1
+    niter = 10
     validation_splits = [ValidationSplit.RCP_START, ValidationSplit.END,
                          ValidationSplit.START, ValidationSplit.SYMMETRICAL,
                          ValidationSplit.EXTREME][:2]
@@ -85,8 +85,6 @@ def compute_dataframes(validation_split, niter) -> tuple[pd.DataFrame, pd.DataFr
             physical_variable_name_to_y_test_predict[physical_variable_name] = y_test_predict
             physical_variable_name_to_infos[physical_variable_name] = infos
             physical_variable_name_to_y_test_true[physical_variable_name] = y_test_true
-            if i == 1:
-                break
         # Save dataframes
         df_true = pd.DataFrame.from_dict(physical_variable_name_to_y_test_true)
         df_true.to_csv(true_csv_filename)
