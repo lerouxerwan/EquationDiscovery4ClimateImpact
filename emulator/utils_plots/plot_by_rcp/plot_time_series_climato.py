@@ -6,17 +6,18 @@ from matplotlib import pyplot as plt
 
 from emulator.utils_plots.plot_by_rcp.utils_plot_by_rcp import plot_average_value
 from emulator.utils_plots.plot_by_split.utlis_plot_selected_equation import get_label
-from utils.utils_plot import show_or_save_plot
+from utils.utils_plot import show_or_save_plot, show_and_save_with_optional_plot_folder
 
 
 def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label: dict[str, list[tuple[list[int], list[float], str, str]]],
-                                    y_train: np.ndarray, y_label: str, plot_name: str, show: Optional[bool], ymin_and_ymax: tuple[float, float] = None, plot_std: bool = True) -> dict[str, tuple[list[int], list[float], str]]:
+                                    y_train: np.ndarray, y_label: str, plot_name: str, show: Optional[bool], ymin_and_ymax: tuple[float, float] = None, 
+                                    plot_std: bool = True, plot_folder: Optional[str] = None) -> dict[str, tuple[list[int], list[float], str]]:
     ax = plt.gca()
     rcp_name_to_years_and_std_values_and_color = _plot_climatological_time_series(ax,
                                                                                   rcp_name_to_list_of_years_and_y_and_color_and_label,
                                                                                   y_train, y_label,
                                                                                   ymin_and_ymax, plot_std)
-    show_or_save_plot(f'climatological_series_{plot_name}', show)
+    show_and_save_with_optional_plot_folder(f'climatological_series_{plot_name}', show, plot_folder)
     return rcp_name_to_years_and_std_values_and_color
 
 

@@ -30,6 +30,13 @@ def subplots_custom(nrows, ncols, sharex=False, sharey=False, hspace=None, wspac
     axs = gs.subplots(sharex=sharex, sharey=sharey)
     return fig, axs
 
+def show_and_save_with_optional_plot_folder(plot_name: str, show: bool, plot_folder: Optional[str] = None):
+    """Same function as 'show_or_save_plot' but it enables to plot in specific plot_folder directory"""
+    if show or (plot_folder is None):
+        show_or_save_plot(plot_name, show)
+    else:
+        plt.savefig(op.join(plot_folder, plot_name + '.png'), format='png', bbox_inches="tight")
+        plt.close()
 
 def show_or_save_plot(plot_name: str, show: Optional[bool]=False):
     """show = True displays the Figure, show = False saves the Figure, show = None clears the Figure (for testing)"""

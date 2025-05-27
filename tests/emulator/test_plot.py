@@ -1,5 +1,5 @@
 from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
-from emulator.utils_plots.utils_plots import plot_diagnosis_fit
+from emulator.utils_plots.plot_diagnosis_fit import plot_diagnosis_fit
 from tests.emulator.utils_tests_emulator import load_pysr_emulator_for_test
 
 

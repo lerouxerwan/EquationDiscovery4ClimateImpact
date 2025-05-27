@@ -12,12 +12,14 @@ from emulator.utils_plots.plot_by_split.utils_plot_by_split import load_split_na
 from emulator.utils_plots.plot_by_split.utils_equation_str import get_equation_str
 from emulator.utils_plots.plot_by_split.utils_plot_split_name import SPLIT_NAMES, split_name_to_color, \
     get_label_split_name
-from utils.utils_plot import show_or_save_plot
+from utils.utils_plot import show_or_save_plot, show_and_save_with_optional_plot_folder
 
 
-def plot_loss_vs_complexity(emulator: PySREmulator, dataset:Dataset, show: Optional[bool] = False, detailed_plot: bool = False) -> None:
+def plot_loss_vs_complexity(emulator: PySREmulator, dataset:Dataset, show: Optional[bool] = False,
+                            plot_folder: Optional[str] = None) -> None:
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""
+    detailed_plot = False
     metric = Metric.RMSE
     split_name_to_x_and_y = load_split_name_to_X_and_y(emulator, dataset.X_train, dataset.y_train, dataset.X_test,
                                                        dataset.y_test, dataset.years_train, dataset.years_test, dataset.validation_mask)
@@ -61,7 +63,8 @@ def plot_loss_vs_complexity(emulator: PySREmulator, dataset:Dataset, show: Optio
         plot_threshold(ax, emulator, metric, *ax.get_xlim())
     # General settings for the plot
     ax.legend(loc='upper right')
-    show_or_save_plot(f'loss_vs_complexity', show)
+    show_and_save_with_optional_plot_folder('loss_vs_complexity', show, plot_folder)
+
 
 
 def add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width):

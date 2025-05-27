@@ -12,8 +12,8 @@ from utils.utils_log import log_info
 
 
 
-def plot_diagnosis_fit(emulator: PySREmulator, dataset:Dataset, show: Optional[bool] = False):
+def plot_diagnosis_fit(emulator: PySREmulator, dataset:Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None):
     log_info('Start plot diagnosis fit')
     # Plot diagnosis of this emulator by split and by rcp
     for plot_function in [plot_loss_vs_complexity, plot_scatter, plot_time_series, plot_climato, plot_errors_climato]:
-        plot_function(emulator, dataset, show)
+        plot_function(emulator, dataset, show, plot_folder)

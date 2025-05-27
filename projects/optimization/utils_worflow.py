@@ -3,7 +3,7 @@ from typing import Any, Optional
 from data.utils_dataset.dataset import Dataset
 from data.utils_search.plot_diagnosis_search import plot_diagnosis_search
 from emulator.pysr_emulator import PySREmulator
-from emulator.utils_plots.utils_plots import plot_diagnosis_fit
+from emulator.utils_plots.plot_diagnosis_fit import plot_diagnosis_fit
 from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
 from emulator_with_search.utils_attributes.utils_validation import get_X_and_y
 

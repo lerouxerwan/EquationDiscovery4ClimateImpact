@@ -11,10 +11,10 @@ from emulator.utils_plots.plot_by_split.utils_plot_by_split import load_split_na
     get_ymin_and_ymax
 from emulator.utils_plots.plot_by_split.utlis_plot_selected_equation import get_true_label_and_predicted_label, \
     add_equation, get_label, get_true_and_predicted_prefix, get_true_and_predicted_label
-from utils.utils_plot import show_or_save_plot
+from utils.utils_plot import show_or_save_plot, show_and_save_with_optional_plot_folder
 
 
-def plot_time_series(emulator: PySREmulator, dataset: Dataset, show: Optional[bool] = False) -> None:
+def plot_time_series(emulator: PySREmulator, dataset: Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None) -> None:
     """Plot predicted values VS True values (as 2 time series)"""
     split_name_to_X_and_y_and_y_predicted_and_years = load_split_name_to_X_and_y_and_y_predicted_and_years(emulator, dataset.X_train, dataset.y_train, dataset.X_test, 
                                                        dataset.y_test, dataset.years_train, dataset.years_test, dataset.validation_mask)
@@ -35,4 +35,4 @@ def plot_time_series(emulator: PySREmulator, dataset: Dataset, show: Optional[bo
         ax.set_ylabel(get_label(dataset.target_label))
         ax.legend(loc='upper right')
         ax.set_ylim((ymin, ymax))
-        show_or_save_plot(f'plot_time_series_{split_name}', show)
+        show_and_save_with_optional_plot_folder(f'plot_time_series_{split_name}', show, plot_folder)

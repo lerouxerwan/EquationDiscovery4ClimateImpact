@@ -1,3 +1,4 @@
+import os
 import os.path as op
 from collections import OrderedDict
 
@@ -6,6 +7,8 @@ import pandas as pd
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit, validation_split_to_validation_name
+from emulator.utils_plots.plot_by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
+from emulator.utils_plots.plot_diagnosis_fit import plot_diagnosis_fit
 from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
 from projects.experiments.split_comparison.utils_feature_dataset import get_feature_datasets
 from projects.utils_params import get_params_search, get_params_emulator
@@ -15,7 +18,7 @@ from utils.utils_log import log_info
 
 def main_split_comparison(show: bool = False, fast: bool = False):
     # Select and check validation split
-    niter = 10
+    niter = 1
     validation_splits = [ValidationSplit.RCP_START, ValidationSplit.END,
                          ValidationSplit.START, ValidationSplit.SYMMETRICAL,
                          ValidationSplit.EXTREME][:2]
@@ -55,7 +58,7 @@ def main_split_comparison(show: bool = False, fast: bool = False):
         print_df_latex(df)
 
     # Compute df_equation
-    df_equation = pd.concat(all_series_equations, axis=1)
+    # df_equation = pd.concat(all_series_equations, axis=1)
     # for i in [5, -6, -1]:
     # for i in [6, 7]:
     #     print(df_equation.iloc[i, 0])
@@ -66,10 +69,10 @@ def main_split_comparison(show: bool = False, fast: bool = False):
 def compute_dataframes(validation_split, niter) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     validation_name = validation_split_to_validation_name[validation_split]
     log_info(f"Compute dataframes for validation_split {validation_name}")
-    csv_filename = f'{niter}_{validation_name}.csv'
-    true_csv_filename = 'csv/true_' + csv_filename
-    predict_csv_filename = 'csv/predict_' + csv_filename
-    infos_csv_filename = 'csv/infos_' + csv_filename
+    folder = f'runs/{niter}_{validation_name}'
+    true_csv_filename = folder + '/true.csv'
+    predict_csv_filename =  folder + '/predict.csv'
+    infos_csv_filename =  folder + '/infos.csv'
 
     if not op.exists(true_csv_filename):
         dataset = Dataset("NPP_season.csv", "RCP85", "RCP45", 0.3, validation_split)
@@ -78,10 +81,12 @@ def compute_dataframes(validation_split, niter) -> tuple[pd.DataFrame, pd.DataFr
         physical_variable_name_to_infos = OrderedDict()
         for i, feature_dataset in enumerate(get_feature_datasets(dataset)):
             physical_variable_name = feature_dataset.y_variable_names[0]
-            y_test_true, y_test_predict, infos = get_res(feature_dataset, get_params_emulator(), get_params_search(niter))
+            y_test_true, y_test_predict, infos = get_res(feature_dataset, get_params_emulator(), get_params_search(niter), folder)
             physical_variable_name_to_y_test_predict[physical_variable_name] = y_test_predict
             physical_variable_name_to_infos[physical_variable_name] = infos
             physical_variable_name_to_y_test_true[physical_variable_name] = y_test_true
+            if i == 1:
+                break
         # Save dataframes
         df_true = pd.DataFrame.from_dict(physical_variable_name_to_y_test_true)
         df_true.to_csv(true_csv_filename)
@@ -94,12 +99,15 @@ def compute_dataframes(validation_split, niter) -> tuple[pd.DataFrame, pd.DataFr
         df_true, df_predict, df_infos = [pd.read_csv(filename, index_col=0) for filename in filenames]
     return df_true, df_predict, df_infos
 
-def get_res(dataset, params_emulator, params_search):
+def get_res(dataset, params_emulator, params_search, folder:str):
     emulator = PySREmulatorWithSearch(**params_emulator, **params_search)
     emulator.fit(dataset.X_train, dataset.y_train, variable_names=dataset.X_variables_names, X_units=dataset.X_units,
                  y_units=dataset.y_units, validation_mask=dataset.validation_mask)
     y_test_predict = emulator.predict(dataset.X_test)
-
+    plot_folder = op.join(folder, dataset.y_variable_names[0])
+    if not op.exists(plot_folder):
+        os.makedirs(plot_folder)
+    plot_diagnosis_fit(emulator, dataset, show=False, plot_folder=plot_folder)
     infos = [f'${emulator.selected_expr}$', emulator.selected_complexity, emulator.selected_variable_names]
     return dataset.y_test, y_test_predict, infos
 
