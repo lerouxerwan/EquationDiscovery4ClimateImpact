@@ -16,7 +16,7 @@ def main():
     y = X[:, 0] ** 2 - 2 * X[:, 0] + 3 + norm.rvs(loc=0, scale=1, size=size, random_state=42)
 
     # Fit model
-    model = PySRRegressor(niterations=1, verbosity=0)
+    model = PySRRegressor(niterations=1, verbosity=0, precision=64)
     model.fit(X, y)
 
     # Show loss from the "equations_" dataframe
@@ -26,7 +26,13 @@ def main():
     # Show loss found using the predict method
     y_predict_list = [model.predict(X, index=index) for index in range(len(model.equations_))]
     loss_values_from_predict_method = [mean_squared_error(y, y_predict) for y_predict in y_predict_list]
-    print('Loss from predict method:', loss_values_from_predict_method)
+    print('Loss from predict method:', loss_values_from_predict_method, '\n')
+
+    # Show the difference
+    differences = [v1 - v2 for v1, v2 in zip(loss_values_from_equations_dataframe, loss_values_from_predict_method)]
+    print('Difference between the two loss values:', differences, '\n')
+    relative_differences = [100 * abs(v1 - v2) / v2 for v1, v2 in zip(loss_values_from_equations_dataframe, loss_values_from_predict_method)]
+    print('Relative difference between the two loss values (%):', relative_differences, '\n')
 
 if __name__ == '__main__':
     main()

@@ -1,7 +1,6 @@
 from typing import Any, Optional
 
 from data.utils_dataset.dataset import Dataset
-from data.utils_search.plot_diagnosis_search import plot_diagnosis_search
 from emulator.pysr_emulator import PySREmulator
 from emulator.utils_plots.plot_diagnosis_fit import plot_diagnosis_fit
 from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
@@ -28,8 +27,5 @@ def workflow(dataset: Dataset, params_emulator: dict[str, Any],
         emulator.fit(X_train, y_train, variable_names=X_variables_names, X_units=X_units, y_units=y_units, validation_mask=validation_mask)
     #  Generate diagnosis plot for the fit
     plot_diagnosis_fit(emulator, dataset, show)
-    #  Generate diagnosis plot for the search
-    if params_search is not None:
-        plot_diagnosis_search(dataset, emulator.search_experiment_, show)
     return emulator
 
