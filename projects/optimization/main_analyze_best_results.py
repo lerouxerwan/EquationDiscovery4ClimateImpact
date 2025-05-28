@@ -13,7 +13,7 @@ def main_analyze_best_results(nb_top_experiments: int = 5):
     search_experiments = get_best_search_experiments(X_train, y_train, validation_mask, nb_top_experiments)
     print('Ranking of the best search experiments:')
     for rank, search_experiment in list(enumerate(search_experiments, 1))[::-1]:
-        print(f'Rank #{rank} {search_experiment}')
+        print(f'Rank #{rank} {search_experiment}\n')
     # Focus on the best search experiment
     best_search_experiment = search_experiments[0]
     print('\nHistory to obtain the best search experiment:')

@@ -7,7 +7,6 @@ import pandas as pd
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit, validation_split_to_validation_name
-from emulator.utils_plots.plot_by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
 from emulator.utils_plots.plot_diagnosis_fit import plot_diagnosis_fit
 from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
 from projects.experiments.split_comparison.utils_feature_dataset import get_feature_datasets
@@ -18,10 +17,10 @@ from utils.utils_log import log_info
 
 def main_split_comparison(show: bool = False, fast: bool = False):
     # Select and check validation split
-    niter = 10
+    niter = 20
     validation_splits = [ValidationSplit.RCP_START, ValidationSplit.END,
                          ValidationSplit.START, ValidationSplit.SYMMETRICAL,
-                         ValidationSplit.EXTREME][:2]
+                         ValidationSplit.EXTREME][:1]
     # Start loop
     all_series_rmse = []
     all_series_absolute_percentage = []
@@ -44,14 +43,18 @@ def main_split_comparison(show: bool = False, fast: bool = False):
     # Compute df_absolute_percentages
     df_absolute_percentages = pd.concat(all_series_absolute_percentage, axis=1)
     # Compute df_ranks
-    df_ranks = df_rmse.rank(axis=1)
-    df_ranks.loc['Mean rank'] = df_ranks.mean()
+    df_ranks_rmse = df_rmse.rank(axis=1)
+    df_ranks_rmse.loc['Mean rank'] = df_ranks_rmse.mean()
     # Rounds dataframes
     df_rmse = df_rmse.round(decimals=2)
     df_absolute_percentages = df_absolute_percentages.round(decimals=2)
-    df_ranks = df_ranks.round(decimals=1)
+    df_ranks_rmse = df_ranks_rmse.round(decimals=1)
+    # Create a column with
+    df_absolute_percentages['Mean'] = df_absolute_percentages.mean(axis=1)
+    df_absolute_percentages = df_absolute_percentages.sort_values(by="Mean", axis=0)
+    df_ranks_rmse = df_ranks_rmse.loc[df_absolute_percentages.index]
     # Print all dataframes
-    for df in [df_rmse, df_ranks, df_absolute_percentages]:
+    for df in [df_ranks_rmse, df_absolute_percentages]:
         df = df.astype(str).replace(r'\.0$', '', regex=True)
         df.index.name = 'variable'
         df = df.reset_index()

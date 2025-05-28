@@ -172,14 +172,22 @@ class PySREmulator(PySRRegressor):
         super().fit(X, y, Xresampled=Xresampled, weights=weights, variable_names=variable_names,
                            complexity_of_variables=complexity_of_variables, X_units=X_units, y_units=y_units,
                            category=category)
-        # Recompute the loss (because PySR loss is not consistent with the predict method)
-        assert self.loss_function is None # check that the loss is the default MSE, otherwise update the code below
-        loss_list = self.compute_loss_list(X, y, metric=Metric.MSE)
+        # After the fit, we update the 'loss' column in the self.equations_ dataframe
+        self.update_loss_in_equations_dataframe(X, y)
+        return self
+
+    def update_loss_in_equations_dataframe(self, X: np.ndarray, y: np.ndarray) -> None:
+        """Recompute the loss (because the 'loss' column is sometimes not consistent with the predict method)
+        See https://github.com/MilesCranmer/PySR/discussions/943 for more details"""
+        if self.loss_function is None:
+            metric = Metric.MSE
+        else:
+            raise NotImplementedError('this loss function does not have a corresponding metric')
+        loss_list = self.compute_loss_list(X, y, metric=metric)
         self.equations_['loss'] = loss_list
         pareto_indexes = [True] + [loss_list[i] < min(loss_list[:i]) for i in range(1, len(loss_list))]
         self.equations_ = self.equations_.loc[pd.Series(pareto_indexes, index=self.equations_.index)]
         self.equations_ = self.equations_.reset_index(drop=True)
-        return self
 
     def predict(self, X: np.ndarray, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
         return super().predict(X, index, category=category)
