@@ -9,11 +9,11 @@ def get_params_emulator():
         "unary_operators": ["square"]
     }
 
-def get_params_search(n_iter: int):
+def get_params_search(n_iter: int, scaling_factor=2.):
     return {
         "n_iter": n_iter,
         "n_jobs": MAX_NB_JOBS,
-        "scaling_factor": 2.,
+        "scaling_factor": scaling_factor,
         'param_list_to_optimize': [
             "populations",
             "niterations",

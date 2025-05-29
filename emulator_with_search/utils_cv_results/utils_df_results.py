@@ -2,7 +2,6 @@ from typing import Optional
 
 import pandas as pd
 from pysr.utils import ArrayLike
-from sympy import Symbol
 
 from emulator.pysr_emulator import PySREmulator
 

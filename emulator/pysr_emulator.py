@@ -179,11 +179,7 @@ class PySREmulator(PySRRegressor):
     def update_loss_in_equations_dataframe(self, X: np.ndarray, y: np.ndarray) -> None:
         """Recompute the loss (because the 'loss' column is sometimes not consistent with the predict method)
         See https://github.com/MilesCranmer/PySR/discussions/943 for more details"""
-        if self.loss_function is None:
-            metric = Metric.MSE
-        else:
-            raise NotImplementedError('this loss function does not have a corresponding metric')
-        loss_list = self.compute_loss_list(X, y, metric=metric)
+        loss_list = self.compute_loss_list(X, y)
         self.equations_['loss'] = loss_list
         pareto_indexes = [True] + [loss_list[i] < min(loss_list[:i]) for i in range(1, len(loss_list))]
         self.equations_ = self.equations_.loc[pd.Series(pareto_indexes, index=self.equations_.index)]
@@ -196,9 +192,18 @@ class PySREmulator(PySRRegressor):
         """Compute loss for the selected function"""
         return self._compute_loss(y, self.predict(X), metric)
 
-    def compute_loss_list(self, X: np.ndarray, y: np.ndarray, metric=Metric.MSE) -> list[float]:
+    def compute_loss_list(self, X: np.ndarray, y: np.ndarray) -> list[float]:
+        """Compute a list of loss: one loss for every equation of the Pareto optimal set of equations"""
+        if self.loss_function is None:
+            metric = Metric.MSE
+        else:
+            raise NotImplementedError('this loss function does not have a corresponding metric')
+        return [self._compute_loss(y, y_predicted, metric) for y_predicted in self.compute_y_predicted_list(X)]
+
+    def compute_loss_list_other_metric(self, X: np.ndarray, y: np.ndarray, metric: Metric) -> list[float]:
         """Compute a list of loss: one loss for every equation of the Pareto optimal set of equations"""
         return [self._compute_loss(y, y_predicted, metric) for y_predicted in self.compute_y_predicted_list(X)]
+
 
     @staticmethod
     def _compute_loss(y_true: np.ndarray, y_predicted: np.ndarray, metric: Metric) -> float:

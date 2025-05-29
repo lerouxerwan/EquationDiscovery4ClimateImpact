@@ -34,7 +34,7 @@ def plot_loss_vs_complexity(emulator: PySREmulator, dataset:Dataset, show: Optio
     for bar_id, split_name in enumerate(sorted_split_names):
         X, y = split_name_to_x_and_y[split_name]
         coordinates = coordinate_list[bar_id]
-        loss_list = emulator.compute_loss_list(X, y, metric=metric)
+        loss_list = emulator.compute_loss_list_other_metric(X, y, metric=metric)
         # Filter values where the loss is equal np.nan
         coordinates, loss_list = list(zip(*[(coordinate, loss) for coordinate, loss in zip(coordinates, loss_list) if not np.isnan(loss)]))
         ax.bar(coordinates, loss_list, width=width, label=get_label_split_name(split_name, dataset.rcp_name_train, dataset.rcp_name_test),

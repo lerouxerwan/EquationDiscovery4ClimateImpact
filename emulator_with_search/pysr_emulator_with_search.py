@@ -207,6 +207,7 @@ class PySREmulatorWithSearch(PySREmulator):
         assert self.logger_spec is None
         self.set_params(**self.search_experiment_.best_params)
         self.logger_spec = self.search_experiment_.get_logger_spec(log_interval=1 * self.populations)
+        # Fit on the train split
         X_train_train, y_train_train = get_X_and_y(X, y, self.validation_mask_, validation_set=False)
         super().fit(X_train_train, y_train_train, **params_fit)
         self.logger_spec = None

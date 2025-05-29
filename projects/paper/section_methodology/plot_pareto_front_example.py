@@ -7,8 +7,6 @@ from emulator.pysr_emulator import PySREmulator
 from emulator.utils_metric.metric import Metric
 from emulator.utils_plots.plot_by_split.utils_axis import custom_functions_for_yaxis
 from emulator.utils_plots.plot_by_split.utils_equation_str import get_equation_str
-from emulator.utils_plots.plot_by_split.utils_plot_by_split import load_split_name_to_X_and_y
-from emulator.utils_plots.plot_by_split.utils_plot_split_name import SPLIT_NAMES, split_name_to_color
 from utils.utils_plot import show_or_save_plot
 
 
@@ -19,7 +17,7 @@ def plot_pareto_front_example(emulator: PySREmulator, X: np.ndarray, y: np.ndarr
     ax = plt.gca()
     complexity_list = emulator.complexity_list
     width, coordinate_list = load_bar_attributes(nb_bars=2, complexity_list=complexity_list)
-    loss_list = emulator.compute_loss_list(X, y, metric=metric)
+    loss_list = emulator.compute_loss_list_other_metric(X, y, metric=metric)
     ax.bar(coordinate_list[0], loss_list, width=width, color='red')
     ax.set_xlabel('Equation f')
     # Add rounded equations on the lower X axis
