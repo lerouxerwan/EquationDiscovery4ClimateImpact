@@ -36,6 +36,8 @@ class PySREmulatorWithSearch(PySREmulator):
         search_style: str
             Style for hyperparameter search with a single validation, Possibilities include 'random' and 'grid' 
             Default is None, which will be replaced by 'random'
+        load_search_experiment: bool
+            Whether to try to load the search experiment from existing files
         n_iter: int
             Number of parameter settings sampled for RandomSearchCV, which trades off runtime vs quality of the solution
             Default is 10
@@ -110,6 +112,7 @@ class PySREmulatorWithSearch(PySREmulator):
                  # Additional parameters
                  validation_size: float = 0.3,
                  search_style: Optional[str] = None,
+                 load_search_experiment: bool = True,
                  n_iter: int = 10,
                  n_jobs: Optional[int] = None,
                  param_grid: dict[str, list] | list[dict[str, list]] = None,
@@ -162,6 +165,7 @@ class PySREmulatorWithSearch(PySREmulator):
                          **kwargs)
         self.validation_size = validation_size
         self.search_style = 'random' if search_style is None else search_style
+        self.load_search_experiment = load_search_experiment
         self.n_iter = n_iter
         self.n_jobs = n_jobs
         self.param_grid = dict() if param_grid is None else param_grid
@@ -171,6 +175,7 @@ class PySREmulatorWithSearch(PySREmulator):
         # Some checks
         assert isinstance(self.validation_size, float) and (0 < self.validation_size < 1)
         assert isinstance(self.search_style, str)
+        assert isinstance(self.load_search_experiment, bool)
         assert isinstance(self.n_iter, int) and self.n_iter > 0
         assert isinstance(self.param_grid, (dict, list))
         assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
@@ -219,7 +224,9 @@ class PySREmulatorWithSearch(PySREmulator):
         non_default_params = get_non_default_params(self)
         search_experiment = SearchExperiment(get_search_path(X, y, self.validation_mask_, non_default_params))
         # Compute and save search results only it has not yet been saved
-        if not op.exists(search_experiment.filepath_search_result):
+        if self.load_search_experiment and op.exists(search_experiment.filepath_search_result):
+            pass
+        else:
             search_experiment.save_search_results(self.compute_df_cv_results(X, y, **params_fit), non_default_params)
         log_info(f'Best results from the hyperparameter search:\n{search_experiment}')
         return search_experiment
