@@ -1,11 +1,11 @@
-from emulator.pysr_emulator import PySREmulator
+from emulator.emulator import Emulator
 from tests.data.utils_tests_dataset import load_X_and_y_for_test
 
 
 def main_example_1d():
     X, y = load_X_and_y_for_test()
     # plot_observed_climato(y, show=True)
-    emulator = PySREmulator(niterations=5, maxsize=10, weighted_loss_ratio=2.)
+    emulator = Emulator(niterations=5, maxsize=10, weighted_loss_ratio=2.)
     emulator.fit(X, y)
     # plot_predicted_climato(emulator, X, show=True)
     # for plot in [plot_loss_vs_complexity, plot_scatter, plot_time_series][1:2]:

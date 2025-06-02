@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from emulator.pysr_emulator import PySREmulator
+from emulator.emulator import Emulator
 from projects.paper.section_methodology.plot_pareto_front_example import plot_pareto_front_example
 from utils.utils_plot import show_or_save_plot
 
@@ -10,7 +10,7 @@ n = 100
 
 def main_example_1d(show: bool):
     X, y = get_data_example_1d()
-    emulator = PySREmulator(niterations=5, maxsize=9)
+    emulator = Emulator(niterations=5, maxsize=9)
     emulator.fit(X, y)
     plot_pareto_front_example(emulator, X, y, show=show)
 

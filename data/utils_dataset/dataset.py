@@ -6,8 +6,8 @@ from matplotlib.axes import Axes
 
 from data.utils_dataset.utils_dataset_values import load_dataset_values
 from data.utils_dataset.validation_split import ValidationSplit, validation_split_to_validation_name
-from emulator.utils_plots.plot_by_rcp.plot_time_series_climato import _plot_climatological_time_series
-from emulator.utils_plots.plot_by_rcp.utils_plot_by_rcp import load_rcp_name_to_list_of_years_and_y_and_color_and_label
+from plot.by_rcp.plot_time_series_climato import _plot_climatological_time_series
+from plot.by_rcp.utils_plot_by_rcp import load_rcp_name_to_list_of_years_and_y_and_color_and_label
 from utils.utils_log import log_info
 
 

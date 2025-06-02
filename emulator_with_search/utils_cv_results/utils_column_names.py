@@ -1,8 +1,0 @@
-
-RANK_COLUMN_NAME = 'rank_test_MSE'
-MSE_TEST_COLUMN_NAME = 'mean_test_MSE'
-RMSE_VALIDATION_COLUMN_NAME = 'RMSE_validation'
-SELECTED_COMPLEXITY_COLUMN_NAME = 'selected_complexity'
-SELECTED_EXPR_COLUMN_NAME = 'selected_expr'
-SELECTED_FEATURE_INDEXES_COLUMN_NAME = 'selected_feature_indexes'
-PARAMS_EMULATOR_COLUMN_NAME = 'params_emulator'

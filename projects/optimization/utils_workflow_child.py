@@ -1,9 +1,9 @@
 from typing import Any, Optional
 
 from data.utils_dataset.dataset import Dataset
-from data.utils_search.experiment import Experiment
-from data.utils_search.utils_best_score import get_best_experiment
-from data.utils_search.utils_heredity_tree import add_heredity_link
+from data.utils_experiment.experiment import Experiment
+from data.utils_experiment.utils_best_experiment import get_best_experiment
+from data.utils_experiment.utils_heredity_tree import add_heredity_link
 from projects.optimization.utils_worflow import workflow
 from utils.utils_log import log_info
 
