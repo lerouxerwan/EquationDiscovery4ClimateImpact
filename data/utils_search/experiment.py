@@ -10,8 +10,8 @@ import pandas as pd
 from pysr import TensorBoardLoggerSpec
 from sympy import Expr
 
-from data.utils_search.utils_search_experiment import string_to_list_int
-from data.utils_search.utils_search_path import CSV_FILENAME, \
+from data.utils_search.utils_experiment import string_to_list_int
+from data.utils_search.utils_experiment_path import CSV_FILENAME, \
     JSON_FILENAME, CHILDREN_FILENAME, PARENT_FILENAME
 from emulator_with_search.utils_cv_results.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
     SELECTED_FEATURE_INDEXES_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME
@@ -20,32 +20,32 @@ from utils.utils_log import log_info
 
 
 @dataclass
-class SearchExperiment(object):
-    """Handle results from search experiments (df_cv_results, non default params, tensorboard logs)"""
-    search_path: str
+class Experiment(object):
+    """Object to handle results from runs (df_cv_results, non default params, tensorboard logs)"""
+    experiment_path: str
 
     def __post_init__(self):
         #  Create folder if needed
-        if not op.exists(self.search_path):
-            os.makedirs(self.search_path)
+        if not op.exists(self.experiment_path):
+            os.makedirs(self.experiment_path)
 
     """Search cv results"""
 
     @property
     def filepath_search_result(self) -> str:
-        return op.join(self.search_path, CSV_FILENAME)
+        return op.join(self.experiment_path, CSV_FILENAME)
 
     @property
     def filepath_non_default_params(self) -> str:
-        return op.join(self.search_path, JSON_FILENAME)
+        return op.join(self.experiment_path, JSON_FILENAME)
 
     @property
     def filepath_children(self) -> str:
-        return op.join(self.search_path, CHILDREN_FILENAME)
+        return op.join(self.experiment_path, CHILDREN_FILENAME)
 
     @property
     def filepath_parent(self) -> str:
-        return op.join(self.search_path, PARENT_FILENAME)
+        return op.join(self.experiment_path, PARENT_FILENAME)
 
     @property
     def df_cv_results(self) -> pd.DataFrame:
@@ -93,13 +93,13 @@ class SearchExperiment(object):
     def __str__(self):
         return (f' RMSE Validation={round(self.best_rmse_validation, 3)} with equation of complexity {self.best_complexity}: {self.best_expr}\n '
                 f'using the hyperparameters: {self.best_params}\n'
-                f'search_path: {self.search_path}')
+                f'experiment_path: {self.experiment_path}')
 
     """Tensorboard Logging"""
 
     @property
     def log_dir(self) -> str:
-        return op.join(self.search_path, 'logs')
+        return op.join(self.experiment_path, 'logs')
 
     def get_logger_spec(self, log_interval: int = 1) -> Optional[TensorBoardLoggerSpec]:
         """Create a logger only if the log has not yet been saved"""
@@ -117,12 +117,12 @@ class SearchExperiment(object):
         for filepath in filepaths:
             if op.exists(filepath):
                 os.remove(filepath)
-        # Remove folders log_dir and search_path
-        for folder in [self.log_dir, self.search_path]:
+        # Remove folders log_dir and experiment_path
+        for folder in [self.log_dir, self.experiment_path]:
             if op.exists(folder):
                 os.rmdir(folder)
         # Remove even the dataset folder, if it is empty
-        dataset_dir = op.dirname(self.search_path)
+        dataset_dir = op.dirname(self.experiment_path)
         if op.exists(dataset_dir) and (not os.listdir(dataset_dir)):
             os.rmdir(dataset_dir)
 

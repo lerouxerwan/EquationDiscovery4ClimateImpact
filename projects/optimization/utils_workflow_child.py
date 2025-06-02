@@ -1,8 +1,8 @@
 from typing import Any, Optional
 
 from data.utils_dataset.dataset import Dataset
-from data.utils_search.search_experiment import SearchExperiment
-from data.utils_search.utils_best_score import get_best_search_experiment
+from data.utils_search.experiment import Experiment
+from data.utils_search.utils_best_score import get_best_experiment
 from data.utils_search.utils_heredity_tree import add_heredity_link
 from projects.optimization.utils_worflow import workflow
 from utils.utils_log import log_info
@@ -29,6 +29,6 @@ def workflow_child(dataset: Dataset, search_path_to_start_from: str, params_sear
 def load_search_experiment(search_path_to_start_from, X_train, y_train, validation_mask):
     assert isinstance(search_path_to_start_from, str)
     if search_path_to_start_from == 'best':
-        return get_best_search_experiment(X_train, y_train, validation_mask)
+        return get_best_experiment(X_train, y_train, validation_mask)
     else:
-        return SearchExperiment(search_path_to_start_from)
+        return Experiment(search_path_to_start_from)

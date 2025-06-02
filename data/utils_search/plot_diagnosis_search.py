@@ -5,7 +5,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from data.utils_dataset.dataset import Dataset
-from data.utils_search.search_experiment import SearchExperiment
+from data.utils_search.experiment import Experiment
 from emulator.pysr_emulator import PySREmulator
 from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
 from emulator_with_search.utils_cv_results.utils_column_names import SELECTED_FEATURE_INDEXES_COLUMN_NAME, \
@@ -16,22 +16,22 @@ from utils.utils_plot import show_and_save_with_optional_plot_folder
 def plot_diagnosis_search(emulator: PySREmulator, dataset:Dataset, show: Optional[bool] = False,
                             plot_folder: Optional[str] = None):
     if isinstance(emulator, PySREmulatorWithSearch):
-        search_experiment = emulator.experiment_
-        _plot_diagnosis_search(dataset, search_experiment, show, plot_folder)
+        experiment = emulator.experiment_
+        _plot_diagnosis_search(dataset, experiment, show, plot_folder)
 
 
-def _plot_diagnosis_search(dataset: Dataset, search_experiment: SearchExperiment, show: bool = False,
+def _plot_diagnosis_search(dataset: Dataset, experiment: Experiment, show: bool = False,
                            plot_folder: Optional[str] = None):
-    plot_selected_features_best_equation(dataset, search_experiment, show, plot_folder)
+    plot_selected_features_best_equation(dataset, experiment, show, plot_folder)
     for nb_top_equations in [5, 10, 20]:
-        plot_selected_features_top_equations(dataset, search_experiment, nb_top_equations, show, plot_folder)
-    # plot_diagnosis_search_1d(search_experiment, show, plot_folder)
+        plot_selected_features_top_equations(dataset, experiment, nb_top_equations, show, plot_folder)
+    # plot_diagnosis_search_1d(experiment, show, plot_folder)
 
-def plot_selected_features_top_equations(dataset: Dataset, search_experiment: SearchExperiment,
+def plot_selected_features_top_equations(dataset: Dataset, experiment: Experiment,
                                          nb_top_equations: int = 10, show: bool = False,
                                          plot_folder: Optional[str] = None):
     """Plot the selected features for top equations"""
-    df = search_experiment.df_cv_results
+    df = experiment.df_cv_results
     if len(df) >= nb_top_equations:
         ax = plt.gca()
         # Gather feature indexes from the top 10 equations
@@ -47,7 +47,7 @@ def plot_selected_features_top_equations(dataset: Dataset, search_experiment: Se
         ax.set_xticks(x_values)
         xticklabels = [dataset.X_variables_names[feature_index] for feature_index in feature_indexes]
         xticklabels = ['$' + label.replace('_', '_{') + '}$' for label in xticklabels]
-        for selected_feature_index in search_experiment.df_cv_results[SELECTED_FEATURE_INDEXES_COLUMN_NAME].values[0]:
+        for selected_feature_index in experiment.df_cv_results[SELECTED_FEATURE_INDEXES_COLUMN_NAME].values[0]:
             i = feature_indexes.index(selected_feature_index)
             xticklabels[i] =  '$\\mathbf{' + xticklabels[i][1:-1] + '}$'
         ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
@@ -56,21 +56,21 @@ def plot_selected_features_top_equations(dataset: Dataset, search_experiment: Se
                                                 plot_folder)
 
 
-def plot_selected_features_best_equation(dataset: Dataset, search_experiment: SearchExperiment, show: bool = False,
+def plot_selected_features_best_equation(dataset: Dataset, experiment: Experiment, show: bool = False,
                                          plot_folder: Optional[str] = None):
     """Plot the selected features in the best equation"""
-    selected_feature_indexes = search_experiment.df_cv_results[SELECTED_FEATURE_INDEXES_COLUMN_NAME].values[0]
+    selected_feature_indexes = experiment.df_cv_results[SELECTED_FEATURE_INDEXES_COLUMN_NAME].values[0]
     for selected_feature_index in selected_feature_indexes:
         ax = plt.gca()
         dataset.plot_values_feature(ax, selected_feature_index)
         show_and_save_with_optional_plot_folder(f'feature_#{selected_feature_index}', show, plot_folder)
 
-def plot_diagnosis_search_1d(search_experiment: SearchExperiment, show: bool, plot_folder: Optional[str] = None):
+def plot_diagnosis_search_1d(experiment: Experiment, show: bool, plot_folder: Optional[str] = None):
     """Plot the variation of RMSE validation for each hyperparameter in the param_grid"""
-    df = search_experiment.df_cv_results
+    df = experiment.df_cv_results
     params_list = df[PARAMS_EMULATOR_COLUMN_NAME].to_list()
     metric_name = RMSE_VALIDATION_COLUMN_NAME
-    for param_name in search_experiment.get_combinations_of_param_names_in_param_grid(nb_elements=1):
+    for param_name in experiment.get_combinations_of_param_names_in_param_grid(nb_elements=1):
         param_name = param_name[0]
         ax = plt.gca()
         min_loss_list = []

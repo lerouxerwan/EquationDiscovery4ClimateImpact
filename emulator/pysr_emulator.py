@@ -8,9 +8,9 @@ from pysr.utils import ArrayLike
 from sympy import Expr, Symbol
 
 from data.utils_dataset.utils_validation_split import get_validation_mask
-from data.utils_search.search_experiment import SearchExperiment
+from data.utils_search.experiment import Experiment
 from data.utils_search.utils_non_default_params import get_non_default_params
-from data.utils_search.utils_search_path import get_search_path
+from data.utils_search.utils_experiment_path import get_experiment_path
 from emulator.utils_attributes.utils_data_augmentation import apply_data_augmentation
 from emulator.utils_attributes.utils_weighted_loss import get_weights
 from emulator.utils_metric.metric import Metric, metric_to_function
@@ -41,7 +41,7 @@ class PySREmulator(PySRRegressor):
         -logger_spec is set by default to True (in this case, in the fit function, a more specific logger will be set)
         """
     validation_mask_: Optional[np.ndarray[bool]]
-    experiment_: Optional[SearchExperiment]
+    experiment_: Optional[Experiment]
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
@@ -167,7 +167,7 @@ class PySREmulator(PySRRegressor):
     def fit(self, X: np.ndarray, y: np.ndarray, *, Xresampled=None, weights=None, variable_names: ArrayLike[str] | None = None,
             complexity_of_variables: int | float | list[int | float] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
-            category: ndarray | None = None, experiment: Optional[SearchExperiment] = None) -> "PySRRegressor":
+            category: ndarray | None = None, experiment: Optional[Experiment] = None) -> "PySRRegressor":
         """Fit method of PySR preceded by some potential preprocessing (data augmentation, weights computing...)
         By simplicity for coding preprocessing functions, for the moment this method only handles np.ndarray as input"""
         # For simplicity, the code only handles X and y as numpy arrays, not as dataframes
@@ -200,10 +200,10 @@ class PySREmulator(PySRRegressor):
         """Load attributes at the start of the fit function"""
         if hasattr(self, 'validation_size'):
             self.validation_mask_ = get_validation_mask(y) if validation_mask is None else validation_mask
-        self.experiment_ = SearchExperiment(get_search_path(X, y, validation_mask, get_non_default_params(self)))
+        self.experiment_ = Experiment(get_experiment_path(X, y, validation_mask, get_non_default_params(self)))
 
     def load_experiment(self, X: np.ndarray, y: np.ndarray):
-        return SearchExperiment(get_search_path(X, y, self.validation_mask_, get_non_default_params(self)))
+        return Experiment(get_experiment_path(X, y, self.validation_mask_, get_non_default_params(self)))
 
     def update_loss_in_equations_dataframe(self, X: np.ndarray, y: np.ndarray) -> None:
         """Recompute the loss (because the 'loss' column is sometimes not consistent with the predict method)

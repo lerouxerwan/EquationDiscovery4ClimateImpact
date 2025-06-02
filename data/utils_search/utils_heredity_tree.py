@@ -1,42 +1,42 @@
 from typing import Optional
 
-from data.utils_search.search_experiment import SearchExperiment
+from data.utils_search.experiment import Experiment
 import os.path as op
 
 """Write text files"""
 
-def add_heredity_link(search_experiment_child: SearchExperiment, search_experiment_parent: SearchExperiment) -> None:
+def add_heredity_link(experiment_child: Experiment, experiment_parent: Experiment) -> None:
     """Create files that create some heredity link between the child and the parent"""
-    # For the parent, we add the search_path of the children to a list of children (in a text file)
-    filepath = search_experiment_parent.filepath_children
-    _write_search_path(filepath, search_experiment_child.search_path, "a" if op.exists(filepath) else "w")
-    # For the children, we add the search_path of the parent (in a text file)
-    filepath = search_experiment_child.filepath_parent
+    # For the parent, we add the experiment_path of the children to a list of children (in a text file)
+    filepath = experiment_parent.filepath_children
+    _write_experiment_path(filepath, experiment_child.experiment_path, "a" if op.exists(filepath) else "w")
+    # For the children, we add the experiment_path of the parent (in a text file)
+    filepath = experiment_child.filepath_parent
     assert not op.exists(filepath)
-    _write_search_path(filepath, search_experiment_parent.search_path)
+    _write_experiment_path(filepath, experiment_parent.experiment_path)
 
-def _write_search_path(filepath: str, search_path: str, option: str = 'w') -> None:
+def _write_experiment_path(filepath: str, experiment_path: str, option: str = 'w') -> None:
     file = open(filepath, option)
-    file.write(f'{search_path}\n')
+    file.write(f'{experiment_path}\n')
     file.close()
 
 """Read text files"""
 
-def get_children(search_experiment: SearchExperiment) -> list[SearchExperiment]:
-    """Returns list of child search experiments, returns empty list if the search_experiment has no children"""
-    return _get_search_experiments(search_experiment.filepath_children)
+def get_children(experiment: Experiment) -> list[Experiment]:
+    """Returns list of child search experiments, returns empty list if the experiment has no children"""
+    return _get_experiments(experiment.filepath_children)
 
-def get_parent(search_experiment: SearchExperiment) -> Optional[SearchExperiment]:
+def get_parent(experiment: Experiment) -> Optional[Experiment]:
     """Returns parent search experiment, returns None if the search experiment has no parent"""
-    search_experiments_parents = _get_search_experiments(search_experiment.filepath_parent)
-    assert len(search_experiments_parents) <= 1
-    return None if len(search_experiments_parents) == 0 else search_experiments_parents[0]
+    experiments_parents = _get_experiments(experiment.filepath_parent)
+    assert len(experiments_parents) <= 1
+    return None if len(experiments_parents) == 0 else experiments_parents[0]
 
-def _get_search_experiments(filepath: str) -> list[SearchExperiment]:
+def _get_experiments(filepath: str) -> list[Experiment]:
     if op.exists(filepath):
         file = open(filepath, 'r')
-        search_experiments = [SearchExperiment(search_path[:-1]) for search_path in file.readlines()]
+        experiments = [Experiment(experiment_path[:-1]) for experiment_path in file.readlines()]
         file.close()
-        return search_experiments
+        return experiments
     else:
         return []
