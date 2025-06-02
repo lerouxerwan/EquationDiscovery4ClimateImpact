@@ -1,22 +1,22 @@
+import math
 from typing import Literal, Callable, Optional
 
 import numpy as np
-from numpy import ndarray
 from pysr import AbstractExpressionSpec, AbstractLoggerSpec, PySRRegressor
 from pysr.utils import ArrayLike
 
 from data.utils_dataset.utils_validation import get_X_and_y
-from data.utils_experiment.experiment import Experiment
 from emulator.emulator import Emulator
-from emulator.utils_optimize_threshold import compute_optimal_threshold
 
 
 class EmulatorValidated(Emulator):
-    """This class is an extension of PySREmulator where the fit data is split between a train and validation set
-    and where the 'custom' model_selection selects the equation minimizing validation error
+    """EmulatorValidated is an extension of Emulator that:
+        -split the training/fit data X and y between a train and validation set
+        -fit the emulator on the train set
+        -optimize the 'threshold_for_model_selection' parameter so that 'custom' model_selection
+        always selects the equation minimizing validation error
 
-    This extension has several additional attributes:
-
+    ->additional parameters:
         validation_size: float
             represent the proportion (between 0 and 1) of data to include in the validation split.
             Default is 0.3
@@ -124,20 +124,36 @@ class EmulatorValidated(Emulator):
     def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
             y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
-        """
-        Fit is done on a part of the trian set (train_train set) that minimizes the validation error is selected
-
-        We add one argument:
-        -validation_mask: array of boolean s.t. validation_mask[i] indicates if the index 'i' is in the validation set
-        """
+        """Method that:
+            1) fit on the train set (X_train_train, y_train_train) the emulator
+            2) optimize the threshold_for_model_selection on the validation set (X_validation, y_validation)"""
+        # Some check
         assert validation_mask is not None
         # Fit on the train set
-        X_train_train, y_train_train = get_X_and_y(X, y, validation_mask, validation_set=False)
-        super()._fit(X_train_train, y_train_train, None, variable_names, X_units, y_units)
+        X_train, y_train = get_X_and_y(X, y, validation_mask, validation_set=False)
+        super()._fit(X_train, y_train, None, variable_names, X_units, y_units)
         # Set the optimal threshold for the 'custom' model selection using the validation set
-        X_train_validation, y_train_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
-        self.threshold_for_model_selection = compute_optimal_threshold(self, X_train_validation, y_train_validation)
+        X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
+        validation_loss_list = self.compute_loss_list(X_validation, y_validation)
+        self.threshold_for_model_selection = self.compute_optimal_threshold(self.loss_list, validation_loss_list)
         return self
+
+    @staticmethod
+    def compute_optimal_threshold(train_loss_list: list[float], validation_loss_list: list[float]) -> float:
+        # Compute the threshold with maximum precision
+        train_loss_min = min(train_loss_list)
+        index_validation_loss_min = np.nanargmin(validation_loss_list)
+        train_loss_for_optimal_equation = train_loss_list[index_validation_loss_min]
+        optimal_threshold = train_loss_for_optimal_equation / train_loss_min
+        #  Round above (with the ceiling function) the threshold above some digits:
+        # This is done to avoid issues for the custom selection
+        # Otherwise due to rounding in the multiplication operation, the correct equation was sometimes not selected
+        #  (because its loss value was just above min_loss_value * threshold, due to small roundings)
+        nb_digits_for_upper_rounding = 10
+        scaling = 10 ** nb_digits_for_upper_rounding
+        optimal_threshold = float(math.ceil(optimal_threshold * scaling)) / scaling
+        return optimal_threshold
+
 
 
 
