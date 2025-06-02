@@ -5,7 +5,7 @@ from numpy import ndarray
 def get_cv(validation_mask: np.ndarray):
     """Generator that returns the single split for the validation, i.e. train_indices, validation_indices"""
     indices = np.arange(len(validation_mask))
-    yield indices[~validation_mask], indices[validation_mask]
+    yield indices, indices[validation_mask]
 
 
 def get_X_and_y(X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray, validation_set: bool) -> tuple[np.ndarray, ndarray]:

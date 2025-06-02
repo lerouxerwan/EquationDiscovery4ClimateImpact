@@ -164,12 +164,15 @@ class PySREmulator(PySRRegressor):
         self.validation_mask_ = None
         self.experiment_ = None
 
-    def fit(self, X: np.ndarray, y: np.ndarray, *, Xresampled=None, weights=None, variable_names: ArrayLike[str] | None = None,
+    def fit(self, X: np.ndarray, y: np.ndarray, *, variable_names: ArrayLike[str] | None = None,
             complexity_of_variables: int | float | list[int | float] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
             category: ndarray | None = None, experiment: Optional[Experiment] = None) -> "PySRRegressor":
         """Fit method of PySR preceded by some potential preprocessing (data augmentation, weights computing...)
-        By simplicity for coding preprocessing functions, for the moment this method only handles np.ndarray as input"""
+        By simplicity for coding preprocessing functions, for the moment this method only handles np.ndarray as input
+        Some arguments from the fit() method of PySR, are not yet handled (weights, Xresampled, ...)
+        because we would need to modify experiment_path for every variation of these arguments.
+        """
         # For simplicity, the code only handles X and y as numpy arrays, not as dataframes
         assert isinstance(X, np.ndarray)
         assert isinstance(y, np.ndarray)
@@ -179,15 +182,13 @@ class PySREmulator(PySRRegressor):
         if self.data_augmentation_ratio > 1:
             X, y = apply_data_augmentation(X, y, self.data_augmentation_ratio, self.data_augmentation_sigma)
         # Compute weights
-        if self.weighted_loss_ratio > 1.:
-            assert weights is None, "two weights are provided (one with the fit method, one with the __init__ method)"
-            weights = get_weights(y, self.weighted_loss_ratio)
+        weights = get_weights(y, self.weighted_loss_ratio) if self.weighted_loss_ratio > 1. else None
         #  By default, we log with tensorboard the progress for each iteration of the experiment
         #  See https://github.com/MilesCranmer/PySR/discussions/840 for more details on log_interval
         logging = self.logger_spec is True
         if logging:
             self.logger_spec = self.experiment_.get_logger_spec(log_interval=1 * self.populations)
-        super().fit(X, y, Xresampled=Xresampled, weights=weights, variable_names=variable_names,
+        super().fit(X, y, weights=weights, variable_names=variable_names,
                            complexity_of_variables=complexity_of_variables, X_units=X_units, y_units=y_units,
                            category=category)
         if logging:

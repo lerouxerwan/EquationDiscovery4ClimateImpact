@@ -1,55 +1,27 @@
-import os.path as op
 from typing import Literal, Callable, Optional
 
 import numpy as np
-import pandas as pd
 from numpy import ndarray
 from pysr import AbstractExpressionSpec, AbstractLoggerSpec, PySRRegressor
 from pysr.utils import ArrayLike
-from sklearn.metrics import make_scorer, mean_squared_error
-from sklearn.model_selection._search import BaseSearchCV
 
 from data.utils_dataset.utils_validation_split import get_validation_mask
-from data.utils_search.utils_non_default_params import get_non_default_params
-from emulator_validated.pysr_emulator_validated import PySREmulatorValidated
-from emulator_with_search.utils_attributes.utils_search_cv import get_search_cv_kwargs
-from emulator_with_search.utils_attributes.utils_validation import get_cv, get_X_and_y
-from emulator_with_search.utils_cv_results.utils_column_names import RMSE_VALIDATION_COLUMN_NAME, MSE_TEST_COLUMN_NAME
-from emulator_with_search.utils_cv_results.utils_df_results import get_df_cv_results
-from emulator_with_search.utils_param_grid.utils_scaling_factor import get_param_grid
-from emulator_with_search.utils_param_grid.utils_search_style import search_style_to_search_cv_type
+from data.utils_search.experiment import Experiment
+from emulator.pysr_emulator import PySREmulator
+from emulator_with_search.utils_attributes.utils_validation import get_X_and_y
+from emulator_with_search.utils_cv_results.utils_optimize_threshold import compute_optimal_threshold
 from utils.utils_log import log_info
 
 
-class PySREmulatorWithSearch(PySREmulatorValidated):
-    """This class is an extension of PySREmulator with hyperparameter search. Hyperparameter settings are
-    compared on a validation set, and the best hyperparameter setting (minimizing validation error) is selected
+class PySREmulatorValidated(PySREmulator):
+    """This class is an extension of PySREmulator where the fit data is split between a train and validation set
+    and where the 'custom' model_selection selects the equation minimizing validation error
 
     This extension has several additional attributes:
 
-        search_style: str
-            Style for hyperparameter search with a single validation, Possibilities include 'random' and 'grid' 
-            Default is None, which will be replaced by 'random'
-        n_iter: int
-            Number of parameter settings sampled for RandomSearchCV, which trades off runtime vs quality of the solution
-            Default is 10
-        n_jobs : int
-            Number of jobs to run in parallel.
-            None means 1 unless in a joblib context. -1 means using all processors
-            Default is None
-        param_grid : dict[str, list] | list[dict[str, list]]
-            Dictionary with hyperparameters names (`str`) as keys and lists of hyperparameter settings to try as values,
-            or a list of such dictionaries, in which case the grids spanned by each dictionary in the list are explored.
-            This enables searching over any sequence of hyperparameter settings.
-            Default is None, this default is replaced by an empty dictionary in the __init__ method
-        param_list_to_optimize: list[str]
-            List of hyperparameter names that are optimized, i.e. specified inside the param_grid
-            If param_grid is specified, i.e. different from None, then this list is not accounted for
-            Default is None, which leads to optimizing only the hyperparameter "niterations"
-        scaling_factor: int
-            Scaling factor to optimize around default.
-            Hyperparameter are sampled in [default_value / scaling_factor, default * scaling_factor]
-            Default is 10
+        validation_size: float
+            represent the proportion (between 0 and 1) of data to include in the validation split.
+            Default is 0.3
     """
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "custom", *,
@@ -99,14 +71,8 @@ class PySREmulatorWithSearch(PySREmulatorValidated):
                  data_augmentation_ratio: int = 1,
                  data_augmentation_sigma: float = 1.0,
                  weighted_loss_ratio: float = 1.0,
-                 validation_size: float = 0.3,
                  # Additional parameters
-                 search_style: Optional[str] = None,
-                 n_iter: int = 10,
-                 n_jobs: Optional[int] = None,
-                 param_grid: dict[str, list] | list[dict[str, list]] = None,
-                 param_list_to_optimize: Optional[list[str]] = None,
-                 scaling_factor: int = 10,
+                 validation_size: float = 0.3,
                  **kwargs):
         super().__init__(model_selection, binary_operators=binary_operators, unary_operators=unary_operators,
                          expression_spec=expression_spec, niterations=niterations, populations=populations,
@@ -150,100 +116,41 @@ class PySREmulatorWithSearch(PySREmulatorValidated):
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          threshold_for_model_selection=threshold_for_model_selection,
                          data_augmentation_ratio=data_augmentation_ratio, data_augmentation_sigma=data_augmentation_sigma,
-                         weighted_loss_ratio=weighted_loss_ratio, validation_size=validation_size,
+                         weighted_loss_ratio=weighted_loss_ratio,
                          **kwargs)
-        self.search_style = 'random' if search_style is None else search_style
-        self.n_iter = n_iter
-        self.n_jobs = n_jobs
-        self.param_grid = dict() if param_grid is None else param_grid
-        self.param_list_to_optimize = param_list_to_optimize
-            # Hyperparameters that could be added: 'populations', 'population_size' (but can lead to long computation)
-        self.scaling_factor = scaling_factor
+        self.validation_size = validation_size
         # Some checks
         assert isinstance(self.validation_size, float) and (0 < self.validation_size < 1)
-        assert isinstance(self.search_style, str)
-        assert isinstance(self.n_iter, int) and self.n_iter > 0
-        assert isinstance(self.param_grid, (dict, list))
-        assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
-        #  Set param grid using param_list_to_optimize if param_grid has not been specified by the user
-        if not self.param_grid:
-            self.param_grid = get_param_grid(self, self.scaling_factor, self.search_style, self.n_iter, 
-                                             self.param_list_to_optimize)
 
     def fit(self, X, y, *, variable_names: ArrayLike[str] | None = None,
             complexity_of_variables: int | float | list[int | float] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
-            category: ndarray | None = None, validation_mask: np.ndarray[bool] = None) -> "PySRRegressor":
+            category: ndarray | None = None, validation_mask: Optional[np.ndarray[bool]] = None,
+            experiment: Optional[Experiment] = None) -> "PySRRegressor":
         """
-        Fit where many hyperparameters settings are compared on a single validation set, and the hyperparameter
-        setting that minimizes the validation error is selected
-        Some arguments from the fit() method of PySR, are not yet handled (weights, Xresampled, ...)
-        because we would need to modify search path for every variation of these arguments.
+        Fit is done on a part of the trian set (train_train set) that minimizes the validation error is selected
+
         We add one optional argument:
              validation_mask: array of boolean s.t. validation_mask[i] indicates if the index 'i' is in the validation set
         """
-        # Load attributes
+        # Load attributes if needed
+        log_info(f'Shape of input for fit: {X.shape}')
         self.validation_mask_ = get_validation_mask(y) if validation_mask is None else validation_mask
-        self.experiment_ = self.load_experiment(X, y)
-        # Run hyperparameter search
-        if not op.exists(self.experiment_.filepath_search_result):
-            log_info(f'Run hyperparameter search with param grid = {self.param_grid}')
-            df_cv_results = self.compute_df_cv_results(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
-            self.experiment_.save_search_results(df_cv_results, get_non_default_params(self))
-        log_info(f'Best results from the hyperparameter search:\n{self.experiment_}')
-        # Final fit with the best setting of hyperparameter on the train split
-        self.set_params(**self.experiment_.best_params)
-        super().fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units,
-                    validation_mask=self.validation_mask_, experiment=self.experiment_)
+        self.experiment_ = self.load_experiment(X, y) if experiment is None else experiment
+        # Fit on the train set
+        X_train_train, y_train_train = get_X_and_y(X, y, self.validation_mask_, validation_set=False)
+        log_info(f'Shape of input for super fit: {X_train_train.shape}')
+        super().fit(X_train_train, y_train_train,
+                    variable_names=variable_names, X_units=X_units, y_units=y_units, experiment=self.experiment_)
+        # Set the optimal threshold using the validation set
+        assert self.model_selection == 'custom'
+        X_train_validation, y_train_validation = get_X_and_y(X, y, self.validation_mask_, validation_set=True)
+        self.threshold_for_model_selection = compute_optimal_threshold(self, X_train_validation, y_train_validation)
         return self
 
-    def compute_df_cv_results(self, X: np.ndarray, y: np.ndarray, **params_fit) -> pd.DataFrame:
-        """Run hyperparameter search and return the results transformed as a DataFrame called df_cv_results"""
-        log_info('Compute search results')
-
-        # Run hyperparameter search with respect to self.param_grid
-        log_info(f'Start hyperparameter search with {self.n_iter} combinations')
-        search_cv_type = search_style_to_search_cv_type[self.search_style]
-        search_cv = self.run_search_cv(search_cv_type, X, y, self.param_grid, **params_fit)
-
-        # Compute optimal threshold for each emulator, just like an additional hyperparameter we would optimize
-        # log_info('Compute optimal threshold')
-        # emulators = search_cv.cv_results_['estimator']
-        # for j, emulator in enumerate(emulators):
-        #     assert isinstance(emulator, PySREmulator)
-        #     assert emulator.equations_ is not None
-        #     optimal_threshold = compute_optimal_threshold(emulator, X_validation, y_validation)
-        #     emulator.threshold_for_model_selection = optimal_threshold
-        #     search_cv.cv_results_['params'][j]['threshold_for_model_selection'] = optimal_threshold
-        # # Add RMSE validation information
-        # X_validation, y_validation = get_X_and_y(X, y, self.validation_mask_, validation_set=True)
-        # rmse_validation_list = [emulator.compute_loss(X_validation, y_validation, Metric.RMSE) for emulator in emulators]
-        search_cv.cv_results_[RMSE_VALIDATION_COLUMN_NAME] = np.sqrt(-search_cv.cv_results_[MSE_TEST_COLUMN_NAME])
-
-        #  Transform cv_results into a Dataframe sorted by ranking with additional columns
-        return get_df_cv_results(search_cv.cv_results_, variable_names=params_fit['variable_names'])
 
 
-    def run_search_cv(self, search_cv_type: type, X, y, param_grid: dict | list[dict], **params_fit):
-        """Run hyperparameter search for a specific type of search (random, grid), a param_grid (all hyperparameters)
-        and some parameters 'params_fit' that will be passed to the estimator"""
-        assert issubclass(search_cv_type, BaseSearchCV)
-        search_cv = search_cv_type(estimator=self.load_emulator_with_same_attributes(),
-                                   scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
-                                   cv=get_cv(self.validation_mask_), refit=False, return_train_score=False,
-                                   n_jobs=self.n_jobs,
-                                   **get_search_cv_kwargs(search_cv_type, param_grid, self.n_iter))
-        search_cv.fit(X, y, **params_fit)
-        return search_cv
 
-    def load_emulator_with_same_attributes(self) -> PySREmulatorValidated:
-        """Load a pysr_emulator object with the same attributes as self,
-        except additional attributes that are due to inheritance"""
-        estimator = PySREmulatorValidated()
-        params = self.get_params()
-        params = {param_name: params[param_name] for param_name in estimator.__dict__ if param_name in params}
-        estimator.set_params(**params)
-        return estimator
 
 
 
