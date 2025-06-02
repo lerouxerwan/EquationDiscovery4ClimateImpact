@@ -161,41 +161,33 @@ class Emulator(PySRRegressor):
         # Create attributes
         self.experiment_ = None
 
-    def fit(self, X: np.ndarray, y: np.ndarray, *, variable_names: ArrayLike[str] | None = None,
-            complexity_of_variables: int | float | list[int | float] | None = None,
-            X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
-            category: ndarray | None = None, experiment: Optional[Experiment] = None) -> "PySRRegressor":
+    def fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
+            variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
+            y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
         """Fit method of PySR preceded by some potential preprocessing (data augmentation, weights computing...)
         By simplicity for coding preprocessing functions, for the moment this method only handles np.ndarray as input
         Some arguments from the fit() method of PySR, are not yet handled (weights, Xresampled, ...)
         because we would need to modify experiment_path for every variation of these arguments.
         """
-        # For simplicity, the code only handles X and y as numpy arrays, not as dataframes
-        assert isinstance(X, np.ndarray)
-        assert isinstance(y, np.ndarray)
-        # Load experiment for logging
-        self.experiment_ = self.load_experiment(X, y) if experiment is None else experiment
+        self.experiment_ = self.load_experiment(X, y, validation_mask)
+        return self._fit(X, y, validation_mask, variable_names, X_units, y_units)
+
+    def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
+            variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
+            y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
+        assert validation_mask is None
         # Apply data augmentation
         if self.data_augmentation_ratio > 1:
             X, y = apply_data_augmentation(X, y, self.data_augmentation_ratio, self.data_augmentation_sigma)
         # Compute weights
         weights = get_weights(y, self.weighted_loss_ratio) if self.weighted_loss_ratio > 1. else None
         # Fit with logging
-        self.fit_with_logging(X, X_units, category, complexity_of_variables, variable_names, weights, y, y_units)
-        return self
-
-    def load_experiment(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray]= None):
-        return Experiment(get_experiment_path(X, y, validation_mask, get_non_default_params(self)))
-
-    def fit_with_logging(self, X, X_units, category, complexity_of_variables, variable_names, weights, y, y_units):
-        """By default, we log with tensorboard the progress for each iteration of the experiment
-        See https://github.com/MilesCranmer/PySR/discussions/840 for more details on log_interval"""
+        # By default, we log with tensorboard the progress for each iteration of the experiment
+        # See https://github.com/MilesCranmer/PySR/discussions/840 for more details on log_interval"""
         logging = self.logger_spec is True
         if logging:
             self.logger_spec = self.experiment_.get_logger_spec(log_interval=1 * self.populations)
-        super().fit(X, y, weights=weights, variable_names=variable_names,
-                    complexity_of_variables=complexity_of_variables, X_units=X_units, y_units=y_units,
-                    category=category)
+        super().fit(X, y, weights=weights, variable_names=variable_names, X_units=X_units, y_units=y_units)
         if logging:
             self.logger_spec = True
         # Update the 'loss' column in the self.equations_ dataframe
@@ -206,6 +198,12 @@ class Emulator(PySRRegressor):
         pareto_indexes = [True] + [loss_list[i] < min(loss_list[:i]) for i in range(1, len(loss_list))]
         self.equations_ = self.equations_.loc[pd.Series(pareto_indexes, index=self.equations_.index)]
         self.equations_ = self.equations_.reset_index(drop=True)
+        return self
+
+    def load_experiment(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray]= None):
+        assert isinstance(X, np.ndarray)
+        assert isinstance(y, np.ndarray)
+        return Experiment(get_experiment_path(X, y, validation_mask, get_non_default_params(self)))
 
     def predict(self, X: np.ndarray, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
         return super().predict(X, index, category=category)

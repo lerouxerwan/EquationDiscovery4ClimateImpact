@@ -11,7 +11,7 @@ def run_three_main_functions_with_one_feature(emulator: Emulator):
     fit_with_validation_mask = isinstance(emulator, (EmulatorValidated, EmulatorValidatedWithSearch))
     if fit_with_validation_mask:
         X, y, validation_mask = load_X_and_y_and_validation_mask_for_test()
-        emulator.fit(X, y, validation_mask=validation_mask)
+        emulator.fit(X, y, validation_mask)
     else:
         X, y = load_X_and_y_for_test()
         emulator.fit(X, y)

@@ -167,10 +167,9 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
             self.param_grid = get_param_grid(self, self.scaling_factor, self.search_style, self.n_iter, 
                                              self.param_list_to_optimize)
 
-    def fit(self, X, y, validation_mask: np.ndarray[bool], *, variable_names: ArrayLike[str] | None = None,
-            complexity_of_variables: int | float | list[int | float] | None = None,
-            X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
-            category: ndarray | None = None, experiment: Optional[Experiment] = None) -> "PySRRegressor":
+    def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
+            variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
+            y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
         """
         Fit where many hyperparameters settings are compared on a single validation set, and the hyperparameter
         setting that minimizes the validation error is selected
@@ -179,17 +178,14 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
         We add one optional argument:
              validation_mask: array of boolean s.t. validation_mask[i] indicates if the index 'i' is in the validation set
         """
-        # Load attributes
-        self.experiment_ = self.load_experiment(X, y, validation_mask)
+        assert validation_mask is not None
         # Run hyperparameter search
         if not op.exists(self.experiment_.filepath_search_result):
-            self.run_and_save_hyperparameter_search(X, y, validation_mask=validation_mask,
-                                                    variable_names=variable_names, X_units=X_units, y_units=y_units)
+            self.run_and_save_hyperparameter_search(X, y, validation_mask, variable_names, X_units, y_units)
         # Final fit with the best setting of hyperparameter on the train split
         log_info(f'Best params/results from the hyperparameter search:\n{self.experiment_}')
         self.set_params(**self.experiment_.best_params)
-        super().fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units,
-                    validation_mask=validation_mask, experiment=self.experiment_)
+        super()._fit(X, y, validation_mask, variable_names, X_units, y_units)
         return self
 
     def run_and_save_hyperparameter_search(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],

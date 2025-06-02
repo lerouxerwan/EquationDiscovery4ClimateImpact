@@ -16,8 +16,7 @@ from utils.utils_plot import show_and_save_with_optional_plot_folder
 def plot_diagnosis_search(emulator: Emulator, dataset:Dataset, show: Optional[bool] = False,
                           plot_folder: Optional[str] = None):
     if isinstance(emulator, EmulatorValidatedWithSearch):
-        experiment = emulator.experiment_
-        _plot_diagnosis_search(dataset, experiment, show, plot_folder)
+        _plot_diagnosis_search(dataset, emulator.experiment_, show, plot_folder)
 
 
 def _plot_diagnosis_search(dataset: Dataset, experiment: Experiment, show: bool = False,

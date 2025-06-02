@@ -120,26 +120,24 @@ class EmulatorValidated(Emulator):
         # Some checks
         assert isinstance(self.validation_size, float) and (0 < self.validation_size < 1)
 
-    def fit(self, X, y, validation_mask: np.ndarray[bool], *, variable_names: ArrayLike[str] | None = None,
-            complexity_of_variables: int | float | list[int | float] | None = None,
-            X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
-            category: ndarray | None = None, experiment: Optional[Experiment] = None) -> "PySRRegressor":
+
+    def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
+            variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
+            y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
         """
         Fit is done on a part of the trian set (train_train set) that minimizes the validation error is selected
 
         We add one argument:
         -validation_mask: array of boolean s.t. validation_mask[i] indicates if the index 'i' is in the validation set
         """
-        # Load attributes if needed
-        self.experiment_ = self.load_experiment(X, y, validation_mask) if experiment is None else experiment
+        assert validation_mask is not None
         # Fit on the train set
         X_train_train, y_train_train = get_X_and_y(X, y, validation_mask, validation_set=False)
-        super().fit(X_train_train, y_train_train, variable_names=variable_names, X_units=X_units, y_units=y_units, experiment=self.experiment_)
+        super()._fit(X_train_train, y_train_train, None, variable_names, X_units, y_units)
         # Set the optimal threshold for the 'custom' model selection using the validation set
         X_train_validation, y_train_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
         self.threshold_for_model_selection = compute_optimal_threshold(self, X_train_validation, y_train_validation)
         return self
-
 
 
 
