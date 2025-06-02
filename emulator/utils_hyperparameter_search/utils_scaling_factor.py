@@ -4,7 +4,7 @@ from typing import Optional, Any
 import numpy as np
 from sklearn.base import BaseEstimator
 
-from emulator.emulator_validated_with_search.utils_search_style import search_style_to_search_cv_type
+from emulator.utils_hyperparameter_search.utils_search_style import search_style_to_search_cv_type
 
 
 def get_param_grid(estimator: BaseEstimator, scaling_factor: float, search_style: str, n_iter: int,

@@ -2,7 +2,7 @@ from data.utils_experiment.experiment import Experiment
 from data.utils_experiment.utils_heredity_tree import add_heredity_link, get_parent, get_children
 from utils.utils_non_default_params import get_non_default_params
 from data.utils_experiment.utils_experiment_path import get_experiment_path
-from emulator.emulator_validated_with_search.emulator_validated_with_search import EmulatorValidatedWithSearch
+from emulator.emulator_validated_with_search import EmulatorValidatedWithSearch
 from tests.data.utils_tests_dataset import load_X_and_y_and_validation_mask_for_test
 
 

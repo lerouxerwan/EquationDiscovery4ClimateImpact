@@ -1,5 +1,4 @@
 import math
-from enum import Enum
 from typing import Optional
 
 import numpy as np
@@ -7,6 +6,7 @@ from sklearn.model_selection import train_test_split
 
 from data.utils_dataset.validation_split import ValidationSplit
 from utils.utils_run import random_seed
+
 
 def get_validation_mask(y_train: np.ndarray, validation_size: float = 0.3,
                         validation_split: ValidationSplit = ValidationSplit.RANDOM,

@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 
 from emulator.emulator import Emulator
-from emulator.emulator_validated.utils_validation import get_X_and_y
+from data.utils_dataset.utils_validation import get_X_and_y
 from plot.by_split.utils_plot_split_name import SPLIT_NAMES
 from utils.utils_plot import compute_axis_lim
 

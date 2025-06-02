@@ -13,7 +13,7 @@ from sympy import Expr
 from data.utils_experiment.utils_experiment import string_to_list_int
 from data.utils_experiment.utils_experiment_path import CSV_FILENAME, \
     JSON_FILENAME, CHILDREN_FILENAME, PARENT_FILENAME
-from emulator.emulator_validated_with_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
+from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
     SELECTED_FEATURE_INDEXES_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info

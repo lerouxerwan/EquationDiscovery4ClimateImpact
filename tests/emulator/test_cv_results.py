@@ -1,9 +1,9 @@
 import numpy as np
 
-from emulator.emulator_validated_with_search.emulator_validated_with_search import EmulatorValidatedWithSearch
-from emulator.emulator_validated_with_search.utils_column_names import SELECTED_COMPLEXITY_COLUMN_NAME, \
+from emulator.emulator_validated_with_search import EmulatorValidatedWithSearch
+from emulator.utils_hyperparameter_search.utils_column_names import SELECTED_COMPLEXITY_COLUMN_NAME, \
     RMSE_VALIDATION_COLUMN_NAME, PARAMS_EMULATOR_COLUMN_NAME, SELECTED_FEATURE_INDEXES_COLUMN_NAME
-from emulator.emulator_validated_with_search.utils_df_results import get_selected_feature_indexes
+from emulator.utils_hyperparameter_search.utils_df_results import get_selected_feature_indexes
 from tests.emulator.utils_tests_emulator import run_three_main_functions_with_one_feature
 
 

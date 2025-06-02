@@ -5,7 +5,7 @@ import pandas as pd
 from pysr.utils import ArrayLike
 
 from emulator.emulator import Emulator
-from emulator.emulator_validated_with_search.utils_column_names import SELECTED_EXPR_COLUMN_NAME, \
+from emulator.utils_hyperparameter_search.utils_column_names import SELECTED_EXPR_COLUMN_NAME, \
     SELECTED_COMPLEXITY_COLUMN_NAME, SELECTED_FEATURE_INDEXES_COLUMN_NAME, PARAMS_EMULATOR_COLUMN_NAME, \
     RMSE_VALIDATION_COLUMN_NAME, MSE_TEST_COLUMN_NAME
 

@@ -4,8 +4,8 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, ParameterSampler
 
-from emulator.emulator_validated_with_search.utils_params_distribution import get_param_distributions
-from emulator.emulator_validated_with_search.utils_scaling_factor import get_param_grid
+from emulator.utils_hyperparameter_search.utils_params_distribution import get_param_distributions
+from emulator.utils_hyperparameter_search.utils_scaling_factor import get_param_grid
 from utils.utils_run import random_seed
 
 

@@ -1,7 +1,7 @@
 import numpy as np
 
 from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
-from emulator.emulator_validated.emulator_validated import EmulatorValidated
+from emulator.emulator_validated import EmulatorValidated
 
 
 def test_custom_model_selection():

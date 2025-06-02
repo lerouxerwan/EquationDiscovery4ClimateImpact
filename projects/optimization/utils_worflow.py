@@ -3,8 +3,8 @@ from typing import Any, Optional
 from data.utils_dataset.dataset import Dataset
 from emulator.emulator import Emulator
 from plot.plot_diagnosis_fit import plot_diagnosis_fit
-from emulator.emulator_validated_with_search.emulator_validated_with_search import EmulatorValidatedWithSearch
-from emulator.emulator_validated.utils_validation import get_X_and_y
+from emulator.emulator_validated_with_search import EmulatorValidatedWithSearch
+from data.utils_dataset.utils_validation import get_X_and_y
 
 
 def workflow(dataset: Dataset, params_emulator: dict[str, Any],

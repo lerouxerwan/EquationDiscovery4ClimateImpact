@@ -7,8 +7,8 @@ from matplotlib import pyplot as plt
 from data.utils_dataset.dataset import Dataset
 from data.utils_experiment.experiment import Experiment
 from emulator.emulator import Emulator
-from emulator.emulator_validated_with_search.emulator_validated_with_search import EmulatorValidatedWithSearch
-from emulator.emulator_validated_with_search.utils_column_names import SELECTED_FEATURE_INDEXES_COLUMN_NAME, \
+from emulator.emulator_validated_with_search import EmulatorValidatedWithSearch
+from emulator.utils_hyperparameter_search.utils_column_names import SELECTED_FEATURE_INDEXES_COLUMN_NAME, \
     PARAMS_EMULATOR_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME
 from utils.utils_plot import show_and_save_with_optional_plot_folder
 

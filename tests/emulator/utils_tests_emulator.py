@@ -1,6 +1,6 @@
 from emulator.emulator import Emulator
-from emulator.emulator_validated.emulator_validated import EmulatorValidated
-from emulator.emulator_validated_with_search.emulator_validated_with_search import EmulatorValidatedWithSearch
+from emulator.emulator_validated import EmulatorValidated
+from emulator.emulator_validated_with_search import EmulatorValidatedWithSearch
 from tests.data.utils_tests_dataset import load_X_and_y_for_test, load_X_and_y_and_validation_mask_for_test
 
 

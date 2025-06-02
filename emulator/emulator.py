@@ -10,22 +10,27 @@ from sympy import Expr, Symbol
 from data.utils_experiment.experiment import Experiment
 from utils.utils_non_default_params import get_non_default_params
 from data.utils_experiment.utils_experiment_path import get_experiment_path
-from emulator.utils_contributions.utils_data_augmentation import apply_data_augmentation
-from emulator.utils_contributions.utils_weighted_loss import get_weights
+from emulator.utils_potential_contributions.utils_data_augmentation import apply_data_augmentation
+from emulator.utils_potential_contributions.utils_weighted_loss import get_weights
 from plot.utils_metric.metric import Metric, metric_to_function
 from utils.utils_log import log_info
 from utils.utils_run import random_seed
 
 
 class Emulator(PySRRegressor):
-    """Emulator is a variant of PySRRegressor (by default no verbose & hall of fame files are deleted)
-    For reproducibility, randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
-    with some additional attributes:
+    """Emulator is a variant of PySRRegressor with some:
+
+    -> additional attribute:
+        experiment_: Experiment
+            it defines an 'experiment path', depending on 'fit' inputs, where results/TensorBoard logs can be saved
+
+    -> additional parameter:
         threshold_for_model_selection : float
             Threshold to select the best equation with some model selection ('best' and 'custom')
             this threshold must be larger or equal to 1
             Default is 1.5 (as specified in PySR).
-    including some potential contributions/tricks that are deactivated by default
+
+    -> more additional parameters for some contributions/tricks that are deactivated by default
         data_augmentation_ratio: int
             Number of times the number of datapoints augments with data augmentation
             Default is 1, i.e. no data augmentation
@@ -35,10 +40,13 @@ class Emulator(PySRRegressor):
         weighted_loss_ratio: float
             Ratio between the largest weight (for most extreme values) and the smallest weight 1.0 (for middle values)
             Default is 1., which means that weights are not considered
-    with some modification on the default value:
+
+    -> modification of the default value for some parameters:
+        -randomness is fixed for reproducibility
+        -no verbose from Julia
+        -hall of fame files are deleted
         -dimensional_constraint_penalty equals is set by default to 10**8 (to enforce dimension constraint)
-        -logger_spec is set by default to True (in this case, in the fit function, a more specific logger will be set)
-        """
+        -logger_spec set to True (in this case, in the fit function, a more specific logger will be set)"""
     experiment_: Optional[Experiment]
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "best", *,
@@ -142,6 +150,7 @@ class Emulator(PySRRegressor):
         self.data_augmentation_ratio = data_augmentation_ratio
         self.data_augmentation_sigma = data_augmentation_sigma
         self.weighted_loss_ratio = weighted_loss_ratio
+        # Some checks
         assert isinstance(self.threshold_for_model_selection, float)
         assert self.threshold_for_model_selection >= 1.
         assert isinstance(self.data_augmentation_ratio, int)
@@ -164,18 +173,31 @@ class Emulator(PySRRegressor):
     def fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
             y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
-        """Fit method of PySR preceded by some potential preprocessing (data augmentation, weights computing...)
-        By simplicity for coding preprocessing functions, for the moment this method only handles np.ndarray as input
-        Some arguments from the fit() method of PySR, are not yet handled (weights, Xresampled, ...)
-        because we would need to modify experiment_path for every variation of these arguments.
-        """
-        self.experiment_ = self.load_experiment(X, y, validation_mask)
+        """Fit an Emulator for some feature X, target y, and validation_mask.
+        Additional information can be specified: variable_names & units (with X_units, y_units)
+        Compared to the fit method of PySR, this 'fit' method:
+            -has one more argument 'validation_mask', an array of boolean (set to None by default) that defines the
+                validation split: validation_mask[i] indicates if the index 'i' is in the validation set
+            -only handles np.ndarray as input for X and y
+            -do not handle additional parameters of PySR (weights, Xresampled, ...)"""
+        # Some checks
+        assert isinstance(X, np.ndarray) and isinstance(y, np.ndarray)
+        assert isinstance(validation_mask, np.ndarray) or validation_mask is None
+        # Load self.experiment_ which defines an 'experiment path' where results/TensorBoard logs can be saved
+        self.experiment_ = Experiment(get_experiment_path(X, y, validation_mask, get_non_default_params(self)))
+        # Run _fit method
         return self._fit(X, y, validation_mask, variable_names, X_units, y_units)
 
     def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
             y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
+        """Method that implement additional options compared to PySR:
+            -add some potential preprocessing before the fit
+            -fit with TensorBoard logging
+            -update/correct small difference in the loss of the self.equations_ dataframe  """
+        # Some check
         assert validation_mask is None
+        # Potential preprocessing (data augmentation, weights computing) before the fit that are deactivate by default
         # Apply data augmentation
         if self.data_augmentation_ratio > 1:
             X, y = apply_data_augmentation(X, y, self.data_augmentation_ratio, self.data_augmentation_sigma)
@@ -192,7 +214,7 @@ class Emulator(PySRRegressor):
             self.logger_spec = True
         # Update the 'loss' column in the self.equations_ dataframe
         # because it is sometimes not consistent with the predict method)
-        # See https://github.com/MilesCranmer/PySR/discussions/943 for more details on this issue"""
+        # See https://github.com/MilesCranmer/PySR/discussions/943 for more details on this issue
         loss_list = self.compute_loss_list(X, y)
         self.equations_['loss'] = loss_list
         pareto_indexes = [True] + [loss_list[i] < min(loss_list[:i]) for i in range(1, len(loss_list))]
@@ -200,13 +222,10 @@ class Emulator(PySRRegressor):
         self.equations_ = self.equations_.reset_index(drop=True)
         return self
 
-    def load_experiment(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray]= None):
-        assert isinstance(X, np.ndarray)
-        assert isinstance(y, np.ndarray)
-        return Experiment(get_experiment_path(X, y, validation_mask, get_non_default_params(self)))
+    def predict(self, X: np.ndarray, index: int | list[int] | None = None) -> ndarray:
+        return super().predict(X, index)
 
-    def predict(self, X: np.ndarray, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
-        return super().predict(X, index, category=category)
+    """Method to compute loss"""
 
     def compute_loss_list(self, X: np.ndarray, y: np.ndarray) -> list[float]:
         """Compute a list of loss: one loss for every equation of the Pareto optimal set of equations"""
@@ -219,7 +238,6 @@ class Emulator(PySRRegressor):
     def compute_loss_list_other_metric(self, X: np.ndarray, y: np.ndarray, metric: Metric) -> list[float]:
         """Compute a list of loss: one loss for every equation of the Pareto optimal set of equations"""
         return [self._compute_loss(y, y_predicted, metric) for y_predicted in self.compute_y_predicted_list(X)]
-
 
     @staticmethod
     def _compute_loss(y_true: np.ndarray, y_predicted: np.ndarray, metric: Metric) -> float:

@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 from sympy import Symbol
 
-from emulator.utils_contributions.utils_data_augmentation import apply_data_augmentation
-from emulator.utils_contributions.utils_weighted_loss import get_weights
+from emulator.utils_potential_contributions.utils_data_augmentation import apply_data_augmentation
+from emulator.utils_potential_contributions.utils_weighted_loss import get_weights
 from tests.emulator.utils_tests_emulator import load_pysr_emulator_for_test, \
     run_three_main_functions_with_one_feature, load_X_and_y_for_test
 
