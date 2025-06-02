@@ -7,7 +7,7 @@ import pandas as pd
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit, validation_split_to_validation_name
-from plot.plot_diagnosis_fit import plot_diagnosis_fit
+from plot.utils_plot import plot_diagnosis
 from emulator.emulator_validated_with_search import EmulatorValidatedWithSearch
 from projects.experiments.split_comparison.utils_feature_dataset import get_feature_datasets
 from projects.utils_params import get_params_search, get_params_emulator
@@ -108,7 +108,7 @@ def get_res(dataset, params_emulator, params_search, folder:str):
     plot_folder = op.join(folder, dataset.y_variable_names[0])
     if not op.exists(plot_folder):
         os.makedirs(plot_folder)
-    plot_diagnosis_fit(emulator, dataset, show=False, plot_folder=plot_folder)
+    plot_diagnosis(emulator, dataset, show=False, plot_folder=plot_folder)
     infos = [f'${emulator.selected_expr}$', emulator.selected_complexity, emulator.selected_variable_names]
     return dataset.y_test, y_test_predict, infos
 

@@ -4,7 +4,7 @@ from data.utils_dataset.dataset import Dataset
 from data.utils_experiment.experiment import Experiment
 from data.utils_experiment.utils_best_experiment import get_best_experiment
 from data.utils_experiment.utils_heredity_tree import add_heredity_link
-from projects.optimization.utils_worflow import workflow
+from plot.workflow import workflow
 from utils.utils_log import log_info
 
 
@@ -26,9 +26,9 @@ def workflow_child(dataset: Dataset, search_path_to_start_from: str, params_sear
         add_heredity_link(emulator.experiment_, search_experiment)
 
 
-def load_search_experiment(search_path_to_start_from, X_train, y_train, validation_mask):
-    assert isinstance(search_path_to_start_from, str)
-    if search_path_to_start_from == 'best':
+def load_search_experiment(experiment_path, X_train, y_train, validation_mask):
+    assert isinstance(experiment_path, str)
+    if experiment_path == 'best':
         return get_best_experiment(X_train, y_train, validation_mask)
     else:
-        return Experiment(search_path_to_start_from)
+        return Experiment(experiment_path)

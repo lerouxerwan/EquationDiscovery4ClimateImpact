@@ -2,7 +2,8 @@ from typing import Any, Optional
 
 from data.utils_dataset.dataset import Dataset
 from emulator.emulator import Emulator
-from plot.plot_diagnosis_fit import plot_diagnosis_fit
+from emulator.emulator_validated import EmulatorValidated
+from plot.utils_plot import plot_diagnosis
 from emulator.emulator_validated_with_search import EmulatorValidatedWithSearch
 from data.utils_dataset.utils_validation import get_X_and_y
 
@@ -19,13 +20,11 @@ def workflow(dataset: Dataset, params_emulator: dict[str, Any],
         validation_mask) = dataset.values
     # Fit emulator
     if params_search is None:
-        emulator  = Emulator(**params_emulator)
-        X_train_train, y_train_train = get_X_and_y(X_train, y_train, validation_mask, validation_set=False)
-        emulator.fit(X_train_train, y_train_train, variable_names=X_variables_names, X_units=X_units, y_units=y_units)
+        emulator  = EmulatorValidated(**params_emulator)
     else:
         emulator = EmulatorValidatedWithSearch(**params_emulator, **params_search)
-        emulator.fit(X_train, y_train, variable_names=X_variables_names, X_units=X_units, y_units=y_units, validation_mask=validation_mask)
+    emulator.fit(X_train, y_train, validation_mask, X_variables_names, X_units, y_units)
     #  Generate diagnosis plot for the fit
-    plot_diagnosis_fit(emulator, dataset, show)
+    plot_diagnosis(emulator, dataset, show)
     return emulator
 

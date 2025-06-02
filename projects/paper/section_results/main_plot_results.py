@@ -1,5 +1,5 @@
 from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
-from projects.optimization.utils_workflow_child import workflow_child
+from plot.workflow_child import workflow_child
 
 
 def main_plot_results(show: bool):

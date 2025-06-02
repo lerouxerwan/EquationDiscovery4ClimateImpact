@@ -11,10 +11,12 @@ from utils.utils_log import log_info
 
 
 
-def plot_diagnosis_fit(emulator: Emulator, dataset:Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None):
+def plot_diagnosis(emulator: Emulator, dataset:Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None):
+    """Plot diagnosis of this emulator i) by split ii) by rcp iii) for the search"""
     log_info('Start plot diagnosis')
-    # Plot diagnosis of this emulator by split and by rcp
-    for plot_function in [plot_loss_vs_complexity, plot_scatter, plot_time_series,
-                          plot_climato, plot_errors_climato,
-                          plot_diagnosis_search]:
+    for plot_function in [
+        plot_loss_vs_complexity, plot_scatter, plot_time_series, # plot by split
+        plot_climato, plot_errors_climato, # plot by rcp
+        plot_diagnosis_search # plot for search
+    ]:
         plot_function(emulator, dataset, show, plot_folder)
