@@ -10,14 +10,13 @@ from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection._search import BaseSearchCV
 
 from data.utils_dataset.utils_validation_split import get_validation_mask
-from data.utils_search.search_experiment import SearchExperiment
 from data.utils_search.utils_non_default_params import get_non_default_params
-from data.utils_search.utils_search_path import get_search_path
 from emulator.pysr_emulator import PySREmulator
 from emulator.utils_metric.metric import Metric
 from emulator_with_search.utils_attributes.utils_search_cv import get_search_cv_kwargs
 from emulator_with_search.utils_attributes.utils_validation import get_cv, get_X_and_y
-from emulator_with_search.utils_cv_results.utils_df_results import get_df_cv_results, RMSE_VALIDATION_COLUMN_NAME
+from emulator_with_search.utils_cv_results.utils_column_names import RMSE_VALIDATION_COLUMN_NAME
+from emulator_with_search.utils_cv_results.utils_df_results import get_df_cv_results
 from emulator_with_search.utils_cv_results.utils_optimize_threshold import compute_optimal_threshold
 from emulator_with_search.utils_param_grid.utils_scaling_factor import get_param_grid
 from emulator_with_search.utils_param_grid.utils_search_style import search_style_to_search_cv_type
@@ -59,8 +58,6 @@ class PySREmulatorWithSearch(PySREmulator):
             Hyperparameter are sampled in [default_value / scaling_factor, default * scaling_factor]
             Default is 10
     """
-    validation_mask_: Optional[np.ndarray[bool]]
-    search_experiment_: Optional[SearchExperiment]
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "custom", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
@@ -183,9 +180,6 @@ class PySREmulatorWithSearch(PySREmulator):
         if not self.param_grid:
             self.param_grid = get_param_grid(self, self.scaling_factor, self.search_style, self.n_iter, 
                                              self.param_list_to_optimize)
-        # Create attributes
-        self.validation_mask_ = None
-        self.search_experiment_ = None
 
     def fit(self, X, y, *, Xresampled=None, weights=None, variable_names: ArrayLike[str] | None = None,
             complexity_of_variables: int | float | list[int | float] | None = None,
@@ -199,37 +193,21 @@ class PySREmulatorWithSearch(PySREmulator):
         We add one optional argument:
              validation_mask: array of boolean s.t. validation_mask[i] indicates if the index 'i' is in the validation set
         """
-        # Set validation_mask
+        # Load attributes
         self.validation_mask_ = get_validation_mask(y) if validation_mask is None else validation_mask
-        # Run hyperparameter search experiment
-        self.search_experiment_ = self.run_hyperparameter_search(X, y, variable_names=variable_names,
-                                                                 X_units=X_units, y_units=y_units)
+        self.experiment_ = self.load_experiment(X, y)
+        # Run hyperparameter search
+        if (not self.load_search_experiment) or (not op.exists(self.experiment_.filepath_search_result)):
+            log_info(f'Run hyperparameter search with param grid = {self.param_grid}')
+            df_cv_results = self.compute_df_cv_results(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
+            self.experiment_.save_search_results(df_cv_results, get_non_default_params(self))
+        log_info(f'Best results from the hyperparameter search:\n{self.experiment_}')
         # Fit with the best setting of hyperparameter on the train split
-        return self.fit_with_best_params(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
-
-    def fit_with_best_params(self, X: np.ndarray, y: np.ndarray, **params_fit):
-        #  By default, we log with tensorboard the progress of this fit iteration by iteration
-        assert self.logger_spec is None
-        self.set_params(**self.search_experiment_.best_params)
-        self.logger_spec = self.search_experiment_.get_logger_spec(log_interval=1 * self.populations)
-        # Fit on the train split
+        self.set_params(**self.experiment_.best_params)
         X_train_train, y_train_train = get_X_and_y(X, y, self.validation_mask_, validation_set=False)
-        super().fit(X_train_train, y_train_train, **params_fit)
-        self.logger_spec = None
+        super().fit(X_train_train, y_train_train,
+                    variable_names=variable_names, X_units=X_units, y_units=y_units, experiment=self.experiment_)
         return self
-
-    def run_hyperparameter_search(self, X: np.ndarray, y: np.ndarray, **params_fit) -> SearchExperiment:
-        """Run hyperparameter search, save search results to file, and return search_experiment"""
-        log_info(f'Run hyperparameter search with param grid = {self.param_grid}')
-        non_default_params = get_non_default_params(self)
-        search_experiment = SearchExperiment(get_search_path(X, y, self.validation_mask_, non_default_params))
-        # Compute and save search results only it has not yet been saved
-        if self.load_search_experiment and op.exists(search_experiment.filepath_search_result):
-            pass
-        else:
-            search_experiment.save_search_results(self.compute_df_cv_results(X, y, **params_fit), non_default_params)
-        log_info(f'Best results from the hyperparameter search:\n{search_experiment}')
-        return search_experiment
 
     def compute_df_cv_results(self, X: np.ndarray, y: np.ndarray, **params_fit) -> pd.DataFrame:
         """Run hyperparameter search and return the results transformed as a DataFrame called df_cv_results"""

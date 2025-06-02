@@ -8,15 +8,15 @@ from data.utils_dataset.dataset import Dataset
 from data.utils_search.search_experiment import SearchExperiment
 from emulator.pysr_emulator import PySREmulator
 from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
-from emulator_with_search.utils_cv_results.utils_df_results import RMSE_VALIDATION_COLUMN_NAME, \
-    PARAMS_EMULATOR_COLUMN_NAME, SELECTED_FEATURE_INDEXES_COLUMN_NAME
+from emulator_with_search.utils_cv_results.utils_column_names import SELECTED_FEATURE_INDEXES_COLUMN_NAME, \
+    PARAMS_EMULATOR_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME
 from utils.utils_plot import show_and_save_with_optional_plot_folder
 
 
 def plot_diagnosis_search(emulator: PySREmulator, dataset:Dataset, show: Optional[bool] = False,
                             plot_folder: Optional[str] = None):
     if isinstance(emulator, PySREmulatorWithSearch):
-        search_experiment = emulator.search_experiment_
+        search_experiment = emulator.experiment_
         _plot_diagnosis_search(dataset, search_experiment, show, plot_folder)
 
 

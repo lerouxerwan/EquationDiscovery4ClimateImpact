@@ -23,7 +23,7 @@ def workflow_child(dataset: Dataset, search_path_to_start_from: str, params_sear
     emulator = workflow(dataset, search_experiment.best_params, params_search, show)
     # Add a child/parent link if 'search_path_to_start_from' was used
     if params_search is not None:
-        add_heredity_link(emulator.search_experiment_, search_experiment)
+        add_heredity_link(emulator.experiment_, search_experiment)
 
 
 def load_search_experiment(search_path_to_start_from, X_train, y_train, validation_mask):

@@ -2,9 +2,9 @@ import numpy as np
 
 from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
 from emulator_with_search.pysr_emulator_with_search import PySREmulatorWithSearch
-from emulator_with_search.utils_cv_results.utils_df_results import RMSE_VALIDATION_COLUMN_NAME, \
-    PARAMS_EMULATOR_COLUMN_NAME, SELECTED_COMPLEXITY_COLUMN_NAME, get_selected_feature_indexes, \
-    SELECTED_FEATURE_INDEXES_COLUMN_NAME
+from emulator_with_search.utils_cv_results.utils_column_names import SELECTED_COMPLEXITY_COLUMN_NAME, \
+    RMSE_VALIDATION_COLUMN_NAME, PARAMS_EMULATOR_COLUMN_NAME, SELECTED_FEATURE_INDEXES_COLUMN_NAME
+from emulator_with_search.utils_cv_results.utils_df_results import get_selected_feature_indexes
 from tests.emulator.utils_tests_emulator import run_three_main_functions_with_one_feature
 
 
@@ -14,7 +14,7 @@ def test_df_cv_results():
     emulator = PySREmulatorWithSearch(niterations=1, param_grid={'populations': [10, 20]}, n_iter=n_iter)
     run_three_main_functions_with_one_feature(emulator)
     # Check number of lines in df
-    df = emulator.search_experiment_.df_cv_results
+    df = emulator.experiment_.df_cv_results
     assert len(df) == n_iter
     # Check the best selected complexity
     assert df[SELECTED_COMPLEXITY_COLUMN_NAME].values[0] == 9
@@ -31,7 +31,7 @@ def test_df_cv_results():
     assert best_params['populations'] == 19
     assert best_params['niterations'] == 1
     # Remove folders at the end of the test
-    emulator.search_experiment_.remove_folder()
+    emulator.experiment_.remove_folder()
 
 def test_selected_feature_indexes():
     selected_variable_names = ['x0', 'x10', 'x84']

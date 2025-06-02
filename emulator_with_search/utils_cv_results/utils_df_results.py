@@ -4,14 +4,10 @@ import pandas as pd
 from pysr.utils import ArrayLike
 
 from emulator.pysr_emulator import PySREmulator
+from emulator_with_search.utils_cv_results.utils_column_names import SELECTED_EXPR_COLUMN_NAME, \
+    SELECTED_COMPLEXITY_COLUMN_NAME, SELECTED_FEATURE_INDEXES_COLUMN_NAME, PARAMS_EMULATOR_COLUMN_NAME, \
+    RMSE_VALIDATION_COLUMN_NAME
 
-RANK_COLUMN_NAME = 'rank_test_MSE'
-METRIC_COLUMN_NAME = 'mean_test_MSE'
-RMSE_VALIDATION_COLUMN_NAME = 'RMSE_validation'
-SELECTED_COMPLEXITY_COLUMN_NAME = 'selected_complexity'
-SELECTED_EXPR_COLUMN_NAME = 'selected_expr'
-SELECTED_FEATURE_INDEXES_COLUMN_NAME = 'selected_feature_indexes'
-PARAMS_EMULATOR_COLUMN_NAME = 'params_emulator'
 
 def get_df_cv_results(cv_results: dict, variable_names: ArrayLike[str] | None = None) -> pd.DataFrame:
     # Pop estimator columns

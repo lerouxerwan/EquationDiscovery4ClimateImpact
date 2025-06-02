@@ -1,4 +1,4 @@
-from typing import Literal, Callable, Any
+from typing import Literal, Callable, Optional
 
 import numpy as np
 import pandas as pd
@@ -7,6 +7,10 @@ from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
 from pysr.utils import ArrayLike
 from sympy import Expr, Symbol
 
+from data.utils_dataset.utils_validation_split import get_validation_mask
+from data.utils_search.search_experiment import SearchExperiment
+from data.utils_search.utils_non_default_params import get_non_default_params
+from data.utils_search.utils_search_path import get_search_path
 from emulator.utils_attributes.utils_data_augmentation import apply_data_augmentation
 from emulator.utils_attributes.utils_weighted_loss import get_weights
 from emulator.utils_metric.metric import Metric, metric_to_function
@@ -33,7 +37,11 @@ class PySREmulator(PySRRegressor):
             Ratio between the largest weight (for most extreme values) and the smallest weight 1.0 (for middle values)
             Default is 1., which means that weights are not considered
     with some modification on the default value:
-        -dimensional_constraint_penalty equals is set by default to 10**8 (to enforce dimension constraint)"""
+        -dimensional_constraint_penalty equals is set by default to 10**8 (to enforce dimension constraint)
+        -logger_spec is set by default to True (in this case, in the fit function, a more specific logger will be set)
+        """
+    validation_mask_: Optional[np.ndarray[bool]]
+    experiment_: Optional[SearchExperiment]
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
@@ -71,7 +79,7 @@ class PySREmulator(PySRRegressor):
                  precision: Literal[16, 32, 64] = 32, autodiff_backend: Literal["Zygote"] | None = None,
                  random_state: int | np.random.RandomState | None = None, deterministic: bool = True,
                  warm_start: bool = False, verbosity: int = 0, update_verbosity: int | None = None,
-                 print_precision: int = 5, progress: bool = True, logger_spec: AbstractLoggerSpec | None = None,
+                 print_precision: int = 5, progress: bool = True, logger_spec: AbstractLoggerSpec | None | bool = True,
                  input_stream: str = "stdin", run_id: str | None = None, output_directory: str | None = None,
                  temp_equation_file: bool = True, tempdir: str | None = None, delete_tempfiles: bool = True,
                  update: bool = False, output_jax_format: bool = False, output_torch_format: bool = False,
@@ -152,16 +160,21 @@ class PySREmulator(PySRRegressor):
         # Change default dimensional_constraint_penalty
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
+        # Create attributes
+        self.validation_mask_ = None
+        self.experiment_ = None
 
     def fit(self, X: np.ndarray, y: np.ndarray, *, Xresampled=None, weights=None, variable_names: ArrayLike[str] | None = None,
             complexity_of_variables: int | float | list[int | float] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
-            category: ndarray | None = None) -> "PySRRegressor":
+            category: ndarray | None = None, experiment: Optional[SearchExperiment] = None) -> "PySRRegressor":
         """Fit method of PySR preceded by some potential preprocessing (data augmentation, weights computing...)
         By simplicity for coding preprocessing functions, for the moment this method only handles np.ndarray as input"""
         # For simplicity, the code only handles X and y as numpy arrays, not as dataframes
         assert isinstance(X, np.ndarray)
         assert isinstance(y, np.ndarray)
+        # Load experiment attribute
+        self.experiment_ = self.load_experiment(X, y) if experiment is None else experiment
         # Apply data augmentation
         if self.data_augmentation_ratio > 1:
             X, y = apply_data_augmentation(X, y, self.data_augmentation_ratio, self.data_augmentation_sigma)
@@ -169,12 +182,28 @@ class PySREmulator(PySRRegressor):
         if self.weighted_loss_ratio > 1.:
             assert weights is None, "two weights are provided (one with the fit method, one with the __init__ method)"
             weights = get_weights(y, self.weighted_loss_ratio)
+        #  By default, we log with tensorboard the progress for each iteration of the experiment
+        #  See https://github.com/MilesCranmer/PySR/discussions/840 for more details on log_interval
+        logging = self.logger_spec is True
+        if logging:
+            self.logger_spec = self.experiment_.get_logger_spec(log_interval=1 * self.populations)
         super().fit(X, y, Xresampled=Xresampled, weights=weights, variable_names=variable_names,
                            complexity_of_variables=complexity_of_variables, X_units=X_units, y_units=y_units,
                            category=category)
+        if logging:
+            self.logger_spec = True
         # After the fit, we update the 'loss' column in the self.equations_ dataframe
         self.update_loss_in_equations_dataframe(X, y)
         return self
+
+    def load_attributes(self, X: np.ndarray, y: np.ndarray, validation_mask=None):
+        """Load attributes at the start of the fit function"""
+        if hasattr(self, 'validation_size'):
+            self.validation_mask_ = get_validation_mask(y) if validation_mask is None else validation_mask
+        self.experiment_ = SearchExperiment(get_search_path(X, y, validation_mask, get_non_default_params(self)))
+
+    def load_experiment(self, X: np.ndarray, y: np.ndarray):
+        return SearchExperiment(get_search_path(X, y, self.validation_mask_, get_non_default_params(self)))
 
     def update_loss_in_equations_dataframe(self, X: np.ndarray, y: np.ndarray) -> None:
         """Recompute the loss (because the 'loss' column is sometimes not consistent with the predict method)
