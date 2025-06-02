@@ -39,7 +39,6 @@ class Emulator(PySRRegressor):
         -dimensional_constraint_penalty equals is set by default to 10**8 (to enforce dimension constraint)
         -logger_spec is set by default to True (in this case, in the fit function, a more specific logger will be set)
         """
-    validation_mask_: Optional[np.ndarray[bool]]
     experiment_: Optional[Experiment]
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "best", *,
@@ -160,7 +159,6 @@ class Emulator(PySRRegressor):
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
         # Create attributes
-        self.validation_mask_ = None
         self.experiment_ = None
 
     def fit(self, X: np.ndarray, y: np.ndarray, *, variable_names: ArrayLike[str] | None = None,
@@ -175,33 +173,34 @@ class Emulator(PySRRegressor):
         # For simplicity, the code only handles X and y as numpy arrays, not as dataframes
         assert isinstance(X, np.ndarray)
         assert isinstance(y, np.ndarray)
-        # Load experiment attribute
+        # Load experiment for logging
         self.experiment_ = self.load_experiment(X, y) if experiment is None else experiment
         # Apply data augmentation
         if self.data_augmentation_ratio > 1:
             X, y = apply_data_augmentation(X, y, self.data_augmentation_ratio, self.data_augmentation_sigma)
         # Compute weights
         weights = get_weights(y, self.weighted_loss_ratio) if self.weighted_loss_ratio > 1. else None
-        #  By default, we log with tensorboard the progress for each iteration of the experiment
-        #  See https://github.com/MilesCranmer/PySR/discussions/840 for more details on log_interval
+        # Fit with logging
+        self.fit_with_logging(X, X_units, category, complexity_of_variables, variable_names, weights, y, y_units)
+        return self
+
+    def load_experiment(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray]= None):
+        return Experiment(get_experiment_path(X, y, validation_mask, get_non_default_params(self)))
+
+    def fit_with_logging(self, X, X_units, category, complexity_of_variables, variable_names, weights, y, y_units):
+        """By default, we log with tensorboard the progress for each iteration of the experiment
+        See https://github.com/MilesCranmer/PySR/discussions/840 for more details on log_interval"""
         logging = self.logger_spec is True
         if logging:
             self.logger_spec = self.experiment_.get_logger_spec(log_interval=1 * self.populations)
         super().fit(X, y, weights=weights, variable_names=variable_names,
-                           complexity_of_variables=complexity_of_variables, X_units=X_units, y_units=y_units,
-                           category=category)
+                    complexity_of_variables=complexity_of_variables, X_units=X_units, y_units=y_units,
+                    category=category)
         if logging:
             self.logger_spec = True
-        # After the fit, we update the 'loss' column in the self.equations_ dataframe
-        self.update_loss_in_equations_dataframe(X, y)
-        return self
-
-    def load_experiment(self, X: np.ndarray, y: np.ndarray):
-        return Experiment(get_experiment_path(X, y, self.validation_mask_, get_non_default_params(self)))
-
-    def update_loss_in_equations_dataframe(self, X: np.ndarray, y: np.ndarray) -> None:
-        """Recompute the loss (because the 'loss' column is sometimes not consistent with the predict method)
-        See https://github.com/MilesCranmer/PySR/discussions/943 for more details"""
+        # Update the 'loss' column in the self.equations_ dataframe
+        # because it is sometimes not consistent with the predict method)
+        # See https://github.com/MilesCranmer/PySR/discussions/943 for more details on this issue"""
         loss_list = self.compute_loss_list(X, y)
         self.equations_['loss'] = loss_list
         pareto_indexes = [True] + [loss_list[i] < min(loss_list[:i]) for i in range(1, len(loss_list))]
@@ -210,10 +209,6 @@ class Emulator(PySRRegressor):
 
     def predict(self, X: np.ndarray, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
         return super().predict(X, index, category=category)
-
-    def compute_loss(self, X: np.ndarray, y: np.ndarray, metric=Metric.MSE) -> float:
-        """Compute loss for the selected function"""
-        return self._compute_loss(y, self.predict(X), metric)
 
     def compute_loss_list(self, X: np.ndarray, y: np.ndarray) -> list[float]:
         """Compute a list of loss: one loss for every equation of the Pareto optimal set of equations"""

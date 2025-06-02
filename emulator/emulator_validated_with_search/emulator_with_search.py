@@ -182,7 +182,7 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
         """
         # Load attributes
         self.validation_mask_ = get_validation_mask(y) if validation_mask is None else validation_mask
-        self.experiment_ = self.load_experiment(X, y)
+        self.experiment_ = self.load_experiment(X, y, self.validation_mask_)
         # Run hyperparameter search
         if not op.exists(self.experiment_.filepath_search_result):
             self.run_and_save_hyperparameter_search(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)

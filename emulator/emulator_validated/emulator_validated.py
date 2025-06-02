@@ -23,6 +23,7 @@ class EmulatorValidated(Emulator):
             represent the proportion (between 0 and 1) of data to include in the validation split.
             Default is 0.3
     """
+    validation_mask_: Optional[np.ndarray[bool]]
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "custom", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
@@ -121,6 +122,8 @@ class EmulatorValidated(Emulator):
         self.validation_size = validation_size
         # Some checks
         assert isinstance(self.validation_size, float) and (0 < self.validation_size < 1)
+        # Create attributes
+        self.validation_mask_ = None
 
     def fit(self, X, y, *, variable_names: ArrayLike[str] | None = None,
             complexity_of_variables: int | float | list[int | float] | None = None,
@@ -134,16 +137,12 @@ class EmulatorValidated(Emulator):
              validation_mask: array of boolean s.t. validation_mask[i] indicates if the index 'i' is in the validation set
         """
         # Load attributes if needed
-        log_info(f'Shape of input for fit: {X.shape}')
         self.validation_mask_ = get_validation_mask(y) if validation_mask is None else validation_mask
-        self.experiment_ = self.load_experiment(X, y) if experiment is None else experiment
+        self.experiment_ = self.load_experiment(X, y, self.validation_mask_) if experiment is None else experiment
         # Fit on the train set
         X_train_train, y_train_train = get_X_and_y(X, y, self.validation_mask_, validation_set=False)
-        log_info(f'Shape of input for super fit: {X_train_train.shape}')
-        super().fit(X_train_train, y_train_train,
-                    variable_names=variable_names, X_units=X_units, y_units=y_units, experiment=self.experiment_)
-        # Set the optimal threshold using the validation set
-        assert self.model_selection == 'custom'
+        super().fit(X_train_train, y_train_train, variable_names=variable_names, X_units=X_units, y_units=y_units, experiment=self.experiment_)
+        # Set the optimal threshold for the 'custom' model selection using the validation set
         X_train_validation, y_train_validation = get_X_and_y(X, y, self.validation_mask_, validation_set=True)
         self.threshold_for_model_selection = compute_optimal_threshold(self, X_train_validation, y_train_validation)
         return self

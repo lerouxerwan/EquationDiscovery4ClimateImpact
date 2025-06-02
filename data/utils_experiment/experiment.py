@@ -21,7 +21,7 @@ from utils.utils_log import log_info
 
 @dataclass
 class Experiment(object):
-    """Object to handle results from runs (df_cv_results, non default params, tensorboard logs)"""
+    """Object to handle results/plots from runs (df_cv_results, non default params, tensorboard logs)"""
     experiment_path: str
 
     def __post_init__(self):
