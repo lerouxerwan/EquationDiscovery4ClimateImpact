@@ -16,11 +16,10 @@ class EmulatorValidated(Emulator):
         -optimize the 'threshold_for_model_selection' parameter so that 'custom' model_selection
         always selects the equation minimizing validation error
 
-    ->additional parameters:
+    -> additional parameters:
         validation_size: float
             represent the proportion (between 0 and 1) of data to include in the validation split.
-            Default is 0.3
-    """
+            Default is 0.3"""
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "custom", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,

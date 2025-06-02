@@ -173,19 +173,32 @@ class Emulator(PySRRegressor):
     def fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
             y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
-        """Fit an Emulator for some feature X, target y, and validation_mask.
+        """Fit the emulator for some feature X, target y, and validation_mask.
         Additional information can be specified: variable_names & units (with X_units, y_units)
         Compared to the fit method of PySR, this 'fit' method:
-            -has one more argument 'validation_mask', an array of boolean (set to None by default) that defines the
-                validation split: validation_mask[i] indicates if the index 'i' is in the validation set
+            -has one more argument 'validation_mask', an array of bool (None by default) defining the validation split
             -only handles np.ndarray as input for X and y
-            -do not handle additional parameters of PySR (weights, Xresampled, ...)"""
+            -does not handle additional parameters of PySR (weights, Xresampled, ...)
+
+        Parameters
+        ----------
+        X : ndarray, Training data of shape (n_samples, n_features).
+        y : ndarray, Target values of shape (n_samples,) or (n_samples, n_targets).
+        validation_mask: Optional[ndarray], validation_mask[i] indicates if the index 'i' is in the validation set
+        variable_names : list[str], a list of names for the variables, rather than "x0", "x1", etc.
+        X_units : list[str], a list of units for each variable in `X`.
+        y_units : str | list[str], similar to `X_units`, but as a unit for the target variable, `y`.
+
+        Returns
+        -------
+        self : object
+            Fitted estimator"""
         # Some checks
         assert isinstance(X, np.ndarray) and isinstance(y, np.ndarray)
         assert isinstance(validation_mask, np.ndarray) or validation_mask is None
-        # Load self.experiment_ which defines an 'experiment path' where results/TensorBoard logs can be saved
+        # Initialize self.experiment_ which defines an 'experiment path' where results/TensorBoard logs can be saved
         self.experiment_ = Experiment(get_experiment_path(X, y, validation_mask, get_non_default_params(self)))
-        # Run _fit method
+        # Run self._fit method, which can be overriden in child classes
         return self._fit(X, y, validation_mask, variable_names, X_units, y_units)
 
     def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
@@ -194,7 +207,11 @@ class Emulator(PySRRegressor):
         """Method that implement additional options compared to PySR:
             -add some potential preprocessing before the fit
             -fit with TensorBoard logging
-            -update/correct small difference in the loss of the self.equations_ dataframe  """
+            -update/correct small difference in the loss of the self.equations_ dataframe
+
+        Parameters & Results
+        ----------
+        Same as the self.fit method"""
         # Some check
         assert validation_mask is None
         # Potential preprocessing (data augmentation, weights computing) before the fit that are deactivate by default

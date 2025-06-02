@@ -17,11 +17,11 @@ from utils.utils_log import log_info
 
 
 class EmulatorValidatedWithSearch(EmulatorValidated):
-    """This class is an extension of EmulatorValidated with hyperparameter search. Hyperparameter settings are
-    compared on a validation set, and the best hyperparameter setting (minimizing validation error) is selected
+    """EmulatorValidatedWithSearch is an extension of EmulatorValidated with hyperparameter search.
+     Several hyperparameter settings are compared on the validation set,
+     and the best hyperparameter setting (minimizing validation error) is selected for the final 'fit' of the emulator
 
-    This extension has several additional attributes:
-
+    -> additional parameters:
         search_style: str
             Style for hyperparameter search with a single validation, Possibilities include 'random' and 'grid' 
             Default is None, which will be replaced by 'random'
@@ -44,8 +44,7 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
         scaling_factor: int
             Scaling factor to optimize around default.
             Hyperparameter are sampled in [default_value / scaling_factor, default * scaling_factor]
-            Default is 10
-    """
+            Default is 10"""
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "custom", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
@@ -168,14 +167,8 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
     def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
             y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
-        """
-        Fit where many hyperparameters settings are compared on a single validation set, and the hyperparameter
-        setting that minimizes the validation error is selected
-        Some arguments from the fit() method of PySR, are not yet handled (weights, Xresampled, ...)
-        because we would need to modify search path for every variation of these arguments.
-        We add one optional argument:
-             validation_mask: array of boolean s.t. validation_mask[i] indicates if the index 'i' is in the validation set
-        """
+        """Run hyperparameter search with several hyperparameter settings (load from file the results if it exists)
+        The best hyperparameter setting (minimizing validation error) is selected for the final 'fit' of the emulator"""
         # Some check
         assert validation_mask is not None
         # Run hyperparameter search
