@@ -1,5 +1,5 @@
 from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
-from emulator.emulator_validated_with_search.emulator_with_search import EmulatorValidatedWithSearch
+from emulator.emulator_validated_with_search.emulator_validated_with_search import EmulatorValidatedWithSearch
 
 
 def test_emulator_validation_with_search():

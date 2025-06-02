@@ -8,9 +8,8 @@ from pysr.utils import ArrayLike
 from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection._search import BaseSearchCV
 
-from data.utils_dataset.utils_validation_split import get_validation_mask
 from data.utils_experiment.experiment import Experiment
-from data.utils_search.utils_non_default_params import get_non_default_params
+from utils.utils_non_default_params import get_non_default_params
 from emulator.emulator_validated.emulator_validated import EmulatorValidated
 from emulator.emulator_validated_with_search.utils_search_cv import get_search_cv_kwargs, get_cv
 from emulator.emulator_validated_with_search.utils_df_results import get_df_cv_results
@@ -168,10 +167,10 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
             self.param_grid = get_param_grid(self, self.scaling_factor, self.search_style, self.n_iter, 
                                              self.param_list_to_optimize)
 
-    def fit(self, X, y, *, variable_names: ArrayLike[str] | None = None,
+    def fit(self, X, y, validation_mask: np.ndarray[bool], *, variable_names: ArrayLike[str] | None = None,
             complexity_of_variables: int | float | list[int | float] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
-            category: ndarray | None = None, validation_mask: np.ndarray[bool] = None, experiment: Optional[Experiment] = None) -> "PySRRegressor":
+            category: ndarray | None = None, experiment: Optional[Experiment] = None) -> "PySRRegressor":
         """
         Fit where many hyperparameters settings are compared on a single validation set, and the hyperparameter
         setting that minimizes the validation error is selected
@@ -181,19 +180,21 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
              validation_mask: array of boolean s.t. validation_mask[i] indicates if the index 'i' is in the validation set
         """
         # Load attributes
-        self.validation_mask_ = get_validation_mask(y) if validation_mask is None else validation_mask
-        self.experiment_ = self.load_experiment(X, y, self.validation_mask_)
+        self.experiment_ = self.load_experiment(X, y, validation_mask)
         # Run hyperparameter search
         if not op.exists(self.experiment_.filepath_search_result):
-            self.run_and_save_hyperparameter_search(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
-        log_info(f'Best results from the hyperparameter search:\n{self.experiment_}')
+            self.run_and_save_hyperparameter_search(X, y, validation_mask=validation_mask,
+                                                    variable_names=variable_names, X_units=X_units, y_units=y_units)
         # Final fit with the best setting of hyperparameter on the train split
+        log_info(f'Best params/results from the hyperparameter search:\n{self.experiment_}')
         self.set_params(**self.experiment_.best_params)
         super().fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units,
-                    validation_mask=self.validation_mask_, experiment=self.experiment_)
+                    validation_mask=validation_mask, experiment=self.experiment_)
         return self
 
-    def run_and_save_hyperparameter_search(self, X: np.ndarray, y: np.ndarray, **params_fit) -> None:
+    def run_and_save_hyperparameter_search(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+                                           variable_names: ArrayLike[str] | None = None, X_units: ArrayLike[str] | None = None,
+                                           y_units: str | ArrayLike[str] | None = None) -> None:
         """Run hyperparameter search and save the results as a csv"""
         log_info(f'Start hyperparameter search with {self.n_iter} combinations, with param grid = {self.param_grid}')
         # Run hyperparameter search with respect to self.param_grid
@@ -201,12 +202,13 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
         assert issubclass(search_cv_type, BaseSearchCV)
         search_cv = search_cv_type(estimator=self.load_emulator_with_same_attributes(),
                                    scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
-                                   cv=get_cv(self.validation_mask_), refit=False, return_train_score=False,
+                                   cv=get_cv(validation_mask), refit=False, return_train_score=False,
                                    n_jobs=self.n_jobs,
                                    **get_search_cv_kwargs(search_cv_type, self.param_grid, self.n_iter))
-        search_cv.fit(X, y, **params_fit)
+        search_cv.fit(X, y, validation_mask=validation_mask, variable_names=variable_names,
+                      X_units=X_units, y_units=y_units)
         #  Transform cv_results into a Dataframe sorted by ranking with additional columns
-        df_cv_results = get_df_cv_results(search_cv.cv_results_, variable_names=params_fit['variable_names'])
+        df_cv_results = get_df_cv_results(search_cv.cv_results_, variable_names)
         # Save df_cv_results to file
         self.experiment_.save_search_results(df_cv_results, get_non_default_params(self))
 

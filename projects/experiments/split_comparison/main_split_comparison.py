@@ -8,7 +8,7 @@ import pandas as pd
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit, validation_split_to_validation_name
 from plot.plot_diagnosis_fit import plot_diagnosis_fit
-from emulator.emulator_validated_with_search.emulator_with_search import EmulatorValidatedWithSearch
+from emulator.emulator_validated_with_search.emulator_validated_with_search import EmulatorValidatedWithSearch
 from projects.experiments.split_comparison.utils_feature_dataset import get_feature_datasets
 from projects.utils_params import get_params_search, get_params_emulator
 from utils.utils_latex import print_df_latex

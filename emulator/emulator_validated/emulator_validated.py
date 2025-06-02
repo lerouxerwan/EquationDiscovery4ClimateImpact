@@ -5,12 +5,10 @@ from numpy import ndarray
 from pysr import AbstractExpressionSpec, AbstractLoggerSpec, PySRRegressor
 from pysr.utils import ArrayLike
 
-from data.utils_dataset.utils_validation_split import get_validation_mask
 from data.utils_experiment.experiment import Experiment
 from emulator.emulator import Emulator
-from emulator.emulator_validated.utils_validation import get_X_and_y
 from emulator.emulator_validated.utils_optimize_threshold import compute_optimal_threshold
-from utils.utils_log import log_info
+from emulator.emulator_validated.utils_validation import get_X_and_y
 
 
 class EmulatorValidated(Emulator):
@@ -23,7 +21,6 @@ class EmulatorValidated(Emulator):
             represent the proportion (between 0 and 1) of data to include in the validation split.
             Default is 0.3
     """
-    validation_mask_: Optional[np.ndarray[bool]]
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "custom", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
@@ -122,28 +119,24 @@ class EmulatorValidated(Emulator):
         self.validation_size = validation_size
         # Some checks
         assert isinstance(self.validation_size, float) and (0 < self.validation_size < 1)
-        # Create attributes
-        self.validation_mask_ = None
 
-    def fit(self, X, y, *, variable_names: ArrayLike[str] | None = None,
+    def fit(self, X, y, validation_mask: np.ndarray[bool], *, variable_names: ArrayLike[str] | None = None,
             complexity_of_variables: int | float | list[int | float] | None = None,
             X_units: ArrayLike[str] | None = None, y_units: str | ArrayLike[str] | None = None,
-            category: ndarray | None = None, validation_mask: Optional[np.ndarray[bool]] = None,
-            experiment: Optional[Experiment] = None) -> "PySRRegressor":
+            category: ndarray | None = None, experiment: Optional[Experiment] = None) -> "PySRRegressor":
         """
         Fit is done on a part of the trian set (train_train set) that minimizes the validation error is selected
 
-        We add one optional argument:
-             validation_mask: array of boolean s.t. validation_mask[i] indicates if the index 'i' is in the validation set
+        We add one argument:
+        -validation_mask: array of boolean s.t. validation_mask[i] indicates if the index 'i' is in the validation set
         """
         # Load attributes if needed
-        self.validation_mask_ = get_validation_mask(y) if validation_mask is None else validation_mask
-        self.experiment_ = self.load_experiment(X, y, self.validation_mask_) if experiment is None else experiment
+        self.experiment_ = self.load_experiment(X, y, validation_mask) if experiment is None else experiment
         # Fit on the train set
-        X_train_train, y_train_train = get_X_and_y(X, y, self.validation_mask_, validation_set=False)
+        X_train_train, y_train_train = get_X_and_y(X, y, validation_mask, validation_set=False)
         super().fit(X_train_train, y_train_train, variable_names=variable_names, X_units=X_units, y_units=y_units, experiment=self.experiment_)
         # Set the optimal threshold for the 'custom' model selection using the validation set
-        X_train_validation, y_train_validation = get_X_and_y(X, y, self.validation_mask_, validation_set=True)
+        X_train_validation, y_train_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
         self.threshold_for_model_selection = compute_optimal_threshold(self, X_train_validation, y_train_validation)
         return self
 

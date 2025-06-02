@@ -1,7 +1,7 @@
 from typing import Optional
 
 from data.utils_dataset.dataset import Dataset
-from data.utils_search.plot_diagnosis_search import plot_diagnosis_search
+from plot.for_search.plot_diagnosis_search import plot_diagnosis_search
 from emulator.emulator import Emulator
 from plot.by_rcp.plot_climato import plot_climato, plot_errors_climato
 from plot.by_split.plot_loss_vs_complexity import plot_loss_vs_complexity

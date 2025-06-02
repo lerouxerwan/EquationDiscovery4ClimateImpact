@@ -1,12 +1,13 @@
 import numpy as np
 from scipy.stats import norm
 
+from data.utils_dataset.utils_validation_split import get_validation_mask
 from utils.utils_run import random_seed
 
 
-def load_X_and_y_and_validation_mask_for_test(nb_features=1) -> tuple[np.ndarray, np.ndarray, np.ndarray[bool]]:
+def load_X_and_y_and_validation_mask_for_test(nb_features=1) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray[bool]]:
     X, y = load_X_and_y_for_test(nb_features)
-    validation_mask = np.array([i < 30 for i, _ in enumerate(y)])
+    validation_mask = get_validation_mask(y)
     return X, y, validation_mask
 
 
