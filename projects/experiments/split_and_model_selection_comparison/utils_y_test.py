@@ -1,8 +1,5 @@
 import os
 import os.path as op
-from enum import StrEnum
-
-from numpy import ndarray
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit
@@ -10,13 +7,6 @@ from emulator.emulator import Emulator
 from emulator.emulator_validated import EmulatorValidated
 from plot.utils_plot import plot_diagnosis
 
-
-class Strategy(StrEnum):
-    PYSR = "'best' fitted on train + validation"
-    # Only the two following strategy change with the validation split
-    TRUE = "ground truth value on validation"
-    BEST = "prediction with 'best' model selection fitted on train"
-    CUSTOM = "prediction with 'custom' model selection fitted on train (and optimized on validation)"
 
 def get_y_test(dataset: Dataset, folder: str):
     """Compute predictions with default parameters"""
@@ -50,6 +40,3 @@ def plot_emulator(dataset, emulator, folder):
         os.makedirs(plot_folder)
     plot_diagnosis(emulator, dataset, show=False, plot_folder=plot_folder)
 
-
-if __name__ == '__main__':
-    print(Strategy.CUSTOM)
