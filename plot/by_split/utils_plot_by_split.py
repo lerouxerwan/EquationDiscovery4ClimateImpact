@@ -34,15 +34,23 @@ def load_split_name_to_X_and_y_and_y_predicted_and_years(emulator: Emulator, X_t
     assert (years_train is None) or (years_train.ndim == 1)
     # Set default for years_train and years_test if needed
     years_test, years_train = set_default_years(y_test, y_train, years_test, years_train)
-    # Three splits
-    #  Separate train data between train (train_train) and validation (train_validation) data
-    X_train_train, y_train_train = get_X_and_y(X_train, y_train, validation_mask, False)
-    X_train_validation, y_train_validation = get_X_and_y(X_train, y_train, validation_mask, True)
-    #  Prepare ordered list with split_name, X, y and years
-    split_names = SPLIT_NAMES
-    X_list = [X_train_train, X_train_validation, X_test]
-    y_list = [y_train_train, y_train_validation, y_test]
-    years_list = [years_train[~validation_mask], years_train[validation_mask], years_test]
+    # Create splits
+    if validation_mask is None:
+        # Two splits
+        split_names = SPLIT_NAMES[::2]
+        X_list = [X_train, X_test]
+        y_list = [y_train, y_test]
+        years_list = [years_train, years_test]
+    else:
+        # Three splits
+        #  Separate train data between train (train_train) and validation (train_validation) data
+        X_train_train, y_train_train = get_X_and_y(X_train, y_train, validation_mask, False)
+        X_train_validation, y_train_validation = get_X_and_y(X_train, y_train, validation_mask, True)
+        #  Prepare ordered list with split_name, X, y and years
+        split_names = SPLIT_NAMES
+        X_list = [X_train_train, X_train_validation, X_test]
+        y_list = [y_train_train, y_train_validation, y_test]
+        years_list = [years_train[~validation_mask], years_train[validation_mask], years_test]
     # Remove test split (the last split name) using "zip" below if the data for this split has not been specified
     if X_test is None:
         split_names = split_names[:-1]

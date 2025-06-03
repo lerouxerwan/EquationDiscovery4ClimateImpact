@@ -198,7 +198,7 @@ class Emulator(PySRRegressor):
         assert isinstance(validation_mask, np.ndarray) or validation_mask is None
         # Initialize self.experiment_ which defines an 'experiment path' where results/TensorBoard logs can be saved
         self.experiment_ = Experiment(get_experiment_path(X, y, validation_mask, get_non_default_params(self)))
-        # Run self._fit method, which can be overriden in child classes
+        # Run self._fit method, which can be overridden in child classes
         return self._fit(X, y, validation_mask, variable_names, X_units, y_units)
 
     def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,

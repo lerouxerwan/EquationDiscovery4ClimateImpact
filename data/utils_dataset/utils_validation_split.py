@@ -11,14 +11,16 @@ from utils.utils_run import random_seed
 def get_validation_mask(y_train: np.ndarray, validation_size: float = 0.3,
                         validation_split: ValidationSplit = ValidationSplit.RANDOM,
                         years_train: Optional[list[int]] = None, rcp_name_train: Optional[str] = None,
-                        prefixes_train: Optional[list[str]] = None) -> np.ndarray:
+                        prefixes_train: Optional[list[str]] = None) -> Optional[np.ndarray]:
     """Compute an array of boolean such that validation_mask[i] = True if the index 'i' is in the validation set"""
     # Initialize validation_mask as False
     length_mask = len(y_train)
     validation_mask = np.zeros(length_mask).astype(bool)
     validation_length = math.ceil(length_mask * validation_size)
     # Set some indices of validation_mask to True (depending on the validation_split considered)
-    if validation_split is ValidationSplit.RANDOM:
+    if validation_split is ValidationSplit.NONE:
+        return None
+    elif validation_split is ValidationSplit.RANDOM:
         indices = list(range(length_mask))
         indices_validation_set = set(train_test_split(np.array(indices), test_size=validation_size, random_state=random_seed)[1])
         return np.array([i in indices_validation_set for i in indices])

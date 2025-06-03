@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 
 from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
+from plot.dataset.plot_dataset import plot_values_feature, plot_values_target, plot_values
 from utils.utils_plot import subplots_custom, show_or_save_plot
 
 
@@ -14,8 +15,8 @@ def main_plot_data(show=False):
     sst_train = dataset.X_train[:, column_index] - 273.15
     sst_test = dataset.X_test[:, column_index] - 273.15
     label_sst = dataset.X_labels[column_index].replace('(K)', '($^o$C)')
-    dataset.plot_values(ax1, sst_train, sst_test, label_sst)
-    dataset.plot_values_target(ax2)
+    plot_values(ax1, dataset, sst_train, sst_test, label_sst)
+    plot_values_target(ax2, dataset)
 
     # Some additional things for Slides
     # for ax in [ax1, ax2]:
@@ -32,7 +33,7 @@ def main_plot_all_features(show=False):
     variable_names = ['SSH_DJF', 'SSS_MAM', 'Shortwave_DJF', 'MerWindStr_MAM']
     for variable_name in variable_names:
         ax = plt.gca()
-        dataset.plot_values_feature(ax, dataset.X_variables_names.index(variable_name))
+        plot_values_feature(ax, dataset, dataset.X_variables_names.index(variable_name))
         show_or_save_plot(f'data_{variable_name}', show)
 
 

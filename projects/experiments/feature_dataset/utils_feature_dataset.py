@@ -6,6 +6,9 @@ import numpy as np
 from data.utils_dataset.dataset import Dataset
 from utils.utils_log import log_info
 
+def get_all_datasets(original_dataset: Dataset) -> Generator[Dataset, Any, None]:
+    yield original_dataset
+    yield from get_feature_datasets(original_dataset)
 
 def get_feature_datasets(original_dataset: Dataset) -> Generator[Dataset, Any, None]:
     """Generator of toy datasets, where for each dataset the target is composed/calculated from features"""

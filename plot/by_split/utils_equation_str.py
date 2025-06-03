@@ -72,10 +72,9 @@ def text_on_two_lines_if_too_long(text: str) -> str:
             if len(index_with_left_parenthesis) > 0:
                 for index_left, index_right in zip(index_with_left_parenthesis, index_with_right_parenthesis):
                     index_plus_and_minus = [i for i in index_plus_and_minus if not (index_left < i < index_right)]
-            if len(index_plus_and_minus) == 0:
+            if len(index_plus_and_minus) < 10:
                 return text
             else:
-                assert len(index_plus_and_minus) > 0
                 middle_index = len(text) // 2
                 distance_to_middle_index = [abs(i - middle_index) for i in index_plus_and_minus]
                 index_minimize_distance = index_plus_and_minus[np.argmin(distance_to_middle_index)]

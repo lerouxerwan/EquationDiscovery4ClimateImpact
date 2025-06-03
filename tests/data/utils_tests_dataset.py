@@ -7,8 +7,7 @@ from utils.utils_run import random_seed
 
 def load_X_and_y_and_validation_mask_for_test(nb_features=1) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray[bool]]:
     X, y = load_X_and_y_for_test(nb_features)
-    validation_mask = get_validation_mask(y)
-    return X, y, validation_mask
+    return X, y, get_validation_mask(y)
 
 
 def load_X_and_y_for_test(nb_features=1) -> tuple[np.ndarray, np.ndarray]:

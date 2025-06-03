@@ -6,10 +6,10 @@ import numpy as np
 import pandas as pd
 
 from data.utils_dataset.dataset import Dataset
-from data.utils_dataset.validation_split import ValidationSplit, validation_split_to_validation_name
-from plot.utils_plot import plot_diagnosis
+from data.utils_dataset.validation_split import ValidationSplit
 from emulator.emulator_validated_with_search import EmulatorValidatedWithSearch
-from projects.experiments.split_comparison.utils_feature_dataset import get_feature_datasets
+from plot.utils_plot import plot_diagnosis
+from projects.experiments.feature_dataset.utils_feature_dataset import get_feature_datasets
 from projects.utils_params import get_params_search, get_params_emulator
 from utils.utils_latex import print_df_latex
 from utils.utils_log import log_info
@@ -30,7 +30,7 @@ def main_split_comparison(show: bool = False, fast: bool = False):
         df_squared_error = (df_true - df_predict)**2
         series_rmse = df_squared_error.mean(axis=0).apply(np.sqrt)
         series_absolute_percentage = (100 * (df_predict - df_true) / df_true).apply(np.abs).mean(axis=0)
-        validation_name = validation_split_to_validation_name[validation_split]
+        validation_name = str(validation_split)
         series_rmse.name = validation_name
         all_series_rmse.append(series_rmse)
         series_equation = df_infos.iloc[0]
@@ -70,7 +70,7 @@ def main_split_comparison(show: bool = False, fast: bool = False):
 
 
 def compute_dataframes(validation_split, niter) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    validation_name = validation_split_to_validation_name[validation_split]
+    validation_name = str(validation_split)
     log_info(f"Compute dataframes for validation_split {validation_name}")
     folder = f'runs/{niter}_{validation_name}'
     true_csv_filename = folder + '/true.csv'

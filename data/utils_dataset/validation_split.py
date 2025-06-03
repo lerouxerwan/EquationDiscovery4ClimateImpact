@@ -1,27 +1,22 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ValidationSplit(Enum):
-    RANDOM = 0
-    RCP_START = 1
-    END = 2
-    START = 3
-    SYMMETRICAL = 4
-    RANDOM_DECADE = 5
-    MAX = 6
-    MIN = 7
-    EXTREME = 8
+class ValidationSplit(StrEnum):
+    RANDOM = 'random'
+    RCP_START = 'start RCP'
+    END = 'end'
+    START = 'start'
+    SYMMETRICAL = 'symmetrical'
+    RANDOM_DECADE = 'random_decade'
+    MAX = 'max'
+    MIN = 'min'
+    EXTREME = 'extreme'
+    NONE = 'no validation set'
 
-validation_split_to_validation_name = {
-    ValidationSplit.RANDOM: 'random',
-    ValidationSplit.RCP_START: 'start RCP',
-    ValidationSplit.END: 'end',
-    ValidationSplit.START: 'start',
-    ValidationSplit.SYMMETRICAL: 'symmetrical',
-    ValidationSplit.RANDOM_DECADE: 'random_decade',
-    ValidationSplit.MAX: 'max',
-    ValidationSplit.MIN: 'min',
-    ValidationSplit.EXTREME: 'extreme',
-}
+def get_train_label(rcp_name_train: str, validation_split: ValidationSplit) -> str:
+    return f'historical period + {rcp_name_train}'
+
+def get_validation_label(rcp_name_train: str, validation_split: ValidationSplit) -> str:
+    return f'historical period + {rcp_name_train}'
 
 

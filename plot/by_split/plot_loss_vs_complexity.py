@@ -36,7 +36,7 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
         loss_list = emulator.compute_loss_list_other_metric(X, y, metric=metric)
         # Filter values where the loss is equal np.nan
         coordinates, loss_list = list(zip(*[(coordinate, loss) for coordinate, loss in zip(coordinates, loss_list) if not np.isnan(loss)]))
-        ax.bar(coordinates, loss_list, width=width, label=get_label_split_name(split_name, dataset.rcp_name_train, dataset.rcp_name_test),
+        ax.bar(coordinates, loss_list, width=width, label=get_label_split_name(split_name, dataset),
                color=split_name_to_color[split_name])
         all_loss_list.extend(loss_list)
 
@@ -45,22 +45,23 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
     x_ticks = complexity_list
     set_x_axis(ax, x_ticks)
     ax.set_xticks(x_ticks)
-    # Add equations as ticklabels
+    # Add equations as ticklabels (show in bold the selected equation)
     xticklabels = [get_equation_str(expr) for expr in emulator.expr_list]
-    selected_series_with_default_pysr = emulator.get_best_pysr()
-    selected_complexity_with_default_pysr = selected_series_with_default_pysr['complexity']
-    selected_equation_with_default_pysr = selected_series_with_default_pysr['sympy_format']
-    xticklabels[complexity_list.index(selected_complexity_with_default_pysr)] \
-        = get_equation_str(selected_equation_with_default_pysr, add_underline=True)
     xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True)
-    ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     # Add y-axis with special scaling
     set_custom_y_axis(ax, all_loss_list, dataset.target_label, metric)
     # Potentially add detailed plots
     if detailed_plot:
         add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width)
         plot_threshold(ax, emulator, metric, *ax.get_xlim())
+        # selected equation with pysr
+        selected_series_with_default_pysr = emulator.get_best_pysr()
+        selected_complexity_with_default_pysr = selected_series_with_default_pysr['complexity']
+        selected_equation_with_default_pysr = selected_series_with_default_pysr['sympy_format']
+        xticklabels[complexity_list.index(selected_complexity_with_default_pysr)] \
+            = get_equation_str(selected_equation_with_default_pysr, add_underline=True)
     # General settings for the plot
+    ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     ax.legend(loc='upper right')
     show_and_save_with_optional_plot_folder('loss_vs_complexity', show, plot_folder)
 
