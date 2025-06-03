@@ -7,12 +7,10 @@ from data.utils_dataset.dataset import Dataset
 from projects.experiments.feature_dataset.utils_feature_dataset import get_all_datasets
 from projects.experiments.split_and_model_selection_comparison.utils_y_test import get_y_test
 from utils.utils_log import log_info
-from utils.utils_path import CURRENT_PATH
 
 
 def compute_dataframes_y(validation_split) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     validation_name = str(validation_split)
-    log_info(f"Compute dataframes for validation_split {validation_name}")
     folder = f'runs/{validation_name}'
     true_csv_filename = folder + '/true.csv'
     predict_custom_csv_filename =  folder + '/predict_custom.csv'
@@ -20,9 +18,8 @@ def compute_dataframes_y(validation_split) -> tuple[pd.DataFrame, pd.DataFrame, 
     # infos_csv_filename =  folder + '/infos.csv'
 
     if not op.exists(true_csv_filename):
-        print(CURRENT_PATH)
-        raise ValueError(true_csv_filename)
-        print('here')
+        log_info(f"Compute dataframes for validation_split {validation_name}")
+        # raise ValueError(true_csv_filename)
         dataset = Dataset("NPP_season.csv", "RCP85", "RCP45", 0.3, validation_split)
         physical_variable_name_to_y_test_true = OrderedDict()
         physical_variable_name_to_y_test_predict_best = OrderedDict()
