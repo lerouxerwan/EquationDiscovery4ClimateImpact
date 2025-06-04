@@ -89,11 +89,12 @@ class Experiment(object):
                                      if isinstance(param_value, (int, float))]
         return list(combinations(param_names_in_param_grid, nb_elements))
 
-
-    def __str__(self):
-        return (f' RMSE Validation={round(self.best_rmse_validation, 3)} with equation of complexity {self.best_complexity}: {self.best_expr}\n '
+    def print_search_results(self):
+        log_info(f'Best params/results from the hyperparameter search:\n')
+        s = (f' RMSE Validation={round(self.best_rmse_validation, 3)} with equation of complexity {self.best_complexity}: {self.best_expr}\n '
                 f'using the hyperparameters: {self.best_params}\n'
                 f'experiment_path: {self.experiment_path}')
+        log_info(s)
 
     """Tensorboard Logging"""
 

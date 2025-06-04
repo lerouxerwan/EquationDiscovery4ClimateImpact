@@ -8,7 +8,6 @@ def main_workflow_root_random_hyperparameter_settings(n_iter: int):
         "maxsize": 20,
         "optimizer_f_calls_limit": 10000,
         "population_size": 31,
-        "load_search_experiment": False,
         # "unary_operators": ["square"]
     }
     param_search = get_params_search(n_iter, scaling_factor=1.)

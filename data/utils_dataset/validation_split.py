@@ -31,7 +31,7 @@ def get_train_label(rcp_name_train: str, validation_split: ValidationSplit, vali
     elif validation_split is ValidationSplit.RANDOM:
         return f'{percent} randomly in the historical period + {rcp_name_train}'
     elif validation_split is ValidationSplit.NONE:
-        return 'historical period + {rcp_name_train}'
+        return f'historical period + {rcp_name_train}'
     else:
         raise NotImplementedError
 

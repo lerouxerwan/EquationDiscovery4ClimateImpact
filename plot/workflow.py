@@ -1,6 +1,7 @@
 from typing import Any, Optional
 
 from data.utils_dataset.dataset import Dataset
+from data.utils_dataset.validation_split import ValidationSplit
 from emulator.emulator import Emulator
 from emulator.emulator_validated import EmulatorValidated
 from plot.utils_plot import plot_diagnosis
@@ -20,7 +21,8 @@ def workflow(dataset: Dataset, params_emulator: dict[str, Any],
         validation_mask) = dataset.values
     # Fit emulator
     if params_search is None:
-        emulator  = EmulatorValidated(**params_emulator)
+        emulator_type = Emulator if dataset.validation_split is ValidationSplit.NONE else EmulatorValidated
+        emulator  = emulator_type(**params_emulator)
     else:
         emulator = EmulatorValidatedWithSearch(**params_emulator, **params_search)
     emulator.fit(X_train, y_train, validation_mask, X_variables_names, X_units, y_units)

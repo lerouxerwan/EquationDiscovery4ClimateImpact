@@ -175,7 +175,7 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
         if not op.exists(self.experiment_.filepath_search_result):
             self.run_and_save_hyperparameter_search(X, y, validation_mask, variable_names, X_units, y_units)
         # Final fit with the best setting of hyperparameter on the train split
-        log_info(f'Best params/results from the hyperparameter search:\n{self.experiment_}')
+        self.experiment_.print_search_results()
         self.set_params(**self.experiment_.best_params)
         super()._fit(X, y, validation_mask, variable_names, X_units, y_units)
         return self
