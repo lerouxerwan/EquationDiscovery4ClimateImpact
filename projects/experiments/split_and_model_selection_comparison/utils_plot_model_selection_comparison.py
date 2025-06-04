@@ -14,25 +14,18 @@ def plot_compare_model_selection(validation_split: ValidationSplit):
     df_absolute_percentages_pysr, df_rmse_pysr = compute_dataframe_errors('best', [ValidationSplit.NONE])
     df_absolute_percentages_best, df_rmse_best = compute_dataframe_errors('best', [validation_split])
     df_absolute_percentages_custom, df_rmse_custom = compute_dataframe_errors('custom', [validation_split])
-    df = pd.concat([df_rmse_pysr, df_rmse_best, df_rmse_custom, df_rmse_best,
-                    df_absolute_percentages_pysr, df_absolute_percentages_best, df_absolute_percentages_custom, df_absolute_percentages_best], axis=1)
+    df = pd.concat([df_rmse_pysr, df_rmse_best, df_rmse_custom, df_rmse_best], axis=1)
     # Compute ratio columns
-    for i in [0, 4]:
-        df.iloc[i+3] /= df.iloc[i+2]
-        for j in [i+1, i+2]:
-            df.iloc[:, j] /= df.iloc[:, i]
+    df.iloc[:, 3] /= df.iloc[:, 2]
+    for j in [1, 2]:
+        df.iloc[:, j] /= df.iloc[:, 0]
     # Combine dataframes
     df.index.name = str(validation_split)
-    df.columns = ['RMSE', 'B/', 'C/', 'B/C', 'Percent', 'Bp/', 'Cp/', 'Bp/Cp']
-    df['B/>1'] = 100 * (df['B/'] > 1)
-    df['C/>1'] = 100 * (df['C/'] > 1)
-    df['Bp/>1'] = 100 * (df['Bp/'] > 1)
-    df['Cp/>1'] = 100 * (df['Cp/'] > 1)
-    df['B/C>1'] = 100 * (df['B/C'] > 1)
-    df['Bp/Cp>1'] = 100 * (df['Bp/Cp'] > 1)
-    # Do not keep all the columns
-    df = df.loc[:, ['RMSE', 'B/', 'B/>1', 'C/', 'C/>1', 'B/C', 'B/C>1']]
-    df = df.sort_values(by='B/', axis=0)
+    df.columns = ['Base', 'Best/Base', 'Custom/Base', 'Best/Custom']
+    df['Best<Base'] = 100 * (df['Best/Base'] < 1)
+    df['Custom<Base'] = 100 * (df['Custom/Base'] < 1)
+    df['Custom<Best'] = 100 * (df['Best/Custom'] > 1)
+    df = df.sort_values(by='Best/Base', axis=0)
     df.loc['Mean'] = df.mean()
     df = df.round(2)
     # Plot df
