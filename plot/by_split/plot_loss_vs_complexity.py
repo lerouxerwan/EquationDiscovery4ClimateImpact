@@ -36,8 +36,10 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
         loss_list = emulator.compute_loss_list_other_metric(X, y, metric=metric)
         # Filter values where the loss is equal np.nan
         coordinates, loss_list = list(zip(*[(coordinate, loss) for coordinate, loss in zip(coordinates, loss_list) if not np.isnan(loss)]))
-        ax.bar(coordinates, loss_list, width=width, label=get_label_split_name(split_name, dataset),
+        barplot = ax.bar(coordinates, loss_list, width=width, label=get_label_split_name(split_name, dataset),
                color=split_name_to_color[split_name])
+        loss_list_labels = [str(round(loss, 2)) for loss in loss_list]
+        ax.bar_label(barplot, labels=loss_list_labels, label_type='edge', padding=1)
         all_loss_list.extend(loss_list)
 
     # Add rounded equations on the lower X axis
