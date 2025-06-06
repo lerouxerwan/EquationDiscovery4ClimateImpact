@@ -21,12 +21,13 @@ pandas==2.2.3
 pillow==11.1.0
 pluggy==1.5.0
 protobuf==6.31.1
+Pygments==2.19.1
 pyparsing==3.2.1
 PyQt5==5.15.11
 PyQt5-Qt5==5.15.16
 PyQt5_sip==12.17.0
 pysr==1.5.8
-pytest==8.3.5
+pytest==8.4.0
 pytest-repeat==0.9.3
 python-dateutil==2.9.0.post0
 pytz==2025.1

@@ -12,6 +12,7 @@ class ValidationSplit(StrEnum):
     MIN = 'min'
     EXTREME = 'extreme'
     NONE = 'no validation set'
+    PRELIMINARY_TEST = 'preliminary test'
 
 def get_train_label(rcp_name_train: str, validation_split: ValidationSplit, validation_size: float) -> str:
     percent = f'{int(100 * validation_size)}%'
@@ -30,12 +31,12 @@ def get_train_label(rcp_name_train: str, validation_split: ValidationSplit, vali
         return f'{percent} that are intermediary values for the historical period + {rcp_name_train}'
     elif validation_split is ValidationSplit.RANDOM:
         return f'{percent} randomly in the historical period + {rcp_name_train}'
-    elif validation_split is ValidationSplit.NONE:
+    elif validation_split in {ValidationSplit.NONE, ValidationSplit.PRELIMINARY_TEST}:
         return f'historical period + {rcp_name_train}'
     else:
         raise NotImplementedError
 
-def get_validation_label(rcp_name_train: str, validation_split: ValidationSplit, validation_size: float) -> str:
+def get_validation_label(rcp_name_train: str, rcp_name_test: str, validation_split: ValidationSplit, validation_size: float) -> str:
     percent = f'{int(100 * validation_size)}%'
     if validation_split in [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END]:
         key_word = 'middle' if validation_split is ValidationSplit.SYMMETRICAL else str(validation_split)
@@ -48,6 +49,8 @@ def get_validation_label(rcp_name_train: str, validation_split: ValidationSplit,
         return f'{percent} randomly in the historical period + {rcp_name_train}'
     elif validation_split is ValidationSplit.NONE:
         raise ValueError('This function should not have been called')
+    elif validation_split is ValidationSplit.PRELIMINARY_TEST:
+        return rcp_name_test
     else:
         raise NotImplementedError
 

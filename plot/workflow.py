@@ -15,17 +15,14 @@ def workflow(dataset: Dataset, params_emulator: dict[str, Any],
     """Workflow that fit an emulator to a dataset and generate diagnosis plots to assess fit quality
     This workflow takes as compulsory inputs: a dataset filename & a dictionary of parameters for the emulator
     An optional input is 'params_search' which gives some argument for hyperparameter search """
-    # Load dataset
-    (X_train, y_train, X_test, y_test, years_train, years_test,
-        X_units, y_units, X_labels, y_labels, X_variables_names, y_variable_names,
-        validation_mask) = dataset.values
     # Fit emulator
     if params_search is None:
         emulator_type = Emulator if dataset.validation_split is ValidationSplit.NONE else EmulatorValidated
         emulator  = emulator_type(**params_emulator)
     else:
         emulator = EmulatorValidatedWithSearch(**params_emulator, **params_search)
-    emulator.fit(X_train, y_train, validation_mask, X_variables_names, X_units, y_units)
+    emulator.fit(dataset.X_train, dataset.y_train, dataset.validation_mask,
+                 dataset.X_variables_names, dataset.X_units, dataset.y_units)
     #  Generate diagnosis plot for the fit
     plot_diagnosis(emulator, dataset, show, plot_folder)
     return emulator

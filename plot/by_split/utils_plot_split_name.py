@@ -11,6 +11,7 @@ def get_label_split_name(split_name: str, dataset: Dataset) -> str:
                                        dataset.validation_split, dataset.validation_size)
     elif split_name == 'validation':
         return label + get_validation_label(get_rcp_name_with_dot(dataset.rcp_name_train),
+                                            get_rcp_name_with_dot(dataset.rcp_name_test),
                                             dataset.validation_split, dataset.validation_size)
     else:
         return label + get_rcp_name_with_dot(dataset.rcp_name_test)
