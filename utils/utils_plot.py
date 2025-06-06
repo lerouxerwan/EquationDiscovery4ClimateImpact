@@ -14,6 +14,7 @@ VERSION = str(datetime.now()).split('.')[0][5:]
 for s in [' ', ':', '-']:
     VERSION = VERSION.replace(s, '_')
 VERSION = ''.join(VERSION)
+PLOT_PATH = op.join(RESULT_PATH, VERSION)
 
 
 def compute_axis_lim(values: np.ndarray) -> tuple[float, float]:
@@ -50,7 +51,7 @@ def show_or_save_plot(plot_name: str, show: Optional[bool]=False):
 def save_plot(plot_name: str):
     for character in ['\n', ' ']:
         plot_name = plot_name.replace(character, '_')
-    filepath = op.join(RESULT_PATH, VERSION, plot_name)
+    filepath = op.join(PLOT_PATH, plot_name)
     for i, f in enumerate(['png', 'pdf'][:]):
         filepath_with_format = filepath + '.' + f
         if i >= 1:

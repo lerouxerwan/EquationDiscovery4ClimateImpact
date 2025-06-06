@@ -48,6 +48,15 @@ class Experiment(object):
         return op.join(self.experiment_path, PARENT_FILENAME)
 
     @property
+    def filepath_duration(self) -> str:
+        return op.join(self.experiment_path, 'duration.txt')
+
+    @property
+    def filepath_symbolic_link(self) -> str:
+        return op.join(self.experiment_path, 'plot_path')
+
+
+    @property
     def df_cv_results(self) -> pd.DataFrame:
         df_cv_results = pd.read_csv(self.filepath_search_result, index_col=0)
         df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].apply(string_to_dict)
@@ -99,6 +108,10 @@ class Experiment(object):
     """Tensorboard Logging"""
 
     @property
+    def filepath_tensorboard_command(self) -> str:
+        return op.join(self.experiment_path, 'tensorboard_command.txt')
+
+    @property
     def log_dir(self) -> str:
         return op.join(self.experiment_path, 'logs')
 
@@ -112,7 +125,8 @@ class Experiment(object):
     def remove_folder(self):
         # Remove files
         filepaths = [self.filepath_non_default_params, self.filepath_search_result,
-                     self.filepath_children, self.filepath_parent]
+                     self.filepath_children, self.filepath_parent, self.filepath_duration,
+                     self.filepath_tensorboard_command]
         if op.exists(self.log_dir):
             filepaths += [op.join(self.log_dir, f) for f in os.listdir(self.log_dir)]
         for filepath in filepaths:

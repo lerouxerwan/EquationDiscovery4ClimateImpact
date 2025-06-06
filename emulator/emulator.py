@@ -1,3 +1,4 @@
+import time
 from typing import Literal, Callable, Optional
 
 import numpy as np
@@ -198,11 +199,21 @@ class Emulator(PySRRegressor):
         assert isinstance(validation_mask, np.ndarray) or validation_mask is None
         # Initialize self.experiment_ which defines an 'experiment path' where results/TensorBoard logs can be saved
         self.experiment_ = Experiment(get_experiment_path(X, y, validation_mask, get_non_default_params(self)))
-        # Run self._fit method, which can be overridden in child classes
-        self._fit(X, y, validation_mask, variable_names, X_units, y_units)
-        # Print the experiment folder, and the command to run tensorboard
         log_info(f"Experiment path={self.experiment_.experiment_path}")
-        log_info(f"tensorboard --logdir {self.experiment_.log_dir}")
+        # Run self._fit method, which can be overridden in child classes
+        start = time.time()
+        self._fit(X, y, validation_mask, variable_names, X_units, y_units)
+        duration = time.time() - start
+        # Print and save fit information to file (for the duration & the tensorboard command)
+        filepath_to_fit_information = {
+            self.experiment_.filepath_duration: f"duration for the fit={duration}s",
+            self.experiment_.filepath_tensorboard_command:  f"tensorboard --logdir {self.experiment_.log_dir}",
+        }
+        for filepath, fit_information in filepath_to_fit_information.items():
+            log_info(fit_information)
+            with open(filepath, 'w') as f:
+                f.write(fit_information)
+        # Save duration and tensorboard command
         return self
 
     def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
