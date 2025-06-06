@@ -63,7 +63,7 @@ def text_on_two_lines_if_too_long(text: str) -> str:
     if len(text) <= 100:
         return text
     else:
-        characters = ['+', '-']
+        characters = ['+', '-', '*']
         if any([character in text for character in characters]):
             index_plus_and_minus = [i for i, character in enumerate(text) if character in characters]
             # Remove some plus and minus indexes that may be between parenthesis (we do not want to cut there)
