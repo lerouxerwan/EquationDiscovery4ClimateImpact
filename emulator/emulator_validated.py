@@ -132,9 +132,10 @@ class EmulatorValidated(Emulator):
         X_train, y_train = get_X_and_y(X, y, validation_mask, validation_set=False)
         super()._fit(X_train, y_train, None, variable_names, X_units, y_units)
         # Set the optimal threshold for the 'custom' model selection using the validation set
-        X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
-        validation_loss_list = self.compute_loss_list(X_validation, y_validation)
-        self.threshold_for_model_selection = self.compute_optimal_threshold(self.loss_list, validation_loss_list)
+        if self.model_selection == 'custom':
+            X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
+            validation_loss_list = self.compute_loss_list(X_validation, y_validation)
+            self.threshold_for_model_selection = self.compute_optimal_threshold(self.loss_list, validation_loss_list)
         return self
 
     @staticmethod

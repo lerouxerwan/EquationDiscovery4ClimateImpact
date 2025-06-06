@@ -188,7 +188,7 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
         # Run hyperparameter search with respect to self.param_grid
         search_cv_type = search_style_to_search_cv_type[self.search_style]
         assert issubclass(search_cv_type, BaseSearchCV)
-        search_cv = search_cv_type(estimator=self.load_emulator_with_same_attributes(),
+        search_cv = search_cv_type(estimator=self.load_emulator_validated_with_same_attributes(),
                                    scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
                                    cv=get_cv(validation_mask), refit=False, return_train_score=False,
                                    n_jobs=self.n_jobs,
@@ -200,7 +200,7 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
         # Save df_cv_results to file
         self.experiment_.save_search_results(df_cv_results, get_non_default_params(self))
 
-    def load_emulator_with_same_attributes(self) -> EmulatorValidated:
+    def load_emulator_validated_with_same_attributes(self) -> EmulatorValidated:
         """Load a pysr_emulator object with the same attributes as self,
         except additional attributes that are due to inheritance"""
         estimator = EmulatorValidated()

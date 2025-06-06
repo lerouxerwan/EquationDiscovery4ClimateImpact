@@ -11,7 +11,7 @@ from data.utils_dataset.utils_validation import get_X_and_y
 
 def workflow(dataset: Dataset, params_emulator: dict[str, Any],
              params_search: Optional[dict[str, Any]] = None,
-             show: bool = False) -> EmulatorValidatedWithSearch:
+             show: bool = False, plot_folder: Optional[str] = None) -> EmulatorValidatedWithSearch:
     """Workflow that fit an emulator to a dataset and generate diagnosis plots to assess fit quality
     This workflow takes as compulsory inputs: a dataset filename & a dictionary of parameters for the emulator
     An optional input is 'params_search' which gives some argument for hyperparameter search """
@@ -27,6 +27,6 @@ def workflow(dataset: Dataset, params_emulator: dict[str, Any],
         emulator = EmulatorValidatedWithSearch(**params_emulator, **params_search)
     emulator.fit(X_train, y_train, validation_mask, X_variables_names, X_units, y_units)
     #  Generate diagnosis plot for the fit
-    plot_diagnosis(emulator, dataset, show)
+    plot_diagnosis(emulator, dataset, show, plot_folder)
     return emulator
 

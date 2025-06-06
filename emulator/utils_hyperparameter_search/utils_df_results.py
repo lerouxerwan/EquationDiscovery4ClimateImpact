@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from pysr.utils import ArrayLike
 
-from emulator.emulator import Emulator
+from emulator.emulator_validated import EmulatorValidated
 from emulator.utils_hyperparameter_search.utils_column_names import SELECTED_EXPR_COLUMN_NAME, \
     SELECTED_COMPLEXITY_COLUMN_NAME, SELECTED_FEATURE_INDEXES_COLUMN_NAME, PARAMS_EMULATOR_COLUMN_NAME, \
     RMSE_VALIDATION_COLUMN_NAME, MSE_TEST_COLUMN_NAME
@@ -15,17 +15,19 @@ def get_df_cv_results(cv_results: dict, variable_names: ArrayLike[str] | None = 
     cv_results[RMSE_VALIDATION_COLUMN_NAME] = np.sqrt(-cv_results[MSE_TEST_COLUMN_NAME])
     # Pop estimator columns
     emulators = cv_results.pop('estimator')
-    assert all([isinstance(emulator, Emulator) for emulator in emulators])
+    assert all([isinstance(emulator, EmulatorValidated) for emulator in emulators])
     #  Remove deprecated losses
     for key in ['split0_test_MSE', 'mean_test_MSE', 'std_test_MSE', 'rank_test_MSE']:
         cv_results.pop(key)
 
     # Load Dataframe from cv_results
     df_cv_results = pd.DataFrame(cv_results)
+    # Add params emulator
+    params_emulator_list = [emulator.get_params().copy() for emulator in emulators]
+    df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = params_emulator_list
     # Compute values for columns
     selected_complexity_list = [emulator.selected_complexity for emulator in emulators]
     selected_expr_list = [emulator.selected_expr for emulator in emulators]
-    params_emulator_list = [emulator.get_params().copy() for emulator in emulators]
     selected_variable_names_list = [emulator.selected_variable_names for emulator in emulators]
     selected_feature_indexes = [get_selected_feature_indexes(selected_variable_names, variable_names)
                                 for selected_variable_names in selected_variable_names_list]
@@ -33,7 +35,6 @@ def get_df_cv_results(cv_results: dict, variable_names: ArrayLike[str] | None = 
     df_cv_results[SELECTED_COMPLEXITY_COLUMN_NAME] = selected_complexity_list
     df_cv_results[SELECTED_EXPR_COLUMN_NAME] = selected_expr_list
     df_cv_results[SELECTED_FEATURE_INDEXES_COLUMN_NAME] = selected_feature_indexes
-    df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = params_emulator_list
     # Sort DataFrame by the rank
     df_cv_results = df_cv_results.sort_values(by=RMSE_VALIDATION_COLUMN_NAME)
     return df_cv_results
