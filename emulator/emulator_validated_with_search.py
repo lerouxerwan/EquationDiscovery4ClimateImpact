@@ -1,16 +1,20 @@
 import os.path as op
+from math import prod
 from typing import Literal, Callable, Optional
 
 import numpy as np
+import pandas as pd
 from pysr import AbstractExpressionSpec, AbstractLoggerSpec, PySRRegressor
 from pysr.utils import ArrayLike
 from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection._search import BaseSearchCV
 
+from emulator.utils_hyperparameter_search.utils_column_names import get_cv_results_column_name, RMSE_VAL_COLUMN_NAME, \
+    PARAMS_EMULATOR_COLUMN_NAME
+from emulator.utils_hyperparameter_search.utils_df_results import get_series
 from utils.utils_non_default_params import get_non_default_params
 from emulator.emulator_validated import EmulatorValidated
 from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs, get_cv
-from emulator.utils_hyperparameter_search.utils_df_results import get_df_cv_results
 from emulator.utils_hyperparameter_search.utils_scaling_factor import get_param_grid
 from emulator.utils_hyperparameter_search.utils_search_style import search_style_to_search_cv_type
 from utils.utils_log import log_info
@@ -158,6 +162,7 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
         assert isinstance(self.search_style, str)
         assert isinstance(self.n_iter, int) and self.n_iter > 0
         assert isinstance(self.param_grid, (dict, list))
+        assert 'model_selection' not in self.param_grid
         assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
         #  Set param grid using param_list_to_optimize if param_grid has not been specified by the user
         if not self.param_grid:
@@ -175,16 +180,24 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
         if not op.exists(self.experiment_.filepath_search_result):
             self.run_and_save_hyperparameter_search(X, y, validation_mask, variable_names, X_units, y_units)
         # Final fit with the best setting of hyperparameter on the train split
-        self.experiment_.print_search_results()
         self.set_params(**self.experiment_.best_params)
         super()._fit(X, y, validation_mask, variable_names, X_units, y_units)
         return self
+
+    @property
+    def nb_combinations(self) -> int:
+        if self.search_style == 'random':
+            return self.n_iter
+        elif self.search_style == 'grid':
+            return prod([len(grid) for grid in self.param_grid.values()])
+        else:
+            raise NotImplementedError
 
     def run_and_save_hyperparameter_search(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
                                            variable_names: ArrayLike[str] | None = None, X_units: ArrayLike[str] | None = None,
                                            y_units: str | ArrayLike[str] | None = None) -> None:
         """Run hyperparameter search and save the results as a csv"""
-        log_info(f'Start hyperparameter search with {self.n_iter} combinations, with param grid = {self.param_grid}')
+        log_info(f'Start hyperparameter search with {self.nb_combinations} combinations, with param grid = {self.param_grid}')
         # Run hyperparameter search with respect to self.param_grid
         search_cv_type = search_style_to_search_cv_type[self.search_style]
         assert issubclass(search_cv_type, BaseSearchCV)
@@ -195,10 +208,31 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
                                    **get_search_cv_kwargs(search_cv_type, self.param_grid, self.n_iter))
         search_cv.fit(X, y, validation_mask=validation_mask, variable_names=variable_names,
                       X_units=X_units, y_units=y_units)
-        #  Transform cv_results into a Dataframe sorted by ranking with additional columns
-        df_cv_results = get_df_cv_results(search_cv.cv_results_, variable_names)
+        # Transform cv_results into a Dataframe sorted by ranking with additional columns
+        df_cv_results = self.get_df_cv_results(search_cv.cv_results_, X, y, validation_mask, variable_names)
         # Save df_cv_results to file
         self.experiment_.save_search_results(df_cv_results, get_non_default_params(self))
+
+
+    def get_df_cv_results(self, cv_results: dict, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+                          variable_names: ArrayLike[str] | None = None) -> pd.DataFrame:
+        # Pop estimator columns from cv_results dict
+        emulators = cv_results.pop('estimator')
+        assert all([isinstance(emulator, EmulatorValidated) for emulator in emulators])
+        # Load Dataframe from cv_results
+        df_cv_results = pd.DataFrame(cv_results)
+        # Add params emulator
+        params_emulator_list = [emulator.get_params().copy() for emulator in emulators]
+        df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = params_emulator_list
+        #  Add columns for the selected equations for each model_selection
+        for model_selection in ['best', 'custom']:
+            data = [get_series(model_selection, emulator, X, y, validation_mask, variable_names) for emulator in emulators]
+            df_model_selection = pd.DataFrame(index=df_cv_results.index, data=data)
+            df_cv_results = pd.concat([df_cv_results, df_model_selection], axis=1)
+        # Sort df_cv_results by their predictive performance on the validation set for self.model_selection
+        column_name_for_sorting = get_cv_results_column_name(self.model_selection, RMSE_VAL_COLUMN_NAME)
+        df_cv_results = df_cv_results.sort_values(by=column_name_for_sorting)
+        return df_cv_results
 
     def load_emulator_validated_with_same_attributes(self) -> EmulatorValidated:
         """Load a pysr_emulator object with the same attributes as self,

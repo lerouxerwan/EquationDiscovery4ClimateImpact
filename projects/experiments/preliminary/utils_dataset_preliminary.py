@@ -20,4 +20,3 @@ def get_dataset_preliminary_test():
 
 if __name__ == '__main__':
     dataset = get_dataset_preliminary_test()
-    workflow(dataset, {'niterations': 2}, {'n_iter': 2})

@@ -263,11 +263,14 @@ class Emulator(PySRRegressor):
 
     def compute_loss_list(self, X: np.ndarray, y: np.ndarray) -> list[float]:
         """Compute a list of loss: one loss for every equation of the Pareto optimal set of equations"""
+        return [self._compute_loss(y, y_predicted, self.metric) for y_predicted in self.compute_y_predicted_list(X)]
+
+    @property
+    def metric(self) -> Metric:
         if self.loss_function is None:
-            metric = Metric.MSE
+            return Metric.MSE
         else:
             raise NotImplementedError('this loss function does not have a corresponding metric')
-        return [self._compute_loss(y, y_predicted, metric) for y_predicted in self.compute_y_predicted_list(X)]
 
     def compute_loss_list_other_metric(self, X: np.ndarray, y: np.ndarray, metric: Metric) -> list[float]:
         """Compute a list of loss: one loss for every equation of the Pareto optimal set of equations"""
@@ -281,6 +284,9 @@ class Emulator(PySRRegressor):
             return loss_function(y_true=y_true, y_pred=y_predicted)
         except ValueError:
             return  np.nan
+
+    def compute_loss(self, X: np.ndarray, y: np.ndarray, metric: Metric) -> float:
+        return self._compute_loss(y, self.predict(X), metric)
 
     def compute_y_predicted_list(self, X: np.ndarray) -> list[np.ndarray]:
         """Compute predicted vector for every equation of the Pareto front"""

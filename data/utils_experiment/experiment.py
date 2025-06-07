@@ -8,13 +8,12 @@ from typing import Optional, Any
 
 import pandas as pd
 from pysr import TensorBoardLoggerSpec
-from sympy import Expr
 
 from data.utils_experiment.utils_experiment import string_to_list_int
 from data.utils_experiment.utils_experiment_path import CSV_FILENAME, \
     JSON_FILENAME, CHILDREN_FILENAME, PARENT_FILENAME
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
-    SELECTED_FEATURE_INDEXES_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME
+    get_cv_results_column_name, RMSE_VAL_COLUMN_NAME, FEATURE_INDEXES_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -60,7 +59,9 @@ class Experiment(object):
     def df_cv_results(self) -> pd.DataFrame:
         df_cv_results = pd.read_csv(self.filepath_search_result, index_col=0)
         df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].apply(string_to_dict)
-        df_cv_results[SELECTED_FEATURE_INDEXES_COLUMN_NAME] = df_cv_results[SELECTED_FEATURE_INDEXES_COLUMN_NAME].apply(string_to_list_int)
+        for model_selection in ['best', 'custom']:
+            column_name = get_cv_results_column_name(model_selection, FEATURE_INDEXES_COLUMN_NAME)
+            df_cv_results[column_name] = df_cv_results[column_name].apply(string_to_list_int)
         return df_cv_results
 
     @cached_property
@@ -71,18 +72,10 @@ class Experiment(object):
     @property
     def best_params(self) -> dict[str, Any]:
         return self.best_series.loc[PARAMS_EMULATOR_COLUMN_NAME]
-    
-    @property
-    def best_expr(self) -> Expr:
-        return self.best_series.loc["selected_expr"]
-
-    @property
-    def best_complexity(self) -> int:
-        return self.best_series.loc["selected_complexity"]
 
     @property
     def best_rmse_validation(self) -> float:
-        return self.best_series.loc[RMSE_VALIDATION_COLUMN_NAME]
+        return self.best_series.loc[get_cv_results_column_name('best', RMSE_VAL_COLUMN_NAME)]
 
     def save_search_results(self, df_cv_results: pd.DataFrame, non_default_params: dict[str, Any]) -> None:
         log_info('Save search results to files')
@@ -98,12 +91,6 @@ class Experiment(object):
                                      if isinstance(param_value, (int, float))]
         return list(combinations(param_names_in_param_grid, nb_elements))
 
-    def print_search_results(self):
-        log_info(f'Best params/results from the hyperparameter search:\n')
-        s = (f' RMSE Validation={round(self.best_rmse_validation, 3)} with equation of complexity {self.best_complexity}: {self.best_expr}\n '
-                f'using the hyperparameters: {self.best_params}\n'
-                f'experiment_path: {self.experiment_path}')
-        log_info(s)
 
     """Tensorboard Logging"""
 

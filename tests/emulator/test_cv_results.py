@@ -1,8 +1,9 @@
 import numpy as np
 
 from emulator.emulator_validated_with_search import EmulatorValidatedWithSearch
-from emulator.utils_hyperparameter_search.utils_column_names import SELECTED_COMPLEXITY_COLUMN_NAME, \
-    RMSE_VALIDATION_COLUMN_NAME, PARAMS_EMULATOR_COLUMN_NAME, SELECTED_FEATURE_INDEXES_COLUMN_NAME
+from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
+    get_cv_results_column_name, COMPLEXITY_COLUMN_NAME, FEATURE_INDEXES_COLUMN_NAME, \
+    RMSE_VAL_COLUMN_NAME
 from emulator.utils_hyperparameter_search.utils_df_results import get_selected_feature_indexes
 from tests.emulator.utils_tests_emulator import run_three_main_functions_with_one_feature
 
@@ -16,11 +17,11 @@ def test_cv_results():
     df = emulator.experiment_.df_cv_results
     assert len(df) == n_iter
     # Check the best selected complexity
-    assert df[SELECTED_COMPLEXITY_COLUMN_NAME].values[0] == 9
+    assert df[get_cv_results_column_name(emulator.model_selection, COMPLEXITY_COLUMN_NAME)].values[0] == 9
     # Check the selected feature indexes
-    assert df[SELECTED_FEATURE_INDEXES_COLUMN_NAME].values[0] == [0]
+    assert df[get_cv_results_column_name(emulator.model_selection, FEATURE_INDEXES_COLUMN_NAME)].values[0] == [0]
     # Check that it is well ranked
-    validation_rmse_sorted_values = df[RMSE_VALIDATION_COLUMN_NAME].values
+    validation_rmse_sorted_values = df[get_cv_results_column_name(emulator.model_selection, RMSE_VAL_COLUMN_NAME)].values
     for rmse1, rmse2 in zip(validation_rmse_sorted_values[:-1], validation_rmse_sorted_values[1:]):
         if not np.isnan(rmse2):
             assert rmse1 <= rmse2

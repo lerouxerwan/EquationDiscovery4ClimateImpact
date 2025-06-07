@@ -7,6 +7,7 @@ from pysr.utils import ArrayLike
 
 from data.utils_dataset.utils_validation import get_X_and_y
 from emulator.emulator import Emulator
+from plot.utils_metric.metric import Metric
 
 
 class EmulatorValidated(Emulator):
@@ -136,7 +137,7 @@ class EmulatorValidated(Emulator):
             self.set_threshold_for_custom_model_selection(X, y, validation_mask)
         return self
 
-    def set_threshold_for_custom_model_selection(self, X, y, validation_mask):
+    def set_threshold_for_custom_model_selection(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> None:
         X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
         validation_loss_list = self.compute_loss_list(X_validation, y_validation)
         self.threshold_for_model_selection = self.compute_optimal_threshold(self.loss_list, validation_loss_list)
@@ -156,6 +157,10 @@ class EmulatorValidated(Emulator):
         scaling = 10 ** nb_digits_for_upper_rounding
         optimal_threshold = float(math.ceil(optimal_threshold * scaling)) / scaling
         return optimal_threshold
+    
+    def compute_loss_for_train_or_validation_set(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool], validation_set: bool, metric: Metric) -> float:
+        return self.compute_loss(*get_X_and_y(X, y, validation_mask, validation_set), metric=metric)
+
 
 
 
