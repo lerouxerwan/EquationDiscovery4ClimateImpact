@@ -10,6 +10,8 @@ CSV_FILENAME = 'cv_results.csv'
 JSON_FILENAME = 'params_emulator.json'
 CHILDREN_FILENAME = 'children.txt'
 PARENT_FILENAME = 'parent.txt'
+SYMBOLIC_LINK_FILENAME = 'plot_path'
+
 
 def get_experiment_path(X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]], non_default_params: dict) -> str:
     """Tree structure of the experiment_path is as follows: dataset_dir/emulator_folder"""

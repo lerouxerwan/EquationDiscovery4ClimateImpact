@@ -11,7 +11,7 @@ from pysr import TensorBoardLoggerSpec
 
 from data.utils_experiment.utils_experiment import string_to_list_int
 from data.utils_experiment.utils_experiment_path import CSV_FILENAME, \
-    JSON_FILENAME, CHILDREN_FILENAME, PARENT_FILENAME
+    JSON_FILENAME, CHILDREN_FILENAME, PARENT_FILENAME, SYMBOLIC_LINK_FILENAME
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
     get_cv_results_column_name, RMSE_VAL_COLUMN_NAME, FEATURE_INDEXES_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
@@ -29,31 +29,6 @@ class Experiment(object):
             os.makedirs(self.experiment_path)
 
     """Search cv results"""
-
-    @property
-    def filepath_search_result(self) -> str:
-        return op.join(self.experiment_path, CSV_FILENAME)
-
-    @property
-    def filepath_non_default_params(self) -> str:
-        return op.join(self.experiment_path, JSON_FILENAME)
-
-    @property
-    def filepath_children(self) -> str:
-        return op.join(self.experiment_path, CHILDREN_FILENAME)
-
-    @property
-    def filepath_parent(self) -> str:
-        return op.join(self.experiment_path, PARENT_FILENAME)
-
-    @property
-    def filepath_duration(self) -> str:
-        return op.join(self.experiment_path, 'duration.txt')
-
-    @property
-    def filepath_symbolic_link(self) -> str:
-        return op.join(self.experiment_path, 'plot_path')
-
 
     @property
     def df_cv_results(self) -> pd.DataFrame:
@@ -91,16 +66,57 @@ class Experiment(object):
                                      if isinstance(param_value, (int, float))]
         return list(combinations(param_names_in_param_grid, nb_elements))
 
-
-    """Tensorboard Logging"""
+    """Filepaths"""
 
     @property
-    def filepath_tensorboard_command(self) -> str:
-        return op.join(self.experiment_path, 'tensorboard_command.txt')
+    def filepath_search_result(self) -> str:
+        return op.join(self.experiment_path, CSV_FILENAME)
+
+    @property
+    def filepath_non_default_params(self) -> str:
+        return op.join(self.experiment_path, JSON_FILENAME)
+
+    @property
+    def filepath_children(self) -> str:
+        return op.join(self.experiment_path, CHILDREN_FILENAME)
+
+    @property
+    def filepath_parent(self) -> str:
+        return op.join(self.experiment_path, PARENT_FILENAME)
+
+    @property
+    def filepath_symbolic_link(self) -> str:
+        return op.join(self.experiment_path, SYMBOLIC_LINK_FILENAME)
+
+    """Fit information"""
+
+    def print_and_save_fit_information(self, duration: str) -> None:
+        log_info(f"Experiment path={self.experiment_path}")
+        #  Print and save fit information to file (for the duration & the tensorboard command)
+        filepath_to_fit_information = {
+            self.filepath_duration: f"duration for the fit={duration}",
+            self.filepath_tensorboard_command: f"tensorboard --logdir {self.log_dir}",
+        }
+        for filepath, fit_information in filepath_to_fit_information.items():
+            log_info(fit_information)
+            with open(filepath, 'w') as f:
+                f.write(fit_information)
+
+    @property
+    def filepath_duration(self) -> str:
+        return op.join(self.experiment_path, 'duration.txt')
 
     @property
     def log_dir(self) -> str:
         return op.join(self.experiment_path, 'logs')
+
+    @property
+    def tensorboard_command(self) -> str:
+        return f"tensorboard --logdir {self.log_dir}"
+
+    @property
+    def filepath_tensorboard_command(self) -> str:
+        return op.join(self.experiment_path, 'tensorboard_command.txt')
 
     def get_logger_spec(self, log_interval: int = 1) -> Optional[TensorBoardLoggerSpec]:
         """Create a logger only if the log has not yet been saved"""

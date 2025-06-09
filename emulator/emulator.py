@@ -200,22 +200,13 @@ class Emulator(PySRRegressor):
         assert isinstance(validation_mask, np.ndarray) or validation_mask is None
         # Initialize self.experiment_ which defines an 'experiment path' where results/TensorBoard logs can be saved
         self.experiment_ = Experiment(get_experiment_path(X, y, validation_mask, get_non_default_params(self)))
-        log_info(f"Experiment path={self.experiment_.experiment_path}")
-        # Run self._fit method, which can be overridden in child classes
+        # Run self._fit method, which can be overridden in child classes, and compute its duration
         start_time = time.monotonic()
         self._fit(X, y, validation_mask, variable_names, X_units, y_units)
         end_time = time.monotonic()
         duration = str(timedelta(seconds=end_time - start_time))
-        # Print and save fit information to file (for the duration & the tensorboard command)
-        filepath_to_fit_information = {
-            self.experiment_.filepath_duration: f"duration for the fit={duration}",
-            self.experiment_.filepath_tensorboard_command:  f"tensorboard --logdir {self.experiment_.log_dir}",
-        }
-        for filepath, fit_information in filepath_to_fit_information.items():
-            log_info(fit_information)
-            with open(filepath, 'w') as f:
-                f.write(fit_information)
-        # Save duration and tensorboard command
+        # Save duration and tensorboard command to file
+        self.experiment_.print_and_save_fit_information(duration)
         return self
 
     def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
