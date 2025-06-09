@@ -5,7 +5,7 @@ from matplotlib.scale import FuncScale
 
 from emulator.emulator import Emulator
 from plot.utils_metric.metric import Metric
-from plot.by_split.utils_axis import custom_functions_for_yaxis
+from plot.by_split.utils_axis import functions_for_yaxis
 from plot.by_split.utils_equation_str import get_equation_str
 from utils.utils_plot import show_or_save_plot
 
@@ -28,7 +28,7 @@ def plot_pareto_front_example(emulator: Emulator, X: np.ndarray, y: np.ndarray,
     # xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True).replace('x0', 'x')
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     # Add y-axis with special scaling
-    set_custom_y_axis_example(ax, loss_list, target_label, metric)
+    set_log_y_axis_example(ax, loss_list, target_label, metric)
     # General settings for the plot
     # ax.legend(loc='upper right')
     show_or_save_plot(f'pareto_front_example', show)
@@ -43,9 +43,9 @@ def set_x_axis_example(ax: Axes, x_ticks: list[int]):
     ax_twin.set_xlabel('Complexity c(f)')
 
 
-def set_custom_y_axis_example(ax: Axes, loss_list: list[float], target_label: str, metric: Metric):
+def set_log_y_axis_example(ax: Axes, loss_list: list[float], target_label: str, metric: Metric):
     """Scale y-axis with a log scale for large values then a linear scale for smaller values"""
-    ax.set_yscale(FuncScale(ax.yaxis, custom_functions_for_yaxis(3.1)))
+    ax.set_yscale(FuncScale(ax.yaxis, functions_for_yaxis(3.1)))
     small_ticks = [0., 1.0, 2.0, 3.0]
     large_ticks = [t * 10 for t in [1, 10, 100, 1000, 10000, 100000, 1_000_000][::2] if t < max(loss_list)]
     y_ticks = small_ticks + large_ticks

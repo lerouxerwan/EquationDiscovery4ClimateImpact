@@ -47,7 +47,7 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
             Hyperparameter are sampled in [default_value / scaling_factor, default * scaling_factor]
             Default is 10"""
 
-    def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "custom", *,
+    def __init__(self, model_selection: Literal["best", "accuracy", "score", "validated"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
                  expression_spec: AbstractExpressionSpec | None = None, niterations: int = 100, populations: int = 31,
                  population_size: int = 27, max_evals: int | None = None, maxsize: int = 30,

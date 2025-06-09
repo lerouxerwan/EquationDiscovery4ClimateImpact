@@ -17,7 +17,7 @@ def compute_df_cv_results(cv_results: dict, X: np.ndarray, y: np.ndarray, valida
     params_emulator_list = [emulator.get_params().copy() for emulator in emulators]
     df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = params_emulator_list
     #  Add columns for the selected equations for each model_selection
-    for model_selection in ['best', 'custom']:
+    for model_selection in ['best', 'validated']:
         data = [get_series(model_selection, emulator, X, y, validation_mask) for emulator in emulators]
         df_model_selection = pd.DataFrame(index=df_cv_results.index, data=data)
         df_cv_results = pd.concat([df_cv_results, df_model_selection], axis=1)
@@ -33,8 +33,8 @@ def get_series(model_selection: str, emulator: EmulatorValidated, X: np.ndarray,
     emulator.model_selection = model_selection
     if model_selection == 'best':
         emulator.threshold_for_model_selection = 1.5
-    elif model_selection == 'custom':
-        emulator.set_threshold_for_custom_model_selection(X, y, validation_mask)
+    elif model_selection == 'validated':
+        emulator.set_threshold_for_model_selection_validated(X, y, validation_mask)
     else:
         raise NotImplementedError
     series = _get_series(model_selection, emulator, X, y, validation_mask)
@@ -46,8 +46,8 @@ def get_series(model_selection: str, emulator: EmulatorValidated, X: np.ndarray,
 def _get_series(model_selection: str, emulator: EmulatorValidated, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.Series:
     """For each model selection, compute RMSE train, RMSE val, selected complexity/expr/features/variables names"""
     # Compute data
-    rmse_train = emulator.compute_loss_for_train_or_validation_set(X, y, validation_mask, False, Metric.RMSE)
-    rmse_validation = emulator.compute_loss_for_train_or_validation_set(X, y, validation_mask, True, Metric.RMSE)
+    rmse_train = emulator.compute_loss_for_set(X, y, validation_mask, False, Metric.RMSE)
+    rmse_validation = emulator.compute_loss_for_set(X, y, validation_mask, True, Metric.RMSE)
     data = [rmse_train, rmse_validation, emulator.selected_complexity, emulator.selected_expr,
             emulator.selected_variable_names]
     # Return Series

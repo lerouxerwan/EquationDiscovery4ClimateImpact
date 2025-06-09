@@ -19,12 +19,12 @@ def set_x_axis(ax: Axes, x_ticks: list[int]):
     ax_twin.set_xlabel('Complexity')
 
 
-def set_custom_y_axis(ax: Axes, loss_list: list[float], target_label: str, metric: Metric):
+def set_log_y_axis(ax: Axes, loss_list: list[float], target_label: str, metric: Metric):
     """Scale y-axis with a log scale for large values then a linear scale for smaller values"""
     threshold = 2.0 * min(loss_list)
     y_ticks = [float(t) / 10 for t in range(math.floor(10 * min(loss_list)), math.ceil(10 * threshold))][::2]
     if max(loss_list) > threshold:
-        ax.set_yscale(FuncScale(ax.yaxis, custom_functions_for_yaxis(threshold)))
+        ax.set_yscale(FuncScale(ax.yaxis, functions_for_yaxis(threshold)))
         large_ticks = [t * 10 for t in [1, 10, 100, 1000, 10000, 100000] if t < max(loss_list)]
         y_ticks += large_ticks
     ax.set_yticks(y_ticks)
@@ -36,8 +36,8 @@ def set_ylabel_with_metric(ax, metric, target_label):
     ax.set_ylabel(f'{metric_to_label[metric]} {get_unit(target_label)}')
 
 
-def custom_functions_for_yaxis(threshold: float) -> tuple[Callable, Callable]:
-    """Create custom functions for scaling axis: a log scale above a threshold, a linear scale below the threshold"""
+def functions_for_yaxis(threshold: float) -> tuple[Callable, Callable]:
+    """Create functions for scaling axis: a log scale above a threshold, a linear scale below the threshold"""
 
     scale = 0.05
 

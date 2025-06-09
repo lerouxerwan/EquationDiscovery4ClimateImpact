@@ -23,7 +23,7 @@ def compute_axis_lim(values: np.ndarray) -> tuple[float, float]:
     return lower_lim - delta, upper_lim + delta
 
 
-def subplots_custom(nrows, ncols, sharex=False, sharey=False, hspace=None, wspace=None):
+def get_subplots(nrows, ncols, sharex=False, sharey=False, hspace=None, wspace=None):
     default_figsize = (6.4, 4.8)
     adjusted_figsize = (default_figsize[0] * ncols, default_figsize[1] * nrows)
     fig = plt.figure(figsize=adjusted_figsize)

@@ -20,7 +20,7 @@ def plot_diagnosis_search_1d(experiment: Experiment, param_grid: dict[str, list]
     for param_name in param_grid.keys():
         ax = plt.gca()
         params_values = [params[param_name] for params in params_list]
-        for model_selection in ['best', 'custom']:
+        for model_selection in ['best', 'validated']:
             _plot_search_1d(ax, experiment.df_cv_results, params_values, model_selection)
         ax.set_xlabel(' '.join([w.capitalize() for w in param_name.split('_')]))
         set_ylabel_with_metric(ax, Metric.RMSE, target_label)

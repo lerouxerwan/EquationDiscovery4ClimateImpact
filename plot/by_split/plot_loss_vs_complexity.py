@@ -6,7 +6,7 @@ import numpy as np
 from data.utils_dataset.dataset import Dataset
 from emulator.emulator import Emulator
 from plot.utils_metric.metric import Metric
-from plot.by_split.utils_axis import set_custom_y_axis, set_x_axis
+from plot.by_split.utils_axis import set_log_y_axis, set_x_axis
 from plot.by_split.utils_plot_by_split import load_split_name_to_X_and_y
 from plot.by_split.utils_equation_str import get_equation_str
 from plot.by_split.utils_plot_split_name import SPLIT_NAMES, split_name_to_color, \
@@ -51,7 +51,7 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
     xticklabels = [get_equation_str(expr) for expr in emulator.expr_list]
     xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True)
     # Add y-axis with special scaling
-    set_custom_y_axis(ax, all_loss_list, dataset.target_label, metric)
+    set_log_y_axis(ax, all_loss_list, dataset.target_label, metric)
     # Potentially add detailed plots
     if detailed_plot:
         add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width)

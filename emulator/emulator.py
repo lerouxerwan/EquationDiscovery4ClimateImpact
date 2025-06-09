@@ -26,9 +26,13 @@ class Emulator(PySRRegressor):
         experiment_: Experiment
             it defines an 'experiment path', depending on 'fit' inputs, where results/TensorBoard logs can be saved
 
+    -> additional parameter value:
+        model_selection: str
+        it can be set to the PySR model selections ("best", "accuracy", "score") or to a new model_selection "validated"
+
     -> additional parameter:
         threshold_for_model_selection : float
-            Threshold to select the best equation with some model selection ('best' and 'custom')
+            Threshold to select the best equation with some model selection ('best' and 'validated')
             this threshold must be larger or equal to 1
             Default is 1.5 (as specified in PySR).
 
@@ -51,7 +55,7 @@ class Emulator(PySRRegressor):
         -logger_spec set to True (in this case, in the fit function, a more specific logger will be set)"""
     experiment_: Optional[Experiment]
 
-    def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "best", *,
+    def __init__(self, model_selection: Literal["best", "accuracy", "score", "validated"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
                  expression_spec: AbstractExpressionSpec | None = None, niterations: int = 100, populations: int = 31,
                  population_size: int = 27, max_evals: int | None = None, maxsize: int = 30,
@@ -334,9 +338,9 @@ class Emulator(PySRRegressor):
     def get_best(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
         """Compute a Series (or list of Series) representing the selected equations (complexity, loss, ...)
          If index=None, then the equation is selected using self.model_selection"""
-        if (index is None) and (self.model_selection in ["best", "custom"]):
+        if (index is None) and (self.model_selection in ["best", "validated"]):
             column = "score" if self.model_selection == "best" else "loss"
-            # Select the index with the maximum score (for 'best') ir with maximum train loss (for 'custom')
+            # Select the index with the maximum score (for 'best') or with maximum train loss (for 'validated')
             index = self.filtered_equations[column].idxmax()
         return super().get_best(index)
 
@@ -352,7 +356,7 @@ class Emulator(PySRRegressor):
 
     def __repr__(self) -> str:
         """If we do not override this method, then the __repr__ method from PySR fails
-        because it does not handle model_selection='custom'"""
+        because it does not handle model_selection='validated'"""
         pass
 
 

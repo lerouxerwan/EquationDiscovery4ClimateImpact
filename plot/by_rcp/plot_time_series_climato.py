@@ -38,7 +38,7 @@ def _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_col
             years_average, std_values = plot_average_value(ax, color, values, dates, window_size, plot_std)
             rcp_name_to_years_and_std_values_and_color[rcp_name] = (years_average, std_values, color)
         all_dates.append(dates)
-    #  Set custom X-axis
+    #  Set X-axis
     xmin = int(math.floor(np.min(np.concat(all_dates)) / 10.0)) * 10
     xmax = int(math.ceil(np.max(np.concat(all_dates)) / 10.0)) * 10
     ax.set_xlim(xmin, xmax)

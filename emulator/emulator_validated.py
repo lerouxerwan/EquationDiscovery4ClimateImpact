@@ -14,15 +14,15 @@ class EmulatorValidated(Emulator):
     """EmulatorValidated is an extension of Emulator that:
         -split the training/fit data X and y between a train and validation set
         -fit the emulator on the train set
-        -optimize the 'threshold_for_model_selection' parameter so that 'custom' model_selection
-        always selects the equation minimizing validation error
+        -for the 'validated' model_selection ,we optimize the 'threshold_for_model_selection' parameter so that
+        the equation minimizing validation error is selected
 
     -> additional parameters:
         validation_size: float
             represent the proportion (between 0 and 1) of data to include in the validation split.
             Default is 0.3"""
 
-    def __init__(self, model_selection: Literal["best", "accuracy", "score", "custom"] = "custom", *,
+    def __init__(self, model_selection: Literal["best", "accuracy", "score", "validated"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
                  expression_spec: AbstractExpressionSpec | None = None, niterations: int = 100, populations: int = 31,
                  population_size: int = 27, max_evals: int | None = None, maxsize: int = 30,
@@ -132,12 +132,12 @@ class EmulatorValidated(Emulator):
         # Fit on the train set
         X_train, y_train = get_X_and_y(X, y, validation_mask, validation_set=False)
         super()._fit(X_train, y_train, None, variable_names, X_units, y_units)
-        # Set the optimal threshold for the 'custom' model selection using the validation set
-        if self.model_selection == 'custom':
-            self.set_threshold_for_custom_model_selection(X, y, validation_mask)
+        # Set the optimal threshold for the 'validated' model selection using the validation set
+        if self.model_selection == 'validated':
+            self.set_threshold_for_model_selection_validated(X, y, validation_mask)
         return self
 
-    def set_threshold_for_custom_model_selection(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> None:
+    def set_threshold_for_model_selection_validated(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> None:
         X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
         validation_loss_list = self.compute_loss_list(X_validation, y_validation)
         self.threshold_for_model_selection = self.compute_optimal_threshold(self.loss_list, validation_loss_list)
@@ -150,7 +150,7 @@ class EmulatorValidated(Emulator):
         train_loss_for_optimal_equation = train_loss_list[index_validation_loss_min]
         optimal_threshold = train_loss_for_optimal_equation / train_loss_min
         #  Round above (with the ceiling function) the threshold above some digits:
-        # This is done to avoid issues for the custom selection
+        # This is done to avoid issues for the model selection "validated"
         # Otherwise due to rounding in the multiplication operation, the correct equation was sometimes not selected
         #  (because its loss value was just above min_loss_value * threshold, due to small roundings)
         nb_digits_for_upper_rounding = 10
@@ -158,7 +158,7 @@ class EmulatorValidated(Emulator):
         optimal_threshold = float(math.ceil(optimal_threshold * scaling)) / scaling
         return optimal_threshold
     
-    def compute_loss_for_train_or_validation_set(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool], validation_set: bool, metric: Metric) -> float:
+    def compute_loss_for_set(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool], validation_set: bool, metric: Metric) -> float:
         return self.compute_loss(*get_X_and_y(X, y, validation_mask, validation_set), metric=metric)
 
 

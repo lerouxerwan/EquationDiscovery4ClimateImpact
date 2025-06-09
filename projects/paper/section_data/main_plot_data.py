@@ -2,12 +2,12 @@ from matplotlib import pyplot as plt
 
 from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
 from plot.dataset.plot_dataset import plot_values_feature, plot_values_target, plot_values
-from utils.utils_plot import subplots_custom, show_or_save_plot
+from utils.utils_plot import get_subplots, show_or_save_plot
 
 
 def main_plot_data(show=False):
     # Load axis and dataset
-    fig, (ax1, ax2) = subplots_custom(1, 2, wspace=0.15)
+    fig, (ax1, ax2) = get_subplots(1, 2, wspace=0.15)
     dataset =  dataset_npp_season_v1
 
     # Add two plots
