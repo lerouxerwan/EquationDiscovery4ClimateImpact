@@ -1,14 +1,15 @@
+import math
 import time
 from datetime import timedelta
 from typing import Literal, Callable, Optional
 
 import numpy as np
 import pandas as pd
-from numpy import ndarray
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
 from pysr.utils import ArrayLike
 from sympy import Expr, Symbol
 
+from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_experiment.experiment import Experiment
 from data.utils_experiment.utils_experiment_path import get_experiment_path
 from emulator.utils_potential_contributions.utils_data_augmentation import apply_data_augmentation
@@ -20,15 +21,18 @@ from utils.utils_run import random_seed
 
 
 class Emulator(PySRRegressor):
-    """Emulator is a variant of PySRRegressor with some:
+    """Emulator is a variant of PySRRegressor.
+
+    The fit method has an additional parameter: 'validation_mask' (validation_mask[i] if i in the  validation set)
+    'validation_mask' makes it possible to split the fit data X and y between a train and validation set
+        -on the train set, the emulator is fitted
+        -on the validation set, the parameter 'threshold_for_model_selection' parameter is optimized for the
+        novel model_selection 'validated'. This model selection selects the equation minimizing validation error
+    By default, Emulator behaves like PySR: 'validation_mask' is set to None, and 'model_selection' is set to 'best'
 
     -> additional attribute:
         experiment_: Experiment
             it defines an 'experiment path', depending on 'fit' inputs, where results/TensorBoard logs can be saved
-
-    -> additional parameter value:
-        model_selection: str
-        it can be set to the PySR model selections ("best", "accuracy", "score") or to a new model_selection "validated"
 
     -> additional parameter:
         threshold_for_model_selection : float
@@ -99,8 +103,9 @@ class Emulator(PySRRegressor):
                  extra_torch_mappings: dict[Callable, Callable] | None = None,
                  extra_jax_mappings: dict[Callable, str] | None = None, denoise: bool = False,
                  select_k_features: int | None = None,
-                 # Additional attributes
+                 # Additional parameters
                  threshold_for_model_selection: float = 1.5,
+                 # Additional parameters for potential contributions (which are deactivated by default)
                  data_augmentation_ratio: int = 1,
                  data_augmentation_sigma: float = 1.0,
                  weighted_loss_ratio: float = 1.0,
@@ -186,6 +191,10 @@ class Emulator(PySRRegressor):
             -only handles np.ndarray as input for X and y
             -does not handle additional parameters of PySR (weights, Xresampled, ...)
 
+        If validation_mask is not None, we fit the emulator on the train set (X_train_train, y_train_train)
+
+        If self.model_selection is 'validated', we optimize the 'threshold_for_model_selection' on the validation set
+
         Parameters
         ----------
         X : ndarray, Training data of shape (n_samples, n_features).
@@ -225,8 +234,6 @@ class Emulator(PySRRegressor):
         Parameters & Results
         ----------
         Same as the self.fit method"""
-        # Some check
-        assert validation_mask is None
         # Potential preprocessing (data augmentation, weights computing) before the fit that are deactivate by default
         # Apply data augmentation
         if self.data_augmentation_ratio > 1:
@@ -239,21 +246,53 @@ class Emulator(PySRRegressor):
         logging = self.logger_spec is True
         if logging:
             self.logger_spec = self.experiment_.get_logger_spec(log_interval=1 * self.populations)
-        super().fit(X, y, weights=weights, variable_names=variable_names, X_units=X_units, y_units=y_units)
+        # Fit on the train set
+        if validation_mask is None:
+            X_fit, y_fit = X, y
+        else:
+            X_fit, y_fit = get_X_and_y(X, y, validation_mask, validation_set=False)
+        super().fit(X_fit, y_fit, weights=weights, variable_names=variable_names, X_units=X_units, y_units=y_units)
+
         if logging:
             self.logger_spec = True
         # Update the 'loss' column in the self.equations_ dataframe
         # because it is sometimes not consistent with the predict method)
         # See https://github.com/MilesCranmer/PySR/discussions/943 for more details on this issue
-        loss_list = self.compute_loss_list(X, y)
+        loss_list = self.compute_loss_list(X_fit, y_fit)
         self.equations_['loss'] = loss_list
         pareto_indexes = [True] + [loss_list[i] < min(loss_list[:i]) for i in range(1, len(loss_list))]
         self.equations_ = self.equations_.loc[pd.Series(pareto_indexes, index=self.equations_.index)]
         self.equations_ = self.equations_.reset_index(drop=True)
+        # Set the optimal threshold for the 'validated' model selection using the validation set
+        if self.model_selection == 'validated':
+            self.set_threshold_for_model_selection_validated(X, y, validation_mask)
         return self
 
-    def predict(self, X: np.ndarray, index: int | list[int] | None = None) -> ndarray:
-        return super().predict(X, index)
+    def set_threshold_for_model_selection_validated(self, X: np.ndarray, y: np.ndarray,
+                                                    validation_mask: np.ndarray[bool]) -> None:
+        X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
+        validation_loss_list = self.compute_loss_list(X_validation, y_validation)
+        self.threshold_for_model_selection = self.compute_optimal_threshold(self.loss_list, validation_loss_list)
+
+    @staticmethod
+    def compute_optimal_threshold(train_loss_list: list[float], validation_loss_list: list[float]) -> float:
+        #  Compute the threshold with maximum precision
+        train_loss_min = min(train_loss_list)
+        index_validation_loss_min = np.nanargmin(validation_loss_list)
+        train_loss_for_optimal_equation = train_loss_list[index_validation_loss_min]
+        optimal_threshold = train_loss_for_optimal_equation / train_loss_min
+        #  Round above (with the ceiling function) the threshold above some digits:
+        # This is done to avoid issues for the model selection "validated"
+        # Otherwise due to rounding in the multiplication operation, the correct equation was sometimes not selected
+        #  (because its loss value was just above min_loss_value * threshold, due to small roundings)
+        nb_digits_for_upper_rounding = 10
+        scaling = 10 ** nb_digits_for_upper_rounding
+        optimal_threshold = float(math.ceil(optimal_threshold * scaling)) / scaling
+        return optimal_threshold
+
+    def compute_loss_for_set(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+                             validation_set: bool, metric: Metric) -> float:
+        return self.compute_loss(*get_X_and_y(X, y, validation_mask, validation_set), metric=metric)
 
     """Method to compute loss"""
 

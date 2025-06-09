@@ -7,7 +7,7 @@ import pandas as pd
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit
-from emulator.emulator_validated_with_search import EmulatorValidatedWithSearch
+from emulator.emulator_with_search import EmulatorWithSearch
 from plot.utils_plot import plot_diagnosis
 from projects.experiments.feature_dataset.utils_feature_dataset import get_feature_datasets
 from projects.utils_params import get_params_search, get_params_emulator
@@ -101,7 +101,7 @@ def compute_dataframes(validation_split, niter) -> tuple[pd.DataFrame, pd.DataFr
     return df_true, df_predict, df_infos
 
 def get_res(dataset, params_emulator, params_search, folder:str):
-    emulator = EmulatorValidatedWithSearch(**params_emulator, **params_search)
+    emulator = EmulatorWithSearch(**params_emulator, **params_search)
     emulator.fit(dataset.X_train, dataset.y_train, variable_names=dataset.X_variables_names, X_units=dataset.X_units,
                  y_units=dataset.y_units, validation_mask=dataset.validation_mask)
     y_test_predict = emulator.predict(dataset.X_test)

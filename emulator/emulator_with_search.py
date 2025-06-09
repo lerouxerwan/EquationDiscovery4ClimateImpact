@@ -8,7 +8,7 @@ from pysr.utils import ArrayLike
 from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection._search import BaseSearchCV
 
-from emulator.emulator_validated import EmulatorValidated
+from emulator.emulator import Emulator
 from emulator.utils_hyperparameter_search.utils_df_cv_results import compute_df_cv_results
 from emulator.utils_hyperparameter_search.utils_scaling_factor import get_param_grid
 from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs, get_cv
@@ -17,8 +17,8 @@ from utils.utils_log import log_info
 from utils.utils_non_default_params import get_non_default_params
 
 
-class EmulatorValidatedWithSearch(EmulatorValidated):
-    """EmulatorValidatedWithSearch is an extension of EmulatorValidated with hyperparameter search.
+class EmulatorWithSearch(Emulator):
+    """EmulatorWithSearch is an extension of Emulator with hyperparameter search.
      Several hyperparameter settings are compared on the validation set,
      and the best hyperparameter setting (minimizing validation error) is selected for the final 'fit' of the emulator
 
@@ -94,7 +94,6 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
                  data_augmentation_ratio: int = 1,
                  data_augmentation_sigma: float = 1.0,
                  weighted_loss_ratio: float = 1.0,
-                 validation_size: float = 0.3,
                  # Additional parameters
                  search_style: Optional[str] = None,
                  n_iter: int = 10,
@@ -145,8 +144,7 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          threshold_for_model_selection=threshold_for_model_selection,
                          data_augmentation_ratio=data_augmentation_ratio, data_augmentation_sigma=data_augmentation_sigma,
-                         weighted_loss_ratio=weighted_loss_ratio, validation_size=validation_size,
-                         **kwargs)
+                         weighted_loss_ratio=weighted_loss_ratio, **kwargs)
         self.search_style = 'random' if search_style is None else search_style
         self.n_iter = n_iter
         self.n_jobs = n_jobs
@@ -155,7 +153,6 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
             # Hyperparameters that could be added: 'populations', 'population_size' (but can lead to long computation)
         self.scaling_factor = scaling_factor
         # Some checks
-        assert isinstance(self.validation_size, float) and (0 < self.validation_size < 1)
         assert isinstance(self.search_style, str)
         assert isinstance(self.n_iter, int) and self.n_iter > 0
         assert isinstance(self.param_grid, (dict, list))
@@ -198,7 +195,7 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
         # Run hyperparameter search with respect to self.param_grid
         search_cv_type = search_style_to_search_cv_type[self.search_style]
         assert issubclass(search_cv_type, BaseSearchCV)
-        search_cv = search_cv_type(estimator=self.load_emulator_validated_with_same_attributes(),
+        search_cv = search_cv_type(estimator=self.load_emulator_with_same_attributes(),
                                    scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
                                    cv=get_cv(validation_mask), refit=False, return_train_score=False,
                                    n_jobs=self.n_jobs,
@@ -210,14 +207,14 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
         # Save df_cv_results to file
         self.experiment_.save_search_results(df_cv_results, get_non_default_params(self))
 
-    def load_emulator_validated_with_same_attributes(self) -> EmulatorValidated:
-        """Load a pysr_emulator object with the same attributes as self,
+    def load_emulator_with_same_attributes(self) -> Emulator:
+        """Load an emulator object with the same attributes as self,
         except additional attributes that are due to inheritance"""
-        estimator = EmulatorValidated()
+        emulator = Emulator()
         params = self.get_params()
-        params = {param_name: params[param_name] for param_name in estimator.__dict__ if param_name in params}
-        estimator.set_params(**params)
-        return estimator
+        params = {param_name: params[param_name] for param_name in emulator.__dict__ if param_name in params}
+        emulator.set_params(**params)
+        return emulator
 
 
 

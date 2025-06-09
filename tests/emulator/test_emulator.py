@@ -13,7 +13,7 @@ from tests.emulator.utils_tests_emulator import load_pysr_emulator_for_test, \
 @pytest.mark.parametrize("threshold_for_model_selection", [1.0, 1.5, 2.0])
 def test_threshold_for_model_selection(threshold_for_model_selection):
     emulator = load_pysr_emulator_for_test(threshold_for_model_selection=threshold_for_model_selection)
-    run_three_main_functions_with_one_feature(emulator)
+    run_three_main_functions_with_one_feature(emulator, fit_with_validation_mask=False)
     # For threshold=1.0, we check that equation with maximal complexity is selected (because threshold=1.0 selects
     # the equation that minimizes the loss, i.e. the equation with maximum complexity of the Pareto front)
     if threshold_for_model_selection == 1.0:

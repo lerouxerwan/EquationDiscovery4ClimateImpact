@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from emulator.emulator_validated import EmulatorValidated
+from emulator.emulator import Emulator
 from emulator.utils_hyperparameter_search.utils_column_names import get_cv_results_column_names, \
     PARAMS_EMULATOR_COLUMN_NAME
 from plot.utils_metric.metric import Metric
@@ -10,7 +10,7 @@ from plot.utils_metric.metric import Metric
 def compute_df_cv_results(cv_results: dict, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.DataFrame:
     # Pop estimator columns from cv_results dict
     emulators = cv_results.pop('estimator')
-    assert all([isinstance(emulator, EmulatorValidated) for emulator in emulators])
+    assert all([isinstance(emulator, Emulator) for emulator in emulators])
     # Load Dataframe from cv_results
     df_cv_results = pd.DataFrame(cv_results)
     # Add params emulator
@@ -24,7 +24,7 @@ def compute_df_cv_results(cv_results: dict, X: np.ndarray, y: np.ndarray, valida
     return df_cv_results
 
 
-def get_series(model_selection: str, emulator: EmulatorValidated, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.Series:
+def get_series(model_selection: str, emulator: Emulator, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.Series:
     """Get the added series, a row with new column that will be appended to the initial cv_results"""
     # Save original attributes
     original_threshold = emulator.threshold_for_model_selection
@@ -43,7 +43,7 @@ def get_series(model_selection: str, emulator: EmulatorValidated, X: np.ndarray,
     emulator.model_selection = original_model_selection
     return series
 
-def _get_series(model_selection: str, emulator: EmulatorValidated, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.Series:
+def _get_series(model_selection: str, emulator: Emulator, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.Series:
     """For each model selection, compute RMSE train, RMSE val, selected complexity/expr/features/variables names"""
     # Compute data
     rmse_train = emulator.compute_loss_for_set(X, y, validation_mask, False, Metric.RMSE)

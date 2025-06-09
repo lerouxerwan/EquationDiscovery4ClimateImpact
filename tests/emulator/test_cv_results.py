@@ -1,6 +1,6 @@
 import numpy as np
 
-from emulator.emulator_validated_with_search import EmulatorValidatedWithSearch
+from emulator.emulator_with_search import EmulatorWithSearch
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME
 from tests.emulator.utils_tests_emulator import run_three_main_functions_with_one_feature
 
@@ -8,8 +8,8 @@ from tests.emulator.utils_tests_emulator import run_three_main_functions_with_on
 def test_cv_results():
     # Run validation with the hyperparameter 'populations' that can have 2 values sampled between 10 and 20
     n_iter = 2
-    emulator = EmulatorValidatedWithSearch(niterations=1, param_grid={'populations': [10, 20]}, n_iter=n_iter)
-    run_three_main_functions_with_one_feature(emulator)
+    emulator = EmulatorWithSearch(niterations=1, param_grid={'populations': [10, 20]}, n_iter=n_iter)
+    run_three_main_functions_with_one_feature(emulator, fit_with_validation_mask=True)
     # Check number of lines in df
     experiment = emulator.experiment_
     df = experiment.df_cv_results

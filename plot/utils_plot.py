@@ -3,7 +3,7 @@ from typing import Optional
 
 from data.utils_dataset.dataset import Dataset
 from emulator.emulator import Emulator
-from emulator.emulator_validated_with_search import EmulatorValidatedWithSearch
+from emulator.emulator_with_search import EmulatorWithSearch
 from plot.by_rcp.plot_climato import plot_climato, plot_errors_climato
 from plot.by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
 from plot.by_split.plot_scatter import plot_scatter
@@ -22,7 +22,7 @@ def plot_diagnosis(emulator: Emulator, dataset:Dataset, show: Optional[bool] = F
     plot_functions = [plot_selected_features, # plot related to the selected equation
         plot_loss_vs_complexity, plot_scatter, plot_time_series, # plot by split
         plot_climato, plot_errors_climato]  # plot by rcp
-    if isinstance(emulator, EmulatorValidatedWithSearch):
+    if isinstance(emulator, EmulatorWithSearch):
         plot_functions.append(plot_diagnosis_search)
     # Run several plot functions
     for plot_function in plot_functions:
