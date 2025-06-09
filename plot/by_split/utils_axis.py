@@ -29,6 +29,10 @@ def set_custom_y_axis(ax: Axes, loss_list: list[float], target_label: str, metri
         y_ticks += large_ticks
     ax.set_yticks(y_ticks)
     ax.set_ylim((y_ticks[0], y_ticks[-1]))
+    set_ylabel_with_metric(ax, metric, target_label)
+
+
+def set_ylabel_with_metric(ax, metric, target_label):
     ax.set_ylabel(f'{metric_to_label[metric]} {get_unit(target_label)}')
 
 

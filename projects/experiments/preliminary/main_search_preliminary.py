@@ -14,4 +14,4 @@ def main_search_preliminary_test():
     workflow(dataset, {}, {'param_grid': param_grid, 'search_style': 'grid'})
 
 if __name__ == '__main__':
-    main_search_preliminary_test()
+    main_search_preliminary_fast()

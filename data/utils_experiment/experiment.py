@@ -85,12 +85,6 @@ class Experiment(object):
         df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].apply(string_to_dict)
         return df_cv_results
 
-    def get_combinations_of_search_param_names(self, nb_elements: int) -> list[tuple]:
-        """Return combinations of nb_elements of param names in param_grid with float/int values"""
-        param_names_in_param_grid = [param_name for param_name, param_value in self.top_params.items()
-                                     if isinstance(param_value, (int, float))]
-        return list(combinations(param_names_in_param_grid, nb_elements))
-
     """Filepaths"""
 
     @property
