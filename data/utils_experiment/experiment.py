@@ -13,7 +13,7 @@ from data.utils_experiment.utils_experiment import string_to_list_int
 from data.utils_experiment.utils_experiment_path import CSV_FILENAME, \
     JSON_FILENAME, CHILDREN_FILENAME, PARENT_FILENAME, SYMBOLIC_LINK_FILENAME
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
-    get_cv_results_column_name, RMSE_VAL_COLUMN_NAME, FEATURE_INDEXES_COLUMN_NAME
+    get_cv_results_column_name, RMSE_VAL_COLUMN_NAME, FEATURE_INDEXES_COLUMN_NAME, COMPLEXITY_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -22,35 +22,53 @@ from utils.utils_log import log_info
 class Experiment(object):
     """Object to handle results/plots from runs (df_cv_results, non default params, tensorboard logs)"""
     experiment_path: str
+    model_selection: str
 
     def __post_init__(self):
         #  Create folder if needed
         if not op.exists(self.experiment_path):
             os.makedirs(self.experiment_path)
 
-    """Search cv results"""
+    """Properties depending on self.model_selection"""
 
     @property
-    def df_cv_results(self) -> pd.DataFrame:
-        df_cv_results = pd.read_csv(self.filepath_search_result, index_col=0)
-        df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].apply(string_to_dict)
-        for model_selection in ['best', 'custom']:
-            column_name = get_cv_results_column_name(model_selection, FEATURE_INDEXES_COLUMN_NAME)
-            df_cv_results[column_name] = df_cv_results[column_name].apply(string_to_list_int)
-        return df_cv_results
+    def rmse_val_column_name(self) -> str:
+        return get_cv_results_column_name(self.model_selection, RMSE_VAL_COLUMN_NAME)
+
+    @property
+    def complexity_column_name(self) -> str:
+        return get_cv_results_column_name(self.model_selection, COMPLEXITY_COLUMN_NAME)
+    
+    @property
+    def feature_indexes_column_name(self) -> str:
+        return get_cv_results_column_name(self.model_selection, FEATURE_INDEXES_COLUMN_NAME)
+
+    """ Top search results"""
 
     @cached_property
-    def best_series(self) -> pd.Series:
-        """Series that corresponds to the set of hyperparameters with the best results"""
+    def top_series(self) -> pd.Series:
+        """Series that corresponds to the top set of hyperparameters minimizing performance on validation set"""
         return self.df_cv_results.iloc[0]
 
     @property
-    def best_params(self) -> dict[str, Any]:
-        return self.best_series.loc[PARAMS_EMULATOR_COLUMN_NAME]
+    def top_params(self) -> dict[str, Any]:
+        """Set of hyperparameters that minimizes the performance on the validation set"""
+        return self.top_series.loc[PARAMS_EMULATOR_COLUMN_NAME]
 
     @property
-    def best_rmse_validation(self) -> float:
-        return self.best_series.loc[get_cv_results_column_name('best', RMSE_VAL_COLUMN_NAME)]
+    def top_rmse_validation(self) -> float:
+        return self.top_series.loc[self.rmse_val_column_name]
+
+    @property
+    def top_complexity(self) -> int:
+        return self.top_series.loc[self.complexity_column_name]
+
+    @property
+    def top_feature_indexes(self) -> list[int]:
+        return self.top_series.loc[self.feature_indexes_column_name]
+
+
+    """Save & Load search results"""
 
     def save_search_results(self, df_cv_results: pd.DataFrame, non_default_params: dict[str, Any]) -> None:
         log_info('Save search results to files')
@@ -60,9 +78,24 @@ class Experiment(object):
         with open(self.filepath_non_default_params, 'w') as fp:
             json.dump(non_default_params, fp, sort_keys=True, indent=4)
 
-    def get_combinations_of_param_names_in_param_grid(self, nb_elements: int) -> list[tuple]:
+    @property
+    def df_cv_results(self) -> pd.DataFrame:
+        """Dataframe with search results. During loading, it is ordered based on the self.model_selection attribute"""
+        log_info('Load search results from files')
+        # Load dataframe from csv file
+        df_cv_results = pd.read_csv(self.filepath_search_result, index_col=0)
+        # Sort the DataFrame by their predictive performance on the validation set for self.model_selection
+        df_cv_results = df_cv_results.sort_values(by=self.rmse_val_column_name)
+        # Cast some columns to their original type
+        df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].apply(string_to_dict)
+        for model_selection in ['best', 'custom']:
+            column_name = get_cv_results_column_name(model_selection, FEATURE_INDEXES_COLUMN_NAME)
+            df_cv_results[column_name] = df_cv_results[column_name].apply(string_to_list_int)
+        return df_cv_results
+
+    def get_combinations_of_search_param_names(self, nb_elements: int) -> list[tuple]:
         """Return combinations of nb_elements of param names in param_grid with float/int values"""
-        param_names_in_param_grid = [param_name for param_name, param_value in self.best_params.items()
+        param_names_in_param_grid = [param_name for param_name, param_value in self.top_params.items()
                                      if isinstance(param_value, (int, float))]
         return list(combinations(param_names_in_param_grid, nb_elements))
 

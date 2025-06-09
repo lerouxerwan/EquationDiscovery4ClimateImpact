@@ -5,8 +5,27 @@ import pandas as pd
 from pysr.utils import ArrayLike
 
 from emulator.emulator_validated import EmulatorValidated
-from emulator.utils_hyperparameter_search.utils_column_names import COLUMN_NAMES, get_cv_results_column_names
+from emulator.utils_hyperparameter_search.utils_column_names import COLUMN_NAMES, get_cv_results_column_names, \
+    PARAMS_EMULATOR_COLUMN_NAME
 from plot.utils_metric.metric import Metric
+
+
+def compute_df_cv_results(cv_results: dict, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+                          variable_names: ArrayLike[str] | None = None) -> pd.DataFrame:
+    # Pop estimator columns from cv_results dict
+    emulators = cv_results.pop('estimator')
+    assert all([isinstance(emulator, EmulatorValidated) for emulator in emulators])
+    # Load Dataframe from cv_results
+    df_cv_results = pd.DataFrame(cv_results)
+    # Add params emulator
+    params_emulator_list = [emulator.get_params().copy() for emulator in emulators]
+    df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = params_emulator_list
+    #  Add columns for the selected equations for each model_selection
+    for model_selection in ['best', 'custom']:
+        data = [get_series(model_selection, emulator, X, y, validation_mask, variable_names) for emulator in emulators]
+        df_model_selection = pd.DataFrame(index=df_cv_results.index, data=data)
+        df_cv_results = pd.concat([df_cv_results, df_model_selection], axis=1)
+    return df_cv_results
 
 
 def get_series(model_selection: str, emulator: EmulatorValidated, X: np.ndarray, y: np.ndarray,

@@ -24,18 +24,18 @@ def _write_experiment_path(filepath: str, experiment_path: str, option: str = 'w
 
 def get_children(experiment: Experiment) -> list[Experiment]:
     """Returns list of child search experiments, returns empty list if the experiment has no children"""
-    return _get_experiments(experiment.filepath_children)
+    return _get_experiments(experiment.filepath_children, experiment.model_selection)
 
 def get_parent(experiment: Experiment) -> Optional[Experiment]:
     """Returns parent search experiment, returns None if the search experiment has no parent"""
-    experiments_parents = _get_experiments(experiment.filepath_parent)
+    experiments_parents = _get_experiments(experiment.filepath_parent, experiment.model_selection)
     assert len(experiments_parents) <= 1
     return None if len(experiments_parents) == 0 else experiments_parents[0]
 
-def _get_experiments(filepath: str) -> list[Experiment]:
+def _get_experiments(filepath: str, model_selection: str) -> list[Experiment]:
     if op.exists(filepath):
         file = open(filepath, 'r')
-        experiments = [Experiment(experiment_path[:-1]) for experiment_path in file.readlines()]
+        experiments = [Experiment(experiment_path[:-1], model_selection) for experiment_path in file.readlines()]
         file.close()
         return experiments
     else:

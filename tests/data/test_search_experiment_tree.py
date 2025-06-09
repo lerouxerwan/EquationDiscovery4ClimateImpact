@@ -8,14 +8,17 @@ from tests.data.utils_tests_dataset import load_X_and_y_and_validation_mask_for_
 
 def test_search_experiment_tree():
     X, y, validation_mask = load_X_and_y_and_validation_mask_for_test()
+    model_selection = 'best'
     # Parent search experiment
     params_emulator_parent = {'n_iter': 1}
     non_default_params_parent = get_non_default_params(EmulatorValidatedWithSearch(**params_emulator_parent))
-    parent_search_experiment = Experiment(get_experiment_path(X, y, validation_mask, non_default_params_parent))
+    path_experiment_path = get_experiment_path(X, y, validation_mask, non_default_params_parent)
+    parent_search_experiment = Experiment(path_experiment_path, model_selection)
     # Child search experiment
     params_emulator_child = {**params_emulator_parent, **{'adaptive_parsimony_scaling':500.}}
     non_default_params_child = get_non_default_params(EmulatorValidatedWithSearch(**params_emulator_child))
-    child_search_experiment = Experiment(get_experiment_path(X, y, validation_mask, non_default_params_child))
+    child_experiment_path = get_experiment_path(X, y, validation_mask, non_default_params_child)
+    child_search_experiment = Experiment(child_experiment_path, model_selection)
     # Add heredity link (create parent and children files)
     add_heredity_link(child_search_experiment, parent_search_experiment)
     # Test get functions for parent
