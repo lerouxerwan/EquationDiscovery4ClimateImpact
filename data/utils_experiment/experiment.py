@@ -9,11 +9,11 @@ from typing import Optional, Any
 import pandas as pd
 from pysr import TensorBoardLoggerSpec
 
-from data.utils_experiment.utils_experiment import string_to_list_int
 from data.utils_experiment.utils_experiment_path import CSV_FILENAME, \
     JSON_FILENAME, CHILDREN_FILENAME, PARENT_FILENAME, SYMBOLIC_LINK_FILENAME
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
-    get_cv_results_column_name, RMSE_VAL_COLUMN_NAME, FEATURE_INDEXES_COLUMN_NAME, COMPLEXITY_COLUMN_NAME
+    get_cv_results_column_name, RMSE_VALIDATION_COLUMN_NAME, COMPLEXITY_COLUMN_NAME, \
+    VARIABLE_NAMES_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -33,15 +33,15 @@ class Experiment(object):
 
     @property
     def rmse_val_column_name(self) -> str:
-        return get_cv_results_column_name(self.model_selection, RMSE_VAL_COLUMN_NAME)
+        return get_cv_results_column_name(self.model_selection, RMSE_VALIDATION_COLUMN_NAME)
 
     @property
     def complexity_column_name(self) -> str:
         return get_cv_results_column_name(self.model_selection, COMPLEXITY_COLUMN_NAME)
-    
+
     @property
-    def feature_indexes_column_name(self) -> str:
-        return get_cv_results_column_name(self.model_selection, FEATURE_INDEXES_COLUMN_NAME)
+    def variable_names_column_name(self) -> str:
+        return get_cv_results_column_name(self.model_selection, VARIABLE_NAMES_COLUMN_NAME)
 
     """ Top search results"""
 
@@ -63,11 +63,6 @@ class Experiment(object):
     def top_complexity(self) -> int:
         return self.top_series.loc[self.complexity_column_name]
 
-    @property
-    def top_feature_indexes(self) -> list[int]:
-        return self.top_series.loc[self.feature_indexes_column_name]
-
-
     """Save & Load search results"""
 
     def save_search_results(self, df_cv_results: pd.DataFrame, non_default_params: dict[str, Any]) -> None:
@@ -88,9 +83,6 @@ class Experiment(object):
         df_cv_results = df_cv_results.sort_values(by=self.rmse_val_column_name)
         # Cast some columns to their original type
         df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].apply(string_to_dict)
-        for model_selection in ['best', 'custom']:
-            column_name = get_cv_results_column_name(model_selection, FEATURE_INDEXES_COLUMN_NAME)
-            df_cv_results[column_name] = df_cv_results[column_name].apply(string_to_list_int)
         return df_cv_results
 
     def get_combinations_of_search_param_names(self, nb_elements: int) -> list[tuple]:

@@ -3,15 +3,13 @@ from math import prod
 from typing import Literal, Callable, Optional
 
 import numpy as np
-import pandas as pd
 from pysr import AbstractExpressionSpec, AbstractLoggerSpec, PySRRegressor
 from pysr.utils import ArrayLike
 from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection._search import BaseSearchCV
 
 from emulator.emulator_validated import EmulatorValidated
-from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME
-from emulator.utils_hyperparameter_search.utils_df_cv_results import get_series, compute_df_cv_results
+from emulator.utils_hyperparameter_search.utils_df_cv_results import compute_df_cv_results
 from emulator.utils_hyperparameter_search.utils_scaling_factor import get_param_grid
 from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs, get_cv
 from emulator.utils_hyperparameter_search.utils_search_style import search_style_to_search_cv_type
@@ -208,7 +206,7 @@ class EmulatorValidatedWithSearch(EmulatorValidated):
         search_cv.fit(X, y, validation_mask=validation_mask, variable_names=variable_names,
                       X_units=X_units, y_units=y_units)
         # Transform cv_results into a Dataframe sorted by ranking with additional columns
-        df_cv_results = compute_df_cv_results(search_cv.cv_results_, X, y, validation_mask, variable_names)
+        df_cv_results = compute_df_cv_results(search_cv.cv_results_, X, y, validation_mask)
         # Save df_cv_results to file
         self.experiment_.save_search_results(df_cv_results, get_non_default_params(self))
 

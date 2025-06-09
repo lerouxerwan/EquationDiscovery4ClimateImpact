@@ -2,6 +2,8 @@ import os.path as op
 from typing import Optional
 
 from data.utils_dataset.dataset import Dataset
+from emulator.emulator_validated_with_search import EmulatorValidatedWithSearch
+from plot.dataset.plot_selected_features import plot_selected_features
 from plot.for_search.plot_diagnosis_search import plot_diagnosis_search
 from emulator.emulator import Emulator
 from plot.by_rcp.plot_climato import plot_climato, plot_errors_climato
@@ -16,12 +18,14 @@ from utils.utils_plot import PLOT_PATH
 def plot_diagnosis(emulator: Emulator, dataset:Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None):
     """Plot diagnosis of this emulator i) by split ii) by rcp iii) for the search"""
     log_info('Start plot diagnosis')
-    # Run several plot functions
-    for plot_function in [
+    # Select plot functions
+    plot_functions = [plot_selected_features, # plot related to the selected equation
         plot_loss_vs_complexity, plot_scatter, plot_time_series, # plot by split
-        plot_climato, plot_errors_climato, # plot by rcp
-        plot_diagnosis_search # plot for search
-    ]:
+        plot_climato, plot_errors_climato]  # plot by rcp
+    if isinstance(emulator, EmulatorValidatedWithSearch):
+        plot_functions.append(plot_diagnosis_search)
+    # Run several plot functions
+    for plot_function in plot_functions:
         plot_function(emulator, dataset, show, plot_folder)
     # Create two symbolic links between the experiment path in the plot path
     if show is False:
