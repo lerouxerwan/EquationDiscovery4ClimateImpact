@@ -15,8 +15,8 @@ def main_search_preliminary_test():
 
 def main_search_preliminary_rank_marginal():
     dataset = get_dataset_preliminary_test()
-    param_grid = {'maxsize': [30, 35], 'niterations_warmup_maxsize': [10, 50], 'adaptive_parsimony_scaling': [130., 260.0]}
-    param_search = {'param_grid': param_grid, 'search_style': 'grid', 'n_jobs': -1}
+    param_grid = {'niterations_warmup_maxsize': [0, 10, 25, 50], 'adaptive_parsimony_scaling': [520., 1040.]}
+    param_search = {'param_grid': param_grid, 'search_style': 'grid'}
     workflow(dataset, {'niterations': 400}, param_search)
 
 
