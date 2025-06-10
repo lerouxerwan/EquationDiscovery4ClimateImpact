@@ -6,7 +6,7 @@ from utils.utils_plot import show_or_save_plot
 
 def print_df_latex(df: pd.DataFrame):
     column_format = ''.join(['c' for _ in df.columns])
-    s_latex = df.to_latex(index=False, column_format=column_format)
+    s_latex = df.to_latex(index=False, column_format=column_format, float_format="%.2f")
     s = ') \\\\'
     s_latex = s_latex.replace(s, s + ' \\hline ')
     for s in ['\\midrule', '\\toprule']:
