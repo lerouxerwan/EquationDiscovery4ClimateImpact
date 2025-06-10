@@ -113,13 +113,6 @@ def test_weighted_loss_special_case():
     assert [int(v) for v in get_weights(np.array([10, 11, 12, 13]), weighted_loss_ratio)] == [2, 1, 1, 2]
     assert [int(v) for v in get_weights(np.array([13, 10, 11, 12]), weighted_loss_ratio)] == [2, 2, 1, 1]
 
-@pytest.mark.parametrize("tournament_selection_n_and_population_size", [(10, 11), (8, 10), (8, 11), (10, 9)])
-def test_adapt_tournament_selection_n(tournament_selection_n_and_population_size):
-    tournament_selection_n, population_size = tournament_selection_n_and_population_size
-    X, y = load_X_and_y_for_test()
-    emulator = load_pysr_emulator_for_test(tournament_selection_n=tournament_selection_n, population_size=population_size)
-    emulator.fit(X, y)
-
 @pytest.mark.parametrize("emulator_type", [Emulator, EmulatorWithSearch])
 def test_niterations_warmup_maxsize(emulator_type: type):
     # Cases with initialization

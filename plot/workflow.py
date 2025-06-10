@@ -17,9 +17,13 @@ def workflow(dataset: Dataset, params_emulator: dict[str, Any],
         emulator  = Emulator(**params_emulator)
     else:
         emulator = EmulatorWithSearch(**params_emulator, **params_search)
-    emulator.fit(dataset.X_train, dataset.y_train, dataset.validation_mask,
-                 dataset.X_variables_names, dataset.X_units, dataset.y_units)
+    fit(emulator, dataset)
     #  Generate diagnosis plot for the fit
     plot_diagnosis(emulator, dataset, show, plot_folder)
     return emulator
+
+
+def fit(emulator: Emulator, dataset: Dataset, **kwargs) -> None:
+    emulator.fit(dataset.X_train, dataset.y_train, dataset.validation_mask,
+                 dataset.X_variables_names, dataset.X_units, dataset.y_units, **kwargs)
 

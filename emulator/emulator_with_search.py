@@ -171,7 +171,7 @@ class EmulatorWithSearch(Emulator):
 
     def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
-            y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
+            y_units: Optional[ArrayLike[str]] = None, refit: bool = True) -> "PySRRegressor":
         """Run hyperparameter search with several hyperparameter settings (load from file the results if it exists)
         The top hyperparameter setting (minimizing validation error) is selected for the final 'fit' of the emulator"""
         # Some check
@@ -179,9 +179,10 @@ class EmulatorWithSearch(Emulator):
         # Run hyperparameter search
         if not op.exists(self.experiment_.filepath_search_result):
             self.run_and_save_hyperparameter_search(X, y, validation_mask, variable_names, X_units, y_units)
-        # Final fit with the top setting of hyperparameter on the train split
-        self.set_params(**self.experiment_.top_params)
-        super()._fit(X, y, validation_mask, variable_names, X_units, y_units)
+        # Refit with the top setting of hyperparameter on the train split
+        if refit:
+            self.set_params(**self.experiment_.top_params)
+            super()._fit(X, y, validation_mask, variable_names, X_units, y_units)
         return self
 
     @property

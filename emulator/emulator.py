@@ -178,10 +178,6 @@ class Emulator(PySRRegressor):
         # Avoid some cases where the Julia code of PySR crashes
         assert self.population_size > 0
         assert self.tournament_selection_n > 0
-        shift = 4
-        if self.tournament_selection_n + shift > self.population_size:
-            self.population_size = self.tournament_selection_n + shift
-            log_info(f'population_size is set to {self.population_size} to avoid a bug w.r.t. tournament_selection_n')
         # Change default dimensional_constraint_penalty
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
@@ -202,7 +198,7 @@ class Emulator(PySRRegressor):
 
     def fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
-            y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
+            y_units: Optional[ArrayLike[str]] = None, **kwargs) -> "PySRRegressor":
         """Fit the emulator for some feature X, target y, and validation_mask.
         Additional information can be specified: variable_names & units (with X_units, y_units)
         Compared to the fit method of PySR, this 'fit' method:
@@ -227,6 +223,7 @@ class Emulator(PySRRegressor):
         -------
         self : object
             Fitted estimator"""
+        log_info('Start fit emulator')
         # Some checks
         assert isinstance(X, np.ndarray) and isinstance(y, np.ndarray)
         assert isinstance(validation_mask, np.ndarray) or validation_mask is None
@@ -235,7 +232,7 @@ class Emulator(PySRRegressor):
         self.experiment_ = Experiment(experiment_path, self.model_selection)
         # Run self._fit method, which can be overridden in child classes, and compute its duration
         start_time = time.monotonic()
-        self._fit(X, y, validation_mask, variable_names, X_units, y_units)
+        self._fit(X, y, validation_mask, variable_names, X_units, y_units, **kwargs)
         end_time = time.monotonic()
         duration = str(timedelta(seconds=end_time - start_time))
         # Save duration and tensorboard command to file

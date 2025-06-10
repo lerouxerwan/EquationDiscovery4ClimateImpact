@@ -3,7 +3,6 @@ import os
 import os.path as op
 from dataclasses import dataclass
 from functools import cached_property
-from itertools import combinations
 from typing import Optional, Any
 
 import pandas as pd
