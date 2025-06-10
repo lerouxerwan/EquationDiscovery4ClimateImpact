@@ -32,7 +32,7 @@ class Experiment(object):
     """Properties depending on self.model_selection"""
 
     @property
-    def rmse_val_column_name(self) -> str:
+    def rmse_validation_column_name(self) -> str:
         return get_cv_results_column_name(self.model_selection, RMSE_VALIDATION_COLUMN_NAME)
 
     @property
@@ -57,7 +57,7 @@ class Experiment(object):
 
     @property
     def top_rmse_validation(self) -> float:
-        return self.top_series.loc[self.rmse_val_column_name]
+        return self.top_series.loc[self.rmse_validation_column_name]
 
     @property
     def top_complexity(self) -> int:
@@ -80,7 +80,7 @@ class Experiment(object):
         # Load dataframe from csv file
         df_cv_results = pd.read_csv(self.filepath_search_result, index_col=0)
         # Sort the DataFrame by their predictive performance on the validation set for self.model_selection
-        df_cv_results = df_cv_results.sort_values(by=self.rmse_val_column_name)
+        df_cv_results = df_cv_results.sort_values(by=self.rmse_validation_column_name)
         # Cast some columns to their original type
         df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].apply(string_to_dict)
         return df_cv_results

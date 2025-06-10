@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 from sympy import Symbol
 
+from emulator.emulator import Emulator
 from emulator.utils_potential_contributions.utils_data_augmentation import apply_data_augmentation
 from emulator.utils_potential_contributions.utils_weighted_loss import get_weights
 from tests.emulator.utils_tests_emulator import load_pysr_emulator_for_test, \
@@ -117,6 +118,18 @@ def test_adapt_tournament_selection_n(tournament_selection_n_and_population_size
     X, y = load_X_and_y_for_test()
     emulator = load_pysr_emulator_for_test(tournament_selection_n=tournament_selection_n, population_size=population_size)
     emulator.fit(X, y)
+
+def test_niterations_warmup_maxsize():
+    assert Emulator(niterations_warmup_maxsize=20, niterations=100).warmup_maxsize_by == 0.2
+    assert Emulator(niterations_warmup_maxsize=50, niterations=100).warmup_maxsize_by == 0.5
+    assert Emulator(niterations_warmup_maxsize=50, niterations=50).warmup_maxsize_by == 1.0
+    assert Emulator(niterations_warmup_maxsize=50, niterations=200).warmup_maxsize_by == 0.25
+    with pytest.raises(AssertionError):
+        Emulator(niterations_warmup_maxsize=-5, niterations=100)
+    with pytest.raises(AssertionError):
+        Emulator(niterations_warmup_maxsize=120, niterations=100)
+    with pytest.raises(AssertionError):
+        Emulator(warmup_maxsize_by=0.5, niterations_warmup_maxsize=20, niterations=100)
 
 
 

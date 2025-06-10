@@ -39,6 +39,10 @@ class Emulator(PySRRegressor):
             Threshold to select an equation based on a model selection ("best", "accuracy", "score", "validated")
             this threshold must be larger or equal to 1
             Default is 1.5 (as specified in PySR).
+        niterations_warmup_maxsize: int | None
+            Number of iterations for warmup (slowly increase max size from a small number up to the maxsize)
+            This number of iterations is when the current maxsize will reach the user-passed maxsize.
+            Default is None
 
     -> more additional parameters for some contributions/tricks that are deactivated by default
         data_augmentation_ratio: int
@@ -105,6 +109,7 @@ class Emulator(PySRRegressor):
                  select_k_features: int | None = None,
                  # Additional parameters
                  threshold_for_model_selection: float = 1.5,
+                 niterations_warmup_maxsize: int | None = None, 
                  # Additional parameters for potential contributions (which are deactivated by default)
                  data_augmentation_ratio: int = 1,
                  data_augmentation_sigma: float = 1.0,
@@ -158,12 +163,18 @@ class Emulator(PySRRegressor):
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          **kwargs)
         self.threshold_for_model_selection = threshold_for_model_selection
+        self.niterations_warmup_maxsize = niterations_warmup_maxsize
         self.data_augmentation_ratio = data_augmentation_ratio
         self.data_augmentation_sigma = data_augmentation_sigma
         self.weighted_loss_ratio = weighted_loss_ratio
         # Some checks
         assert isinstance(self.threshold_for_model_selection, float)
         assert self.threshold_for_model_selection >= 1.
+        assert self.niterations_warmup_maxsize is None or isinstance(self.niterations_warmup_maxsize, int)
+        if self.niterations_warmup_maxsize is not None:
+            assert self.warmup_maxsize_by is None # warmup_maxsize_by cannot be set with niterations_warmup_maxsize
+            assert 0 <= self.niterations_warmup_maxsize <= self.niterations
+            self.warmup_maxsize_by = self.niterations_warmup_maxsize / self.niterations
         assert isinstance(self.data_augmentation_ratio, int)
         assert isinstance(self.data_augmentation_sigma, float)
         assert isinstance(self.weighted_loss_ratio, float)

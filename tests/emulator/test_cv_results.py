@@ -16,7 +16,7 @@ def test_cv_results():
     # Check the top selected complexity
     assert experiment.top_complexity == 9
     # Check that it is well ranked
-    validation_rmse_sorted_values = df[experiment.rmse_val_column_name].values
+    validation_rmse_sorted_values = df[experiment.rmse_validation_column_name].values
     for rmse1, rmse2 in zip(validation_rmse_sorted_values[:-1], validation_rmse_sorted_values[1:]):
         if not np.isnan(rmse2):
             assert rmse1 <= rmse2
