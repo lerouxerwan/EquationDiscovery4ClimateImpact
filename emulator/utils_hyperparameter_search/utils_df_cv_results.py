@@ -44,7 +44,7 @@ def get_series(model_selection: str, emulator: Emulator, X: np.ndarray, y: np.nd
     return series
 
 def _get_series(model_selection: str, emulator: Emulator, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.Series:
-    """For each model selection, compute RMSE train, RMSE val, selected complexity/expr/features/variables names"""
+    """For each model selection, compute RMSE train, RMSE validation, selected complexity/expr/variables names"""
     # Compute data
     rmse_train = emulator.compute_loss_for_set(X, y, validation_mask, False, Metric.RMSE)
     rmse_validation = emulator.compute_loss_for_set(X, y, validation_mask, True, Metric.RMSE)

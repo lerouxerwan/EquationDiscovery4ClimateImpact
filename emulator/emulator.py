@@ -171,10 +171,6 @@ class Emulator(PySRRegressor):
         assert isinstance(self.threshold_for_model_selection, float)
         assert self.threshold_for_model_selection >= 1.
         assert self.niterations_warmup_maxsize is None or isinstance(self.niterations_warmup_maxsize, int)
-        if self.niterations_warmup_maxsize is not None:
-            assert self.warmup_maxsize_by is None # warmup_maxsize_by cannot be set with niterations_warmup_maxsize
-            assert 0 <= self.niterations_warmup_maxsize <= self.niterations
-            self.warmup_maxsize_by = self.niterations_warmup_maxsize / self.niterations
         assert isinstance(self.data_augmentation_ratio, int)
         assert isinstance(self.data_augmentation_sigma, float)
         assert isinstance(self.weighted_loss_ratio, float)
@@ -189,8 +185,20 @@ class Emulator(PySRRegressor):
         # Change default dimensional_constraint_penalty
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
+        # Set params
+        self.set_warmup_maxsize_by()
         # Create attributes
         self.experiment_ = None
+
+    def set_params(self, **params):
+        super().set_params(**params)
+        self.set_warmup_maxsize_by()
+        return self
+
+    def set_warmup_maxsize_by(self):
+        if self.niterations_warmup_maxsize is not None:
+            assert 0 <= self.niterations_warmup_maxsize <= self.niterations
+            self.warmup_maxsize_by = self.niterations_warmup_maxsize / self.niterations
 
     def fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,

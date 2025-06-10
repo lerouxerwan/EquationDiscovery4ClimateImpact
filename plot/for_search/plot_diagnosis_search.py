@@ -14,8 +14,8 @@ from utils.utils_latex import plot_df_latex, print_df_latex
 
 def plot_diagnosis_search(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None):
     assert isinstance(emulator, EmulatorWithSearch)
-    for nb_top_equations in [5, 10, 20]:
-        plot_selection_rate_features_top_equations(dataset, emulator.experiment_, nb_top_equations, show, plot_folder)
+    # for nb_top_equations in [5, 10, 20]:
+    #     plot_selection_rate_features_top_equations(dataset, emulator.experiment_, nb_top_equations, show, plot_folder)
     plot_diagnosis_search_1d(emulator.experiment_, emulator.param_grid, dataset.target_label,
                              show, plot_folder)
     plot_summary_experiment(emulator.experiment_)

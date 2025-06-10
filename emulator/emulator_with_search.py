@@ -157,13 +157,17 @@ class EmulatorWithSearch(Emulator):
         # Some checks
         assert isinstance(self.search_style, str)
         assert isinstance(self.n_iter, int) and self.n_iter > 0
-        assert isinstance(self.param_grid, (dict, list))
-        assert 'model_selection' not in self.param_grid
+
         assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
         #  Set param grid using param_list_to_optimize if param_grid has not been specified by the user
         if not self.param_grid:
             self.param_grid = get_param_grid(self, self.scaling_factor, self.search_style, self.n_iter, 
                                              self.param_list_to_optimize)
+        # Some checks on param_grid
+        assert isinstance(self.param_grid, (dict, list))
+        assert 'model_selection' not in self.param_grid
+        assert ('warmup_maxsize_by' not in self.param_grid) or ('niterations_warmup_maxsize' not in self.param_grid)
+
 
     def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
