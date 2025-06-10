@@ -1,7 +1,6 @@
 import numpy as np
 
 from emulator.emulator_with_search import EmulatorWithSearch
-from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME
 from tests.emulator.utils_tests_emulator import run_three_main_functions_with_one_feature
 
 
@@ -21,11 +20,11 @@ def test_cv_results():
     for rmse1, rmse2 in zip(validation_rmse_sorted_values[:-1], validation_rmse_sorted_values[1:]):
         if not np.isnan(rmse2):
             assert rmse1 <= rmse2
-    # Check that the best params are as expected
-    best_params = df[PARAMS_EMULATOR_COLUMN_NAME].values[0]
-    assert isinstance(best_params, dict)
-    assert best_params['populations'] == 19
-    assert best_params['niterations'] == 1
+    # Check that the top params are as expected
+    top_params = experiment.top_params
+    assert isinstance(top_params, dict)
+    assert top_params['populations'] == 19
+    assert top_params['niterations'] == 1
     # Remove folders at the end of the test
     experiment.remove_folder()
 

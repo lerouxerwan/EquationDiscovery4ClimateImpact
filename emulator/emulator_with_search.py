@@ -20,7 +20,7 @@ from utils.utils_non_default_params import get_non_default_params
 class EmulatorWithSearch(Emulator):
     """EmulatorWithSearch is an extension of Emulator with hyperparameter search.
      Several hyperparameter settings are compared on the validation set,
-     and the best hyperparameter setting (minimizing validation error) is selected for the final 'fit' of the emulator
+     and the top hyperparameter setting (minimizing validation error) is selected for the final 'fit' of the emulator
 
     -> additional parameters:
         search_style: str
@@ -167,13 +167,13 @@ class EmulatorWithSearch(Emulator):
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
             y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
         """Run hyperparameter search with several hyperparameter settings (load from file the results if it exists)
-        The best hyperparameter setting (minimizing validation error) is selected for the final 'fit' of the emulator"""
+        The top hyperparameter setting (minimizing validation error) is selected for the final 'fit' of the emulator"""
         # Some check
         assert validation_mask is not None
         # Run hyperparameter search
         if not op.exists(self.experiment_.filepath_search_result):
             self.run_and_save_hyperparameter_search(X, y, validation_mask, variable_names, X_units, y_units)
-        # Final fit with the best setting of hyperparameter on the train split
+        # Final fit with the top setting of hyperparameter on the train split
         self.set_params(**self.experiment_.top_params)
         super()._fit(X, y, validation_mask, variable_names, X_units, y_units)
         return self

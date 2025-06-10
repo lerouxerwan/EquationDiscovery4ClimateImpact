@@ -21,7 +21,7 @@ def load_dataset_values(csv_filename: str, rcp_name_train: str, rcp_name_test: O
         -Values for each set (train and test) including X an array, y an array, years an array of int.
         -Values for the target & features including units str list, labels str list, variable_names str list
         -Values for the validation set including validation_mask an array of boolean
-    So far the code only handles data coming from two RCPs at best:
+    So far the code only handles data coming from two RCPs:
         -one RCP for the train set (rcp_name_train), If historical data are available, they are added to the train set
         -an optional RCP for the test set (rcp_name_test)
     Two additional rows can be in the csv file:

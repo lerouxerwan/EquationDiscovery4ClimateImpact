@@ -36,7 +36,7 @@ class Emulator(PySRRegressor):
 
     -> additional parameter:
         threshold_for_model_selection : float
-            Threshold to select the best equation with some model selection ('best' and 'validated')
+            Threshold to select an equation based on a model selection ("best", "accuracy", "score", "validated")
             this threshold must be larger or equal to 1
             Default is 1.5 (as specified in PySR).
 
@@ -352,12 +352,12 @@ class Emulator(PySRRegressor):
     @property
     def selected_expr(self) -> Expr:
         """Sympy expressions for the selected equation"""
-        return self.get_best()['sympy_format']
+        return self.selected_row['sympy_format']
 
     @property
     def selected_complexity(self) -> int:
         """Complexity for the selected equation"""
-        return self.get_best()['complexity']
+        return self.selected_row['complexity']
 
     @property
     def selected_variable_names(self) -> list[str]:
@@ -373,6 +373,11 @@ class Emulator(PySRRegressor):
         result = super().get_best()
         self.model_selection = model_selection
         return result
+
+    @property
+    def selected_row(self) -> pd.Series:
+        """Selected row/pd.Series from the Dataframe self.equations_"""
+        return self.get_best()
 
     def get_best(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
         """Compute a Series (or list of Series) representing the selected equations (complexity, loss, ...)
