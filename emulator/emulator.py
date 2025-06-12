@@ -279,16 +279,18 @@ class Emulator(PySRRegressor):
         pareto_indexes = [True] + [loss_list[i] < min(loss_list[:i]) for i in range(1, len(loss_list))]
         self.equations_ = self.equations_.loc[pd.Series(pareto_indexes, index=self.equations_.index)]
         self.equations_ = self.equations_.reset_index(drop=True)
+        #  Add also a 'validation_loss' column in self.equations_
+        if validation_mask is not None:
+            X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
+            self.equations_['validation_loss'] = self.compute_loss_list(X_validation, y_validation)
         # Set the optimal threshold for the 'validated' model selection using the validation set
         if self.model_selection == 'validated':
-            self.set_threshold_for_model_selection_validated(X, y, validation_mask)
+            self.set_threshold_for_model_selection_validated()
         return self
 
-    def set_threshold_for_model_selection_validated(self, X: np.ndarray, y: np.ndarray,
-                                                    validation_mask: np.ndarray[bool]) -> None:
-        X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
-        validation_loss_list = self.compute_loss_list(X_validation, y_validation)
-        self.threshold_for_model_selection = self.compute_optimal_threshold(self.loss_list, validation_loss_list)
+    def set_threshold_for_model_selection_validated(self) -> None:
+        assert self.model_selection == 'validated'
+        self.threshold_for_model_selection = self.compute_optimal_threshold(self.loss_list, self.validation_loss_list)
 
     @staticmethod
     def compute_optimal_threshold(train_loss_list: list[float], validation_loss_list: list[float]) -> float:
@@ -354,6 +356,11 @@ class Emulator(PySRRegressor):
     def loss_list(self) -> list[float]:
         """List of Train loss (Mean squared error) for the equations of the Pareto front"""
         return self.equations_['loss'].to_list()
+
+    @property
+    def validation_loss_list(self) -> list[float]:
+        """List of Validation loss (Mean squared error) for the equations of the Pareto front"""
+        return self.equations_['validation_loss'].to_list()
 
     @property
     def score_list(self) -> list[float]:

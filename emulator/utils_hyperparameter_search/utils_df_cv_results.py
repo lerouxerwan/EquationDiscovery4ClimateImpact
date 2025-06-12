@@ -34,7 +34,7 @@ def get_series(model_selection: str, emulator: Emulator, X: np.ndarray, y: np.nd
     if model_selection == 'best':
         emulator.threshold_for_model_selection = 1.5
     elif model_selection == 'validated':
-        emulator.set_threshold_for_model_selection_validated(X, y, validation_mask)
+        emulator.set_threshold_for_model_selection_validated()
     else:
         raise NotImplementedError
     series = _get_series(model_selection, emulator, X, y, validation_mask)

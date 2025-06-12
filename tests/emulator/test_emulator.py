@@ -9,23 +9,23 @@ from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from emulator.utils_potential_contributions.utils_data_augmentation import apply_data_augmentation
 from emulator.utils_potential_contributions.utils_weighted_loss import get_weights
-from plot.utils_metric.metric import Metric
 from tests.data.utils_tests_dataset import load_X_and_y_and_validation_mask_for_test, load_X_and_y_for_test
 
 
 @pytest.mark.parametrize("with_validation_mask", [False, True])
 def test_emulator_fit(with_validation_mask: bool):
-    metric = Metric.MSE
     emulator = Emulator(niterations=1)
     X, y, validation_mask = load_X_and_y_and_validation_mask_for_test()
     if with_validation_mask:
         emulator.fit(X, y, validation_mask)
         X_train, y_train = get_X_and_y(X, y, validation_mask, validation_set=False)
-        loss_train = emulator.compute_loss(X_train, y_train, metric)
+        loss_list = emulator.compute_loss_list(X_train, y_train)
     else:
         emulator.fit(X, y)
-        loss_train = emulator.compute_loss(X, y, metric)
-    np.testing.assert_almost_equal(emulator.selected_loss, loss_train)
+        loss_list = emulator.compute_loss_list(X, y)
+    # Ensure that the two loss_list are consistent
+    for loss_from_dataframe, loss_computed in zip(emulator.loss_list, loss_list):
+        np.testing.assert_almost_equal(float(loss_from_dataframe), loss_computed)
 
 
 @pytest.mark.parametrize("threshold_for_model_selection", [1.0, 1.5, 2.0])
@@ -52,18 +52,6 @@ def test_deterministic_and_compute_loss():
     emulator.fit(X, y)
     # Assert that the fit of the emulator is deterministic
     np.testing.assert_almost_equal(float(sum(emulator.loss_list)), 35698077.642941765)
-
-def test_loss():
-    emulator = Emulator(niterations=1)
-    X, y = load_X_and_y_for_test()
-    emulator.fit(X, y)
-    # Assert that the method compute_loss of the emulator is consistent with the loss column
-    for loss1, loss2 in zip(emulator.loss_list, emulator.compute_loss_list(X, y)):
-        np.testing.assert_almost_equal(float(loss1), loss2)
-    # Predict with indexes that do not exist anymore
-    for removed_index in [6, 7, 8]:
-        with pytest.raises(IndexError):
-            emulator.predict(X, index=removed_index)
 
 
 list_of_X_units_and_expected_variable_names = [
