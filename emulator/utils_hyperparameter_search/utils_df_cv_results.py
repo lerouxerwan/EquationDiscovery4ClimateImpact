@@ -26,21 +26,13 @@ def compute_df_cv_results(cv_results: dict, X: np.ndarray, y: np.ndarray, valida
 
 def get_series(model_selection: str, emulator: Emulator, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.Series:
     """Get the added series, a row with new column that will be appended to the initial cv_results"""
-    # Save original attributes
-    original_threshold = emulator.threshold_for_model_selection
+    # Save model selection
     original_model_selection = emulator.model_selection[:] # copy model_selection
-    # Compute the row
-    emulator.model_selection = model_selection
-    if model_selection == 'best':
-        emulator.threshold_for_model_selection = 1.5
-    elif model_selection == 'validated':
-        emulator.set_threshold_for_model_selection_validated()
-    else:
-        raise NotImplementedError
+    # Compute the row with the request model selection
+    emulator.set_model_selection(model_selection)
     series = _get_series(model_selection, emulator, X, y, validation_mask)
-    # Reset to original attributes
-    emulator.threshold_for_model_selection = original_threshold
-    emulator.model_selection = original_model_selection
+    # Reset model selection
+    emulator.set_model_selection(original_model_selection)
     return series
 
 def _get_series(model_selection: str, emulator: Emulator, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.Series:

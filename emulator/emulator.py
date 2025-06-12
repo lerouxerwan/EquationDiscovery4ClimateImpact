@@ -241,6 +241,23 @@ class Emulator(PySRRegressor):
     def get_experiment(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None) -> Experiment:
         return Experiment(get_experiment_path(X, y, validation_mask, self.non_default_params), self.model_selection)
 
+    def set_model_selection(self, model_selection: str) -> None:
+        if self.model_selection == model_selection:
+            # Do nothing
+            pass
+        else:
+            self.model_selection = model_selection
+            # Set corresponding threshold
+            if model_selection == 'best':
+                self.threshold_for_model_selection = 1.5
+            elif model_selection == 'validated':
+                self.set_threshold_for_model_selection_validated()
+            else:
+                raise NotImplementedError
+            # Reload experiment with the updated model_selection
+            self.experiment_ = Experiment(self.experiment_.experiment_path, model_selection)
+
+
     def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
             y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
@@ -398,9 +415,9 @@ class Emulator(PySRRegressor):
     def get_best_pysr(self) -> pd.Series:
         """Compute a Series representing the selected equation (complexity, loss, ...) with the PySR heuristic"""
         model_selection = self.model_selection[:]
-        self.model_selection = "best"
+        self.set_model_selection('best')
         result = super().get_best()
-        self.model_selection = model_selection
+        self.set_model_selection(model_selection)
         return result
 
     @property

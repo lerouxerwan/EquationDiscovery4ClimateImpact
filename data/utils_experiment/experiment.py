@@ -12,7 +12,7 @@ from data.utils_experiment.utils_experiment_path import CSV_FILENAME, \
     JSON_FILENAME, CHILDREN_FILENAME, PARENT_FILENAME, SYMBOLIC_LINK_FILENAME
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
     get_cv_results_column_name, RMSE_VALIDATION_COLUMN_NAME, COMPLEXITY_COLUMN_NAME, \
-    VARIABLE_NAMES_COLUMN_NAME
+    VARIABLE_NAMES_COLUMN_NAME, RMSE_TEST_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -29,6 +29,10 @@ class Experiment(object):
             os.makedirs(self.experiment_path)
 
     """Properties depending on self.model_selection"""
+
+    @property
+    def rmse_test_column_name(self) -> str:
+        return get_cv_results_column_name(self.model_selection, RMSE_TEST_COLUMN_NAME)
 
     @property
     def rmse_validation_column_name(self) -> str:
@@ -61,6 +65,10 @@ class Experiment(object):
     @property
     def top_complexity(self) -> int:
         return self.top_series.loc[self.complexity_column_name]
+
+    @property
+    def top_rmse_test(self) -> float:
+        return self.top_series.loc[self.rmse_test_column_name]
 
     """Save & Load search results"""
 

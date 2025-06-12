@@ -1,9 +1,15 @@
+import os.path as op
 from collections import OrderedDict
+
+import numpy as np
+import pandas as pd
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from data.utils_experiment.experiment import Experiment
+from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
+from plot.utils_metric.metric import Metric
 from plot.workflow import fit
 from projects.simple_paper.search_strategy import SearchStrategy, get_params_emulator, get_params_search
 from utils.utils_log import log_info
@@ -12,7 +18,7 @@ from utils.utils_log import log_info
 def main_split_comparison(fast: bool = False):
     n_iter = 1 if fast else 10
     model_selections = ['best', 'validated']
-    validation_splits = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END]
+    validation_splits = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END][:1]
     search_strategies = [SearchStrategy.TOP10_FULL_RANGE, SearchStrategy.ALL_FULL_RANGE][:1]
     # Run emulator fit (and get experiment) for every validation_splits and every search_strategies
     validation_split_to_experiment_paths = OrderedDict()
@@ -26,6 +32,7 @@ def main_split_comparison(fast: bool = False):
             params_search['n_iter'] = n_iter
             emulator = EmulatorWithSearch(**params_emulator, **params_search)
             fit(emulator, dataset, refit=False)
+            compute_and_save_test_rmse(emulator, dataset, model_selections)
             experiments.append(emulator.experiment_.experiment_path)
         validation_split_to_experiment_paths[validation_split] = experiments
     # Plot an array with the results for both the model_selection 'best' and 'validated'
@@ -33,9 +40,27 @@ def main_split_comparison(fast: bool = False):
         validation_split_name_to_rmse_test_list = OrderedDict()
         for validation_split, experiment_paths in validation_split_to_experiment_paths.items():
             experiments = [Experiment(experiment_path, model_selection) for experiment_path in experiment_paths]
-            rmse_test_list = [experiment for experiment in experiments]
+            rmse_test_list = [experiment.top_rmse_test for experiment in experiments]
             validation_split_name_to_rmse_test_list[str(validation_split)] = rmse_test_list
         pass
 
+
+def compute_and_save_test_rmse(emulator: Emulator, dataset: Dataset, model_selections: list[str]):
+    try:
+        _ = emulator.experiment_.top_rmse_test
+    except KeyError:
+        log_info('Compute and save test rmse')
+        # Refit with the top params
+        fit(emulator, dataset)
+        df = emulator.experiment_.df_cv_results
+        # Add test rmse to the dataframe
+        for model_selection in model_selections:
+            emulator.set_model_selection(model_selection)
+            rmse_test = emulator.compute_loss(dataset.X_test, dataset.y_test, Metric.RMSE)
+            rmse_test_values = [rmse_test] + [np.nan] * (len(df) - 1)
+            df[emulator.experiment_.rmse_test_column_name] = rmse_test_values
+        # Save dataframe to file
+        emulator.experiment_.save_search_results(df, emulator.non_default_params)
+
 if __name__ == '__main__':
-    main_split_comparison(fast=False)
+    main_split_comparison(fast=True)
