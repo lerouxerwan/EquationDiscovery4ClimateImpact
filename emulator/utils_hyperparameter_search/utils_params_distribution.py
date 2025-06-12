@@ -10,23 +10,43 @@ def get_param_distributions(param_grid: dict[str, Any]) -> dict[str, Any]:
     param_distributions = {}
     for param_name, param_values in param_grid.items():
         if len(param_values) == 1:
-            param_distributions[param_name] = param_values
+            distribution = param_values
+        elif isinstance(param_values[0], (int, float)):
+            min_value, max_value = min(param_values), max(param_values)
+            assert min_value != max_value, f'{param_name} {param_values}'
+            uniform_distribution_without_scaling = max_value <= 1.
+            uniform_distribution_without_scaling |= (max_value / min_value) < 10
+            if uniform_distribution_without_scaling:
+                distribution_type = UniformDistribution
+            else:
+                distribution_type = ScaledUniformDistribution
+            distribution = distribution_type(min_value, max_value, cast_as_int=isinstance(min_value, int))
         else:
-            param_distributions[param_name] = get_param_distribution(param_values)
+            # In this case, the distribution will sample from the list of parameter values
+            distribution = param_values
+        param_distributions[param_name] = distribution
     return param_distributions
 
 
-def get_param_distribution(param_values: list[int | float]):
-    assert isinstance(param_values[0], (int, float))
-    cast_as_int = isinstance(param_values[0], int)
-    return ScaledUniformDistribution(min_value=min(param_values), max_value=max(param_values), cast_as_int=cast_as_int)
-
 
 @dataclass
-class ScaledUniformDistribution(object):
+class UniformDistribution(object):
     min_value: float
     max_value: float
     cast_as_int: bool
+
+
+    def rvs(self, size: int = 1, random_state=None) -> float | list[float]:
+        uniform_distribution = uniform(loc=self.min_value, scale=self.max_value - self.min_value)
+        # Sample from this distribution
+        sampled_values = uniform_distribution.rvs(size=size, random_state=random_state)
+        if self.cast_as_int:
+            sampled_values = [int(sampled_value) for sampled_value in sampled_values]
+        return sampled_values[0] if size == 1 else sampled_values
+
+
+@dataclass
+class ScaledUniformDistribution(UniformDistribution):
 
     def rvs(self, size: int = 1, random_state=None) -> float | list[float]:
         scaled_min_value, scaled_max_value = np.log(self.min_value), np.log(self.max_value)

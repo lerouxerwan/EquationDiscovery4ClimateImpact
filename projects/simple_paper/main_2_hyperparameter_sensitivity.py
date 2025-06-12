@@ -6,7 +6,7 @@ from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from plot.workflow import fit
 from projects.experiments.preliminary.utils_dataset_preliminary import get_dataset_preliminary_test
-from projects.sprint.utils_hyperparameter_sensitivy import get_param_name_to_values, relative_error
+from projects.simple_paper.utils_hyperparameters import get_param_name_to_values, relative_error
 from utils.utils_latex import print_df_latex
 from utils.utils_log import log_info
 
