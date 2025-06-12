@@ -14,7 +14,6 @@ from emulator.utils_hyperparameter_search.utils_scaling_factor import get_param_
 from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs, get_cv
 from emulator.utils_hyperparameter_search.utils_search_style import search_style_to_search_cv_type
 from utils.utils_log import log_info
-from utils.utils_non_default_params import get_non_default_params
 
 
 class EmulatorWithSearch(Emulator):
@@ -212,7 +211,7 @@ class EmulatorWithSearch(Emulator):
         # Transform cv_results into a Dataframe sorted by ranking with additional columns
         df_cv_results = compute_df_cv_results(search_cv.cv_results_, X, y, validation_mask)
         # Save df_cv_results to file
-        self.experiment_.save_search_results(df_cv_results, get_non_default_params(self))
+        self.experiment_.save_search_results(df_cv_results, self.non_default_params)
 
     def load_emulator_with_same_attributes(self) -> Emulator:
         """Load an emulator object with the same attributes as self,

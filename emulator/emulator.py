@@ -1,7 +1,7 @@
 import math
 import time
 from datetime import timedelta
-from typing import Literal, Callable, Optional
+from typing import Literal, Callable, Optional, Any
 
 import numpy as np
 import pandas as pd
@@ -227,9 +227,8 @@ class Emulator(PySRRegressor):
         # Some checks
         assert isinstance(X, np.ndarray) and isinstance(y, np.ndarray)
         assert isinstance(validation_mask, np.ndarray) or validation_mask is None
-        # Initialize self.experiment_ which defines an 'experiment path' where results/TensorBoard logs can be saved
-        experiment_path = get_experiment_path(X, y, validation_mask, get_non_default_params(self))
-        self.experiment_ = Experiment(experiment_path, self.model_selection)
+        # Initialize self.experiment_ which defines where results/TensorBoard logs can be saved
+        self.experiment_ = self.get_experiment(X, y, validation_mask)
         # Run self._fit method, which can be overridden in child classes, and compute its duration
         start_time = time.monotonic()
         self._fit(X, y, validation_mask, variable_names, X_units, y_units, **kwargs)
@@ -238,6 +237,9 @@ class Emulator(PySRRegressor):
         # Save duration and tensorboard command to file
         self.experiment_.print_and_save_fit_information(duration)
         return self
+
+    def get_experiment(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None) -> Experiment:
+        return Experiment(get_experiment_path(X, y, validation_mask, self.non_default_params), self.model_selection)
 
     def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
@@ -424,6 +426,11 @@ class Emulator(PySRRegressor):
         filtered_equations = self.equations_.query(f"loss <= {max_loss_for_filter}")
         return filtered_equations
 
+    """Other changes"""
+
+    @property
+    def non_default_params(self) -> dict[str, Any]:
+        return get_non_default_params(self)
 
     def __repr__(self) -> str:
         """If we do not override this method, then the __repr__ method from PySR fails

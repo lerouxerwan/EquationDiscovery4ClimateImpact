@@ -1,24 +1,16 @@
-from data.utils_experiment.experiment import Experiment
 from data.utils_experiment.utils_heredity_tree import add_heredity_link, get_parent, get_children
-from utils.utils_non_default_params import get_non_default_params
-from data.utils_experiment.utils_experiment_path import get_experiment_path
 from emulator.emulator_with_search import EmulatorWithSearch
 from tests.data.utils_tests_dataset import load_X_and_y_and_validation_mask_for_test
 
 
 def test_search_experiment_tree():
     X, y, validation_mask = load_X_and_y_and_validation_mask_for_test()
-    model_selection = 'best'
     # Parent search experiment
     params_emulator_parent = {'n_iter': 1}
-    non_default_params_parent = get_non_default_params(EmulatorWithSearch(**params_emulator_parent))
-    path_experiment_path = get_experiment_path(X, y, validation_mask, non_default_params_parent)
-    parent_search_experiment = Experiment(path_experiment_path, model_selection)
+    parent_search_experiment = EmulatorWithSearch(**params_emulator_parent).get_experiment(X, y, validation_mask)
     # Child search experiment
     params_emulator_child = {**params_emulator_parent, **{'adaptive_parsimony_scaling':500.}}
-    non_default_params_child = get_non_default_params(EmulatorWithSearch(**params_emulator_child))
-    child_experiment_path = get_experiment_path(X, y, validation_mask, non_default_params_child)
-    child_search_experiment = Experiment(child_experiment_path, model_selection)
+    child_search_experiment = EmulatorWithSearch(**params_emulator_child).get_experiment(X, y, validation_mask)
     # Add heredity link (create parent and children files)
     add_heredity_link(child_search_experiment, parent_search_experiment)
     # Test get functions for parent
