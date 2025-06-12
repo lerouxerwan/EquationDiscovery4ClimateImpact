@@ -1,14 +1,15 @@
 import numpy as np
 
 from emulator.emulator_with_search import EmulatorWithSearch
-from tests.emulator.utils_tests_emulator import run_three_main_functions_with_one_feature
+from tests.data.utils_tests_dataset import load_X_and_y_and_validation_mask_for_test
 
 
 def test_cv_results():
     # Run validation with the hyperparameter 'populations' that can have 2 values sampled between 10 and 20
     n_iter = 2
     emulator = EmulatorWithSearch(niterations=1, param_grid={'populations': [10, 20]}, n_iter=n_iter)
-    run_three_main_functions_with_one_feature(emulator, fit_with_validation_mask=True)
+    X, y, validation_mask = load_X_and_y_and_validation_mask_for_test()
+    emulator.fit(X, y, validation_mask)
     # Check number of lines in df
     experiment = emulator.experiment_
     df = experiment.df_cv_results

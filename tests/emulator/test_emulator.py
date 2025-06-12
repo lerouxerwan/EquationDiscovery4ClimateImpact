@@ -4,18 +4,35 @@ import numpy as np
 import pytest
 from sympy import Symbol
 
+from data.utils_dataset.utils_validation import get_X_and_y
 from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from emulator.utils_potential_contributions.utils_data_augmentation import apply_data_augmentation
 from emulator.utils_potential_contributions.utils_weighted_loss import get_weights
-from tests.emulator.utils_tests_emulator import load_pysr_emulator_for_test, \
-    run_three_main_functions_with_one_feature, load_X_and_y_for_test
+from plot.utils_metric.metric import Metric
+from tests.data.utils_tests_dataset import load_X_and_y_and_validation_mask_for_test, load_X_and_y_for_test
+
+
+@pytest.mark.parametrize("with_validation_mask", [False, True])
+def test_emulator_fit(with_validation_mask: bool):
+    metric = Metric.MSE
+    emulator = Emulator(niterations=1)
+    X, y, validation_mask = load_X_and_y_and_validation_mask_for_test()
+    if with_validation_mask:
+        emulator.fit(X, y, validation_mask)
+        X_train, y_train = get_X_and_y(X, y, validation_mask, validation_set=False)
+        loss_train = emulator.compute_loss(X_train, y_train, metric)
+    else:
+        emulator.fit(X, y)
+        loss_train = emulator.compute_loss(X, y, metric)
+    np.testing.assert_almost_equal(emulator.selected_loss, loss_train)
 
 
 @pytest.mark.parametrize("threshold_for_model_selection", [1.0, 1.5, 2.0])
 def test_threshold_for_model_selection(threshold_for_model_selection):
-    emulator = load_pysr_emulator_for_test(threshold_for_model_selection=threshold_for_model_selection)
-    run_three_main_functions_with_one_feature(emulator, fit_with_validation_mask=False)
+    emulator = Emulator(niterations=1, threshold_for_model_selection=threshold_for_model_selection)
+    X, y = load_X_and_y_for_test()
+    emulator.fit(X, y)
     # For threshold=1.0, we check that equation with maximal complexity is selected (because threshold=1.0 selects
     # the equation that minimizes the loss, i.e. the equation with maximum complexity of the Pareto front)
     if threshold_for_model_selection == 1.0:
@@ -25,19 +42,19 @@ def test_threshold_for_model_selection(threshold_for_model_selection):
 @pytest.mark.parametrize("threshold_for_model_selection", [0.5, 2])
 def test_invalid_threshold_for_model_selection(threshold_for_model_selection):
     with pytest.raises(AssertionError):
-        load_pysr_emulator_for_test(threshold_for_model_selection=threshold_for_model_selection)
+        Emulator(niterations=1, threshold_for_model_selection=threshold_for_model_selection)
 
 
 @pytest.mark.repeat(2)
 def test_deterministic_and_compute_loss():
-    emulator = load_pysr_emulator_for_test()
+    emulator = Emulator(niterations=1)
     X, y = load_X_and_y_for_test()
     emulator.fit(X, y)
     # Assert that the fit of the emulator is deterministic
     np.testing.assert_almost_equal(float(sum(emulator.loss_list)), 35698077.642941765)
 
 def test_loss():
-    emulator = load_pysr_emulator_for_test()
+    emulator = Emulator(niterations=1)
     X, y = load_X_and_y_for_test()
     emulator.fit(X, y)
     # Assert that the method compute_loss of the emulator is consistent with the loss column
@@ -59,7 +76,7 @@ list_of_X_units_and_expected_variable_names = [
 def test_units(X_units_and_expected_variable_names):
     # We force dimensionless constants for the test, because otherwise any variable (with any unit)
     # could be used in the equation, as long as it is multiplied by a constant that map its unit to the expected unit
-    emulator = load_pysr_emulator_for_test(dimensionless_constants_only=True)
+    emulator = Emulator(niterations=1, dimensionless_constants_only=True)
     X_units, expected_variable_names = X_units_and_expected_variable_names
     y_units = ['m']
     nb_features = len(X_units)
@@ -72,7 +89,7 @@ def test_units(X_units_and_expected_variable_names):
     assert list(sorted_selected_variable_names) == expected_variable_names
 
 def test_composed_units():
-    emulator = load_pysr_emulator_for_test(dimensionless_constants_only=True)
+    emulator = Emulator(niterations=1, dimensionless_constants_only=True)
     X_units = ['', 'yr', 's^-1', 'm/s']
     y_units = ['m']
     nb_features = len(X_units)

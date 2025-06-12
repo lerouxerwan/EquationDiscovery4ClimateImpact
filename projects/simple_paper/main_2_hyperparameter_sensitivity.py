@@ -49,6 +49,9 @@ def main_hyperparameter_sensitivity(fast: bool = False):
     df = df.sort_values(by=gap_column_name)
     print(df.head())
     print_df_latex(df)
+    print(df['Parameter'].to_list())
+
+# ['weight insert node', 'weight delete node', 'populations', 'fraction replaced hof', 'weight simplify', 'weight randomize', 'weight rotate tree', 'weight mutate operator', 'weight add node', 'tournament selection n', 'topn', 'perturbation factor', 'weight do nothing', 'unary operators', 'population size', 'maxsize', 'weight swap operands', 'ncycles per iteration', 'weight mutate constant', 'tournament selection p', 'weight optimize', 'warmup maxsize by', 'optimize probability', 'crossover probability', 'fraction replaced', 'adaptive parsimony scaling', 'niterations', 'probability negate constant', 'optimizer f calls limit']
 
 
 

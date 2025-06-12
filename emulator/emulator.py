@@ -361,6 +361,10 @@ class Emulator(PySRRegressor):
         return self.equations_['score'].to_list()
 
     @property
+    def selected_loss(self):
+        return self.selected_row['loss']
+
+    @property
     def expr_list(self) -> list[Expr]:
         """List of sympy expressions for the equations of the Pareto front"""
         return self.equations_['sympy_format'].to_list()
