@@ -13,7 +13,6 @@ from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_experiment.experiment import Experiment
 from data.utils_experiment.utils_experiment_path import get_experiment_path
 from emulator.utils_potential_contributions.utils_data_augmentation import apply_data_augmentation
-from emulator.utils_potential_contributions.utils_weighted_loss import get_weights
 from plot.utils_metric.metric import Metric, metric_to_function
 from utils.utils_log import log_info
 from utils.utils_non_default_params import get_non_default_params
@@ -49,9 +48,6 @@ class Emulator(PySRRegressor):
         data_augmentation_sigma: float
             Sigma for the noise to create new data by data augmentation
             Default is 1.
-        weighted_loss_ratio: float
-            Ratio between the largest weight (for most extreme values) and the smallest weight 1.0 (for middle values)
-            Default is 1., which means that weights are not considered
 
     -> modification of the default value for some parameters:
         -randomness is fixed for reproducibility
@@ -110,7 +106,6 @@ class Emulator(PySRRegressor):
                  # Additional parameters for potential contributions (which are deactivated by default)
                  data_augmentation_ratio: int = 1,
                  data_augmentation_sigma: float = 1.0,
-                 weighted_loss_ratio: float = 1.0,
                  **kwargs):
         # Randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
         if random_state is None:
@@ -162,13 +157,10 @@ class Emulator(PySRRegressor):
         self.niterations_warmup_maxsize = niterations_warmup_maxsize
         self.data_augmentation_ratio = data_augmentation_ratio
         self.data_augmentation_sigma = data_augmentation_sigma
-        self.weighted_loss_ratio = weighted_loss_ratio
         # Some checks
         assert self.niterations_warmup_maxsize is None or isinstance(self.niterations_warmup_maxsize, int)
         assert isinstance(self.data_augmentation_ratio, int)
         assert isinstance(self.data_augmentation_sigma, float)
-        assert isinstance(self.weighted_loss_ratio, float)
-        assert self.weighted_loss_ratio >= 1.
         # Avoid some cases where the Julia code of PySR crashes
         assert self.population_size > 0
         assert self.tournament_selection_n > 0
@@ -260,8 +252,6 @@ class Emulator(PySRRegressor):
         # Apply data augmentation
         if self.data_augmentation_ratio > 1:
             X, y = apply_data_augmentation(X, y, self.data_augmentation_ratio, self.data_augmentation_sigma)
-        # Compute weights
-        weights = get_weights(y, self.weighted_loss_ratio) if self.weighted_loss_ratio > 1. else None
         # Fit with logging
         # By default, we log with tensorboard the progress for each iteration of the experiment
         # See https://github.com/MilesCranmer/PySR/discussions/840 for more details on log_interval"""
@@ -273,7 +263,7 @@ class Emulator(PySRRegressor):
             X_fit, y_fit = X, y
         else:
             X_fit, y_fit = get_X_and_y(X, y, validation_mask, validation_set=False)
-        super().fit(X_fit, y_fit, weights=weights, variable_names=variable_names, X_units=X_units, y_units=y_units)
+        super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
         if logging:
             self.logger_spec = True

@@ -1,5 +1,3 @@
-from collections import Counter
-
 import numpy as np
 import pytest
 from sympy import Symbol
@@ -8,7 +6,6 @@ from data.utils_dataset.utils_validation import get_X_and_y
 from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from emulator.utils_potential_contributions.utils_data_augmentation import apply_data_augmentation
-from emulator.utils_potential_contributions.utils_weighted_loss import get_weights
 from tests.data.utils_tests_dataset import load_X_and_y_and_validation_mask_for_test, load_X_and_y_for_test
 
 
@@ -80,25 +77,6 @@ def test_data_augmentation(data_augmentation_ratio: int):
     # data augmentation of y should only contain copies of y (no noise)
     assert y[0] == y_augmented[0]
     assert y[-1] == y_augmented[-1]
-
-@pytest.mark.parametrize("weighted_loss_ratio", [2, 10])
-def test_weighted_loss(weighted_loss_ratio):
-    X, y = load_X_and_y_for_test()
-    weights = get_weights(y, weighted_loss_ratio)
-    assert all([1. <= weight <= weighted_loss_ratio for weight in weights])
-    # Largest weights
-    assert weights[np.argmax(y)] == weighted_loss_ratio
-    assert weights[np.argmin(y)] == weighted_loss_ratio
-    # Smallest weight
-    assert 1 <= Counter(list(weights))[1.0] <= 2
-
-def test_weighted_loss_special_case():
-    weighted_loss_ratio = 3
-    assert [int(v) for v in get_weights(np.array([-2, -1, 0, 1, 2]), weighted_loss_ratio)] == [3, 2, 1, 2, 3]
-    assert [int(v) for v in get_weights(np.array([0, -1, 2, 1, -2]), weighted_loss_ratio)] == [1, 2, 3, 2, 3]
-    weighted_loss_ratio = 2
-    assert [int(v) for v in get_weights(np.array([10, 11, 12, 13]), weighted_loss_ratio)] == [2, 1, 1, 2]
-    assert [int(v) for v in get_weights(np.array([13, 10, 11, 12]), weighted_loss_ratio)] == [2, 2, 1, 1]
 
 @pytest.mark.parametrize("emulator_type", [Emulator, EmulatorWithSearch])
 def test_niterations_warmup_maxsize(emulator_type: type):

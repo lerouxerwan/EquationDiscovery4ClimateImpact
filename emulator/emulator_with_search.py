@@ -93,7 +93,6 @@ class EmulatorWithSearch(Emulator):
                  niterations_warmup_maxsize: int | None = None,
                  data_augmentation_ratio: int = 1,
                  data_augmentation_sigma: float = 1.0,
-                 weighted_loss_ratio: float = 1.0,
                  # Additional parameters
                  search_style: Optional[str] = None,
                  n_iter: int = 10,
@@ -143,8 +142,7 @@ class EmulatorWithSearch(Emulator):
                          extra_sympy_mappings=extra_sympy_mappings, extra_torch_mappings=extra_torch_mappings,
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          niterations_warmup_maxsize=niterations_warmup_maxsize,
-                         data_augmentation_ratio=data_augmentation_ratio, data_augmentation_sigma=data_augmentation_sigma,
-                         weighted_loss_ratio=weighted_loss_ratio, **kwargs)
+                         data_augmentation_ratio=data_augmentation_ratio, data_augmentation_sigma=data_augmentation_sigma, **kwargs)
         self.search_style = 'random' if search_style is None else search_style
         self.n_iter = n_iter
         self.n_jobs = n_jobs
