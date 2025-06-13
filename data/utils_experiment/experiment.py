@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Optional, Any
 
+import numpy as np
 import pandas as pd
 from pysr import TensorBoardLoggerSpec
 
@@ -13,6 +14,7 @@ from data.utils_experiment.utils_experiment_path import CSV_FILENAME, \
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
     get_cv_results_column_name, RMSE_VALIDATION_COLUMN_NAME, COMPLEXITY_COLUMN_NAME, \
     VARIABLE_NAMES_COLUMN_NAME, RMSE_TEST_COLUMN_NAME, FIT_TIME_COLUMN_NAME
+from plot.utils_metric.utils_metric_function import mean_relative_absolute_error
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -103,6 +105,34 @@ class Experiment(object):
         # Cast some columns to their original type
         df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].apply(string_to_dict)
         return df_cv_results
+
+    """Metric for some experiments"""
+
+    @property
+    def percentage_of_best_same_as_validated(self) -> int:
+        return int(100 * self.ind_best_same_as_validated.mean())
+
+    @property
+    def ind_best_same_as_validated(self) -> pd.Series:
+        data = [c1 == c2 for c1, c2 in zip(self.get_complexity_values("best"), self.get_complexity_values("validated"))]
+        return pd.Series(index=self.df_cv_results.index, data=data)
+
+    def get_complexity_values(self, model_selection: str) -> np.ndarray:
+        return self.df_cv_results[get_cv_results_column_name(model_selection, COMPLEXITY_COLUMN_NAME)].values
+
+    @property
+    def mean_difference_in_rmse_validation_for_best_not_same_as_validated(self) -> float:
+        rmse_validation_best = self.get_rmse_validation_values_for_best_not_same_as_validation('best')
+        rmse_validation_validated = self.get_rmse_validation_values_for_best_not_same_as_validation('validated')
+        assert all([rmse_best >= rmse_validated for rmse_best, rmse_validated in zip(rmse_validation_best, rmse_validation_validated)])
+        return -mean_relative_absolute_error(rmse_validation_best, rmse_validation_validated)
+
+    def get_rmse_validation_values_for_best_not_same_as_validation(self, model_selection: str) -> np.ndarray:
+        series_rmse_validation = self.df_cv_results[get_cv_results_column_name(model_selection, RMSE_VALIDATION_COLUMN_NAME)]
+        return series_rmse_validation.loc[~self.ind_best_same_as_validated].values
+
+
+
 
     """Filepaths"""
 
