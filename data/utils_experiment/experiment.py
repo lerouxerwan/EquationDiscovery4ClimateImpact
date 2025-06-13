@@ -9,7 +9,7 @@ import pandas as pd
 from pysr import TensorBoardLoggerSpec
 
 from data.utils_experiment.utils_experiment_path import CSV_FILENAME, \
-    JSON_FILENAME, CHILDREN_FILENAME, PARENT_FILENAME, SYMBOLIC_LINK_FILENAME
+    JSON_FILENAME, SYMBOLIC_LINK_FILENAME
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
     get_cv_results_column_name, RMSE_VALIDATION_COLUMN_NAME, COMPLEXITY_COLUMN_NAME, \
     VARIABLE_NAMES_COLUMN_NAME, RMSE_TEST_COLUMN_NAME
@@ -103,14 +103,6 @@ class Experiment(object):
         return op.join(self.experiment_path, JSON_FILENAME)
 
     @property
-    def filepath_children(self) -> str:
-        return op.join(self.experiment_path, CHILDREN_FILENAME)
-
-    @property
-    def filepath_parent(self) -> str:
-        return op.join(self.experiment_path, PARENT_FILENAME)
-
-    @property
     def filepath_symbolic_link(self) -> str:
         return op.join(self.experiment_path, SYMBOLIC_LINK_FILENAME)
 
@@ -154,8 +146,7 @@ class Experiment(object):
     def remove_folder(self):
         # Remove files
         filepaths = [self.filepath_non_default_params, self.filepath_search_result,
-                     self.filepath_children, self.filepath_parent, self.filepath_duration,
-                     self.filepath_tensorboard_command]
+                     self.filepath_duration, self.filepath_tensorboard_command]
         if op.exists(self.log_dir):
             filepaths += [op.join(self.log_dir, f) for f in os.listdir(self.log_dir)]
         for filepath in filepaths:

@@ -8,8 +8,6 @@ from utils.utils_path import EXPERIMENT_PATH
 
 CSV_FILENAME = 'cv_results.csv'
 JSON_FILENAME = 'params_emulator.json'
-CHILDREN_FILENAME = 'children.txt'
-PARENT_FILENAME = 'parent.txt'
 SYMBOLIC_LINK_FILENAME = 'plot_path'
 
 
