@@ -27,24 +27,6 @@ def test_emulator_fit(with_validation_mask: bool):
     for loss_from_dataframe, loss_computed in zip(emulator.loss_list, loss_list):
         np.testing.assert_almost_equal(float(loss_from_dataframe), loss_computed)
 
-
-@pytest.mark.parametrize("threshold_for_model_selection", [1.0, 1.5, 2.0])
-def test_threshold_for_model_selection(threshold_for_model_selection):
-    emulator = Emulator(niterations=1, threshold_for_model_selection=threshold_for_model_selection)
-    X, y = load_X_and_y_for_test()
-    emulator.fit(X, y)
-    # For threshold=1.0, we check that equation with maximal complexity is selected (because threshold=1.0 selects
-    # the equation that minimizes the loss, i.e. the equation with maximum complexity of the Pareto front)
-    if threshold_for_model_selection == 1.0:
-        maximum_complexity = emulator.equations_['complexity'].iloc[-1]
-        assert emulator.selected_complexity == maximum_complexity
-
-@pytest.mark.parametrize("threshold_for_model_selection", [0.5, 2])
-def test_invalid_threshold_for_model_selection(threshold_for_model_selection):
-    with pytest.raises(AssertionError):
-        Emulator(niterations=1, threshold_for_model_selection=threshold_for_model_selection)
-
-
 @pytest.mark.repeat(2)
 def test_deterministic_and_compute_loss():
     emulator = Emulator(niterations=1)

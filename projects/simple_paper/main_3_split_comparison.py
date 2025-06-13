@@ -19,7 +19,7 @@ def main_split_comparison(fast: bool = False):
     n_iter = 1 if fast else 10
     model_selections = ['best', 'validated']
     validation_splits = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END][:1]
-    search_strategies = [SearchStrategy.TOP10_FULL_RANGE, SearchStrategy.ALL_FULL_RANGE][:1]
+    search_strategies = [SearchStrategy.TOP10_FULL_RANGE, SearchStrategy.ALL_FULL_RANGE][:]
     # Run emulator fit (and get experiment) for every validation_splits and every search_strategies
     validation_split_to_experiment_paths = OrderedDict()
     for validation_split in validation_splits:
@@ -63,4 +63,4 @@ def compute_and_save_test_rmse(emulator: Emulator, dataset: Dataset, model_selec
         emulator.experiment_.save_search_results(df, emulator.non_default_params)
 
 if __name__ == '__main__':
-    main_split_comparison(fast=True)
+    main_split_comparison(fast=False)

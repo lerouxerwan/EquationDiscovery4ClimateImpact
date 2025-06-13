@@ -20,7 +20,7 @@ def get_hash_str(*iterables) -> str:
 
 def get_hash_params(params: dict[str, Any]) -> list[tuple[Any] | Any]:
     """Summarize all parameters as list (but do not include model_selection_threshold and logger_spec)"""
-    params_to_remove = {'threshold_for_model_selection', 'logger_spec'}
+    params_to_remove = {'logger_spec'}
     l = []
     for k,v in sorted(list(params.items()), key=itemgetter(0)):
         if k not in params_to_remove:
