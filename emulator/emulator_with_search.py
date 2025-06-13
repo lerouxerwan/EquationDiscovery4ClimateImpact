@@ -91,8 +91,6 @@ class EmulatorWithSearch(Emulator):
                  extra_jax_mappings: dict[Callable, str] | None = None, denoise: bool = False,
                  select_k_features: int | None = None,
                  niterations_warmup_maxsize: int | None = None,
-                 data_augmentation_ratio: int = 1,
-                 data_augmentation_sigma: float = 1.0,
                  # Additional parameters
                  search_style: Optional[str] = None,
                  n_iter: int = 10,
@@ -141,8 +139,7 @@ class EmulatorWithSearch(Emulator):
                          update=update, output_jax_format=output_jax_format, output_torch_format=output_torch_format,
                          extra_sympy_mappings=extra_sympy_mappings, extra_torch_mappings=extra_torch_mappings,
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
-                         niterations_warmup_maxsize=niterations_warmup_maxsize,
-                         data_augmentation_ratio=data_augmentation_ratio, data_augmentation_sigma=data_augmentation_sigma, **kwargs)
+                         niterations_warmup_maxsize=niterations_warmup_maxsize, **kwargs)
         self.search_style = 'random' if search_style is None else search_style
         self.n_iter = n_iter
         self.n_jobs = n_jobs

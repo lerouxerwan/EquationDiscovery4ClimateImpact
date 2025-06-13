@@ -12,7 +12,6 @@ from sympy import Expr, Symbol
 from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_experiment.experiment import Experiment
 from data.utils_experiment.utils_experiment_path import get_experiment_path
-from emulator.utils_potential_contributions.utils_data_augmentation import apply_data_augmentation
 from plot.utils_metric.metric import Metric, metric_to_function
 from utils.utils_log import log_info
 from utils.utils_non_default_params import get_non_default_params
@@ -40,14 +39,6 @@ class Emulator(PySRRegressor):
             Number of iterations for warmup (slowly increase max size from a small number up to the maxsize)
             This number of iterations is when the current maxsize will reach the user-passed maxsize.
             Default is None
-
-    -> more additional parameters for some contributions/tricks that are deactivated by default
-        data_augmentation_ratio: int
-            Number of times the number of datapoints augments with data augmentation
-            Default is 1, i.e. no data augmentation
-        data_augmentation_sigma: float
-            Sigma for the noise to create new data by data augmentation
-            Default is 1.
 
     -> modification of the default value for some parameters:
         -randomness is fixed for reproducibility
@@ -103,9 +94,6 @@ class Emulator(PySRRegressor):
                  select_k_features: int | None = None,
                  # Additional parameters
                  niterations_warmup_maxsize: int | None = None,
-                 # Additional parameters for potential contributions (which are deactivated by default)
-                 data_augmentation_ratio: int = 1,
-                 data_augmentation_sigma: float = 1.0,
                  **kwargs):
         # Randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
         if random_state is None:
@@ -155,15 +143,8 @@ class Emulator(PySRRegressor):
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          **kwargs)
         self.niterations_warmup_maxsize = niterations_warmup_maxsize
-        self.data_augmentation_ratio = data_augmentation_ratio
-        self.data_augmentation_sigma = data_augmentation_sigma
         # Some checks
         assert self.niterations_warmup_maxsize is None or isinstance(self.niterations_warmup_maxsize, int)
-        assert isinstance(self.data_augmentation_ratio, int)
-        assert isinstance(self.data_augmentation_sigma, float)
-        # Avoid some cases where the Julia code of PySR crashes
-        assert self.population_size > 0
-        assert self.tournament_selection_n > 0
         # Change default dimensional_constraint_penalty
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
@@ -248,10 +229,6 @@ class Emulator(PySRRegressor):
         Parameters & Results
         ----------
         Same as the self.fit method"""
-        # Potential preprocessing (data augmentation, weights computing) before the fit that are deactivate by default
-        # Apply data augmentation
-        if self.data_augmentation_ratio > 1:
-            X, y = apply_data_augmentation(X, y, self.data_augmentation_ratio, self.data_augmentation_sigma)
         # Fit with logging
         # By default, we log with tensorboard the progress for each iteration of the experiment
         # See https://github.com/MilesCranmer/PySR/discussions/840 for more details on log_interval"""

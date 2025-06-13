@@ -5,7 +5,6 @@ from sympy import Symbol
 from data.utils_dataset.utils_validation import get_X_and_y
 from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
-from emulator.utils_potential_contributions.utils_data_augmentation import apply_data_augmentation
 from tests.data.utils_tests_dataset import load_X_and_y_and_validation_mask_for_test, load_X_and_y_for_test
 
 
@@ -64,19 +63,6 @@ def test_composed_units():
     variable_names = [f'x{i+1}' for i in range(nb_features)]
     emulator.fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
-
-@pytest.mark.parametrize("data_augmentation_ratio", [2, 3])
-def test_data_augmentation(data_augmentation_ratio: int):
-    X, y = load_X_and_y_for_test()
-    X_augmented, y_augmented = apply_data_augmentation(X, y, data_augmentation_ratio, data_augmentation_sigma=1.0)
-    assert len(X_augmented) == data_augmentation_ratio * len(X)
-    assert len(y_augmented) == data_augmentation_ratio * len(y)
-    # data augmentation of X (with added noise) must be located in the end
-    assert X[0] == X_augmented[0]
-    assert X[-1] != X_augmented[-1]
-    # data augmentation of y should only contain copies of y (no noise)
-    assert y[0] == y_augmented[0]
-    assert y[-1] == y_augmented[-1]
 
 @pytest.mark.parametrize("emulator_type", [Emulator, EmulatorWithSearch])
 def test_niterations_warmup_maxsize(emulator_type: type):
