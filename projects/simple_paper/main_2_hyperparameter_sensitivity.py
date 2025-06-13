@@ -69,4 +69,4 @@ def main_hyperparameter_sensitivity(fast: bool = False):
 
 
 if __name__ == '__main__':
-    main_hyperparameter_sensitivity(fast=True)
+    main_hyperparameter_sensitivity(fast=False)
