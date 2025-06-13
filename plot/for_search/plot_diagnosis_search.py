@@ -25,7 +25,7 @@ def plot_summary_experiment(experiment: Experiment, show: Optional[bool] = False
     for model_selection in ['best', 'validated']:
         experiment.model_selection = model_selection
         column_names = get_cv_results_column_names(model_selection)[:3]
-        df_list.append(experiment.df_cv_results.loc[:, column_names])
+        df_list.append(experiment.df_cv_results.loc[:, column_names].copy())
     df = pd.concat(df_list, axis=1)
     df.rename(columns={c: c.replace('_', ' ') for c in df.columns }, inplace=True)
     df.rename(columns={c: c.replace('validation', 'val') for c in df.columns }, inplace=True)

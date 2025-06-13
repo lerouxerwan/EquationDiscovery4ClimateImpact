@@ -14,7 +14,7 @@ def plot_selection_rate_features_top_equations(dataset: Dataset, experiment: Exp
                                                nb_top_equations: int = 10, show: bool = False,
                                                plot_folder: Optional[str] = None):
     """Plot the selected features for top equations"""
-    df = experiment.df_cv_results
+    df = experiment.df_cv_results.copy()
     if len(df) >= nb_top_equations:
         ax = plt.gca()
         # Gather feature indexes from the top 10 equations

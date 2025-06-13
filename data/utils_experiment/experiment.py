@@ -12,7 +12,7 @@ from data.utils_experiment.utils_experiment_path import CSV_FILENAME, \
     JSON_FILENAME, SYMBOLIC_LINK_FILENAME
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
     get_cv_results_column_name, RMSE_VALIDATION_COLUMN_NAME, COMPLEXITY_COLUMN_NAME, \
-    VARIABLE_NAMES_COLUMN_NAME, RMSE_TEST_COLUMN_NAME
+    VARIABLE_NAMES_COLUMN_NAME, RMSE_TEST_COLUMN_NAME, FIT_TIME_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -59,6 +59,17 @@ class Experiment(object):
         return self.top_series.loc[PARAMS_EMULATOR_COLUMN_NAME]
 
     @property
+    def top_fit_time(self) -> float:
+        """Duration for the fit"""
+        return self.top_series.loc[FIT_TIME_COLUMN_NAME]
+
+    @property
+    def max_fit_time(self) -> float:
+        """Max duration for the fit (between all the hyperparameter settings tested)"""
+        return self.df_cv_results[FIT_TIME_COLUMN_NAME].max()
+
+
+    @property
     def top_rmse_validation(self) -> float:
         return self.top_series.loc[self.rmse_validation_column_name]
 
@@ -70,6 +81,7 @@ class Experiment(object):
     def top_rmse_test(self) -> float:
         return self.top_series.loc[self.rmse_test_column_name]
 
+
     """Save & Load search results"""
 
     def save_search_results(self, df_cv_results: pd.DataFrame, non_default_params: dict[str, Any]) -> None:
@@ -80,7 +92,7 @@ class Experiment(object):
         with open(self.filepath_non_default_params, 'w') as fp:
             json.dump(non_default_params, fp, sort_keys=True, indent=4)
 
-    @property
+    @cached_property
     def df_cv_results(self) -> pd.DataFrame:
         """Dataframe with search results. During loading, it is ordered based on the self.model_selection attribute"""
         log_info('Load search results from files')
