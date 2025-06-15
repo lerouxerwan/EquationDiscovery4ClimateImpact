@@ -13,7 +13,7 @@ from data.utils_experiment.utils_experiment_path import CSV_FILENAME, \
     JSON_FILENAME, SYMBOLIC_LINK_FILENAME
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
     get_cv_results_column_name, RMSE_VALIDATION_COLUMN_NAME, COMPLEXITY_COLUMN_NAME, \
-    VARIABLE_NAMES_COLUMN_NAME, RMSE_TEST_COLUMN_NAME, FIT_TIME_COLUMN_NAME
+    VARIABLE_NAMES_COLUMN_NAME, RMSE_TEST_COLUMN_NAME, FIT_TIME_COLUMN_NAME, PARAMS_COLUMN_NAME
 from plot.utils_metric.utils_metric_function import mean_relative_absolute_error
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
@@ -70,6 +70,11 @@ class Experiment(object):
         """Max duration for the fit (between all the hyperparameter settings tested)"""
         return self.df_cv_results[FIT_TIME_COLUMN_NAME].max()
 
+    @property
+    def mean_fit_time(self) -> float:
+        """Mean duration for the fit (between all the hyperparameter settings tested)"""
+        return self.df_cv_results[FIT_TIME_COLUMN_NAME].mean()
+
 
     @property
     def top_rmse_validation(self) -> float:
@@ -103,7 +108,8 @@ class Experiment(object):
         # Sort the DataFrame by their predictive performance on the validation set for self.model_selection
         df_cv_results = df_cv_results.sort_values(by=self.rmse_validation_column_name)
         # Cast some columns to their original type
-        df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].apply(string_to_dict)
+        for column_name in [PARAMS_COLUMN_NAME, PARAMS_EMULATOR_COLUMN_NAME]:
+            df_cv_results[column_name] = df_cv_results[column_name].apply(string_to_dict)
         return df_cv_results
 
     """Metric for some experiments"""

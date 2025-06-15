@@ -18,7 +18,7 @@ def get_param_name_to_values():
         "maxsize": list(range(13, 41, 3)),
         "warmup_maxsize_by": probability_values,
         'niterations': up_and_down_factors_int(100),
-        'populations': up_and_down_factors_int(31),
+        'populations': [2] + up_and_down_factors_int(31)[1:], # avoid having 2 times the value "3" in the list
         'population_size': [3 * i + 17 for i in range(10)],
         'ncycles_per_iteration': up_and_down_factors_int(380),
         'topn': nb_of_members,
@@ -42,8 +42,6 @@ def get_param_name_to_values():
         default_param_value = emulator_with_default_params.get_params()[param_name]
         param_name_to_values[param_name] = up_and_down_factors(default_param_value)
 
-    # param_name_to_values = {"unary_operators": param_name_to_values["unary_operators"]}
-
     return param_name_to_values
 
 def relative_error(true: float, pred: float) -> float:
@@ -52,4 +50,8 @@ def relative_error(true: float, pred: float) -> float:
 
 if __name__ == '__main__':
     # print(list(range(1, 21, 2)))
-    print([3 * i + 17 for i in range(10)])
+    # print([3 * i + 17 for i in range(10)])
+    for param_name, param_values in get_param_name_to_values().items():
+        if param_name != 'unary_operators':
+            if len(set(param_values)) != len(param_values):
+                print(param_name, param_values)

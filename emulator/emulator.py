@@ -190,7 +190,7 @@ class Emulator(PySRRegressor):
         -------
         self : object
             Fitted estimator"""
-        log_info('Start fit emulator')
+        log_info(f'Start fit emulator with {self.non_default_params}')
         # Some checks
         assert isinstance(X, np.ndarray) and isinstance(y, np.ndarray)
         assert isinstance(validation_mask, np.ndarray) or validation_mask is None

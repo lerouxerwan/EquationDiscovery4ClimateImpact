@@ -1,4 +1,5 @@
 # General column names
+PARAMS_COLUMN_NAME = 'params'
 PARAMS_EMULATOR_COLUMN_NAME = 'params_emulator'
 FIT_TIME_COLUMN_NAME = 'mean_fit_time'
 
