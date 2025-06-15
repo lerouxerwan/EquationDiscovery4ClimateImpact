@@ -22,20 +22,21 @@ TOP_FIT_TIME = 'Top duration (s)'
 MAX_FIT_TIME = 'Max duration (s)'
 MEAN_FIT_TIME = 'Average \\newline duration (s)'
 
+column_name_to_format = {
+    HYPERPARAMETER_NAME_COLUMN_NAME: 'p{40mm}',
+    DEFAULT_VALUE_COLUMN_NAME: 'p{15mm}',
+    TOP_VALUE_COLUMN_NAME: 'p{28mm}',
+    TOP_COMPLEXITY_COLUMN_NAME: 'p{30mm}',
+    TOP_RMSE_COLUMN_NAME: 'p{16mm}',
+    MEAN_FIT_TIME: 'p{25mm}',
+    RELATIVE_DIFFERENCE_COLUMN_NAME: 'p{35mm}',
+}
 
 def main_hyperparameter_sensitivity(fast: bool = False):
     for model_selection in ['validated', 'best'][:]:
         df = compute_df(fast, model_selection)
         log_info(f'RESULTS FOR {model_selection}')
-        column_name_to_format = {
-            HYPERPARAMETER_NAME_COLUMN_NAME: 'p{40mm}',
-            DEFAULT_VALUE_COLUMN_NAME: 'p{15mm}',
-            TOP_VALUE_COLUMN_NAME: 'p{28mm}',
-            TOP_COMPLEXITY_COLUMN_NAME: 'p{30mm}',
-            TOP_RMSE_COLUMN_NAME: 'p{16mm}',
-            MEAN_FIT_TIME: 'p{25mm}',
-            RELATIVE_DIFFERENCE_COLUMN_NAME: 'p{35mm}',
-        }
+
         print_df_latex(df, column_format=''.join([column_name_to_format[c] for c in df.columns]))
         ordered_names = [param_name.replace(' ', '_') for param_name in df[HYPERPARAMETER_NAME_COLUMN_NAME].to_list()]
         print(f'\n Ordered list of hyperparameters for {model_selection}:', ordered_names)
