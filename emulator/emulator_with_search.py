@@ -174,6 +174,7 @@ class EmulatorWithSearch(Emulator):
             self.run_and_save_hyperparameter_search(X, y, validation_mask, variable_names, X_units, y_units)
         # Refit with the top setting of hyperparameter on the train split
         if refit:
+            log_info("Fit with top params")
             self.set_params(**self.experiment_.top_params)
             super()._fit(X, y, validation_mask, variable_names, X_units, y_units)
         return self

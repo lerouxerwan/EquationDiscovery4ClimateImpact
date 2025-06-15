@@ -8,12 +8,13 @@ from typing import Optional, Any
 import numpy as np
 import pandas as pd
 from pysr import TensorBoardLoggerSpec
+from sympy import Expr
 
 from data.utils_experiment.utils_experiment_path import CSV_FILENAME, \
     JSON_FILENAME, SYMBOLIC_LINK_FILENAME
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
     get_cv_results_column_name, RMSE_VALIDATION_COLUMN_NAME, COMPLEXITY_COLUMN_NAME, \
-    VARIABLE_NAMES_COLUMN_NAME, RMSE_TEST_COLUMN_NAME, FIT_TIME_COLUMN_NAME, PARAMS_COLUMN_NAME
+    VARIABLE_NAMES_COLUMN_NAME, RMSE_TEST_COLUMN_NAME, FIT_TIME_COLUMN_NAME, PARAMS_COLUMN_NAME, EXPR_COLUMN_NAME
 from plot.utils_metric.utils_metric_function import mean_relative_absolute_error
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
@@ -43,6 +44,10 @@ class Experiment(object):
     @property
     def complexity_column_name(self) -> str:
         return get_cv_results_column_name(self.model_selection, COMPLEXITY_COLUMN_NAME)
+
+    @property
+    def expr_column_name(self) -> str:
+        return get_cv_results_column_name(self.model_selection, EXPR_COLUMN_NAME)
 
     @property
     def variable_names_column_name(self) -> str:
@@ -83,6 +88,10 @@ class Experiment(object):
     @property
     def top_complexity(self) -> int:
         return self.top_series.loc[self.complexity_column_name]
+
+    @property
+    def top_expr(self) -> Expr:
+        return self.top_series.loc[self.expr_column_name]
 
     @property
     def top_rmse_test(self) -> float:

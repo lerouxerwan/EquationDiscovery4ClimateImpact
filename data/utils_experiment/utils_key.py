@@ -21,18 +21,18 @@ def get_hash_str(*iterables) -> str:
 def get_hash_params(params: dict[str, Any]) -> list[tuple[Any] | Any]:
     """Summarize all parameters as list (but do not include model_selection and logger_spec)"""
     params_to_remove = {'logger_spec', 'model_selection'}
+    params_loop = {k: v for k, v in params.items() if k not in params_to_remove}
     entire_hash_params = []
-    for k, v in sorted(list(params.items()), key=itemgetter(0)):
-        if k not in params_to_remove:
-            if isinstance(v ,(float, int)):
-                hash_params = (k, v)
-            elif isinstance(v, (list, str)):
-                hash_params = tuple([k]) + tuple(v)
-            elif isinstance(v, dict):
-                hash_params =  tuple([k])  + tuple(get_hash_params(v))
-            else:
-                raise ValueError(f'type(v)={type(v)} with v={v}')
-            entire_hash_params.append(hash_params)
+    for k, v in sorted(list(params_loop.items()), key=itemgetter(0)):
+        if isinstance(v ,(float, int)):
+            hash_params = (k, v)
+        elif isinstance(v, (list, str)):
+            hash_params = tuple([k]) + tuple(v)
+        elif isinstance(v, dict):
+            hash_params =  tuple([k])  + tuple(get_hash_params(v))
+        else:
+            raise ValueError(f'type(v)={type(v)} with v={v}')
+        entire_hash_params.append(hash_params)
     return entire_hash_params
 
 
