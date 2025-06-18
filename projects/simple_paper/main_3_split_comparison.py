@@ -17,7 +17,7 @@ from utils.utils_log import log_info
 
 
 def main_split_comparison(fast: bool = False):
-    n_iter = 10 if fast else 50
+    n_iter = 10 if fast else 25
     model_selections = ['best', 'validated']
     validation_splits = [ValidationSplit.RCP_START, ValidationSplit.EXTREME, ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END][:]
     search_strategies = [SearchStrategy.TOP5_VALIDATED, SearchStrategy.TOP5_BEST][:]
@@ -82,4 +82,4 @@ def _compute_and_save_test_rmse(emulator: Emulator, dataset: Dataset, model_sele
     emulator.experiment_.save_search_results(df, emulator.non_default_params)
 
 if __name__ == '__main__':
-    main_split_comparison(fast=True)
+    main_split_comparison(fast=False)

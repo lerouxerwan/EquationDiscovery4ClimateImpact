@@ -31,6 +31,15 @@ class Experiment(object):
         if not op.exists(self.experiment_path):
             os.makedirs(self.experiment_path)
 
+    @property
+    def run_id(self) -> str:
+        return op.basename(self.experiment_path)
+
+    @property
+    def output_directory(self) -> str:
+        return op.dirname(self.experiment_path)
+
+
     """Properties depending on self.model_selection"""
 
     @property

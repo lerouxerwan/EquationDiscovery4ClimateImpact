@@ -48,6 +48,7 @@ class Emulator(PySRRegressor):
         -logger_spec set to True (in this case, in the fit function, a more specific logger will be set)"""
     experiment_: Optional[Experiment]
 
+
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "validated"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
                  expression_spec: AbstractExpressionSpec | None = None, niterations: int = 100, populations: int = 31,
@@ -83,10 +84,10 @@ class Emulator(PySRRegressor):
                  fast_cycle: bool = False, turbo: bool = False, bumper: bool = False,
                  precision: Literal[16, 32, 64] = 32, autodiff_backend: Literal["Zygote"] | None = None,
                  random_state: int | np.random.RandomState | None = None, deterministic: bool = True,
-                 warm_start: bool = False, verbosity: int = 0, update_verbosity: int | None = None,
+                 warm_start: bool = False, verbosity: int = 1, update_verbosity: int | None = None,
                  print_precision: int = 5, progress: bool = True, logger_spec: AbstractLoggerSpec | None | bool = True,
                  input_stream: str = "stdin", run_id: str | None = None, output_directory: str | None = None,
-                 temp_equation_file: bool = True, tempdir: str | None = None, delete_tempfiles: bool = True,
+                 temp_equation_file: bool = False, tempdir: str | None = None, delete_tempfiles: bool = True,
                  update: bool = False, output_jax_format: bool = False, output_torch_format: bool = False,
                  extra_sympy_mappings: dict[str, Callable] | None = None,
                  extra_torch_mappings: dict[Callable, Callable] | None = None,
@@ -98,6 +99,8 @@ class Emulator(PySRRegressor):
         # Randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
         if random_state is None:
             random_state = random_seed
+        # Remove verbosity
+        verbosity = 0
         # Ensures that deterministic is True and parallelism is "serial"
         deterministic = True
         parallelism = "serial"
@@ -196,6 +199,11 @@ class Emulator(PySRRegressor):
         assert isinstance(validation_mask, np.ndarray) or validation_mask is None
         # Initialize self.experiment_ which defines where results/TensorBoard logs can be saved
         self.experiment_ = self.get_experiment(X, y, validation_mask)
+        # Set the corresponding attributes
+        # self.run_id_ = self.experiment_.run_id
+        # self.run_id = self.experiment_.run_id
+        # self.output_directory_ = self.experiment_.output_directory
+        # self.output_directory = self.experiment_.output_directory
         # Run self._fit method, which can be overridden in child classes, and compute its duration
         start_time = time.monotonic()
         self._fit(X, y, validation_mask, variable_names, X_units, y_units, **kwargs)
