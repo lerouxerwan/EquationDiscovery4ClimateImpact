@@ -9,7 +9,7 @@ from plot.utils_metric.metric import Metric
 
 def compute_df_cv_results(cv_results: dict, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.DataFrame:
     # Pop estimator columns from cv_results dict
-    emulators = cv_results.pop('estimator')
+    emulators: list[Emulator] = cv_results.pop('estimator')
     assert all([isinstance(emulator, Emulator) for emulator in emulators])
     # Load Dataframe from cv_results
     df_cv_results = pd.DataFrame(cv_results)
@@ -21,6 +21,9 @@ def compute_df_cv_results(cv_results: dict, X: np.ndarray, y: np.ndarray, valida
         data = [get_series(model_selection, emulator, X, y, validation_mask) for emulator in emulators]
         df_model_selection = pd.DataFrame(index=df_cv_results.index, data=data)
         df_cv_results = pd.concat([df_cv_results, df_model_selection], axis=1)
+    # Remove folder for all the emulators
+    for emulator in emulators:
+        emulator.experiment_.remove_folder()
     return df_cv_results
 
 

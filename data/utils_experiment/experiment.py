@@ -158,19 +158,6 @@ class Experiment(object):
 
 
 
-    """Filepaths"""
-
-    @property
-    def filepath_search_result(self) -> str:
-        return op.join(self.experiment_path, CSV_FILENAME)
-
-    @property
-    def filepath_non_default_params(self) -> str:
-        return op.join(self.experiment_path, JSON_FILENAME)
-
-    @property
-    def filepath_symbolic_link(self) -> str:
-        return op.join(self.experiment_path, SYMBOLIC_LINK_FILENAME)
 
     """Fit information"""
 
@@ -198,21 +185,49 @@ class Experiment(object):
     def tensorboard_command(self) -> str:
         return f"tensorboard --logdir {self.log_dir}"
 
-    @property
-    def filepath_tensorboard_command(self) -> str:
-        return op.join(self.experiment_path, 'tensorboard_command.txt')
-
     def get_logger_spec(self, log_interval: int = 1) -> Optional[TensorBoardLoggerSpec]:
         """Create a logger only if the log has not yet been saved"""
         log_already_saved = op.exists(self.log_dir) and (len(os.listdir(self.log_dir)) == 1)
         return None if log_already_saved else TensorBoardLoggerSpec(log_dir=self.log_dir, log_interval=log_interval)
+
+
+    """Filepaths"""
+
+    @property
+    def filepath_tensorboard_command(self) -> str:
+        return op.join(self.experiment_path, 'tensorboard_command.txt')
+
+    @property
+    def filepath_search_result(self) -> str:
+        return op.join(self.experiment_path, CSV_FILENAME)
+
+    @property
+    def filepath_non_default_params(self) -> str:
+        return op.join(self.experiment_path, JSON_FILENAME)
+
+    @property
+    def filepath_symbolic_link(self) -> str:
+        return op.join(self.experiment_path, SYMBOLIC_LINK_FILENAME)
+
+    @property
+    def filepath_checkpoint(self) -> str:
+        return op.join(self.experiment_path, 'checkpoint.pkl')
+
+    @property
+    def filepath_hall_of_fame(self) -> str:
+        return op.join(self.experiment_path, 'hall_of_fame.csv')
+
+    @property
+    def filepath_hall_of_fame_bak(self) -> str:
+        return op.join(self.experiment_path, 'hall_of_fame.csv.bak')
 
     """Remove folder"""
 
     def remove_folder(self):
         # Remove files
         filepaths = [self.filepath_non_default_params, self.filepath_search_result,
-                     self.filepath_duration, self.filepath_tensorboard_command]
+                     self.filepath_duration, self.filepath_tensorboard_command,
+                     self.filepath_checkpoint, self.filepath_hall_of_fame, self.filepath_hall_of_fame_bak]
         if op.exists(self.log_dir):
             filepaths += [op.join(self.log_dir, f) for f in os.listdir(self.log_dir)]
         for filepath in filepaths:

@@ -84,7 +84,7 @@ class EmulatorWithSearch(Emulator):
                  warm_start: bool = False, verbosity: int = 1, update_verbosity: int | None = None,
                  print_precision: int = 5, progress: bool = True, logger_spec: AbstractLoggerSpec | None = None,
                  input_stream: str = "stdin", run_id: str | None = None, output_directory: str | None = None,
-                 temp_equation_file: bool = False, tempdir: str | None = None, delete_tempfiles: bool = False,
+                 temp_equation_file: bool = False, tempdir: str | None = None, delete_tempfiles: bool = True,
                  update: bool = False, output_jax_format: bool = False, output_torch_format: bool = False,
                  extra_sympy_mappings: dict[str, Callable] | None = None,
                  extra_torch_mappings: dict[Callable, Callable] | None = None,

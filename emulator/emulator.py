@@ -198,10 +198,10 @@ class Emulator(PySRRegressor):
         # Initialize self.experiment_ which defines where results/TensorBoard logs can be saved
         self.experiment_ = self.get_experiment(X, y, validation_mask)
         # Set the corresponding attributes
-        # self.run_id_ = self.experiment_.run_id
-        # self.run_id = self.experiment_.run_id
-        # self.output_directory_ = self.experiment_.output_directory
-        # self.output_directory = self.experiment_.output_directory
+        self.run_id_ = self.experiment_.run_id
+        self.run_id = self.experiment_.run_id
+        self.output_directory_ = self.experiment_.output_directory
+        self.output_directory = self.experiment_.output_directory
         # Run self._fit method, which can be overridden in child classes, and compute its duration
         start_time = time.monotonic()
         self._fit(X, y, validation_mask, variable_names, X_units, y_units, **kwargs)

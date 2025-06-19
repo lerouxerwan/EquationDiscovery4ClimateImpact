@@ -24,6 +24,7 @@ def test_emulator_fit(with_validation_mask: bool):
     # See https://github.com/MilesCranmer/PySR/discussions/943 for more details on this issue
     for loss_from_dataframe, loss_computed in zip(emulator.loss_list, loss_list):
         np.testing.assert_almost_equal(float(loss_from_dataframe), loss_computed, decimal=0)
+    emulator.experiment_.remove_folder()
 
 @pytest.mark.repeat(2)
 def test_deterministic_and_compute_loss():
@@ -32,6 +33,7 @@ def test_deterministic_and_compute_loss():
     emulator.fit(X, y)
     # Assert that the fit of the emulator is deterministic
     np.testing.assert_almost_equal(float(sum(emulator.loss_list)), 35698078.93297232)
+    emulator.experiment_.remove_folder()
 
 
 list_of_X_units_and_expected_variable_names = [
@@ -55,6 +57,7 @@ def test_units(X_units_and_expected_variable_names):
     sorted_selected_variable_names = sorted([str(variable_name) for variable_name in set(selected_variable_names)])
     # The selected expression should only contain expected variable to agree with the unit of the target
     assert list(sorted_selected_variable_names) == expected_variable_names
+    emulator.experiment_.remove_folder()
 
 def test_composed_units():
     emulator = Emulator(niterations=1, dimensionless_constants_only=True)
@@ -64,7 +67,7 @@ def test_composed_units():
     X, y = load_X_and_y_for_test(nb_features=nb_features)
     variable_names = [f'x{i+1}' for i in range(nb_features)]
     emulator.fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
-
+    emulator.experiment_.remove_folder()
 
 @pytest.mark.parametrize("emulator_type", [Emulator, EmulatorWithSearch])
 def test_niterations_warmup_maxsize(emulator_type: type):
