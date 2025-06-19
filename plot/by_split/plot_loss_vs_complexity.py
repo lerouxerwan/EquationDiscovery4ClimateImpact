@@ -80,23 +80,19 @@ def add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width):
 
 
 def plot_threshold(ax, emulator, metric, xmax, xmin):
-    if emulator.model_selection == 'validated':
-        threshold = emulator.threshold_for_model_selection_
-    elif emulator.model_selection == 'best':
+    if emulator.model_selection == 'best':
         threshold = 1.5
-    else:
-        raise NotImplementedError
-    # Add a line for PySR threshold
-    if metric is Metric.MSE:
-        constant_value = threshold
-    elif metric is Metric.RMSE:
-        constant_value = np.sqrt(threshold)
-    else:
-        raise NotImplementedError
-    x_for_threshold = [xmin, xmax]
-    threshold_constant_values = [constant_value for _ in x_for_threshold]
-    ax.plot(x_for_threshold, threshold_constant_values, color=split_name_to_color["train"],
-            linestyle='--', label='Threshold for equation selection')
+        # Add a line for PySR threshold
+        if metric is Metric.MSE:
+            constant_value = threshold
+        elif metric is Metric.RMSE:
+            constant_value = np.sqrt(threshold)
+        else:
+            raise NotImplementedError
+        x_for_threshold = [xmin, xmax]
+        threshold_constant_values = [constant_value for _ in x_for_threshold]
+        ax.plot(x_for_threshold, threshold_constant_values, color=split_name_to_color["train"],
+                linestyle='--', label='Threshold for equation selection')
 
 
 def load_bar_attributes(nb_bars: int, complexity_list: list[int]):

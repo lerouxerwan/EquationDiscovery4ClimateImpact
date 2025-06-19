@@ -24,17 +24,15 @@ class Emulator(PySRRegressor):
     The fit method has an additional parameter: 'validation_mask' (validation_mask[i] if i in the  validation set)
     'validation_mask' makes it possible to split the fit data X and y between a train and validation set
         -on the train set, the emulator is fitted
-        -on the validation set, the attribute 'threshold_for_model_selection_' is optimized for the
+        -on the validation set, the attribute 'index_for_validated_model_selection_' is optimized for the
         novel model_selection 'validated'. This model selection selects the equation minimizing validation error
     By default, Emulator behaves like PySR: 'validation_mask' is set to None, and 'model_selection' is set to 'best'
 
     -> additional attribute:
         experiment_: Experiment
             it defines an 'experiment path', depending on 'fit' inputs, where results/TensorBoard logs can be saved
-        threshold_for_model_selection_: float
-            Threshold to select an equation based on a model selection ("best", "accuracy", "score", "validated")
-            this threshold must be larger or equal to 1
-            Default is 1.5 (as specified in PySR).
+        index_for_validated_model_selection_: float
+            Index  to select the equation that minimizes the validation error
         niterations_warmup_maxsize: int | None
             Number of iterations for warmup (slowly increase max size from a small number up to the maxsize)
             This number of iterations is when the current maxsize will reach the user-passed maxsize.
@@ -154,7 +152,7 @@ class Emulator(PySRRegressor):
         # Set params
         self.set_warmup_maxsize_by()
         # Create attributes
-        self.threshold_for_model_selection_ = None
+        self.index_for_validated_model_selection_ = None
         self.experiment_ = None
 
     def set_params(self, **params):
@@ -178,7 +176,7 @@ class Emulator(PySRRegressor):
             -does not handle additional parameters of PySR (weights, Xresampled, ...)
 
         If validation_mask is not None, we fit the emulator on the train set (X_train_train, y_train_train)
-        and optimize the 'threshold_for_model_selection_' on the validation set
+        and compute the 'index_for_validated_model_selection' on the validation set
 
         Parameters
         ----------
@@ -252,20 +250,12 @@ class Emulator(PySRRegressor):
 
         if logging:
             self.logger_spec = True
-        # Update the 'loss' column in the self.equations_ dataframe
-        # because it is sometimes not consistent with the predict method)
-        # See https://github.com/MilesCranmer/PySR/discussions/943 for more details on this issue
-        loss_list = self.compute_loss_list(X_fit, y_fit)
-        self.equations_['loss'] = loss_list
-        pareto_indexes = [True] + [loss_list[i] < min(loss_list[:i]) for i in range(1, len(loss_list))]
-        self.equations_ = self.equations_.loc[pd.Series(pareto_indexes, index=self.equations_.index)]
-        self.equations_ = self.equations_.reset_index(drop=True)
         #  Add also a 'validation_loss' column in self.equations_
         if validation_mask is not None:
             X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
             self.equations_['validation_loss'] = self.compute_loss_list(X_validation, y_validation)
-            #  Set the optimal threshold for the 'validated' model selection using the validation set
-            self.threshold_for_model_selection_ = self.compute_threshold(self.loss_list, self.validation_loss_list)
+            #  Set the index for the 'validated' model selection using the validation set
+            self.index_for_validated_model_selection_ = np.nanargmin(self.validation_loss_list)
         return self
 
     @staticmethod
@@ -386,18 +376,8 @@ class Emulator(PySRRegressor):
         """Compute a Series (or list of Series) representing the selected equations (complexity, loss, ...)
          If index=None, then the equation is selected using self.model_selection"""
         if (index is None) and (self.model_selection == 'validated'):
-            # Select the index of self.equations_ with the maximum train loss (for 'validated')
-            index = self.filtered_equations['loss'].idxmax()
+            index = self.index_for_validated_model_selection_
         return super().get_best(index)
-
-    @property
-    def filtered_equations(self) -> pd.DataFrame:
-        """Extract a Dataframe, containing only a subset of rows from self.equations,
-        such that selected rows are equations such that loss < min_loss * self.threshold_for_model_selection_"""
-        min_loss_train = self.equations_["loss"].min()
-        max_loss_for_filter = self.threshold_for_model_selection_ * min_loss_train
-        filtered_equations = self.equations_.query(f"loss <= {max_loss_for_filter}")
-        return filtered_equations
 
     """Other changes"""
 
