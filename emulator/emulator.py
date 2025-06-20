@@ -168,7 +168,7 @@ class Emulator(PySRRegressor):
 
     def fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
-            y_units: Optional[ArrayLike[str]] = None, **kwargs) -> "PySRRegressor":
+            y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
         """Fit the emulator for some feature X, target y, and validation_mask.
         Additional information can be specified: variable_names & units (with X_units, y_units)
         Compared to the fit method of PySR, this 'fit' method:
@@ -211,16 +211,21 @@ class Emulator(PySRRegressor):
             self.nout_ = emulator_from_file.nout_
             self.feature_names_in_ = emulator_from_file.feature_names_in_
             self.equations_ = emulator_from_file.equations_
-            self.add_validation_infos(X, y, validation_mask)
         else:
             log_info(f'Fit emulator with {self.non_default_params}')
             # Run self._fit method, which can be overridden in child classes, and compute its duration
             start_time = time.monotonic()
-            self._fit(X, y, validation_mask, variable_names, X_units, y_units, **kwargs)
+            self._fit(X, y, validation_mask, variable_names, X_units, y_units)
             end_time = time.monotonic()
             duration = str(timedelta(seconds=end_time - start_time))
             # Save duration and tensorboard command to file
             self.experiment_.save_fit_information(duration, verbose=False)
+        #  Add also a 'validation_loss' column in self.equations_
+        if validation_mask is not None:
+            X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
+            self.equations_['validation_loss'] = self.compute_loss_list(X_validation, y_validation)
+            #  Set the index for the 'validated' model selection using the validation set
+            self.index_for_validated_model_selection_ = np.nanargmin(self.validation_loss_list)
         return self
 
     def get_experiment(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None) -> Experiment:
@@ -262,16 +267,7 @@ class Emulator(PySRRegressor):
 
         if logging:
             self.logger_spec = True
-        self.add_validation_infos(X, y, validation_mask)
         return self
-
-    def add_validation_infos(self, X, y, validation_mask):
-        #  Add also a 'validation_loss' column in self.equations_
-        if validation_mask is not None:
-            X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
-            self.equations_['validation_loss'] = self.compute_loss_list(X_validation, y_validation)
-            #  Set the index for the 'validated' model selection using the validation set
-            self.index_for_validated_model_selection_ = np.nanargmin(self.validation_loss_list)
 
     def compute_loss_for_set(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
                              validation_set: bool, metric: Metric) -> float:
