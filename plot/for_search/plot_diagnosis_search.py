@@ -3,7 +3,7 @@ from typing import Optional
 import pandas as pd
 
 from data.utils_dataset.dataset import Dataset
-from data.utils_experiment.experiment import Experiment
+from data.utils_run.run import Run
 from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from emulator.utils_hyperparameter_search.utils_column_names import COLUMN_NAMES
@@ -14,17 +14,17 @@ from utils.utils_latex import print_df_latex
 def plot_diagnosis_search(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None):
     assert isinstance(emulator, EmulatorWithSearch)
     # for nb_top_equations in [5, 10, 20]:
-    #     plot_selection_rate_features_top_equations(dataset, emulator.experiment_, nb_top_equations, show, plot_folder)
-    plot_diagnosis_search_1d(emulator.experiment_, emulator.param_grid, dataset.target_label,
+    #     plot_selection_rate_features_top_equations(dataset, emulator.run_, nb_top_equations, show, plot_folder)
+    plot_diagnosis_search_1d(emulator.run_, emulator.param_grid, dataset.target_label,
                              show, plot_folder)
-    plot_summary_experiment(emulator.experiment_)
+    plot_summary_run(emulator.run_)
 
-def plot_summary_experiment(experiment: Experiment, show: Optional[bool] = False, plot_folder: Optional[str] = None) -> None:
-    df_list = [experiment.df_cv_results['params']]
+def plot_summary_run(run: Run, show: Optional[bool] = False, plot_folder: Optional[str] = None) -> None:
+    df_list = [run.df_cv_results['params']]
     for model_selection in ['best', 'validated']:
-        experiment.model_selection = model_selection
+        run.model_selection = model_selection
         column_names = COLUMN_NAMES[:3]
-        df_list.append(experiment.df_cv_results.loc[:, column_names].copy())
+        df_list.append(run.df_cv_results.loc[:, column_names].copy())
     df = pd.concat(df_list, axis=1)
     df.rename(columns={c: c.replace('_', ' ') for c in df.columns }, inplace=True)
     df.rename(columns={c: c.replace('validation', 'val') for c in df.columns }, inplace=True)

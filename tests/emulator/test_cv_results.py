@@ -12,7 +12,7 @@ def test_cv_results():
     X, y, validation_mask = load_X_and_y_and_validation_mask_for_test()
     emulator.fit(X, y, validation_mask)
     # Check number of lines in df
-    df = emulator.experiment_.df_cv_results
+    df = emulator.run_.df_cv_results
     assert len(df) == n_iter
     # Check the top selected complexity
     assert emulator.selected_complexity == 9
@@ -25,7 +25,7 @@ def test_cv_results():
     assert emulator.populations == 19
     assert emulator.niterations == 1
     # Remove folders at the end of the test
-    emulator.experiment_.remove_folder()
+    emulator.run_.remove_folder()
 
 
 

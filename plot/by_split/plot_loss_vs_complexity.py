@@ -18,14 +18,13 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
                             plot_folder: Optional[str] = None) -> None:
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""
-    detailed_plot = False
     metric = Metric.RMSE
     split_name_to_x_and_y = load_split_name_to_X_and_y(emulator, dataset.X_train, dataset.y_train, dataset.X_test,
                                                        dataset.y_test, dataset.years_train, dataset.years_test, dataset.validation_mask)
     fig, ax = plt.subplots(figsize=(16, 9))
     complexity_list = emulator.complexity_list
     # Detailed plot adds one bar for PySR score
-    nb_bars = len(split_name_to_x_and_y) + int(detailed_plot)
+    nb_bars = len(split_name_to_x_and_y)
     width, coordinate_list = load_bar_attributes(nb_bars=nb_bars, complexity_list=complexity_list)
     # One bar plot for each split
     all_loss_list = []
@@ -52,26 +51,10 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
     xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True)
     # Add y-axis with special scaling
     set_log_y_axis(ax, all_loss_list, dataset.target_label, metric)
-    # Potentially add detailed plots
-    if detailed_plot:
-        add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width)
-        plot_threshold(ax, emulator, metric, *ax.get_xlim())
     # General settings for the plot
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     ax.legend(loc='upper right')
     show_and_save_with_optional_plot_folder('loss_vs_complexity', show, plot_folder)
-
-
-
-def add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width):
-    #  Add a bar plot for the PySR score
-    ax_twin = ax.twinx()
-    color_PySR_score = 'blue'
-    ax_twin.bar(coordinate_list[-1], emulator.score_list, width=width, color=color_PySR_score)
-    ax_twin_ymin, ax_twin_ymax = ax_twin.get_ylim()
-    ax_twin.set_ylim(ax_twin_ymin, 2 * ax_twin_ymax)
-    ax_twin.set_ylabel('PySR score', color=color_PySR_score)
-
 
 def plot_threshold(ax, emulator, metric, xmax, xmin):
     if emulator.model_selection == 'best':

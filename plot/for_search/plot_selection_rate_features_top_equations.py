@@ -2,20 +2,19 @@ from collections import Counter
 from typing import Optional
 
 from matplotlib import pyplot as plt
-from pysr.utils import ArrayLike
 
 from data.utils_dataset.dataset import Dataset
-from data.utils_experiment.experiment import Experiment
+from data.utils_run.run import Run
 from emulator.utils_hyperparameter_search.utils_column_names import VARIABLE_NAMES_COLUMN_NAME
 from plot.dataset.plot_selected_features import get_selected_feature_indexes
 from utils.utils_plot import show_and_save_with_optional_plot_folder
 
 
-def plot_selection_rate_features_top_equations(dataset: Dataset, experiment: Experiment,
+def plot_selection_rate_features_top_equations(dataset: Dataset, run: Run,
                                                nb_top_equations: int = 10, show: bool = False,
                                                plot_folder: Optional[str] = None):
     """Plot the selected features for top equations"""
-    df = experiment.df_cv_results.copy()
+    df = run.df_cv_results.copy()
     if len(df) >= nb_top_equations:
         ax = plt.gca()
         # Gather feature indexes from the top 10 equations

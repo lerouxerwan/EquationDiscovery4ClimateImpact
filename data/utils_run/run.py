@@ -8,7 +8,7 @@ from typing import Optional, Any
 import pandas as pd
 from pysr import TensorBoardLoggerSpec
 
-from data.utils_experiment.utils_experiment_path import CSV_FILENAME, \
+from data.utils_run.utils_run import CSV_FILENAME, \
     JSON_FILENAME, SYMBOLIC_LINK_FILENAME
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
     RMSE_VALIDATION_COLUMN_NAME, PARAMS_COLUMN_NAME
@@ -17,22 +17,20 @@ from utils.utils_log import log_info
 
 
 @dataclass
-class Experiment(object):
-    """Object to handle results/plots from runs (df_cv_results, non default params, tensorboard logs)"""
-    experiment_path: str
+class Run(object):
+    """Object to handle results/plots from a run (df_cv_results, non default params, tensorboard logs)"""
+    output_directory: str
+    run_id: str
 
     def __post_init__(self):
+        self.run_directory = op.join(self.output_directory, self.run_id)
         #  Create folder if needed
-        if not op.exists(self.experiment_path):
-            os.makedirs(self.experiment_path)
+        if not op.exists(self.run_directory):
+            os.makedirs(self.run_directory)
 
     @property
-    def run_id(self) -> str:
-        return op.basename(self.experiment_path)
-
-    @property
-    def output_directory(self) -> str:
-        return op.dirname(self.experiment_path)
+    def run_has_been_saved(self) -> bool:
+        return all([op.exists(filepath) for filepath in self.filepaths_basic])
 
     """ Top search results"""
 
@@ -75,7 +73,7 @@ class Experiment(object):
 
     def save_fit_information(self, duration: str, verbose: bool = True) -> None:
         if verbose:
-            log_info(f"Experiment path={self.experiment_path}")
+            log_info(f"Run directory={self.run_directory}")
         #  Print and save fit information to file (for the duration & the tensorboard command)
         filepath_to_fit_information = {
             self.filepath_duration: f"duration for the fit={duration}",
@@ -89,11 +87,11 @@ class Experiment(object):
 
     @property
     def filepath_duration(self) -> str:
-        return op.join(self.experiment_path, 'duration.txt')
+        return op.join(self.run_directory, 'duration.txt')
 
     @property
     def log_dir(self) -> str:
-        return op.join(self.experiment_path, 'logs')
+        return op.join(self.run_directory, 'logs')
 
     @property
     def tensorboard_command(self) -> str:
@@ -109,31 +107,36 @@ class Experiment(object):
 
     @property
     def filepath_tensorboard_command(self) -> str:
-        return op.join(self.experiment_path, 'tensorboard_command.txt')
+        return op.join(self.run_directory, 'tensorboard_command.txt')
 
     @property
     def filepath_search_result(self) -> str:
-        return op.join(self.experiment_path, CSV_FILENAME)
+        return op.join(self.run_directory, CSV_FILENAME)
 
     @property
     def filepath_non_default_params(self) -> str:
-        return op.join(self.experiment_path, JSON_FILENAME)
+        return op.join(self.run_directory, JSON_FILENAME)
 
     @property
     def filepath_symbolic_link(self) -> str:
-        return op.join(self.experiment_path, SYMBOLIC_LINK_FILENAME)
+        return op.join(self.run_directory, SYMBOLIC_LINK_FILENAME)
 
     @property
     def filepath_checkpoint(self) -> str:
-        return op.join(self.experiment_path, 'checkpoint.pkl')
+        return op.join(self.run_directory, 'checkpoint.pkl')
 
     @property
     def filepath_hall_of_fame(self) -> str:
-        return op.join(self.experiment_path, 'hall_of_fame.csv')
+        return op.join(self.run_directory, 'hall_of_fame.csv')
 
     @property
     def filepath_hall_of_fame_bak(self) -> str:
-        return op.join(self.experiment_path, 'hall_of_fame.csv.bak')
+        return op.join(self.run_directory, 'hall_of_fame.csv.bak')
+
+    @property
+    def filepaths_basic(self) -> list[str]:
+        return [self.filepath_duration, self.filepath_tensorboard_command,
+                     self.filepath_checkpoint, self.filepath_hall_of_fame, self.filepath_hall_of_fame_bak]
 
     """Remove folder"""
 
@@ -147,12 +150,12 @@ class Experiment(object):
         for filepath in filepaths:
             if op.exists(filepath):
                 os.remove(filepath)
-        # Remove folders log_dir and experiment_path
-        for folder in [self.log_dir, self.experiment_path]:
+        # Remove folders log_dir and run_directory
+        for folder in [self.log_dir, self.run_directory]:
             if op.exists(folder):
                 os.rmdir(folder)
         # Remove even the dataset folder, if it is empty
-        dataset_dir = op.dirname(self.experiment_path)
+        dataset_dir = op.dirname(self.run_directory)
         if op.exists(dataset_dir) and (not os.listdir(dataset_dir)):
             os.rmdir(dataset_dir)
 

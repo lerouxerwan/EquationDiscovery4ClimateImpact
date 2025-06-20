@@ -167,11 +167,11 @@ class EmulatorWithSearch(Emulator):
         # Some check
         assert validation_mask is not None
         # Run hyperparameter search
-        if not op.exists(self.experiment_.filepath_search_result):
+        if not op.exists(self.run_.filepath_search_result):
             self.run_and_save_hyperparameter_search(X, y, validation_mask, variable_names, X_units, y_units)
         # Fit with the top setting of hyperparameter on the train split
         log_info("Fit with top params")
-        self.set_params(**self.experiment_.top_params)
+        self.set_params(**self.run_.top_params)
         super()._fit(X, y, validation_mask, variable_names, X_units, y_units)
         return self
 
@@ -202,7 +202,7 @@ class EmulatorWithSearch(Emulator):
         # Transform cv_results into a Dataframe sorted by ranking with additional columns
         df_cv_results = compute_df_cv_results(search_cv.cv_results_, X, y, validation_mask)
         # Save df_cv_results to file
-        self.experiment_.save_search_results(df_cv_results, self.non_default_params)
+        self.run_.save_search_results(df_cv_results, self.non_default_params)
 
     def load_emulator_with_same_attributes(self) -> Emulator:
         """Load an emulator object with the same attributes as self,

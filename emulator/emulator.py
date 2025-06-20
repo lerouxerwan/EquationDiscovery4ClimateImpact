@@ -1,5 +1,4 @@
 import os.path as op
-import math
 import time
 from datetime import timedelta
 from typing import Literal, Callable, Optional, Any
@@ -11,8 +10,8 @@ from pysr.utils import ArrayLike
 from sympy import Expr, Symbol
 
 from data.utils_dataset.utils_validation import get_X_and_y
-from data.utils_experiment.experiment import Experiment
-from data.utils_experiment.utils_experiment_path import get_experiment_path
+from data.utils_run.run import Run
+from data.utils_run.utils_run import get_output_directory, get_run_id
 from plot.utils_metric.metric import Metric, metric_to_function
 from utils.utils_log import log_info
 from utils.utils_non_default_params import get_non_default_params
@@ -30,8 +29,8 @@ class Emulator(PySRRegressor):
     By default, Emulator behaves like PySR: 'validation_mask' is set to None, and 'model_selection' is set to 'best'
 
     -> additional attribute:
-        experiment_: Experiment
-            it defines an 'experiment path', depending on 'fit' inputs, where results/TensorBoard logs can be saved
+        run_: Run
+            it defines a 'run_directory', depending on 'fit' inputs, where results/TensorBoard logs can be saved
         index_for_validated_model_selection_: float
             Index  to select the equation that minimizes the validation error
 
@@ -41,7 +40,7 @@ class Emulator(PySRRegressor):
         -hall of fame files are deleted
         -dimensional_constraint_penalty equals is set by default to 10**8 (to enforce dimension constraint)
         -logger_spec set to True (in this case, in the fit function, a more specific logger will be set)"""
-    experiment_: Optional[Experiment]
+    run_: Optional[Run]
 
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "validated"] = "best", *,
@@ -143,7 +142,7 @@ class Emulator(PySRRegressor):
             self.dimensional_constraint_penalty = 10 ** 8
         # Create attributes
         self.index_for_validated_model_selection_ = None
-        self.experiment_ = None
+        self.run_ = None
 
     def fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
@@ -174,18 +173,20 @@ class Emulator(PySRRegressor):
         # Some checks
         assert isinstance(X, np.ndarray) and isinstance(y, np.ndarray)
         assert isinstance(validation_mask, np.ndarray) or validation_mask is None
-        # Initialize self.experiment_ which defines where results/TensorBoard logs can be saved
-        self.experiment_ = self.get_experiment(X, y, validation_mask)
-        # Set the corresponding attributes (PySR needs these attributes to save checkpoints)
-        self.run_id_ = self.experiment_.run_id
-        self.run_id = self.experiment_.run_id
-        self.output_directory_ = self.experiment_.output_directory
-        self.output_directory = self.experiment_.output_directory
+
+        # Run settings
+        # Set output_directory based on X,y and validation_mask.
+        self.output_directory_ = self.output_directory = get_output_directory(X, y, validation_mask)
+        # Set run_id based on the current parameters
+        self.run_id_ = self.run_id = get_run_id(self.non_default_params)
+        # Initialize a Run object, which handles all the input/output processing
+        self.run_ = Run(self.output_directory, self.run_id)
+
         # Load checkpoint if it exists, otherwise run _fit method
-        if op.exists(self.experiment_.filepath_checkpoint):
+        if self.run_.run_has_been_saved:
             #  Start loading from a pickle file
             log_info("Load results from checkpoint")
-            emulator_from_file = self.from_file(run_directory=self.experiment_.experiment_path)
+            emulator_from_file = self.from_file(run_directory=self.run_.run_directory)
             self.selection_mask_ = emulator_from_file.selection_mask_
             self.nout_ = emulator_from_file.nout_
             self.feature_names_in_ = emulator_from_file.feature_names_in_
@@ -198,17 +199,15 @@ class Emulator(PySRRegressor):
             end_time = time.monotonic()
             duration = str(timedelta(seconds=end_time - start_time))
             # Save duration and tensorboard command to file
-            self.experiment_.save_fit_information(duration, verbose=False)
-        #  Add also a 'validation_loss' column in self.equations_
+            self.run_.save_fit_information(duration, verbose=False)
+
+        #  Add a 'validation_loss' column in self.equations_
         if validation_mask is not None:
             X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
             self.equations_['validation_loss'] = self.compute_loss_list(X_validation, y_validation)
             #  Set the index for the 'validated' model selection using the validation set
             self.index_for_validated_model_selection_ = np.nanargmin(self.validation_loss_list)
         return self
-
-    def get_experiment(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None) -> Experiment:
-        return Experiment(get_experiment_path(X, y, validation_mask, self.non_default_params))
 
     def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
@@ -222,11 +221,11 @@ class Emulator(PySRRegressor):
         ----------
         Same as the self.fit method"""
         # Fit with logging
-        # By default, we log with tensorboard the progress for each iteration of the experiment
+        # By default, we log with tensorboard the progress for each iteration of the run
         # See https://github.com/MilesCranmer/PySR/discussions/840 for more details on log_interval"""
         logging = self.logger_spec is True
         if logging:
-            self.logger_spec = self.experiment_.get_logger_spec(log_interval=1 * self.populations)
+            self.logger_spec = self.run_.get_logger_spec(log_interval=1 * self.populations)
         # Fit on the train set
         if validation_mask is None:
             X_fit, y_fit = X, y
@@ -237,10 +236,6 @@ class Emulator(PySRRegressor):
         if logging:
             self.logger_spec = True
         return self
-
-    def compute_loss_for_set(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
-                             validation_set: bool, metric: Metric) -> float:
-        return self.compute_loss(*get_X_and_y(X, y, validation_mask, validation_set), metric=metric)
 
     """Method to compute loss"""
 
@@ -291,11 +286,6 @@ class Emulator(PySRRegressor):
     def validation_loss_list(self) -> list[float]:
         """List of Validation loss (Mean squared error) for the equations of the Pareto front"""
         return self.equations_['validation_loss'].to_list()
-
-    @property
-    def score_list(self) -> list[float]:
-        """List of score (some heuristic defined in PySR) for the equations of the Pareto front"""
-        return self.equations_['score'].to_list()
 
     @property
     def selected_loss(self):

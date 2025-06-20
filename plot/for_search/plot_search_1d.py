@@ -4,7 +4,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 
-from data.utils_experiment.experiment import Experiment
+from data.utils_run.run import Run
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
     RMSE_VALIDATION_COLUMN_NAME, RMSE_TRAIN_COLUMN_NAME
 from plot.by_split.utils_axis import set_ylabel_with_metric
@@ -12,15 +12,15 @@ from plot.utils_metric.metric import Metric
 from utils.utils_plot import show_and_save_with_optional_plot_folder
 
 
-def plot_diagnosis_search_1d(experiment: Experiment, param_grid: dict[str, list], target_label: str,
+def plot_diagnosis_search_1d(run: Run, param_grid: dict[str, list], target_label: str,
                              show: bool, plot_folder: Optional[str] = None) -> None:
     """Plot the variation of RMSE validation for each hyperparameter in the param_grid"""
-    params_list = experiment.df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].to_list()
+    params_list = run.df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].to_list()
     for param_name in param_grid.keys():
         ax = plt.gca()
         params_values = [params[param_name] for params in params_list]
         for model_selection in ['best', 'validated']:
-            _plot_search_1d(ax, experiment.df_cv_results, params_values, model_selection)
+            _plot_search_1d(ax, run.df_cv_results, params_values, model_selection)
         ax.set_xlabel(' '.join([w.capitalize() for w in param_name.split('_')]))
         set_ylabel_with_metric(ax, Metric.RMSE, target_label)
         ax.legend()

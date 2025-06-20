@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from data.utils_dataset.utils_validation import get_X_and_y
 from emulator.emulator import Emulator
 from emulator.utils_hyperparameter_search.utils_column_names import  PARAMS_EMULATOR_COLUMN_NAME, COLUMN_NAMES
 from plot.utils_metric.metric import Metric
@@ -20,17 +21,22 @@ def compute_df_cv_results(cv_results: dict, X: np.ndarray, y: np.ndarray, valida
     df_cv_results = pd.concat([df_cv_results, pd.DataFrame(index=df_cv_results.index, data=data)], axis=1)
     # Remove folder for all the emulators
     for emulator in emulators:
-        emulator.experiment_.remove_folder()
+        emulator.run_.remove_folder()
     return df_cv_results
 
 
 def get_series(emulator: Emulator, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.Series:
     """For each model selection, compute RMSE train, RMSE validation, selected complexity/expr/variables names"""
     # Compute data
-    rmse_train = emulator.compute_loss_for_set(X, y, validation_mask, False, Metric.RMSE)
-    rmse_validation = emulator.compute_loss_for_set(X, y, validation_mask, True, Metric.RMSE)
+    rmse_train = compute_loss_for_set(emulator, X, y, validation_mask, False, Metric.RMSE)
+    rmse_validation = compute_loss_for_set(emulator, X, y, validation_mask, True, Metric.RMSE)
     data = [rmse_train, rmse_validation, emulator.selected_complexity, emulator.selected_expr,
             emulator.selected_variable_names]
     # Return Series
     return pd.Series(data=data, index=COLUMN_NAMES)
+
+def compute_loss_for_set(emulator: Emulator, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+                         validation_set: bool, metric: Metric) -> float:
+    return emulator.compute_loss(*get_X_and_y(X, y, validation_mask, validation_set), metric=metric)
+
 

@@ -11,7 +11,7 @@ def test_model_selection_validated_example1():
     emulator.fit(dataset.X_train, dataset.y_train, validation_mask=dataset.validation_mask,
                  variable_names=dataset.X_variables_names, X_units=dataset.X_units, y_units=dataset.y_units)
     assert emulator.selected_complexity == 16
-    emulator.experiment_.remove_folder()
+    emulator.run_.remove_folder()
 
 def test_model_selection_validation_example2():
     dataset = dataset_npp_season_v1
@@ -20,4 +20,4 @@ def test_model_selection_validation_example2():
     emulator.fit(dataset.X_train, dataset.y_train, validation_mask=dataset.validation_mask,
                  variable_names=dataset.X_variables_names, X_units=dataset.X_units, y_units=dataset.y_units)
     assert emulator.selected_complexity == 7
-    emulator.experiment_.remove_folder()
+    emulator.run_.remove_folder()

@@ -30,13 +30,13 @@ def plot_diagnosis(emulator: Emulator, dataset:Dataset, show: Optional[bool] = F
     # Run several plot functions
     for plot_function in plot_functions:
         plot_function(emulator, dataset, show, plot_folder)
-    # Create two symbolic links between the experiment path in the plot path
+    # Create two symbolic links between the run_directory in the plot path
     if show is False:
-        add_two_symbolic_link(emulator.experiment_.experiment_path, PLOT_PATH)
+        add_two_symbolic_link(emulator.run_.run_directory, PLOT_PATH)
 
-def add_two_symbolic_link(experiment_path: str, plot_path: str) -> None:
-    _add_symbolic_link(experiment_path, plot_path, 'experiment_path')
-    _add_symbolic_link(plot_path, experiment_path, 'plot_path')
+def add_two_symbolic_link(run_directory: str, plot_path: str) -> None:
+    _add_symbolic_link(run_directory, plot_path, 'run_directory')
+    _add_symbolic_link(plot_path, run_directory, 'plot_path')
 
 def _add_symbolic_link(path1: str, path2: str, link_name: str) -> None:
     if not op.exists(op.join(path1, link_name)):
