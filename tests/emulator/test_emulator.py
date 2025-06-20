@@ -69,6 +69,19 @@ def test_composed_units():
     emulator.fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
     emulator.experiment_.remove_folder()
 
+
+def test_save_then_load():
+    # this test will crash if some fit attributes, such as 'feature_names_in_' are not set after loading
+    X, y = load_X_and_y_for_test()
+    emulator = Emulator(niterations=1)
+    emulator.fit(X, y)
+    emulator.predict(X)
+    emulator = Emulator(niterations=1)
+    emulator.fit(X, y)
+    emulator.predict(X)
+    emulator.experiment_.remove_folder()
+
+
 @pytest.mark.parametrize("emulator_type", [Emulator, EmulatorWithSearch])
 def test_niterations_warmup_maxsize(emulator_type: type):
     # Cases with initialization

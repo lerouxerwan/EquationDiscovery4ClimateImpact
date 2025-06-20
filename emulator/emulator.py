@@ -1,3 +1,4 @@
+import os.path as op
 import math
 import time
 from datetime import timedelta
@@ -191,24 +192,35 @@ class Emulator(PySRRegressor):
         -------
         self : object
             Fitted estimator"""
-        log_info(f'Start fit emulator with {self.non_default_params}')
         # Some checks
         assert isinstance(X, np.ndarray) and isinstance(y, np.ndarray)
         assert isinstance(validation_mask, np.ndarray) or validation_mask is None
         # Initialize self.experiment_ which defines where results/TensorBoard logs can be saved
         self.experiment_ = self.get_experiment(X, y, validation_mask)
-        # Set the corresponding attributes
+        # Set the corresponding attributes (PySR needs these attributes to save checkpoints)
         self.run_id_ = self.experiment_.run_id
         self.run_id = self.experiment_.run_id
         self.output_directory_ = self.experiment_.output_directory
         self.output_directory = self.experiment_.output_directory
-        # Run self._fit method, which can be overridden in child classes, and compute its duration
-        start_time = time.monotonic()
-        self._fit(X, y, validation_mask, variable_names, X_units, y_units, **kwargs)
-        end_time = time.monotonic()
-        duration = str(timedelta(seconds=end_time - start_time))
-        # Save duration and tensorboard command to file
-        self.experiment_.save_fit_information(duration, verbose=False)
+        # Load checkpoint if it exists, otherwise run _fit method
+        if op.exists(self.experiment_.filepath_checkpoint):
+            #  Start loading from a pickle file
+            log_info("Load from checkpoint")
+            emulator_from_file = self.from_file(run_directory=self.experiment_.experiment_path)
+            self.selection_mask_ = emulator_from_file.selection_mask_
+            self.nout_ = emulator_from_file.nout_
+            self.feature_names_in_ = emulator_from_file.feature_names_in_
+            self.equations_ = emulator_from_file.equations_
+            self.index_for_validated_model_selection_ = emulator_from_file.index_for_validated_model_selection_
+        else:
+            log_info(f'Fit emulator with {self.non_default_params}')
+            # Run self._fit method, which can be overridden in child classes, and compute its duration
+            start_time = time.monotonic()
+            self._fit(X, y, validation_mask, variable_names, X_units, y_units, **kwargs)
+            end_time = time.monotonic()
+            duration = str(timedelta(seconds=end_time - start_time))
+            # Save duration and tensorboard command to file
+            self.experiment_.save_fit_information(duration, verbose=False)
         return self
 
     def get_experiment(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None) -> Experiment:
