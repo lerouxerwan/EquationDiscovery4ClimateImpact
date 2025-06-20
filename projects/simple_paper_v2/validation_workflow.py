@@ -1,17 +1,17 @@
 from dataclasses import dataclass
 from functools import cached_property
 from random import sample
-from typing import Optional, AnyStr, Any, OrderedDict
+from typing import Optional, Any, OrderedDict
 
 import pandas as pd
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit
-from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from plot.utils_metric.metric import Metric
 from plot.workflow import fit, compute_loss_test
 from projects.simple_paper.utils_hyperparameters import get_param_name_to_values
+from utils.utils_log import log_info
 
 
 @dataclass
@@ -27,32 +27,41 @@ class ValidationWorkflow(object):
         self.dataset = Dataset("NPP_season.csv", "RCP85", "RCP45", self.validation_size, self.validation_split)
         # Load top emulator
         self.emulator = self.search_for_top_emulator()
+        log_info('Fit top emulator')
+        fit(self.emulator, self.dataset)
         # Compute rmse test
         self.rmse_test = compute_loss_test(self.emulator, self.dataset, Metric.RMSE)
 
-    def search_for_top_emulator(self) -> Emulator:
+    def search_for_top_emulator(self) -> EmulatorWithSearch:
         param_name_to_values = self.get_param_name_to_values()
         # Run marginal search
-        param_name_to_emulator_with_search = {}
+        param_name_to_emulator_with_search: dict[str, EmulatorWithSearch] = {}
         for param_name, param_values in param_name_to_values.items():
             param_search = {'param_grid': {param_name: param_values}, 'search_style': 'grid', 'n_jobs': -1}
             emulator_with_search_marginal = EmulatorWithSearch(**self.params_emulator, **param_search)
-            fit(emulator_with_search_marginal, self.dataset)
+            fit(emulator_with_search_marginal, self.dataset, refit=False)
             param_name_to_emulator_with_search[param_name] = emulator_with_search_marginal
         # Select the top hyperparameters with respect to their validation loss
-        key = lambda n: param_name_to_emulator_with_search[n].selected_validation_loss
+        key = lambda n: param_name_to_emulator_with_search[n].experiment_.top_rmse_validation
         top_param_names = list(sorted(list(param_name_to_values.keys()), key=key))[:self.nb_top_hyperparameters]
         top_emulator_with_search_marginal: EmulatorWithSearch = param_name_to_emulator_with_search[top_param_names[0]]
+        rmse_validation_from_marginal_search = top_emulator_with_search_marginal.experiment_.top_rmse_validation
+        log_info(f'Top Params: {top_param_names}')
+        log_info(f'Top RMSE validation: {[key(param_name) for param_name in top_param_names]}')
         # Run a random search with respect to these top hyperparameters
         param_grid = {param_name: param_value for param_name, param_value in param_name_to_values.items()
                       if param_name in top_param_names}
         params_search = {'param_grid': param_grid, 'search_style': 'random', 'n_jobs': -1, 'n_iter': self.n_iter}
         emulator_with_search_random = EmulatorWithSearch(**self.params_emulator, **params_search)
-        fit(emulator_with_search_random, self.dataset)
+        fit(emulator_with_search_random, self.dataset, refit=False)
+        rmse_validation_from_random_search = emulator_with_search_random.experiment_.top_rmse_validation
+        log_info(f'Top RMSE validation from random search={rmse_validation_from_random_search}')
         # Return the emulator that performs best on the validation set
-        if emulator_with_search_random.selected_validation_loss < top_emulator_with_search_marginal.selected_validation_loss:
+        if  rmse_validation_from_random_search < rmse_validation_from_marginal_search:
+            log_info(f'Emulator from random search performs best')
             return emulator_with_search_random
         else:
+            log_info(f'Emulator from marginal search performs best')
             return top_emulator_with_search_marginal
 
     @cached_property

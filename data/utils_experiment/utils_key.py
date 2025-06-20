@@ -20,7 +20,7 @@ def get_hash_str(*iterables) -> str:
 
 def get_hash_params(params: dict[str, Any]) -> list[tuple[Any] | Any]:
     """Summarize all parameters as list (but do not include model_selection and logger_spec)"""
-    params_to_remove = {'logger_spec', 'model_selection'}
+    params_to_remove = {'logger_spec', 'model_selection', 'output_directory', 'run_id'}
     params_loop = {k: v for k, v in params.items() if k not in params_to_remove}
     entire_hash_params = []
     for k, v in sorted(list(params_loop.items()), key=itemgetter(0)):

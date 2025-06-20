@@ -29,7 +29,7 @@ def plot_residuals(emulator: Emulator, dataset: Dataset, show: Optional[bool] = 
         add_equation(ax, emulator.selected_expr)
         # Add legend and labels
         ax.legend()
-        ax.set_xlabel(f'Residuals ({dataset.y_units[0]})')
+        ax.set_xlabel(f'Residuals for {split_name} set ({dataset.y_units[0]})')
         ax.set_ylabel('Density')
         show_and_save_with_optional_plot_folder(f'plot_residuals_{split_name}', show, plot_folder)
 

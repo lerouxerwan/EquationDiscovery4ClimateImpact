@@ -36,7 +36,5 @@ def main_get_top_emulator(fast: bool):
     plot_diagnosis(validation_workflow.emulator, validation_workflow.dataset, False)
 
 
-
-
 if __name__ == '__main__':
-    main_get_top_emulator(fast=True)
+    main_get_top_emulator(fast=False)

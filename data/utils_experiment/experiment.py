@@ -161,15 +161,17 @@ class Experiment(object):
 
     """Fit information"""
 
-    def print_and_save_fit_information(self, duration: str) -> None:
-        log_info(f"Experiment path={self.experiment_path}")
+    def save_fit_information(self, duration: str, verbose: bool = True) -> None:
+        if verbose:
+            log_info(f"Experiment path={self.experiment_path}")
         #  Print and save fit information to file (for the duration & the tensorboard command)
         filepath_to_fit_information = {
             self.filepath_duration: f"duration for the fit={duration}",
             self.filepath_tensorboard_command: f"tensorboard --logdir {self.log_dir}",
         }
         for filepath, fit_information in filepath_to_fit_information.items():
-            log_info(fit_information)
+            if verbose:
+                log_info(fit_information)
             with open(filepath, 'w') as f:
                 f.write(fit_information)
 

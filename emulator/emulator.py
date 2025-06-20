@@ -208,7 +208,7 @@ class Emulator(PySRRegressor):
         end_time = time.monotonic()
         duration = str(timedelta(seconds=end_time - start_time))
         # Save duration and tensorboard command to file
-        self.experiment_.print_and_save_fit_information(duration)
+        self.experiment_.save_fit_information(duration, verbose=False)
         return self
 
     def get_experiment(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None) -> Experiment:
