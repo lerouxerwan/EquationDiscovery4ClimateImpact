@@ -6,6 +6,7 @@ from pysr.utils import ArrayLike
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_experiment.experiment import Experiment
+from emulator.utils_hyperparameter_search.utils_column_names import VARIABLE_NAMES_COLUMN_NAME
 from plot.dataset.plot_selected_features import get_selected_feature_indexes
 from utils.utils_plot import show_and_save_with_optional_plot_folder
 
@@ -19,7 +20,7 @@ def plot_selection_rate_features_top_equations(dataset: Dataset, experiment: Exp
         ax = plt.gca()
         # Gather feature indexes from the top 10 equations
         all_feature_indexes = []
-        for selected_variable_names in df[experiment.variable_names_column_name].values[:nb_top_equations]:
+        for selected_variable_names in df[VARIABLE_NAMES_COLUMN_NAME].values[:nb_top_equations]:
             all_feature_indexes.extend(get_selected_feature_indexes(selected_variable_names, dataset.X_variables_names))
         c = Counter(all_feature_indexes)
         feature_indexes, occurrences = zip(*sorted(c.items(), key=lambda t: t[1], reverse=True))

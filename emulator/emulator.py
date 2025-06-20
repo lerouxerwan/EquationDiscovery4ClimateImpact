@@ -208,17 +208,7 @@ class Emulator(PySRRegressor):
         return self
 
     def get_experiment(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None) -> Experiment:
-        return Experiment(get_experiment_path(X, y, validation_mask, self.non_default_params), self.model_selection)
-
-    def set_model_selection(self, model_selection: str) -> None:
-        if self.model_selection == model_selection:
-            # Do nothing
-            pass
-        else:
-            self.model_selection = model_selection
-            # Reload experiment with the updated model_selection
-            self.experiment_ = Experiment(self.experiment_.experiment_path, model_selection)
-
+        return Experiment(get_experiment_path(X, y, validation_mask, self.non_default_params))
 
     def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
@@ -340,14 +330,6 @@ class Emulator(PySRRegressor):
         return [str(s) for s in self.selected_expr.atoms(Symbol)]
 
     """Model/equation selection"""
-
-    def get_best_pysr(self) -> pd.Series:
-        """Compute a Series representing the selected equation (complexity, loss, ...) with the PySR heuristic"""
-        model_selection = self.model_selection[:]
-        self.set_model_selection('best')
-        result = super().get_best()
-        self.set_model_selection(model_selection)
-        return result
 
     @property
     def selected_row(self) -> pd.Series:

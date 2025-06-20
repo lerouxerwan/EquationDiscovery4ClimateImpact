@@ -1,5 +1,4 @@
-from itertools import combinations
-from typing import Optional, Any
+from typing import Optional
 
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -7,7 +6,7 @@ from matplotlib.axes import Axes
 
 from data.utils_experiment.experiment import Experiment
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
-    get_cv_results_column_name, RMSE_VALIDATION_COLUMN_NAME, RMSE_TRAIN_COLUMN_NAME
+    RMSE_VALIDATION_COLUMN_NAME, RMSE_TRAIN_COLUMN_NAME
 from plot.by_split.utils_axis import set_ylabel_with_metric
 from plot.utils_metric.metric import Metric
 from utils.utils_plot import show_and_save_with_optional_plot_folder
@@ -29,8 +28,8 @@ def plot_diagnosis_search_1d(experiment: Experiment, param_grid: dict[str, list]
 
 
 def _plot_search_1d(ax: Axes, df_cv_results: pd.DataFrame, param_values: list[float], model_selection: str) -> None:
-    rmse_train_column_name = get_cv_results_column_name(model_selection, RMSE_TRAIN_COLUMN_NAME)
-    rmse_validation_column_name = get_cv_results_column_name(model_selection, RMSE_VALIDATION_COLUMN_NAME)
+    rmse_train_column_name = RMSE_TRAIN_COLUMN_NAME
+    rmse_validation_column_name = RMSE_VALIDATION_COLUMN_NAME
     min_rmse_validation_list = []
     corresponding_rmse_train_list = []
     sorted_param_values = sorted(list(set(param_values)))

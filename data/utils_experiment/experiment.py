@@ -5,17 +5,13 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Optional, Any
 
-import numpy as np
 import pandas as pd
 from pysr import TensorBoardLoggerSpec
-from sympy import Expr
 
 from data.utils_experiment.utils_experiment_path import CSV_FILENAME, \
     JSON_FILENAME, SYMBOLIC_LINK_FILENAME
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
-    get_cv_results_column_name, RMSE_VALIDATION_COLUMN_NAME, COMPLEXITY_COLUMN_NAME, \
-    VARIABLE_NAMES_COLUMN_NAME, RMSE_TEST_COLUMN_NAME, FIT_TIME_COLUMN_NAME, PARAMS_COLUMN_NAME, EXPR_COLUMN_NAME
-from plot.utils_metric.utils_metric_function import mean_relative_absolute_error
+    RMSE_VALIDATION_COLUMN_NAME, PARAMS_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -24,7 +20,6 @@ from utils.utils_log import log_info
 class Experiment(object):
     """Object to handle results/plots from runs (df_cv_results, non default params, tensorboard logs)"""
     experiment_path: str
-    model_selection: str
 
     def __post_init__(self):
         #  Create folder if needed
@@ -38,29 +33,6 @@ class Experiment(object):
     @property
     def output_directory(self) -> str:
         return op.dirname(self.experiment_path)
-
-
-    """Properties depending on self.model_selection"""
-
-    @property
-    def rmse_test_column_name(self) -> str:
-        return get_cv_results_column_name(self.model_selection, RMSE_TEST_COLUMN_NAME)
-
-    @property
-    def rmse_validation_column_name(self) -> str:
-        return get_cv_results_column_name(self.model_selection, RMSE_VALIDATION_COLUMN_NAME)
-
-    @property
-    def complexity_column_name(self) -> str:
-        return get_cv_results_column_name(self.model_selection, COMPLEXITY_COLUMN_NAME)
-
-    @property
-    def expr_column_name(self) -> str:
-        return get_cv_results_column_name(self.model_selection, EXPR_COLUMN_NAME)
-
-    @property
-    def variable_names_column_name(self) -> str:
-        return get_cv_results_column_name(self.model_selection, VARIABLE_NAMES_COLUMN_NAME)
 
     """ Top search results"""
 
@@ -76,39 +48,6 @@ class Experiment(object):
         params_to_remove = {'output_directory', 'run_id'}
         return {k: v for k, v in params.items() if k not in params_to_remove}
 
-    @property
-    def top_fit_time(self) -> float:
-        """Duration for the fit"""
-        return self.top_series.loc[FIT_TIME_COLUMN_NAME]
-
-    @property
-    def max_fit_time(self) -> float:
-        """Max duration for the fit (between all the hyperparameter settings tested)"""
-        return self.df_cv_results[FIT_TIME_COLUMN_NAME].max()
-
-    @property
-    def mean_fit_time(self) -> float:
-        """Mean duration for the fit (between all the hyperparameter settings tested)"""
-        return self.df_cv_results[FIT_TIME_COLUMN_NAME].mean()
-
-
-    @property
-    def top_rmse_validation(self) -> float:
-        return self.top_series.loc[self.rmse_validation_column_name]
-
-    @property
-    def top_complexity(self) -> int:
-        return self.top_series.loc[self.complexity_column_name]
-
-    @property
-    def top_expr(self) -> Expr:
-        return self.top_series.loc[self.expr_column_name]
-
-    @property
-    def top_rmse_test(self) -> float:
-        return self.top_series.loc[self.rmse_test_column_name]
-
-
     """Save & Load search results"""
 
     def save_search_results(self, df_cv_results: pd.DataFrame, non_default_params: dict[str, Any]) -> None:
@@ -121,42 +60,16 @@ class Experiment(object):
 
     @cached_property
     def df_cv_results(self) -> pd.DataFrame:
-        """Dataframe with search results. During loading, it is ordered based on the self.model_selection attribute"""
+        """Dataframe with search results. it is ordered based on the validation RMSE"""
         log_info('Load search results from files')
         # Load dataframe from csv file
         df_cv_results = pd.read_csv(self.filepath_search_result, index_col=0)
-        # Sort the DataFrame by their predictive performance on the validation set for self.model_selection
-        df_cv_results = df_cv_results.sort_values(by=self.rmse_validation_column_name)
+        # Sort the DataFrame by their predictive performance on the validation set
+        df_cv_results = df_cv_results.sort_values(by=RMSE_VALIDATION_COLUMN_NAME)
         # Cast some columns to their original type
         for column_name in [PARAMS_COLUMN_NAME, PARAMS_EMULATOR_COLUMN_NAME]:
             df_cv_results[column_name] = df_cv_results[column_name].apply(string_to_dict)
         return df_cv_results
-
-    """Metric for some experiments"""
-
-    @property
-    def percentage_of_best_same_as_validated(self) -> int:
-        return int(100 * self.ind_best_same_as_validated.mean())
-
-    @property
-    def ind_best_same_as_validated(self) -> pd.Series:
-        data = [c1 == c2 for c1, c2 in zip(self.get_complexity_values("best"), self.get_complexity_values("validated"))]
-        return pd.Series(index=self.df_cv_results.index, data=data)
-
-    def get_complexity_values(self, model_selection: str) -> np.ndarray:
-        return self.df_cv_results[get_cv_results_column_name(model_selection, COMPLEXITY_COLUMN_NAME)].values
-
-    @property
-    def mean_difference_in_rmse_validation_for_best_not_same_as_validated(self) -> float:
-        rmse_validation_best = self.get_rmse_validation_values_for_best_not_same_as_validation('best')
-        rmse_validation_validated = self.get_rmse_validation_values_for_best_not_same_as_validation('validated')
-        assert all([rmse_best >= rmse_validated for rmse_best, rmse_validated in zip(rmse_validation_best, rmse_validation_validated)])
-        return -mean_relative_absolute_error(rmse_validation_best, rmse_validation_validated)
-
-    def get_rmse_validation_values_for_best_not_same_as_validation(self, model_selection: str) -> np.ndarray:
-        series_rmse_validation = self.df_cv_results[get_cv_results_column_name(model_selection, RMSE_VALIDATION_COLUMN_NAME)]
-        return series_rmse_validation.loc[~self.ind_best_same_as_validated].values
-
 
     """Fit information"""
 

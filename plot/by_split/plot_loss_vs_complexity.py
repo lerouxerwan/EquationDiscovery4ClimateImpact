@@ -56,12 +56,6 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
     if detailed_plot:
         add_bar_plot_for_PySR_score(ax, coordinate_list, emulator, width)
         plot_threshold(ax, emulator, metric, *ax.get_xlim())
-        # selected equation with pysr
-        selected_series_with_default_pysr = emulator.get_best_pysr()
-        selected_complexity_with_default_pysr = selected_series_with_default_pysr['complexity']
-        selected_equation_with_default_pysr = selected_series_with_default_pysr['sympy_format']
-        xticklabels[complexity_list.index(selected_complexity_with_default_pysr)] \
-            = get_equation_str(selected_equation_with_default_pysr, add_underline=True)
     # General settings for the plot
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     ax.legend(loc='upper right')
