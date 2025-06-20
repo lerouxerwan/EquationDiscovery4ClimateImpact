@@ -37,4 +37,4 @@ def main_get_top_emulator(fast: bool):
 
 
 if __name__ == '__main__':
-    main_get_top_emulator(fast=False)
+    main_get_top_emulator(fast=True)

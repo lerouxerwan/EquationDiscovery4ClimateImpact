@@ -205,13 +205,13 @@ class Emulator(PySRRegressor):
         # Load checkpoint if it exists, otherwise run _fit method
         if op.exists(self.experiment_.filepath_checkpoint):
             #  Start loading from a pickle file
-            log_info("Load from checkpoint")
+            log_info("Load results from checkpoint")
             emulator_from_file = self.from_file(run_directory=self.experiment_.experiment_path)
             self.selection_mask_ = emulator_from_file.selection_mask_
             self.nout_ = emulator_from_file.nout_
             self.feature_names_in_ = emulator_from_file.feature_names_in_
             self.equations_ = emulator_from_file.equations_
-            self.index_for_validated_model_selection_ = emulator_from_file.index_for_validated_model_selection_
+            self.add_validation_infos(X, y, validation_mask)
         else:
             log_info(f'Fit emulator with {self.non_default_params}')
             # Run self._fit method, which can be overridden in child classes, and compute its duration
@@ -262,29 +262,16 @@ class Emulator(PySRRegressor):
 
         if logging:
             self.logger_spec = True
+        self.add_validation_infos(X, y, validation_mask)
+        return self
+
+    def add_validation_infos(self, X, y, validation_mask):
         #  Add also a 'validation_loss' column in self.equations_
         if validation_mask is not None:
             X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
             self.equations_['validation_loss'] = self.compute_loss_list(X_validation, y_validation)
             #  Set the index for the 'validated' model selection using the validation set
             self.index_for_validated_model_selection_ = np.nanargmin(self.validation_loss_list)
-        return self
-
-    @staticmethod
-    def compute_threshold(train_loss_list: list[float], validation_loss_list: list[float]) -> float:
-        #  Compute the threshold with maximum precision
-        train_loss_min = min(train_loss_list)
-        index_validation_loss_min = np.nanargmin(validation_loss_list)
-        train_loss_for_optimal_equation = train_loss_list[index_validation_loss_min]
-        optimal_threshold = train_loss_for_optimal_equation / train_loss_min
-        #  Round above (with the ceiling function) the threshold above some digits:
-        # This is done to avoid issues for the model selection "validated"
-        # Otherwise due to rounding in the multiplication operation, the correct equation was sometimes not selected
-        #  (because its loss value was just above min_loss_value * threshold, due to small roundings)
-        nb_digits_for_upper_rounding = 10
-        scaling = 10 ** nb_digits_for_upper_rounding
-        optimal_threshold = float(math.ceil(optimal_threshold * scaling)) / scaling
-        return optimal_threshold
 
     def compute_loss_for_set(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
                              validation_set: bool, metric: Metric) -> float:
@@ -354,6 +341,10 @@ class Emulator(PySRRegressor):
         return self.selected_row['validation_loss']
 
     @property
+    def selected_validation_rmse(self) -> float:
+        return np.sqrt(self.selected_validation_loss)
+
+    @property
     def expr_list(self) -> list[Expr]:
         """List of sympy expressions for the equations of the Pareto front"""
         return self.equations_['sympy_format'].to_list()
@@ -392,6 +383,7 @@ class Emulator(PySRRegressor):
         """Compute a Series (or list of Series) representing the selected equations (complexity, loss, ...)
          If index=None, then the equation is selected using self.model_selection"""
         if (index is None) and (self.model_selection == 'validated'):
+            assert self.index_for_validated_model_selection_ is not None
             index = self.index_for_validated_model_selection_
         return super().get_best(index)
 
