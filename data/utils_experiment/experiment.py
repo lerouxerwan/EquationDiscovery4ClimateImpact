@@ -72,7 +72,9 @@ class Experiment(object):
     @property
     def top_params(self) -> dict[str, Any]:
         """Set of hyperparameters that minimizes the performance on the validation set"""
-        return self.top_series.loc[PARAMS_EMULATOR_COLUMN_NAME]
+        params = self.top_series.loc[PARAMS_EMULATOR_COLUMN_NAME]
+        params_to_remove = {'output_directory', 'run_id'}
+        return {k: v for k, v in params.items() if k not in params_to_remove}
 
     @property
     def top_fit_time(self) -> float:
@@ -154,9 +156,6 @@ class Experiment(object):
     def get_rmse_validation_values_for_best_not_same_as_validation(self, model_selection: str) -> np.ndarray:
         series_rmse_validation = self.df_cv_results[get_cv_results_column_name(model_selection, RMSE_VALIDATION_COLUMN_NAME)]
         return series_rmse_validation.loc[~self.ind_best_same_as_validated].values
-
-
-
 
 
     """Fit information"""
