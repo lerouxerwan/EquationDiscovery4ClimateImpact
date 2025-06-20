@@ -34,10 +34,6 @@ class Emulator(PySRRegressor):
             it defines an 'experiment path', depending on 'fit' inputs, where results/TensorBoard logs can be saved
         index_for_validated_model_selection_: float
             Index  to select the equation that minimizes the validation error
-        niterations_warmup_maxsize: int | None
-            Number of iterations for warmup (slowly increase max size from a small number up to the maxsize)
-            This number of iterations is when the current maxsize will reach the user-passed maxsize.
-            Default is None
 
     -> modification of the default value for some parameters:
         -randomness is fixed for reproducibility
@@ -92,8 +88,6 @@ class Emulator(PySRRegressor):
                  extra_torch_mappings: dict[Callable, Callable] | None = None,
                  extra_jax_mappings: dict[Callable, str] | None = None, denoise: bool = False,
                  select_k_features: int | None = None,
-                 # Additional parameters
-                 niterations_warmup_maxsize: int | None = None,
                  **kwargs):
         # Randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
         if random_state is None:
@@ -144,27 +138,12 @@ class Emulator(PySRRegressor):
                          extra_sympy_mappings=extra_sympy_mappings, extra_torch_mappings=extra_torch_mappings,
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          **kwargs)
-        self.niterations_warmup_maxsize = niterations_warmup_maxsize
-        # Some checks
-        assert self.niterations_warmup_maxsize is None or isinstance(self.niterations_warmup_maxsize, int)
         # Change default dimensional_constraint_penalty
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
-        # Set params
-        self.set_warmup_maxsize_by()
         # Create attributes
         self.index_for_validated_model_selection_ = None
         self.experiment_ = None
-
-    def set_params(self, **params):
-        super().set_params(**params)
-        self.set_warmup_maxsize_by()
-        return self
-
-    def set_warmup_maxsize_by(self):
-        if self.niterations_warmup_maxsize is not None:
-            assert 0 <= self.niterations_warmup_maxsize <= self.niterations
-            self.warmup_maxsize_by = self.niterations_warmup_maxsize / self.niterations
 
     def fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,

@@ -90,7 +90,6 @@ class EmulatorWithSearch(Emulator):
                  extra_torch_mappings: dict[Callable, Callable] | None = None,
                  extra_jax_mappings: dict[Callable, str] | None = None, denoise: bool = False,
                  select_k_features: int | None = None,
-                 niterations_warmup_maxsize: int | None = None,
                  # Additional parameters
                  search_style: Optional[str] = None,
                  n_iter: int = 10,
@@ -139,7 +138,7 @@ class EmulatorWithSearch(Emulator):
                          update=update, output_jax_format=output_jax_format, output_torch_format=output_torch_format,
                          extra_sympy_mappings=extra_sympy_mappings, extra_torch_mappings=extra_torch_mappings,
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
-                         niterations_warmup_maxsize=niterations_warmup_maxsize, **kwargs)
+                         **kwargs)
         self.search_style = 'random' if search_style is None else search_style
         self.n_iter = n_iter
         self.n_jobs = n_jobs
@@ -158,8 +157,6 @@ class EmulatorWithSearch(Emulator):
                                              self.param_list_to_optimize)
         # Some checks on param_grid
         assert isinstance(self.param_grid, (dict, list))
-        assert 'model_selection' not in self.param_grid
-        assert ('warmup_maxsize_by' not in self.param_grid) or ('niterations_warmup_maxsize' not in self.param_grid)
 
 
     def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,

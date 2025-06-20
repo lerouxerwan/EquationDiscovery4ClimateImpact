@@ -82,25 +82,4 @@ def test_save_then_load():
     emulator.experiment_.remove_folder()
 
 
-@pytest.mark.parametrize("emulator_type", [Emulator, EmulatorWithSearch])
-def test_niterations_warmup_maxsize(emulator_type: type):
-    # Cases with initialization
-    assert emulator_type(niterations_warmup_maxsize=20, niterations=100).warmup_maxsize_by == 0.2
-    assert emulator_type(niterations_warmup_maxsize=50, niterations=100).warmup_maxsize_by == 0.5
-    assert emulator_type(niterations_warmup_maxsize=50, niterations=50).warmup_maxsize_by == 1.0
-    assert emulator_type(niterations_warmup_maxsize=50, niterations=200).warmup_maxsize_by == 0.25
-    # Cases with set_params
-    emulator = emulator_type()
-    emulator.set_params(niterations_warmup_maxsize=20)
-    assert emulator.warmup_maxsize_by == 0.2
-    emulator.set_params(niterations_warmup_maxsize=50)
-    assert emulator.warmup_maxsize_by == 0.5
-    # Cases expected to fail
-    with pytest.raises(AssertionError):
-        emulator_type(niterations_warmup_maxsize=-5, niterations=100)
-    with pytest.raises(AssertionError):
-        emulator_type(niterations_warmup_maxsize=120, niterations=100)
-
-
-
 
