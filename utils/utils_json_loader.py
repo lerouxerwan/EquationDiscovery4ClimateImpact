@@ -29,8 +29,19 @@ class JsonLoader(object):
             # When the boolean is a parameter of an object, we revert the previous operation
             dict_string = dict_string.replace(f'="{str_symbol}"', f'={str_symbol}')
         # Only keep the float that is inside "np.float64(...)"
-        dict_string = re.sub(r"np.float64\([+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)\)", r"\1", dict_string)
+        dict_string = dict_string.replace('np.float64(', '')
+        dict_string = dict_string.replace(')', '')
         return dict_string
+
+    @staticmethod
+    def remove_npfloat64_and_parenthesis(s: str) -> str:
+
+        prefix = 'np.float64('
+        if s.startswith(prefix):
+            return s.split(prefix)[-1][:-1]
+        else:
+            return s
+
 
 
 def string_to_dict(dict_string: str) -> dict[str, Any]:

@@ -12,7 +12,7 @@ def test_emulator_validation_with_search():
     emulator.fit(dataset.X_train, dataset.y_train, validation_mask=dataset.validation_mask,
                  variable_names=dataset.X_variables_names, X_units=dataset.X_units, y_units=dataset.y_units)
     assert emulator.selected_complexity == 27
-    emulator.run_.remove_folder()
+    emulator.remove_folder()
 
 def test_random_sampling():
     param_name = 'niterations'

@@ -25,7 +25,7 @@ def test_cv_results():
     assert emulator.populations == 19
     assert emulator.niterations == 1
     # Remove folders at the end of the test
-    emulator.run_.remove_folder()
+    emulator.remove_folder()
 
 
 

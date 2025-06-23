@@ -348,4 +348,6 @@ class Emulator(PySRRegressor):
         because it does not handle model_selection='validated'"""
         pass
 
+    def remove_folder(self):
+        self.run_.remove_folder()
 

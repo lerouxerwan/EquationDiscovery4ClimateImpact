@@ -19,9 +19,6 @@ def compute_df_cv_results(cv_results: dict, X: np.ndarray, y: np.ndarray, valida
     #  Add columns for the selected equation
     data = [get_series(emulator, X, y, validation_mask) for emulator in emulators]
     df_cv_results = pd.concat([df_cv_results, pd.DataFrame(index=df_cv_results.index, data=data)], axis=1)
-    # Remove folder for all the emulators
-    for emulator in emulators:
-        emulator.run_.remove_folder()
     return df_cv_results
 
 
@@ -31,7 +28,7 @@ def get_series(emulator: Emulator, X: np.ndarray, y: np.ndarray, validation_mask
     rmse_train = compute_loss_for_set(emulator, X, y, validation_mask, False, Metric.RMSE)
     rmse_validation = compute_loss_for_set(emulator, X, y, validation_mask, True, Metric.RMSE)
     data = [rmse_train, rmse_validation, emulator.selected_complexity, emulator.selected_expr,
-            emulator.selected_variable_names]
+            emulator.selected_variable_names, emulator.output_directory, emulator.run_id]
     # Return Series
     return pd.Series(data=data, index=COLUMN_NAMES)
 

@@ -8,6 +8,7 @@ from pysr.utils import ArrayLike
 from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection._search import BaseSearchCV
 
+from data.utils_run.run import Run
 from emulator.emulator import Emulator
 from emulator.utils_hyperparameter_search.utils_df_cv_results import compute_df_cv_results
 from emulator.utils_hyperparameter_search.utils_scaling_factor import get_param_grid
@@ -216,5 +217,9 @@ class EmulatorWithSearch(Emulator):
         emulator.set_params(**params)
         return emulator
 
+    def remove_folder(self):
+        for output_directory, run_id in self.run_.list_of_output_directory_and_run_id:
+            Run(output_directory, run_id).remove_folder()
+        super().remove_folder()
 
 

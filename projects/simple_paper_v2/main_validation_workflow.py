@@ -4,12 +4,17 @@ from data.utils_dataset.validation_split import ValidationSplit
 from plot.utils_plot import plot_diagnosis
 from projects.simple_paper_v2.validation_workflow import ValidationWorkflow
 from utils.utils_latex import print_df_latex
+from utils.utils_log import log_info
 
 
 def load_setting(fast):
+    model_selection = 'best'
+    # Run independently the validation workflow, so that if it crashes, it does not crash everything
+    val_id = 0
     # Load setting
-    validation_splits = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END]
-    n_iter = 20
+    validation_splits = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END,
+                         ValidationSplit.RCP_START, ValidationSplit.EXTREME][val_id:val_id+1]
+    n_iter = 100
     nb_top_hyperparameters = 5
     nb_hyperparameters = None  # run marginal search for all hyperparameters
     if fast:
@@ -17,13 +22,18 @@ def load_setting(fast):
         n_iter = 2
         nb_top_hyperparameters = 1
         nb_hyperparameters = 2
-    return n_iter, nb_hyperparameters, nb_top_hyperparameters, validation_splits
+    log_info(f'Start validation workflow with: '
+             f'validation_splits={validation_splits} n_iter={n_iter} nb_top_hyperparameters={nb_top_hyperparameters}, '
+             f'model_selection={model_selection}, nb_hyperparameters={nb_hyperparameters}')
+    return validation_splits, n_iter, nb_top_hyperparameters, model_selection, nb_hyperparameters
 
 
 def main_get_top_emulator(fast: bool):
-    n_iter, nb_hyperparameters, nb_top_hyperparameters, validation_splits = load_setting(fast)
+    validation_splits, n_iter, nb_top_hyperparameters, model_selection, nb_hyperparameters = load_setting(fast)
     # Load sorted validation workflows
-    validation_workflows = [ValidationWorkflow(validation_split, n_iter, nb_top_hyperparameters, nb_hyperparameters) for validation_split in validation_splits]
+    validation_workflows = [ValidationWorkflow(validation_split, n_iter, nb_top_hyperparameters,
+                                               model_selection, nb_hyperparameters)
+                            for validation_split in validation_splits]
     sorted_validation_workflow = sorted(validation_workflows, key=lambda vw: vw.rmse_test)
     # Create array with a summary of all validation workflows
     df = pd.concat([validation_workflow.series_summary for validation_workflow in validation_workflows], axis=1).transpose()
@@ -37,4 +47,4 @@ def main_get_top_emulator(fast: bool):
 
 
 if __name__ == '__main__':
-    main_get_top_emulator(fast=True)
+    main_get_top_emulator(fast=False)

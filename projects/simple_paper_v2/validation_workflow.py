@@ -18,6 +18,7 @@ class ValidationWorkflow(object):
     validation_split: ValidationSplit
     n_iter: int
     nb_top_hyperparameters: int
+    model_selection: str
     nb_hyperparameters: Optional[int] = None
     validation_size: float = 0.3
 
@@ -38,7 +39,7 @@ class ValidationWorkflow(object):
         param_name_to_emulator_with_search: dict[str, EmulatorWithSearch] = {}
         for param_name, param_values in param_name_to_values.items():
             log_info(f'Run marginal search for {param_name}')
-            param_search = {'param_grid': {param_name: param_values}, 'search_style': 'grid', 'n_jobs': -1}
+            param_search = {'param_grid': {param_name: param_values}, 'search_style': 'grid'}
             emulator_with_search_marginal = EmulatorWithSearch(**self.params_emulator, **param_search)
             fit(emulator_with_search_marginal, self.dataset)
             param_name_to_emulator_with_search[param_name] = emulator_with_search_marginal
@@ -53,7 +54,7 @@ class ValidationWorkflow(object):
         log_info(f'Start random search with: {top_param_names}')
         param_grid = {param_name: param_value for param_name, param_value in param_name_to_values.items()
                       if param_name in top_param_names}
-        params_search = {'param_grid': param_grid, 'search_style': 'random', 'n_jobs': -1, 'n_iter': self.n_iter}
+        params_search = {'param_grid': param_grid, 'search_style': 'random', 'n_iter': self.n_iter}
         emulator_with_search_random = EmulatorWithSearch(**self.params_emulator, **params_search)
         fit(emulator_with_search_random, self.dataset)
         rmse_validation_from_random_search = emulator_with_search_random.selected_validation_rmse
@@ -68,7 +69,7 @@ class ValidationWorkflow(object):
 
     @cached_property
     def params_emulator(self) -> dict[str, Any]:
-        params_emulator: dict[str, Any] = {'model_selection': 'validated'}
+        params_emulator: dict[str, Any] = {'model_selection': self.model_selection}
         if self.fast:
             params_emulator['niterations'] = 2
         return params_emulator

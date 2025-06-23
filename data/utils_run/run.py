@@ -12,7 +12,7 @@ from data.utils_run.utils_run import CSV_FILENAME, \
     JSON_FILENAME, SYMBOLIC_LINK_FILENAME
 from emulator.utils_emulator import params_that_do_not_impact_the_fit_results
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
-    RMSE_VALIDATION_COLUMN_NAME, PARAMS_COLUMN_NAME
+    RMSE_VALIDATION_COLUMN_NAME, PARAMS_COLUMN_NAME, OUTPUT_DIRECTORY_COLUMN_NAME, RUN_ID_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -68,6 +68,12 @@ class Run(object):
         for column_name in [PARAMS_COLUMN_NAME, PARAMS_EMULATOR_COLUMN_NAME]:
             df_cv_results[column_name] = df_cv_results[column_name].apply(string_to_dict)
         return df_cv_results
+
+    @property
+    def list_of_output_directory_and_run_id(self) -> list[tuple[str, str]]:
+        output_directory_values = self.df_cv_results[OUTPUT_DIRECTORY_COLUMN_NAME].values
+        run_id_values = self.df_cv_results[RUN_ID_COLUMN_NAME].values
+        return list(zip(output_directory_values, run_id_values))
 
     """Fit information"""
 

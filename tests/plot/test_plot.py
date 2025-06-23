@@ -9,7 +9,7 @@ def test_plot_with_emulator():
     dataset = dataset_npp_season_v1
     emulator.fit(dataset.X_train, dataset.y_train, variable_names=dataset.X_variables_names)
     plot_diagnosis(emulator, dataset, show=None)
-    emulator.run_.remove_folder()
+    emulator.remove_folder()
 
 def test_selected_feature_indexes():
     selected_variable_names = ['x0', 'x10', 'x84']
