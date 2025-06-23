@@ -8,7 +8,7 @@ from utils.utils_log import log_info
 
 
 def load_setting(fast):
-    model_selection = 'best'
+    model_selection = ['best', 'validated'][0]
     # Run independently the validation workflow, so that if it crashes, it does not crash everything
     val_id = 0
     # Load setting

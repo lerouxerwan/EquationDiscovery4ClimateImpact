@@ -200,7 +200,6 @@ class EmulatorWithSearch(Emulator):
         self.initialize_run(X, y, validation_mask)
 
         # Run hyperparameter search
-        print(self.run_id)
         if not op.exists(self.run_.filepath_search_result):
             self.run_and_save_hyperparameter_search(X, y, validation_mask, variable_names, X_units, y_units)
 
@@ -208,12 +207,7 @@ class EmulatorWithSearch(Emulator):
         log_info("Fit with top params")
         top_params_emulator = self.run_.top_params_emulator
         self.set_params(**top_params_emulator)
-        print(self.run_.run_id)
-        if self.run_.run_has_been_saved:
-            # Handle old setting where the pickle was saved in the directory and removed elsewhere
-            run = self.run_
-        else:
-            run = Run(self.output_directory, get_run_id(get_non_default_params(top_params_emulator, Emulator)))
+        run = Run(self.output_directory, get_run_id(get_non_default_params(top_params_emulator, Emulator)))
         assert run.run_has_been_saved, f'{run.run_id} {run.run_directory}'
 
         # Fit with a specific run

@@ -1,6 +1,8 @@
 import json
 from typing import Any
 
+import numpy as np
+
 
 class JsonLoader(object):
 
@@ -15,6 +17,8 @@ class JsonLoader(object):
             if isinstance(v, str):
                 if v in map:
                     d[k] = map[v]
+            if isinstance(v, float):
+                d[k] = np.float64(v)
         return d
 
     @classmethod
