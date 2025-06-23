@@ -42,6 +42,8 @@ class UniformDistribution(object):
         sampled_values = uniform_distribution.rvs(size=size, random_state=random_state)
         if self.cast_as_int:
             sampled_values = [int(sampled_value) for sampled_value in sampled_values]
+        else:
+            sampled_values = [float(sampled_value) for sampled_value in sampled_values]
         return sampled_values[0] if size == 1 else sampled_values
 
 
@@ -57,4 +59,6 @@ class ScaledUniformDistribution(UniformDistribution):
         sampled_values = [np.exp(scaled_value) for scaled_value in scaled_values]
         if self.cast_as_int:
             sampled_values = [int(sampled_value) for sampled_value in sampled_values]
+        else:
+            sampled_values = [float(sampled_value) for sampled_value in sampled_values]
         return sampled_values[0] if size == 1 else sampled_values

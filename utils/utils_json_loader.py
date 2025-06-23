@@ -17,8 +17,6 @@ class JsonLoader(object):
             if isinstance(v, str):
                 if v in map:
                     d[k] = map[v]
-            if isinstance(v, float):
-                d[k] = np.float64(v)
         return d
 
     @classmethod
@@ -30,9 +28,6 @@ class JsonLoader(object):
             dict_string = dict_string.replace(str_symbol, f'"{str_symbol}"')
             # When the boolean is a parameter of an object, we revert the previous operation
             dict_string = dict_string.replace(f'="{str_symbol}"', f'={str_symbol}')
-        # Only keep the float that is inside "np.float64(...)"
-        dict_string = dict_string.replace('np.float64(', '')
-        dict_string = dict_string.replace(')', '')
         return dict_string
 
 

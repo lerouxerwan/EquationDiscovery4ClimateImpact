@@ -201,7 +201,6 @@ class Emulator(PySRRegressor):
         Parameters & Results
         ----------
         Same as the self.fit method"""
-        print('fit with run', run.run_id, run.output_directory)
         # Load checkpoint if it exists, otherwise run _fit method
         if run.run_has_been_saved:
             #  Start loading from a pickle file
