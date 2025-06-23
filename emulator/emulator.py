@@ -1,4 +1,3 @@
-import os.path as op
 import time
 from datetime import timedelta
 from typing import Literal, Callable, Optional, Any
@@ -173,48 +172,27 @@ class Emulator(PySRRegressor):
         -------
         self : object
             Fitted estimator"""
-        # Some checks
+        #  Initialize self.run_, a Run object that handles all the input/output processing
+        self.initialize_run(X, y, validation_mask)
+
+        # Fit with a specific run
+        return self.fit_with_run(X, y, validation_mask, variable_names, X_units, y_units, self.run_)
+
+    def initialize_run(self, X, y, validation_mask):
+        #  Some checks
         assert isinstance(X, np.ndarray) and isinstance(y, np.ndarray)
         assert isinstance(validation_mask, np.ndarray) or validation_mask is None
-
-        # Run settings
-        # Set output_directory based on X,y and validation_mask.
+        #  Run settings
+        #  Set output_directory based on X,y and validation_mask.
         self.output_directory_ = self.output_directory = get_output_directory(X, y, validation_mask)
         # Set run_id based on the current parameters
         self.run_id_ = self.run_id = get_run_id(self.non_default_params)
-        # Initialize a Run object, which handles all the input/output processing
+        #  Initialize a Run object, which handles all the input/output processing
         self.run_ = Run(self.output_directory, self.run_id)
 
-        # Load checkpoint if it exists, otherwise run _fit method
-        if self.run_.run_has_been_saved:
-            #  Start loading from a pickle file
-            log_info("Load results from checkpoint")
-            emulator_from_file = self.from_file(run_directory=self.run_.run_directory)
-            self.selection_mask_ = emulator_from_file.selection_mask_
-            self.nout_ = emulator_from_file.nout_
-            self.feature_names_in_ = emulator_from_file.feature_names_in_
-            self.equations_ = emulator_from_file.equations_
-        else:
-            log_info(f'Fit emulator with {self.non_default_params}')
-            # Run self._fit method, which can be overridden in child classes, and compute its duration
-            start_time = time.monotonic()
-            self._fit(X, y, validation_mask, variable_names, X_units, y_units)
-            end_time = time.monotonic()
-            duration = str(timedelta(seconds=end_time - start_time))
-            # Save duration and tensorboard command to file
-            self.run_.save_fit_information(duration, verbose=False)
-
-        #  Add a 'validation_loss' column in self.equations_
-        if validation_mask is not None:
-            X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
-            self.equations_['validation_loss'] = self.compute_loss_list(X_validation, y_validation)
-            #  Set the index for the 'validated' model selection using the validation set
-            self.index_for_validated_model_selection_ = np.nanargmin(self.validation_loss_list)
-        return self
-
-    def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
+    def fit_with_run(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
-            y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
+            y_units: Optional[ArrayLike[str]] = None, run: Run = Optional) -> "PySRRegressor":
         """Method that implement additional options compared to PySR:
             -add some potential preprocessing before the fit
             -fit with TensorBoard logging
@@ -223,21 +201,47 @@ class Emulator(PySRRegressor):
         Parameters & Results
         ----------
         Same as the self.fit method"""
-        # Fit with logging
-        # By default, we log with tensorboard the progress for each iteration of the run
-        # See https://github.com/MilesCranmer/PySR/discussions/840 for more details on log_interval"""
-        logging = self.logger_spec is True
-        if logging:
-            self.logger_spec = self.run_.get_logger_spec(log_interval=1 * self.populations)
-        # Fit on the train set
-        if validation_mask is None:
-            X_fit, y_fit = X, y
+        print('fit with run', run.run_id, run.output_directory)
+        # Load checkpoint if it exists, otherwise run _fit method
+        if run.run_has_been_saved:
+            #  Start loading from a pickle file
+            log_info("Load fit from checkpoint")
+            emulator_from_file = self.from_file(run_directory=run.run_directory)
+            self.selection_mask_ = emulator_from_file.selection_mask_
+            self.nout_ = emulator_from_file.nout_
+            self.feature_names_in_ = emulator_from_file.feature_names_in_
+            self.equations_ = emulator_from_file.equations_
         else:
-            X_fit, y_fit = get_X_and_y(X, y, validation_mask, validation_set=False)
-        super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
+            log_info(f'Run fit')
+            #  Fit with logging and compute its duration
+            start_time = time.monotonic()
+            # By default, we log with tensorboard the progress for each iteration of the run
+            # See https://github.com/MilesCranmer/PySR/discussions/840 for more details on log_interval
+            logging = self.logger_spec is True
+            if logging:
+                self.logger_spec = run.get_logger_spec(log_interval=1 * self.populations)
+            #  Fit on the train set
+            if validation_mask is None:
+                X_fit, y_fit = X, y
+            else:
+                X_fit, y_fit = get_X_and_y(X, y, validation_mask, validation_set=False)
+            log_info(f'Fit emulator with {self.non_default_params}')
+            super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
+            if logging:
+                self.logger_spec = True
+            end_time = time.monotonic()
+            duration = str(timedelta(seconds=end_time - start_time))
+            # Save duration and tensorboard command to file
+            log_info(f'Save fit to file')
+            run.save_fit_information(duration, verbose=False)
 
-        if logging:
-            self.logger_spec = True
+        #  Add a 'validation_loss' column in self.equations_
+        if validation_mask is not None:
+            X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
+            self.equations_['validation_loss'] = self.compute_loss_list(X_validation, y_validation)
+            #  Set the index for the 'validated' model selection using the validation set
+            self.index_for_validated_model_selection_ = np.nanargmin(self.validation_loss_list)
+
         return self
 
     """Method to compute loss"""
@@ -341,7 +345,7 @@ class Emulator(PySRRegressor):
 
     @property
     def non_default_params(self) -> dict[str, Any]:
-        return get_non_default_params(self)
+        return get_non_default_params(self.get_params(), type(self))
 
     def __repr__(self) -> str:
         """If we do not override this method, then the __repr__ method from PySR fails

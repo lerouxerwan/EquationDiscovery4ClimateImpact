@@ -9,12 +9,15 @@ from sklearn.metrics import make_scorer, mean_squared_error
 from sklearn.model_selection._search import BaseSearchCV
 
 from data.utils_run.run import Run
+from data.utils_run.utils_run import get_run_id
 from emulator.emulator import Emulator
+from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME
 from emulator.utils_hyperparameter_search.utils_df_cv_results import compute_df_cv_results
 from emulator.utils_hyperparameter_search.utils_scaling_factor import get_param_grid
 from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs, get_cv
 from emulator.utils_hyperparameter_search.utils_search_style import search_style_to_search_cv_type
 from utils.utils_log import log_info
+from utils.utils_non_default_params import get_non_default_params
 
 
 class EmulatorWithSearch(Emulator):
@@ -162,22 +165,59 @@ class EmulatorWithSearch(Emulator):
         # Some checks on param_grid
         assert isinstance(self.param_grid, (dict, list))
 
-
-    def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
+    def fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
             y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
-        """Run hyperparameter search with several hyperparameter settings (load from file the results if it exists)
-        The top hyperparameter setting (minimizing validation error) is selected for the final 'fit' of the emulator"""
-        # Some check
-        assert validation_mask is not None
+        """Fit the emulator for some feature X, target y, and validation_mask.
+        Additional information can be specified: variable_names & units (with X_units, y_units)
+        Run hyperparameter search with several hyperparameter settings (load from file the results if it exists)
+        The top hyperparameter setting (minimizing validation error) is selected for the final 'fit' of the emulator
+
+        Compared to the fit method of PySR, this 'fit' method:
+            -has one more argument 'validation_mask', an array of bool (None by default) defining the validation split
+            -only handles np.ndarray as input for X and y
+            -does not handle additional parameters of PySR (weights, Xresampled, ...)
+
+        If validation_mask is not None, we fit the emulator on the train set (X_train_train, y_train_train)
+        and compute the 'index_for_validated_model_selection' on the validation set
+
+
+
+        Parameters
+        ----------
+        X : ndarray, Training data of shape (n_samples, n_features).
+        y : ndarray, Target values of shape (n_samples,) or (n_samples, n_targets).
+        validation_mask: Optional[ndarray], validation_mask[i] indicates if the index 'i' is in the validation set
+        variable_names : list[str], a list of names for the variables, rather than "x0", "x1", etc.
+        X_units : list[str], a list of units for each variable in `X`.
+        y_units : str | list[str], similar to `X_units`, but as a unit for the target variable, `y`.
+
+        Returns
+        -------
+        self : object
+            Fitted estimator"""
+        #  Initialize self.run_, a Run object that handles all the input/output processing
+        self.initialize_run(X, y, validation_mask)
+
         # Run hyperparameter search
+        print(self.run_id)
         if not op.exists(self.run_.filepath_search_result):
             self.run_and_save_hyperparameter_search(X, y, validation_mask, variable_names, X_units, y_units)
+
         # Fit with the top setting of hyperparameter on the train split
         log_info("Fit with top params")
-        self.set_params(**self.run_.top_params)
-        super()._fit(X, y, validation_mask, variable_names, X_units, y_units)
-        return self
+        top_params_emulator = self.run_.top_params_emulator
+        self.set_params(**top_params_emulator)
+        print(self.run_.run_id)
+        if self.run_.run_has_been_saved:
+            # Handle old setting where the pickle was saved in the directory and removed elsewhere
+            run = self.run_
+        else:
+            run = Run(self.output_directory, get_run_id(get_non_default_params(top_params_emulator, Emulator)))
+        assert run.run_has_been_saved, f'{run.run_id} {run.run_directory}'
+
+        # Fit with a specific run
+        return self.fit_with_run(X, y, validation_mask, variable_names, X_units, y_units, run)
 
     @property
     def nb_combinations(self) -> int:
@@ -193,6 +233,8 @@ class EmulatorWithSearch(Emulator):
                                            y_units: str | ArrayLike[str] | None = None) -> None:
         """Run hyperparameter search and save the results as a csv"""
         log_info(f'Start hyperparameter search with {self.nb_combinations} combinations, with param grid = {self.param_grid}')
+        # Some check
+        assert validation_mask is not None
         # Run hyperparameter search with respect to self.param_grid
         search_cv_type = search_style_to_search_cv_type[self.search_style]
         assert issubclass(search_cv_type, BaseSearchCV)
@@ -218,8 +260,8 @@ class EmulatorWithSearch(Emulator):
         return emulator
 
     def remove_folder(self):
-        for output_directory, run_id in self.run_.list_of_output_directory_and_run_id:
-            Run(output_directory, run_id).remove_folder()
+        for params in self.run_.df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].values:
+            Run(self.output_directory, get_run_id(get_non_default_params(params, Emulator))).remove_folder()
         super().remove_folder()
 
 

@@ -6,6 +6,7 @@ import joblib
 import numpy as np
 
 from emulator.utils_emulator import params_that_do_not_impact_the_fit_results
+from utils.utils_log import log_info
 
 
 def get_hash_str(*iterables) -> str:
@@ -23,6 +24,8 @@ def get_hash_str(*iterables) -> str:
 def get_hash_params(params: dict[str, Any]) -> list[tuple[Any] | Any]:
     """Summarize all parameters as list (but do not include params that do not impact the fit results)"""
     params_loop = {k: v for k, v in params.items() if k not in params_that_do_not_impact_the_fit_results}
+    params_loop = {k: np.float64(v) if isinstance(v, float) else v for k, v in params_loop.items()}
+    log_info(f'params loop= {params_loop}')
     entire_hash_params = []
     for k, v in sorted(list(params_loop.items()), key=itemgetter(0)):
         if isinstance(v ,(float, int)):

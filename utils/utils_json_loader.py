@@ -1,6 +1,4 @@
 import json
-import re
-from collections import Counter
 from typing import Any
 
 
@@ -32,16 +30,6 @@ class JsonLoader(object):
         dict_string = dict_string.replace('np.float64(', '')
         dict_string = dict_string.replace(')', '')
         return dict_string
-
-    @staticmethod
-    def remove_npfloat64_and_parenthesis(s: str) -> str:
-
-        prefix = 'np.float64('
-        if s.startswith(prefix):
-            return s.split(prefix)[-1][:-1]
-        else:
-            return s
-
 
 
 def string_to_dict(dict_string: str) -> dict[str, Any]:
