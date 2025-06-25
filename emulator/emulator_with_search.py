@@ -208,7 +208,7 @@ class EmulatorWithSearch(Emulator):
         top_params_emulator = self.run_.top_params_emulator
         self.set_params(**top_params_emulator)
         run = Run(self.output_directory, get_run_id(get_non_default_params(top_params_emulator, Emulator)))
-        assert run.run_has_been_saved, f'{run.run_id} {run.run_directory}'
+        assert run.has_been_saved, f'{run.run_directory}'
 
         # Fit with a specific run
         return self.fit_with_run(X, y, validation_mask, variable_names, X_units, y_units, run)

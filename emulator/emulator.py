@@ -202,16 +202,16 @@ class Emulator(PySRRegressor):
         ----------
         Same as the self.fit method"""
         # Load checkpoint if it exists, otherwise run _fit method
-        if run.run_has_been_saved:
+        if run.has_been_saved:
             #  Start loading from a pickle file
-            log_info("Load fit from checkpoint")
+            log_info("Load fit from file")
             emulator_from_file = self.from_file(run_directory=run.run_directory)
             self.selection_mask_ = emulator_from_file.selection_mask_
             self.nout_ = emulator_from_file.nout_
             self.feature_names_in_ = emulator_from_file.feature_names_in_
             self.equations_ = emulator_from_file.equations_
         else:
-            log_info(f'Run fit')
+            log_info(f'Fit with {self.non_default_params}')
             #  Fit with logging and compute its duration
             start_time = time.monotonic()
             # By default, we log with tensorboard the progress for each iteration of the run
@@ -224,7 +224,6 @@ class Emulator(PySRRegressor):
                 X_fit, y_fit = X, y
             else:
                 X_fit, y_fit = get_X_and_y(X, y, validation_mask, validation_set=False)
-            log_info(f'Fit emulator with {self.non_default_params}')
             super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
             if logging:
                 self.logger_spec = True
@@ -232,7 +231,7 @@ class Emulator(PySRRegressor):
             duration = str(timedelta(seconds=end_time - start_time))
             # Save duration and tensorboard command to file
             log_info(f'Save fit to file')
-            run.save_fit_information(duration, verbose=False)
+            run.save_fit(duration, verbose=False)
 
         #  Add a 'validation_loss' column in self.equations_
         if validation_mask is not None:

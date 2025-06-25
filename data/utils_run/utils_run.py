@@ -8,8 +8,6 @@ from utils.utils_path import RUN_PATH
 
 CSV_FILENAME = 'cv_results.csv'
 JSON_FILENAME = 'params_emulator.json'
-SYMBOLIC_LINK_FILENAME = 'plot_path'
-
 
 def get_output_directory(X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]]):
     """Directory, containing subdirectories with results, for a dataset and a validation size"""
