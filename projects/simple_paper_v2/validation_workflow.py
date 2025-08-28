@@ -57,6 +57,7 @@ class ValidationWorkflow(object):
         params_search = {'param_grid': param_grid, 'search_style': 'random', 'n_iter': self.n_iter}
         emulator_with_search_random = EmulatorWithSearch(**self.params_emulator, **params_search)
         fit(emulator_with_search_random, self.dataset)
+        log_info(f'Run directory: {emulator_with_search_random.run_.run_directory}')
         rmse_validation_from_random_search = emulator_with_search_random.selected_validation_rmse
         log_info(f'Top RMSE validation from random search={rmse_validation_from_random_search}')
         # Return the emulator that performs best on the validation set

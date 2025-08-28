@@ -8,14 +8,14 @@ from utils.utils_log import log_info
 
 
 def load_setting(fast):
-    model_selection = ['best', 'validated'][1]
+    model_selection = ['best', 'validated'][0]
     # Run independently the validation workflow, so that if it crashes, it does not crash everything
-    # val_id = 0
-    # validation_splits = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END,
-    #                      ValidationSplit.RCP_START, ValidationSplit.EXTREME][val_id:val_id+1]
-
+    val_id = 0
     validation_splits = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END,
-                         ValidationSplit.RCP_START, ValidationSplit.EXTREME]
+                         ValidationSplit.RCP_START, ValidationSplit.EXTREME][val_id:val_id+1]
+    #
+    # validation_splits = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END,
+    #                      ValidationSplit.RCP_START, ValidationSplit.EXTREME]
     n_iter = 1000
     nb_top_hyperparameters = 5
     nb_hyperparameters = None  # run marginal search for all hyperparameters
