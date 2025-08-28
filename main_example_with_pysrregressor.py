@@ -25,7 +25,7 @@ def main():
           'optimizer_f_calls_limit': 8324, 'optimizer_iterations': 8, 'optimizer_nrestarts': 1,
           'output_directory': None, 'output_jax_format': False, 'output_torch_format': False, 'parallelism': 'serial',
           'parsimony': 0.0, 'perturbation_factor': np.float64(0.09045990289487015), 'population_size': 31,
-          'populations': 59, 'precision': 32, 'print_precision': 5,
+          'populations': 59, 'precision': 64, 'print_precision': 5,
           'probability_negate_constant': np.float64(0.006406594415059639), 'procs': None, 'progress': True,
           'random_state': 42, 'run_id': None, 'select_k_features': None, 'should_optimize_constants': True,
           'should_simplify': True, 'skip_mutation_failures': True, 'tempdir': None, 'timeout_in_seconds': None,
@@ -48,6 +48,7 @@ def main():
 
     print(len(model.equations_))
     print(model.equations_['complexity'].to_list())
+    print(model.equations_['loss'].to_list())
     print(model.equations_['sympy_format'].to_list())
 
 if __name__ == '__main__':
