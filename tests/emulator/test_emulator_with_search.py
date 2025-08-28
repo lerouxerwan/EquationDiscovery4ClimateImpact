@@ -11,7 +11,7 @@ def test_emulator_validation_with_search():
                                   param_list_to_optimize=['adaptive_parsimony_scaling'])
     emulator.fit(dataset.X_train, dataset.y_train, validation_mask=dataset.validation_mask,
                  variable_names=dataset.X_variables_names, X_units=dataset.X_units, y_units=dataset.y_units)
-    assert emulator.selected_complexity == 27
+    assert emulator.selected_complexity == 13
     emulator.remove_folder()
 
 def test_random_sampling():

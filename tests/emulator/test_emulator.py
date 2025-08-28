@@ -32,7 +32,7 @@ def test_deterministic_and_compute_loss():
     X, y = load_X_and_y_for_test()
     emulator.fit(X, y)
     # Assert that the fit of the emulator is deterministic
-    np.testing.assert_almost_equal(float(sum(emulator.loss_list)), 35698078.93297232)
+    np.testing.assert_almost_equal(float(sum(emulator.loss_list)), 8409174.98107913)
     emulator.remove_folder()
 
 

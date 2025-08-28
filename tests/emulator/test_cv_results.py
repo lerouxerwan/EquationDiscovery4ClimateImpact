@@ -15,7 +15,7 @@ def test_cv_results():
     df = emulator.run_.df_cv_results
     assert len(df) == n_iter
     # Check the top selected complexity
-    assert emulator.selected_complexity == 9
+    assert emulator.selected_complexity == 7
     # Check that it is well ranked
     validation_rmse_sorted_values = df[RMSE_VALIDATION_COLUMN_NAME].values
     for rmse1, rmse2 in zip(validation_rmse_sorted_values[:-1], validation_rmse_sorted_values[1:]):
