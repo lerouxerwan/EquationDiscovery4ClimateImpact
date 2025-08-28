@@ -240,6 +240,10 @@ class Emulator(PySRRegressor):
             X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
             self.equations_['validation_loss'] = self.compute_loss_list(X_validation, y_validation)
             #  Set the index for the 'validated' model selection using the validation set
+            log_info(f'validation values= {X_validation.sum()} {y_validation.sum()}')
+            for complexity, expr in zip(self.complexity_list, self.expr_list):
+                print(f'{complexity}: {expr}')
+            print(self.equations_)
             log_info(f'validation loss list= {self.validation_loss_list}')
             self.index_for_validated_model_selection_ = np.nanargmin(self.validation_loss_list)
 
