@@ -1,15 +1,6 @@
 import numpy as np
-from pysr import PySRRegressor
 
-from data.utils_dataset.dataset import Dataset
-from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
-from data.utils_dataset.utils_validation import get_X_and_y
-from dataset import variable_names, X_units, y_units, X, y
-
-
-def main():
-
-    params = {'model_selection': 'best', 'adaptive_parsimony_scaling': np.float64(816.4197141003457), 'alpha': 3.17,
+params = {'model_selection': 'best', 'adaptive_parsimony_scaling': np.float64(816.4197141003457), 'alpha': 3.17,
           'annealing': False, 'autodiff_backend': None, 'batch_size': 50, 'batching': False, 'binary_operators': None,
           'bumper': False, 'cluster_manager': None, 'complexity_mapping': None, 'complexity_of_constants': None,
           'complexity_of_operators': None, 'complexity_of_variables': None, 'constraints': None,
@@ -38,21 +29,3 @@ def main():
           'weight_mutate_operator': np.float64(0.39883855941752566), 'weight_optimize': 0.0,
           'weight_randomize': np.float64(0.00037043799727333546), 'weight_rotate_tree': np.float64(2.2030242310409216),
           'weight_simplify': np.float64(0.0025569918001819283), 'weight_swap_operands': np.float64(0.1265512527625602)}
-    model = PySRRegressor(**params)
-
-    # model.fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
-    dataset: Dataset = dataset_npp_season_v1
-    X_fit, y_fit = get_X_and_y(dataset.X_train, dataset.y_train, dataset.validation_mask, validation_set=False)
-
-    print(X_fit.sum())
-    print(y_fit.sum())
-
-    # model.fit(X_fit, y_fit, variable_names=dataset.X_variables_names, X_units=dataset.X_units, y_units=dataset.y_units)
-    #
-    # print(len(model.equations_))
-    # print(model.equations_['complexity'].to_list())
-    # print(model.equations_['loss'].to_list())
-    # print(model.equations_['sympy_format'].to_list())
-
-if __name__ == '__main__':
-    main()
