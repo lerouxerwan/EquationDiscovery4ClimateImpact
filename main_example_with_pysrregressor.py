@@ -44,12 +44,15 @@ def main():
     dataset: Dataset = dataset_npp_season_v1
     X_fit, y_fit = get_X_and_y(dataset.X_train, dataset.y_train, dataset.validation_mask, validation_set=False)
 
-    model.fit(X_fit, y_fit, variable_names=dataset.X_variables_names, X_units=dataset.X_units, y_units=dataset.y_units)
+    print(X_fit.sum())
+    print(y_fit.sum())
 
-    print(len(model.equations_))
-    print(model.equations_['complexity'].to_list())
-    print(model.equations_['loss'].to_list())
-    print(model.equations_['sympy_format'].to_list())
+    # model.fit(X_fit, y_fit, variable_names=dataset.X_variables_names, X_units=dataset.X_units, y_units=dataset.y_units)
+    #
+    # print(len(model.equations_))
+    # print(model.equations_['complexity'].to_list())
+    # print(model.equations_['loss'].to_list())
+    # print(model.equations_['sympy_format'].to_list())
 
 if __name__ == '__main__':
     main()
