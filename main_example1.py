@@ -40,8 +40,13 @@ def main():
           'weight_randomize': np.float64(0.00037043799727333546), 'weight_rotate_tree': np.float64(2.2030242310409216),
           'weight_simplify': np.float64(0.0025569918001819283), 'weight_swap_operands': np.float64(0.1265512527625602)}
     emulator = Emulator(**params)
+    print(dataset.X_units)
+    print(dataset.y_units)
+    print(type(dataset.y_units[0]))
+    print(type(dataset.X_units[0]))
     emulator.fit(dataset.X_train, dataset.y_train, validation_mask=dataset.validation_mask,
                  variable_names=dataset.X_variables_names, X_units=dataset.X_units, y_units=dataset.y_units)
+    print(emulator.run_.run_directory)
     print(emulator.selected_complexity)
     emulator.remove_folder()
 
