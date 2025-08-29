@@ -42,22 +42,22 @@ def _plot_climato(y_train: np.ndarray, y_test: Optional[np.ndarray] = None,
                   years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None, rcp_name_train: str= 'RCP85',
                   rcp_name_test: Optional[str]=None, validation_mask:Optional[np.ndarray[bool]] = None,
                   target_label: str = "Target (-)", show: bool = False, ymin_and_ymax: Optional[tuple[float, float]] = None,
-                  plot_folder: Optional[str] = None):
+                  plot_folder: Optional[str] = None, ax=None):
     """Plot several RCP climatological time series on the same graph"""
     rcp_name_to_list_of_years_and_y_and_color_and_label = load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train, y_test, years_train, years_test, rcp_name_train, rcp_name_test, validation_mask)
     y_label = get_label(target_label)
     plot_name = y_label.split()[0]
     return plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, y_label, plot_name, show, ymin_and_ymax,
-                                           plot_folder=plot_folder)
+                                           plot_folder=plot_folder, ax=ax)
 
 
-def plot_errors_climato(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None):
+def plot_errors_climato(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None, ax=None):
     for relative_error in [True, False]:
-        _plot_errors_climato(emulator, dataset, show, relative_error, plot_folder)
+        _plot_errors_climato(emulator, dataset, show, relative_error, plot_folder, ax)
 
 
 def _plot_errors_climato(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False, relative_error: bool = False,
-                         plot_folder: Optional[str] = None):
+                         plot_folder: Optional[str] = None, ax=None, loc=None):
     errors_train = compute_differences(emulator, dataset.X_train, dataset.y_train, relative_error)
     errors_test = compute_differences(emulator, dataset.X_test, dataset.y_test, relative_error)
     rcp_name_to_list_of_years_and_errors_and_color_and_label = load_rcp_name_to_list_of_years_and_y_and_color_and_label(errors_train, errors_test, dataset.years_train, dataset.years_test,
@@ -68,7 +68,8 @@ def _plot_errors_climato(emulator: Emulator, dataset: Dataset, show: Optional[bo
     else:
         y_label = f'Error of {target_label}'
     plot_name = y_label.split()[0]
-    plot_climatological_time_series(rcp_name_to_list_of_years_and_errors_and_color_and_label, errors_train, y_label, plot_name, show, plot_folder=plot_folder)
+    plot_climatological_time_series(rcp_name_to_list_of_years_and_errors_and_color_and_label, errors_train, y_label, plot_name, show, plot_folder=plot_folder,
+                                    ax=ax, loc=loc)
 
 def compute_differences(emulator: Emulator, X: Optional[np.ndarray], y: Optional[np.ndarray],
                         relative_error: bool = False) -> Optional[np.ndarray]:

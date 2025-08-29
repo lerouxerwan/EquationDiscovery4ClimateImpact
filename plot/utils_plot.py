@@ -5,6 +5,7 @@ from data.utils_dataset.dataset import Dataset
 from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from plot.by_rcp.plot_climato import plot_climato, plot_errors_climato
+from plot.by_rcp.plot_climato_side_by_side import plot_climato_side_by_side
 from plot.by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
 from plot.by_split.plot_residuals import plot_residuals
 from plot.by_split.plot_scatter import plot_scatter, plot_scatter_side_by_side
@@ -20,11 +21,10 @@ def plot_diagnosis(emulator: Emulator, dataset:Dataset, show: Optional[bool] = F
     """Plot diagnosis of this emulator i) by split ii) by rcp iii) for the search"""
     log_info('Start plot diagnosis')
     # Select plot functions
-    plot_functions = []
     plot_functions = [
         plot_selected_features, # plot related to the selected equation
         plot_loss_vs_complexity, plot_scatter, plot_residuals, plot_time_series, # plot by split
-        plot_climato, plot_errors_climato, # plot by rcp
+        plot_climato, plot_errors_climato, plot_climato_side_by_side, # plot by rcp
         plot_scatter_side_by_side, # plot side by side
     ]
     if isinstance(emulator, EmulatorWithSearch):

@@ -10,18 +10,25 @@ from utils.utils_plot import show_and_save_with_optional_plot_folder
 
 def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label: dict[str, list[tuple[list[int], list[float], str, str]]],
                                     y_train: np.ndarray, y_label: str, plot_name: str, show: Optional[bool], ymin_and_ymax: tuple[float, float] = None, 
-                                    plot_std: bool = True, plot_folder: Optional[str] = None) -> dict[str, tuple[list[int], list[float], str]]:
-    ax = plt.gca()
+                                    plot_std: bool = True, plot_folder: Optional[str] = None, ax=None,
+                                    loc=None) -> dict[str, tuple[list[int], list[float], str]]:
+    if ax is None:
+        show_and_save = True
+        ax = plt.gca()
+    else:
+        show_and_save = False
     rcp_name_to_years_and_std_values_and_color = _plot_climatological_time_series(ax,
                                                                                   rcp_name_to_list_of_years_and_y_and_color_and_label,
                                                                                   y_train, y_label,
-                                                                                  ymin_and_ymax, plot_std)
-    show_and_save_with_optional_plot_folder(f'climatological_series_{plot_name}', show, plot_folder)
+                                                                                  ymin_and_ymax, plot_std, loc=loc)
+    if show_and_save:
+        show_and_save_with_optional_plot_folder(f'climatological_series_{plot_name}', show, plot_folder)
     return rcp_name_to_years_and_std_values_and_color
 
 
 def _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, y_label,
-                                     ymin_and_ymax, plot_std: bool = True, plot_average: bool = True):
+                                     ymin_and_ymax, plot_std: bool = True, plot_average: bool = True,
+                                     loc=None):
     window_size = 30
     all_dates = []
     rcp_name_to_years_and_std_values_and_color = {}
@@ -70,6 +77,10 @@ def _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_col
         legend_handles, legend_labels = legend_handles[:-1], legend_labels[:-1]
     ax_twin = ax.twinx()
     ax_twin.set_yticks([])
-    ax_twin.legend(legend_handles, legend_labels, loc=loc2)
+    if loc is None:
+        legend_loc=loc2
+    else:
+        legend_loc = loc
+    ax_twin.legend(legend_handles, legend_labels, loc=legend_loc)
     ax.yaxis.grid()
     return rcp_name_to_years_and_std_values_and_color
