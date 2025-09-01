@@ -2,11 +2,11 @@ import numpy as np
 
 params = {
           'parallelism': 'serial',
+    'random_state': 42,
+    'deterministic': True,
+
           'verbosity': 1,
-          'random_state': 42,
         'precision': 64,
-            'deterministic': True,
-            'dimensional_constraint_penalty': 100000000,
 
     'fraction_replaced': np.float64(0.0004429864911833153),
     'fraction_replaced_hof': np.float64(0.09963726885503711),
