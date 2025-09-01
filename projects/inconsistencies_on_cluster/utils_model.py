@@ -1,34 +1,27 @@
 import numpy as np
 
-params = {'adaptive_parsimony_scaling': np.float64(816.4197141003457),
-          'crossover_probability': np.float64(0.03645040661041819),
-
-          'deterministic': True,
-          'dimensional_constraint_penalty': 100000000,
-
-          'fraction_replaced': np.float64(0.0004429864911833153),
-          'fraction_replaced_hof': np.float64(0.09963726885503711),
-            'maxsize': 20,
-
-
-          'ncycles_per_iteration': 472,
-          'niterations': 109, 'optimize_probability': np.float64(0.07970689105408878),
-          'optimizer_f_calls_limit': 8324, 'optimizer_iterations': 8, 'optimizer_nrestarts': 1,
-
+params = {
           'parallelism': 'serial',
-          'perturbation_factor': np.float64(0.09045990289487015), 'population_size': 31,
-
-          'populations': 59, 'precision': 64,
-          'probability_negate_constant': np.float64(0.006406594415059639),
-
-          'topn': 20,
-
-          'tournament_selection_n': 18, 'tournament_selection_p': 0.982,
-          'unary_operators': ['square', 'sqrt'],
-
           'verbosity': 1,
+          'random_state': 42,
+        'precision': 64,
+            'maxsize': 20,
+            'deterministic': True,
+            'dimensional_constraint_penalty': 100000000,
 
-
+    'fraction_replaced': np.float64(0.0004429864911833153),
+    'fraction_replaced_hof': np.float64(0.09963726885503711),
+    'ncycles_per_iteration': 472,
+    'niterations': 109, 'optimize_probability': np.float64(0.07970689105408878),
+    'optimizer_f_calls_limit': 8324, 'optimizer_iterations': 8, 'optimizer_nrestarts': 1,
+    'perturbation_factor': np.float64(0.09045990289487015), 'population_size': 31,
+    'populations': 59,
+    'probability_negate_constant': np.float64(0.006406594415059639),
+    'topn': 20,
+    'tournament_selection_n': 18, 'tournament_selection_p': 0.982,
+    'unary_operators': ['square', 'sqrt'],
+          'adaptive_parsimony_scaling': np.float64(816.4197141003457),
+          'crossover_probability': np.float64(0.03645040661041819),
           'weight_add_node': np.float64(3.716987016612159), 'weight_delete_node': np.float64(0.8731863557229343),
           'weight_do_nothing': np.float64(0.3037130122259829), 'weight_insert_node': np.float64(0.011084426436652957),
           'weight_mutate_constant': np.float64(0.022677443556439466),
