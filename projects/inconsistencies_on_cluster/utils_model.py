@@ -21,14 +21,12 @@ params = {'adaptive_parsimony_scaling': np.float64(816.4197141003457),
           'populations': 59, 'precision': 64,
           'probability_negate_constant': np.float64(0.006406594415059639),
 
-          'random_state': 42,
-
           'topn': 20,
 
           'tournament_selection_n': 18, 'tournament_selection_p': 0.982,
           'unary_operators': ['square', 'sqrt'],
 
-          'verbosity': 0,
+          'verbosity': 1,
 
 
           'weight_add_node': np.float64(3.716987016612159), 'weight_delete_node': np.float64(0.8731863557229343),
