@@ -18,7 +18,6 @@ params = {
     'probability_negate_constant': np.float64(0.006406594415059639),
     'topn': 20,
     'tournament_selection_n': 18, 'tournament_selection_p': 0.982,
-    'unary_operators': ['square', 'sqrt'],
           'adaptive_parsimony_scaling': np.float64(816.4197141003457),
           'crossover_probability': np.float64(0.03645040661041819),
           'weight_add_node': np.float64(3.716987016612159), 'weight_delete_node': np.float64(0.8731863557229343),
