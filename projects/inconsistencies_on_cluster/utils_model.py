@@ -5,7 +5,6 @@ params = {
           'verbosity': 1,
           'random_state': 42,
         'precision': 64,
-            'maxsize': 20,
             'deterministic': True,
             'dimensional_constraint_penalty': 100000000,
 
