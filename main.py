@@ -1,7 +1,7 @@
 import numpy as np
 from pysr import PySRRegressor, jl
 
-jl.seval('Pkg.activate("venv/julia_env")')
+# jl.seval('Pkg.activate("venv/julia_env")')
 # jl.seval('using random')
 # jl.seval("Random.seed!(3);")
 
@@ -11,7 +11,7 @@ nb_samples = 5
 X = X[:5, :]
 y = y[:5]
 model = PySRRegressor(parallelism='serial', random_state=0, deterministic=True,
-                      niterations=1, precision=32)
+                      niterations=1)
 model.fit(X, y)
 print(f'{len(model.equations_)} equations with complexity: {model.equations_['complexity'].to_list()}')
 print(f'with loss list={model.equations_["loss"].to_list()}')
