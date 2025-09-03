@@ -9,4 +9,4 @@ function test_iterations(n)
 end
 
 # Exécutez sur chaque machine et comparez les sorties
-test_iterations(1000)
+test_iterations(1000000)

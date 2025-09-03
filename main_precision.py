@@ -7,4 +7,4 @@ def test_iterations(n):
         print(f"Itération {i}: x = {x}")
     return x
 
-test_iterations(1000)
+test_iterations(1000000)
