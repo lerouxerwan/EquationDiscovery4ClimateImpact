@@ -3,8 +3,8 @@ from pysr import PySRRegressor, jl
 
 jl.seval('Pkg.activate("venv/julia_env")')
 # jl.seval('add random')
-jl.seval('using Random')
-jl.seval('Random.seed!(42)')
+# jl.seval('using Random')
+# jl.seval('Random.seed!(42)')
 # jl.seval("Pkg.status()")
 # jl.seval('srand(10)')
 
@@ -13,7 +13,7 @@ y = np.array([31.82082490529877,30.095264211096985,30.8671131573908,30.753026760
 nb_samples = 5
 X = X[:5, :]
 y = y[:5]
-model = PySRRegressor(parallelism='serial', random_state=42, deterministic=True, niterations=1)
+model = PySRRegressor(parallelism='serial', random_state=0, deterministic=True, niterations=1)
 model.fit(X, y)
 print(f'{len(model.equations_)} equations with complexity: {model.equations_['complexity'].to_list()}')
 print(f'with loss list={model.equations_["loss"].to_list()}')
