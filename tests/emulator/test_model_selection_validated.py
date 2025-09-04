@@ -10,7 +10,7 @@ def test_model_selection_validated_example1():
     emulator = Emulator(**params)
     emulator.fit(dataset.X_train, dataset.y_train, validation_mask=dataset.validation_mask,
                  variable_names=dataset.X_variables_names, X_units=dataset.X_units, y_units=dataset.y_units)
-    assert emulator.selected_complexity == 12
+    assert emulator.selected_complexity == 16
     emulator.remove_folder()
 
 def test_model_selection_validation_example2():
@@ -19,5 +19,5 @@ def test_model_selection_validation_example2():
     emulator = Emulator(**params)
     emulator.fit(dataset.X_train, dataset.y_train, validation_mask=dataset.validation_mask,
                  variable_names=dataset.X_variables_names, X_units=dataset.X_units, y_units=dataset.y_units)
-    assert emulator.selected_complexity == 17
+    assert emulator.selected_complexity == 7
     emulator.remove_folder()

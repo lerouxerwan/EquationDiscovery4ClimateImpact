@@ -92,8 +92,6 @@ class Emulator(PySRRegressor):
         # Randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
         if random_state is None:
             random_state = random_seed
-        # Set precision to 64 by default to avoid rounding issues between different computers
-        precision = 64
         # Remove verbosity
         verbosity = 0
         # Ensures that deterministic is True and parallelism is "serial"
