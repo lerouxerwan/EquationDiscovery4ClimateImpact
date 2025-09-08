@@ -44,7 +44,7 @@ class Sbatch(ABC):
 
     @property
     def bash_filepath(self) -> str:
-        short_setting_name = '_'.join([s[:2] for s in self.setting_name.split('_')])
+        short_setting_name = '_'.join([s[:3] for s in self.setting_name.split('_')])
         return op.join(self.root, 'slurm', 'bash_scripts', f'xp_{self.setting_name}', f'{short_setting_name}.sh')
 
     @property
