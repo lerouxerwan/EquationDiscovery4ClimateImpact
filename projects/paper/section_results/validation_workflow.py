@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Optional, Any, OrderedDict
+from typing import Any, OrderedDict
 
 import pandas as pd
 
@@ -19,8 +19,8 @@ class ValidationWorkflow(object):
     n_iter: int
     nb_top_hyperparameters: int
     model_selection: str
-    nb_hyperparameters: Optional[int] = None
     validation_size: float = 0.3
+    fast: bool = False
 
     def __post_init__(self):
         # Load dataset
@@ -75,16 +75,12 @@ class ValidationWorkflow(object):
             params_emulator['niterations'] = 2
         return params_emulator
 
-    @property
-    def fast(self) -> bool:
-        """If nb_hyperparameters is not None, it means we want to run fast"""
-        return self.nb_hyperparameters is not None
-
     def get_param_name_to_values(self) -> dict[str, list]:
         param_name_to_values = get_param_name_to_values()
-        if self.nb_hyperparameters is not None:
-            assert isinstance(self.nb_hyperparameters, int)
-            first_param_names = list(sorted(list(param_name_to_values.keys())))[:self.nb_hyperparameters]
+        if self.fast:
+            # Reduce the number of hyperparameters for the marginal search
+            nb_hyperparameters = 2
+            first_param_names = list(sorted(list(param_name_to_values.keys())))[:nb_hyperparameters]
             param_name_to_values = {param_name: values for param_name, values in param_name_to_values.items()
                     if param_name in first_param_names}
         assert len(param_name_to_values) >= self.nb_top_hyperparameters

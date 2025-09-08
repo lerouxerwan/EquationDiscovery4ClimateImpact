@@ -13,21 +13,29 @@ def load_setting(fast):
     val_id = 0
     validation_splits = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END,
                          ValidationSplit.RCP_START, ValidationSplit.EXTREME][val_id:val_id+1]
-    #
-    # validation_splits = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END,
-    #                      ValidationSplit.RCP_START, ValidationSplit.EXTREME]
     n_iter = 10
     nb_top_hyperparameters = 3
-    nb_hyperparameters = None  # run marginal search for all hyperparameters
     if fast:
         validation_splits = validation_splits[:2]
         n_iter = 2
         nb_top_hyperparameters = 1
-        nb_hyperparameters = 2
     log_info(f'Start validation workflow with: '
              f'validation_splits={validation_splits} n_iter={n_iter} nb_top_hyperparameters={nb_top_hyperparameters}, '
-             f'model_selection={model_selection}, nb_hyperparameters={nb_hyperparameters}')
-    return validation_splits, n_iter, nb_top_hyperparameters, model_selection, nb_hyperparameters
+             f'model_selection={model_selection}')
+    return validation_splits, n_iter, nb_top_hyperparameters, model_selection
+
+def run_validation_workflow_from_indices(indices: list[int]):
+    model_selection = ['best', 'validated'][indices[0]]
+    validation_split = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END,
+                         ValidationSplit.RCP_START, ValidationSplit.EXTREME][indices[1]]
+    n_iter = indices[2]
+    nb_top_hyperparameters = indices[3]
+    validation_size = [0.3, 0.2, 0.4][indices[4]]
+    validation_split = ValidationWorkflow(validation_split, n_iter, nb_top_hyperparameters, model_selection, validation_size)
+    print('Run validation workflow:')
+    print(validation_split.emulator.selected_expr)
+    print(validation_split.emulator.selected_complexity)
+    print(validation_split.rmse_test)
 
 
 def main_get_top_emulator(fast: bool):

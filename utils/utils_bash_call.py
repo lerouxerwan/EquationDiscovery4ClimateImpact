@@ -1,10 +1,11 @@
 import subprocess as sp
 
 
-def bash_call(command, print_command=False):
+def bash_call(command, just_print: bool=False):
     """Call bash function from python"""
-    if print_command:
-        print(command)
+    print(command)
+    if just_print:
+        return None
     else:
         out = sp.check_output(command, shell=True)
         if isinstance(out, bytes):
