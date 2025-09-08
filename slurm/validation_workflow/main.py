@@ -19,7 +19,7 @@ class SbatchValidationWorkflow(Sbatch):
 def main():
     for n_iter in [100]:
         # for nb_top_hyperparameters in range(1, 11):
-        for nb_top_hyperparameters in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
+        for nb_top_hyperparameters in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10][:1]:
             indices = [0, 0, n_iter, nb_top_hyperparameters, 0]
             sbatch = SbatchValidationWorkflow(indices)
             sbatch.run()

@@ -80,7 +80,7 @@ class Sbatch(ABC):
             # Lines of the bash file
             lines = [
                 '#!/bin/bash',
-                'source /homes/e23lerou/.bashrc',
+                'source /homes/e23lerou/miniforge3/bin/activate',
                 'mamba activate venv',
                 self.python_exec,
                 f'rm {self.bash_filepath}'
@@ -94,7 +94,6 @@ class Sbatch(ABC):
         bash_call(f'chmod +x {self.bash_filepath}', just_print=LOCAL_COMPUTER)
         # Run bash file
         command = (f'sbatch '
-                   # f'-p Odyssey '
                    f'-c {self.nb_cores} '
                    f'--time=2-00:00:00 '
                    f'--nodelist=sl-mee-br-111 '
