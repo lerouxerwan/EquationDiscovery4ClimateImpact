@@ -80,8 +80,7 @@ class Sbatch(ABC):
             # Lines of the bash file
             lines = [
                 '#!/bin/bash',
-                # 'source /homes/e23lerou/miniforge3/bin/activate',
-                'eval "$(/homes/e23lerou/miniforge3/bin/mamba shell hook)"',
+                'eval "$(/homes/e23lerou/miniforge3/condabin/mamba shell hook --shell bash)"',
                 'mamba activate venv',
                 self.python_exec,
                 f'rm {self.bash_filepath}'
