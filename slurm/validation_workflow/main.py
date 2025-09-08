@@ -5,7 +5,7 @@ class SbatchValidationWorkflow(Sbatch):
 
     @property
     def sbatch_name(self) -> str:
-        return 'val_workflow'
+        return 'val'
 
     @property
     def filepath_from_root(self):
@@ -13,13 +13,13 @@ class SbatchValidationWorkflow(Sbatch):
 
     @property
     def nb_cores(self) -> int:
-        return 8
+        return 4
 
 
 def main():
     for n_iter in [10]:
         # for nb_top_hyperparameters in range(1, 11):
-        for nb_top_hyperparameters in [3]:
+        for nb_top_hyperparameters in [1, 2, 3, 4, 5]:
             indices = [0, 0, n_iter, nb_top_hyperparameters, 0]
             sbatch = SbatchValidationWorkflow(indices)
             sbatch.run()

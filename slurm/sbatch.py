@@ -36,7 +36,7 @@ class Sbatch(ABC):
 
     @property
     def setting_name(self) -> str:
-        return f'{self.sbatch_name}_{'_'.join([str(i) for i in self.indices])}'
+        return f'{self.sbatch_name}_{'_'.join([str(i) for i in self.indices if i != 0])}'
 
     @property
     def python_exec(self):
