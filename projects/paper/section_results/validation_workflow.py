@@ -9,7 +9,7 @@ from data.utils_dataset.validation_split import ValidationSplit
 from emulator.emulator_with_search import EmulatorWithSearch
 from plot.utils_metric.metric import Metric
 from plot.workflow import fit, compute_loss_test
-from projects.simple_paper_v2.utils_hyperparameters import get_param_name_to_values
+from projects.paper.section_results.utils_hyperparameters import get_param_name_to_values
 from utils.utils_log import log_info
 
 
