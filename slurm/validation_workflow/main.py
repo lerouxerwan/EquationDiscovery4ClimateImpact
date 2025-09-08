@@ -4,12 +4,16 @@ from slurm.sbatch import Sbatch
 class SbatchValidationWorkflow(Sbatch):
 
     @property
+    def sbatch_name(self) -> str:
+        return 'val_workflow'
+
+    @property
     def filepath_from_root(self):
         return 'slurm/validation_workflow/main_for_bash_script.py'
 
     @property
-    def setting_name(self) -> str:
-        return f'val_workflow_{'_'.join([str(i) for i in self.indices])}'
+    def nb_cores(self) -> int:
+        return 8
 
 
 def main():

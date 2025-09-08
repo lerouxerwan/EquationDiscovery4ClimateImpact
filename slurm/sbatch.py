@@ -3,6 +3,8 @@ import os.path as op
 import socket
 from abc import abstractmethod, ABC
 from dataclasses import dataclass
+from typing import Any
+
 from utils.utils_bash_call import bash_call
 
 LOCAL_COMPUTER = socket.gethostname() == 'IMT-MEE-20241210'
@@ -24,9 +26,17 @@ class Sbatch(ABC):
 
     @property
     @abstractmethod
-    def setting_name(self) -> str:
-        """Define setting_name depending on the indices"""
+    def sbatch_name(self) -> str:
         raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def nb_cores(self) -> int:
+        raise
+
+    @property
+    def setting_name(self) -> str:
+        return f'{self.sbatch_name}_{'_'.join([str(i) for i in self.indices])}'
 
     @property
     def python_exec(self):
@@ -85,7 +95,7 @@ class Sbatch(ABC):
         # Run bash file
         command = (f'sbatch '
                    f'-p Odyssey '
-                   f'-c 32 '
+                   f'-c {self.nb_cores} '
                    f'--time=2-00:00:00 '
                    f'--nodelist=sl-mee-br-111 '
                    f'-o {dirname}/%a.out '
