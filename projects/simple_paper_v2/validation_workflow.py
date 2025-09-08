@@ -54,7 +54,7 @@ class ValidationWorkflow(object):
         log_info(f'Start random search with: {top_param_names}')
         param_grid = {param_name: param_value for param_name, param_value in param_name_to_values.items()
                       if param_name in top_param_names}
-        params_search = {'param_grid': param_grid, 'search_style': 'random', 'n_iter': self.n_iter}
+        params_search = {'param_grid': param_grid, 'search_style': 'random', 'n_iter': self.n_iter, 'n_jobs': -1}
         emulator_with_search_random = EmulatorWithSearch(**self.params_emulator, **params_search)
         fit(emulator_with_search_random, self.dataset)
         log_info(f'Run directory: {emulator_with_search_random.run_.run_directory}')

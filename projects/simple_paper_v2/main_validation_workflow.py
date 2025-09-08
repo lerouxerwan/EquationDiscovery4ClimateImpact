@@ -16,8 +16,8 @@ def load_setting(fast):
     #
     # validation_splits = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END,
     #                      ValidationSplit.RCP_START, ValidationSplit.EXTREME]
-    n_iter = 1000
-    nb_top_hyperparameters = 5
+    n_iter = 10
+    nb_top_hyperparameters = 3
     nb_hyperparameters = None  # run marginal search for all hyperparameters
     if fast:
         validation_splits = validation_splits[:2]
