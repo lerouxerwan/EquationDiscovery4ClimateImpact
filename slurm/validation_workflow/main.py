@@ -16,6 +16,15 @@ class SbatchValidationWorkflow(Sbatch):
         return 4
 
 
+def main_fast():
+    for n_iter in [3]:
+        # for nb_top_hyperparameters in range(1, 11):
+        for nb_top_hyperparameters in [1, 2, 3][:]:
+            indices = [0, 0, n_iter, nb_top_hyperparameters, 0]
+            sbatch = SbatchValidationWorkflow(indices)
+            sbatch.run()
+
+
 def main():
     for n_iter in [100]:
         # for nb_top_hyperparameters in range(1, 11):
@@ -26,4 +35,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main_fast()
+    # main()

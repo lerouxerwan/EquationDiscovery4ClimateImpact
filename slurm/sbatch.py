@@ -82,7 +82,7 @@ class Sbatch(ABC):
                 '#!/bin/bash',
                 'export PATH="/homes/e23lerou/miniforge3/bin:$PATH"',
                 'eval "$(mamba shell hook --shell bash)"',
-                'mamba activate venv',
+                'mamba activate /Odyssey/private/e23lerou/Documents/EquationDiscovery4ClimateImpact/venv_shared_space',
                 self.python_exec,
                 f'rm {self.bash_filepath}'
             ]
