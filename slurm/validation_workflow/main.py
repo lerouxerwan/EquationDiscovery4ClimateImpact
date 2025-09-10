@@ -13,7 +13,7 @@ class SbatchValidationWorkflow(Sbatch):
 
     @property
     def nb_cores(self) -> int:
-        return 4
+        return 8
 
 
 def main_fast():
