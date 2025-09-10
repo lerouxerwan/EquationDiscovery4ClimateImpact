@@ -84,7 +84,7 @@ class Sbatch(ABC):
                 'eval "$(mamba shell hook --shell bash)"',
                 f'mamba activate /Odyssey/private/e23lerou/shared_install/venv',
                 self.python_exec,
-                f'rm {self.bash_filepath}'
+                # f'rm {self.bash_filepath}'
             ]
             # Write lines inside the bash file
             with open(self.bash_filepath, 'w') as f:
