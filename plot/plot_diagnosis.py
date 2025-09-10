@@ -11,6 +11,7 @@ from plot.by_split.plot_residuals import plot_residuals
 from plot.by_split.plot_scatter import plot_scatter, plot_scatter_side_by_side
 from plot.by_split.plot_time_series import plot_time_series
 from plot.dataset.plot_selected_features import plot_selected_features
+from plot.equation.plot_decomposition import plot_decomposition
 from plot.for_search.plot_diagnosis_search import plot_diagnosis_search
 from utils.utils_bash_call import bash_call
 from utils.utils_log import log_info
@@ -26,6 +27,7 @@ def plot_diagnosis(emulator: Emulator, dataset:Dataset, show: Optional[bool] = F
         plot_loss_vs_complexity, plot_scatter, plot_residuals, plot_time_series, # plot by split
         plot_climato, plot_errors_climato, plot_climato_side_by_side, # plot by rcp
         plot_scatter_side_by_side, # plot side by side
+        plot_decomposition, # plot a decomposition for the selected equation
     ]
     if isinstance(emulator, EmulatorWithSearch):
         plot_functions.append(plot_diagnosis_search)

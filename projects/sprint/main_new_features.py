@@ -1,6 +1,6 @@
 from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
 from emulator.emulator import Emulator
-from plot.utils_plot import plot_diagnosis
+from plot.plot_diagnosis import plot_diagnosis
 
 emulator = Emulator(niterations=1)
 dataset = dataset_npp_season_v1

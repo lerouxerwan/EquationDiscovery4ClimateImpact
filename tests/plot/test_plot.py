@@ -1,7 +1,7 @@
 from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
 from emulator.emulator import Emulator
 from plot.dataset.plot_selected_features import get_selected_feature_indexes
-from plot.utils_plot import plot_diagnosis
+from plot.plot_diagnosis import plot_diagnosis
 
 
 def test_plot_with_emulator():

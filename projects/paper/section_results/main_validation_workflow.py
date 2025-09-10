@@ -1,7 +1,7 @@
 import pandas as pd
 
 from data.utils_dataset.validation_split import ValidationSplit
-from plot.utils_plot import plot_diagnosis
+from plot.plot_diagnosis import plot_diagnosis
 from projects.paper.section_results.validation_workflow import ValidationWorkflow
 from utils.utils_latex import print_df_latex
 from utils.utils_log import log_info

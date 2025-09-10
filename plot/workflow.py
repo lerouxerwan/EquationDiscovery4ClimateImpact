@@ -4,7 +4,7 @@ from data.utils_dataset.dataset import Dataset
 from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from plot.utils_metric.metric import Metric
-from plot.utils_plot import plot_diagnosis
+from plot.plot_diagnosis import plot_diagnosis
 
 
 def workflow(dataset: Dataset, params_emulator: dict[str, Any],
