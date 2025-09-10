@@ -13,7 +13,7 @@ class SbatchValidationWorkflow(Sbatch):
 
     @property
     def nb_cores(self) -> int:
-        return 2
+        return 4
 
 
 def main_fast():
@@ -26,7 +26,7 @@ def main_fast():
 
 
 def main():
-    for n_iter in [100]:
+    for n_iter in [1000]:
         # for nb_top_hyperparameters in range(1, 11):
         for nb_top_hyperparameters in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10][:]:
             indices = [0, 0, n_iter, nb_top_hyperparameters, 0]

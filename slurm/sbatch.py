@@ -99,8 +99,8 @@ class Sbatch(ABC):
         # Run bash file
         command = (f'sbatch '
                    f'-c {self.nb_cores} '
-                   f'--time=2-00:00:00 '
-                   f'--nodelist=sl-mee-br-111 '
+                   # f'--time=2-00:00:00 '
+                   f'--nodelist=sl-mee-br-113 '
                    f'-o {dirname}/%a.out '
                    f'{self.bash_filepath}')
         bash_call(command, just_print=LOCAL_COMPUTER)

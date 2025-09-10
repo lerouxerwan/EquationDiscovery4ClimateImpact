@@ -6,3 +6,4 @@ export JULIA_DEPOT_PATH="/Odyssey/private/e23lerou/shared_install/.julia"
 export PYTHONPATH="${PYTHONPATH}:/Odyssey/private/e23lerou/test_server/EquationDiscovery4ClimateImpact"
 mamba activate /Odyssey/private/e23lerou/shared_install/venv
 python projects/mre_for_cluster/main.py
+pytest tests/
