@@ -78,11 +78,12 @@ class Sbatch(ABC):
 
         if not LOCAL_COMPUTER:
             # Lines of the bash file
+            virtualenv_path = '/Odyssey/private/e23lerou/Documents/EquationDiscovery4ClimateImpact/venv_shared_space'
             lines = [
                 '#!/bin/bash',
-                'export PATH="/homes/e23lerou/miniforge3/bin:$PATH"',
+                f'export PATH="{virtualenv_path}/bin:$PATH"',
                 'eval "$(mamba shell hook --shell bash)"',
-                'mamba activate /Odyssey/private/e23lerou/Documents/EquationDiscovery4ClimateImpact/venv_shared_space',
+                f'mamba activate {virtualenv_path}',
                 self.python_exec,
                 f'rm {self.bash_filepath}'
             ]
