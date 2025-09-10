@@ -36,7 +36,7 @@ class Sbatch(ABC):
 
     @property
     def setting_name(self) -> str:
-        return f'{self.sbatch_name}_{'_'.join([str(i) for i in self.indices if i != 0])}'
+        return '' + '_'.join([str(i) for i in self.indices if i != 0])
 
     @property
     def python_exec(self):
@@ -44,7 +44,7 @@ class Sbatch(ABC):
 
     @property
     def bash_filepath(self) -> str:
-        short_setting_name = '_'.join([s[:3] for s in self.setting_name.split('_')])
+        short_setting_name = '_'.join([s[:4] for s in self.setting_name.split('_')])
         return op.join(self.root, 'slurm', 'bash_scripts', f'xp_{self.setting_name}', f'{short_setting_name}.sh')
 
     @property
