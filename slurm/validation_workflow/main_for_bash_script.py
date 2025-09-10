@@ -1,3 +1,9 @@
+from utils.utils_run import LOCAL_COMPUTER
+
+if not LOCAL_COMPUTER:
+    from pysr import jl
+    jl.CONFIG['exepath'] = '/homes/e23lerou/shared_space/shared_install/julia-1.11.6/bin/julia'
+
 import sys
 
 from data.utils_dataset.validation_split import ValidationSplit
