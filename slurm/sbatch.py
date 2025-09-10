@@ -82,6 +82,7 @@ class Sbatch(ABC):
                 '#!/bin/bash',
                 f'export PATH="/Odyssey/private/e23lerou/shared_install/miniforge3/bin:$PATH"',
                 'eval "$(mamba shell hook --shell bash)"',
+                'export PYTHONPATH="${PYTHONPATH}:/Odyssey/private/e23lerou/Documents/EquationDiscovery4ClimateImpact',
                 f'mamba activate /Odyssey/private/e23lerou/shared_install/venv',
                 self.python_exec,
                 # f'rm {self.bash_filepath}'
