@@ -97,6 +97,13 @@ class Sbatch(ABC):
                 # 'mamba shell reinit --shell',
                 f'eval "$(/Odyssey/private/e23lerou/shared_install/miniforge3/bin/mamba shell hook --shell bash)"',
                 f'echo $(which mamba)',
+
+                'export MAMBA_ROOT_PREFIX="/Odyssey/private/e23lerou/shared_install/miniforge3"',
+                "export CONDA_PKGS_DIRS=/Odyssey/private/e23lerou/shared_install/miniforge3/pkgs",
+                "export CONDA_ENVS_DIRS=/Odyssey/private/e23lerou/shared_install/miniforge3/envs",
+                "export CONDA_CACHE_DIR=/Odyssey/private/e23lerou/shared_install/miniforge3/.cache/mamba",
+                "export XDG_CONDA_HOME=/Odyssey/private/e23lerou/shared_install/miniforge3/.cache",
+                "export CONDARC=/Odyssey/private/e23lerou/shared_install/miniforge3/.condarc",
                 # 'export CONDA_RC_PATH="/dev/null"',
                 # 'export MAMBA_RC_PATH="/dev/null"',
                 # 'export MAMBA_NO_PLUGINS=true',
