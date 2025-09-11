@@ -21,7 +21,7 @@ def main():
 
     # Run validation workflow
     validation_split = ValidationWorkflow(validation_split, n_iter, nb_top_hyperparameters, model_selection,
-                                          validation_size, n_jobs=-1)
+                                          validation_size)
     print('Run validation workflow:')
     print('Equation:', validation_split.emulator.selected_expr)
     print('Complexity:', validation_split.emulator.selected_complexity)

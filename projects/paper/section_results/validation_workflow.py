@@ -22,7 +22,6 @@ class ValidationWorkflow(object):
     model_selection: str
     validation_size: float = 0.3
     fast: bool = False
-    n_jobs: Optional[int] = None
     sorted_param_names: Optional[list[str]] = None
     top_emulator_with_search_marginal: Optional[EmulatorWithSearch] = None
 
@@ -35,8 +34,6 @@ class ValidationWorkflow(object):
             self.sorted_param_names, self.top_emulator_with_search_marginal = self.run_marginal_search()
         # Load top emulator
         self.emulator = self.search_for_top_emulator()
-        log_info('Fit top emulator')
-        fit(self.emulator, self.dataset)
         # Compute rmse test
         self.rmse_test = compute_loss_test(self.emulator, self.dataset, Metric.RMSE)
 
@@ -46,13 +43,13 @@ class ValidationWorkflow(object):
         log_info(f'Start random search with: {top_param_names}')
         param_grid = {param_name: param_value for param_name, param_value in self.get_param_name_to_values().items()
                       if param_name in top_param_names}
-        params_search = {'param_grid': param_grid, 'search_style': 'random', 'n_iter': self.n_iter, 'n_jobs': self.n_jobs}
+        params_search = {'param_grid': param_grid, 'search_style': 'random', 'n_iter': self.n_iter, 'n_jobs': -1}
         emulator_with_search_random = EmulatorWithSearch(**self.params_emulator, **params_search)
         fit(emulator_with_search_random, self.dataset)
-        log_info(f'Run directory: {emulator_with_search_random.run_.run_directory}')
         rmse_validation_from_random_search = emulator_with_search_random.selected_validation_rmse
         rmse_validation_from_marginal_search = self.top_emulator_with_search_marginal.selected_validation_rmse
         log_info(f'Top RMSE validation from random search={rmse_validation_from_random_search}')
+        # return emulator_with_search_random
         # Return the emulator that performs best on the validation set
         if  rmse_validation_from_random_search < rmse_validation_from_marginal_search:
             log_info(f'Emulator from random search performs best')
