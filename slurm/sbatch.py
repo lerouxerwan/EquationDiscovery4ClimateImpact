@@ -80,6 +80,10 @@ class Sbatch(ABC):
             # Lines of the bash file
             lines = [
                 '#!/bin/bash',
+                # path to avoid mamba trying to load things from the HomeDir
+                'export CONDA_ENVS_DIRS="/homes/e23lerou/shared_space/shared_install"',
+                'export CONDA_RC_PATH="/dev/null"',
+                'export CONDA_PKGS_DIRS="/homes/e23lerou/shared_space/shared_install/miniforge3/pkgs"',
                 # mamba (for the python and julia environment)
                 f'eval "$(/Odyssey/private/e23lerou/shared_install/miniforge3/bin/mamba shell hook --shell bash)"',
                 f'mamba activate /Odyssey/private/e23lerou/shared_install/venv',
