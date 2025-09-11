@@ -93,6 +93,7 @@ class Sbatch(ABC):
                 # 'source /Odyssey/private/e23lerou/shared_install/miniforge3/etc/profile.d/conda.sh"',
                 # 'source /Odyssey/private/e23lerou/shared_install/miniforge3/etc/profile.d/mamba.sh"',
                 f'echo "here2"',
+                'mamba shell reinit --shell',
                 f'eval "$(mamba shell hook --shell bash)"',
                 f'echo "here3"',
                 f'echo $(which mamba)',
