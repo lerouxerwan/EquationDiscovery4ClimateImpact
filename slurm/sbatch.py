@@ -91,14 +91,15 @@ class Sbatch(ABC):
                 # 'source /Odyssey/private/e23lerou/shared_install/miniforge3/etc/profile.d/conda.sh"',
                 # 'source /Odyssey/private/e23lerou/shared_install/miniforge3/etc/profile.d/mamba.sh"',
                 f'echo "here2"',
+                f'eval "$(mamba shell hook --shell bash)"',
+                f'echo "here3"',
                 'mamba activate',
                 'mamba config --set envs_dirs /Odyssey/private/e23lerou/shared_install',
                 'mamba config --set pkgs_dirs /Odyssey/private/e23lerou/shared_install/miniforge3/pkgs',
                 # mamba (for the python and julia environment)
                 # f'source /Odyssey/private/e23lerou/shared_install/miniforge3/bin/activate',
-                # f'eval "$(mamba shell hook --shell bash)"',
                 f'mamba activate /Odyssey/private/e23lerou/shared_install/venv',
-                f'echo "here3"',
+                f'echo "here4"',
                 # julia
                 f'export PATH="/Odyssey/private/e23lerou/shared_install/julia-1.11.6/bin:$PATH"',
                 f'export JULIA_DEPOT_PATH="/Odyssey/private/e23lerou/shared_install/.julia"',
