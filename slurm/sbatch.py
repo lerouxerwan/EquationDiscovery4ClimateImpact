@@ -95,21 +95,18 @@ class Sbatch(ABC):
                 f'echo "here2"',
                 # 'mamba shell reinit --shell',
                 f'eval "$(/Odyssey/private/e23lerou/shared_install/miniforge3/bin/mamba shell hook --shell bash)"',
-                f'echo "here3"',
-                # f'echo $(which mamba)',
-                'mamba activate',
-                'mamba config --set envs_dirs /Odyssey/private/e23lerou/shared_install',
-                'mamba config --set pkgs_dirs /Odyssey/private/e23lerou/shared_install/miniforge3/pkgs',
+                f'echo $(which mamba)',
+                # '/Odyssey/private/e23lerou/shared_install/miniforge3/bin/mamba activate',
+                # 'mamba config --set envs_dirs /Odyssey/private/e23lerou/shared_install',
+                # 'mamba config --set pkgs_dirs /Odyssey/private/e23lerou/shared_install/miniforge3/pkgs',
                 # mamba (for the python and julia environment)
                 # f'source /Odyssey/private/e23lerou/shared_install/miniforge3/bin/activate',
-                f'mamba activate /Odyssey/private/e23lerou/shared_install/venv',
-                f'echo "here4"',
                 # julia
                 f'export PATH="/Odyssey/private/e23lerou/shared_install/julia-1.11.6/bin:$PATH"',
                 f'export JULIA_DEPOT_PATH="/Odyssey/private/e23lerou/shared_install/.julia"',
                 # python
                 'export PYTHONPATH="${PYTHONPATH}:/Odyssey/private/e23lerou/Documents/EquationDiscovery4ClimateImpact"',
-                self.python_exec,
+                f'mamba run -n /Odyssey/private/e23lerou/shared_install/venv {self.python_exec}'
                 # f'rm {self.bash_filepath}'
             ]
             with open(self.bash_filepath, 'w') as f:
