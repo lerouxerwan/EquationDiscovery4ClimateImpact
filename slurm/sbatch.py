@@ -80,12 +80,14 @@ class Sbatch(ABC):
             # Lines of the bash file
             lines = [
                 '#!/bin/bash',
-                f'export PATH="/Odyssey/private/e23lerou/shared_install/miniforge3/bin:$PATH"',
-                'eval "$(mamba shell hook --shell bash)"',
+                # mamba (for the python and julia environment)
+                f'eval "$(/Odyssey/private/e23lerou/shared_install/miniforge3/bin/mamba shell hook --shell bash)"',
+                f'mamba activate /Odyssey/private/e23lerou/shared_install/venv',
+                # julia
                 f'export PATH="/Odyssey/private/e23lerou/shared_install/julia-1.11.6/bin:$PATH"',
                 f'export JULIA_DEPOT_PATH="/Odyssey/private/e23lerou/shared_install/.julia"',
+                # python
                 'export PYTHONPATH="${PYTHONPATH}:/Odyssey/private/e23lerou/Documents/EquationDiscovery4ClimateImpact"',
-                f'mamba activate /Odyssey/private/e23lerou/shared_install/venv',
                 self.python_exec,
                 # f'rm {self.bash_filepath}'
             ]
@@ -104,3 +106,4 @@ class Sbatch(ABC):
                    f'-o {dirname}/%a.out '
                    f'{self.bash_filepath}')
         bash_call(command, just_print=LOCAL_COMPUTER)
+
