@@ -98,12 +98,12 @@ class Sbatch(ABC):
                 f'eval "$(/Odyssey/private/e23lerou/shared_install/miniforge3/bin/mamba shell hook --shell bash)"',
                 f'echo $(which mamba)',
 
-                'export MAMBA_ROOT_PREFIX="/Odyssey/private/e23lerou/shared_install/miniforge3"',
-                "export CONDA_PKGS_DIRS=/Odyssey/private/e23lerou/shared_install/miniforge3/pkgs",
-                "export CONDA_ENVS_DIRS=/Odyssey/private/e23lerou/shared_install/miniforge3/envs",
-                "export CONDA_CACHE_DIR=/Odyssey/private/e23lerou/shared_install/miniforge3/.cache/mamba",
-                "export XDG_CACHE_HOME=/Odyssey/private/e23lerou/shared_install/miniforge3/.cache",
-                "export CONDARC=/Odyssey/private/e23lerou/shared_install/miniforge3/.condarc",
+                # 'export MAMBA_ROOT_PREFIX="/Odyssey/private/e23lerou/shared_install/miniforge3"',
+                # "export CONDA_PKGS_DIRS=/Odyssey/private/e23lerou/shared_install/miniforge3/pkgs",
+                # "export CONDA_ENVS_DIRS=/Odyssey/private/e23lerou/shared_install/miniforge3/envs",
+                # "export CONDA_CACHE_DIR=/Odyssey/private/e23lerou/shared_install/miniforge3/.cache/mamba",
+                # "export XDG_CACHE_HOME=/Odyssey/private/e23lerou/shared_install/miniforge3/.cache",
+                # "export CONDARC=/Odyssey/private/e23lerou/shared_install/miniforge3/.condarc",
                 # 'export CONDA_RC_PATH="/dev/null"',
                 # 'export MAMBA_RC_PATH="/dev/null"',
                 # 'export MAMBA_NO_PLUGINS=true',
@@ -115,6 +115,7 @@ class Sbatch(ABC):
                 # f'source /Odyssey/private/e23lerou/shared_install/miniforge3/bin/activate',
                 # julia
                 f'export PATH="/Odyssey/private/e23lerou/shared_install/julia-1.11.6/bin:$PATH"',
+                f'export LD_LIBRARY_PATH="/Odyssey/private/e23lerou/shared_install/julia-1.11.6/lib:$LD_LIBRARY_PATH"',
                 f'export JULIA_DEPOT_PATH="/Odyssey/private/e23lerou/shared_install/.julia"',
                 # python
                 'export PYTHONPATH="${PYTHONPATH}:/Odyssey/private/e23lerou/Documents/EquationDiscovery4ClimateImpact"',
