@@ -85,10 +85,7 @@ class Sbatch(ABC):
                 'echo $pwd',
                 f'echo "here0"',
                 'export MAMBA_ROOT_PREFIX="/Odyssey/private/e23lerou/shared_install/miniforge3"',
-                'export CONDA_RC_PATH="/dev/null"',
-                'export MAMBA_RC_PATH="/dev/null"',
-                'export MAMBA_NO_PLUGINS=true',
-                'export CONDA_NO_PLUGINS=true',
+
                 f'echo "here1"',
                 # 'source /Odyssey/private/e23lerou/shared_install/miniforge3/etc/profile.d/conda.sh"',
                 # 'source /Odyssey/private/e23lerou/shared_install/miniforge3/etc/profile.d/mamba.sh"',
@@ -96,6 +93,10 @@ class Sbatch(ABC):
                 # 'mamba shell reinit --shell',
                 f'eval "$(/Odyssey/private/e23lerou/shared_install/miniforge3/bin/mamba shell hook --shell bash)"',
                 f'echo $(which mamba)',
+                'export CONDA_RC_PATH="/dev/null"',
+                'export MAMBA_RC_PATH="/dev/null"',
+                'export MAMBA_NO_PLUGINS=true',
+                'export CONDA_NO_PLUGINS=true',
                 # '/Odyssey/private/e23lerou/shared_install/miniforge3/bin/mamba activate',
                 # 'mamba config --set envs_dirs /Odyssey/private/e23lerou/shared_install',
                 # 'mamba config --set pkgs_dirs /Odyssey/private/e23lerou/shared_install/miniforge3/pkgs',
@@ -106,7 +107,7 @@ class Sbatch(ABC):
                 f'export JULIA_DEPOT_PATH="/Odyssey/private/e23lerou/shared_install/.julia"',
                 # python
                 'export PYTHONPATH="${PYTHONPATH}:/Odyssey/private/e23lerou/Documents/EquationDiscovery4ClimateImpact"',
-                f'mamba run -n /Odyssey/private/e23lerou/shared_install/venv {self.python_exec}'
+                f'mamba run -n venv {self.python_exec}'
                 # f'rm {self.bash_filepath}'
             ]
             with open(self.bash_filepath, 'w') as f:
