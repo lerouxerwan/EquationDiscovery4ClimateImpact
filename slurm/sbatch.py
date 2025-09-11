@@ -85,6 +85,7 @@ class Sbatch(ABC):
                 'export CONDA_ENVS_DIRS="/homes/e23lerou/shared_space/shared_install"',
                 'export CONDA_RC_PATH="/dev/null"',
                 'export CONDA_PKGS_DIRS="/homes/e23lerou/shared_space/shared_install/miniforge3/pkgs"',
+                'export CONDA_NO_PLUGINS=true'
                 # mamba (for the python and julia environment)
                 f'echo "here"',
                 f'source /Odyssey/private/e23lerou/shared_install/miniforge3/bin/activate',
