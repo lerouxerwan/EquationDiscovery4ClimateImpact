@@ -86,11 +86,11 @@ class Sbatch(ABC):
                 # 'export CONDA_RC_PATH="/dev/null"',
                 # 'export CONDA_PKGS_DIRS="/homes/e23lerou/shared_space/shared_install/miniforge3/pkgs"',
                 # 'export CONDA_NO_PLUGINS=true',
-                'source /homes/e23lerou/shared_space/shared_install/miniforge3/etc/profile.d/conda.sh"',
-                'source /homes/e23lerou/shared_space/shared_install/miniforge3/etc/profile.d/mamba.sh"',
+                'source /Odyssey/private/e23lerou/shared_space/shared_install/miniforge3/etc/profile.d/conda.sh"',
+                'source /Odyssey/private/e23lerou/shared_space/shared_install/miniforge3/etc/profile.d/mamba.sh"',
                 'mamba activate',
-                'conda config --set envs_dirs /homes/e23lerou/shared_space/shared_install'
-                'conda config --set pkgs_dirs /homes/e23lerou/shared_space/shared_install/miniforge3/pkgs'
+                'conda config --set envs_dirs /Odyssey/private/e23lerou/shared_space/shared_install'
+                'conda config --set pkgs_dirs /Odyssey/private/e23lerou/shared_space/shared_install/miniforge3/pkgs'
                 # mamba (for the python and julia environment)
                 f'echo "here"',
                 f'source /Odyssey/private/e23lerou/shared_install/miniforge3/bin/activate',
