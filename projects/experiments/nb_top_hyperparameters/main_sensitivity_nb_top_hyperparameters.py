@@ -8,8 +8,8 @@ def main_sensitivity_nb_top_hyperparameters():
     model_selection = ['best', 'validated'][0]
     validation_split = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END,
                          ValidationSplit.RCP_START, ValidationSplit.EXTREME][0]
-    n_iter = 10
-    nb_top_hyperparameters_list = [1, 2, 3]
+    n_iter = 100
+    nb_top_hyperparameters_list = [8, 9, 10]
     # Load a single marginal search, with the largest nb_top_hyperparameters
     validation_workflow = ValidationWorkflow(validation_split, n_iter, max(nb_top_hyperparameters_list), model_selection)
     sorted_param_names = validation_workflow.sorted_param_names
