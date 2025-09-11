@@ -85,16 +85,16 @@ class Sbatch(ABC):
                 # 'export CONDA_ENVS_DIRS="/homes/e23lerou/shared_space/shared_install"',
                 # 'export CONDA_RC_PATH="/dev/null"',
                 # 'export CONDA_PKGS_DIRS="/homes/e23lerou/shared_space/shared_install/miniforge3/pkgs"',
-                # 'export CONDA_NO_PLUGINS=true',
+                'export CONDA_NO_PLUGINS=true',
+                f'echo "here"',
                 'source /Odyssey/private/e23lerou/shared_space/shared_install/miniforge3/etc/profile.d/conda.sh"',
                 'source /Odyssey/private/e23lerou/shared_space/shared_install/miniforge3/etc/profile.d/mamba.sh"',
-                'mamba activate',
-                'conda config --set envs_dirs /Odyssey/private/e23lerou/shared_space/shared_install'
-                'conda config --set pkgs_dirs /Odyssey/private/e23lerou/shared_space/shared_install/miniforge3/pkgs'
-                # mamba (for the python and julia environment)
-                f'echo "here"',
-                f'source /Odyssey/private/e23lerou/shared_install/miniforge3/bin/activate',
                 f'echo "here2"',
+                'mamba activate',
+                'mamba config --set envs_dirs /Odyssey/private/e23lerou/shared_space/shared_install',
+                'mamba config --set pkgs_dirs /Odyssey/private/e23lerou/shared_space/shared_install/miniforge3/pkgs',
+                # mamba (for the python and julia environment)
+                # f'source /Odyssey/private/e23lerou/shared_install/miniforge3/bin/activate',
                 # f'eval "$(mamba shell hook --shell bash)"',
                 f'mamba activate /Odyssey/private/e23lerou/shared_install/venv',
                 f'echo "here3"',
