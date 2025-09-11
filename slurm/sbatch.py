@@ -97,9 +97,9 @@ class Sbatch(ABC):
                 'export MAMBA_RC_PATH="/dev/null"',
                 'export MAMBA_NO_PLUGINS=true',
                 'export CONDA_NO_PLUGINS=true',
+                'mamba config --set envs_dirs /Odyssey/private/e23lerou/shared_install',
+                'mamba config --set pkgs_dirs /Odyssey/private/e23lerou/shared_install/miniforge3/pkgs',
                 # '/Odyssey/private/e23lerou/shared_install/miniforge3/bin/mamba activate',
-                # 'mamba config --set envs_dirs /Odyssey/private/e23lerou/shared_install',
-                # 'mamba config --set pkgs_dirs /Odyssey/private/e23lerou/shared_install/miniforge3/pkgs',
                 # mamba (for the python and julia environment)
                 # f'source /Odyssey/private/e23lerou/shared_install/miniforge3/bin/activate',
                 # julia
