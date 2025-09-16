@@ -16,6 +16,9 @@ from utils.utils_log import log_info
 from utils.utils_non_default_params import get_non_default_params
 from utils.utils_run import random_seed
 
+AUTOMATIC_LOADING_AND_SAVING = True
+
+
 
 class Emulator(PySRRegressor):
     """Emulator is a variant of PySRRegressor.
@@ -142,6 +145,9 @@ class Emulator(PySRRegressor):
         # Change default dimensional_constraint_penalty
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
+        # Update logger_spec if needed
+        if not AUTOMATIC_LOADING_AND_SAVING:
+            self.logger_spec = None
         # Create attributes
         self.index_for_validated_model_selection_ = None
         self.run_ = None
@@ -202,7 +208,7 @@ class Emulator(PySRRegressor):
         ----------
         Same as the self.fit method"""
         # Load checkpoint if it exists, otherwise run _fit method
-        if run.has_been_saved:
+        if run.has_been_saved and AUTOMATIC_LOADING_AND_SAVING:
             #  Start loading from a pickle file
             log_info("Load fit from file")
             emulator_from_file = self.from_file(run_directory=run.run_directory)
@@ -216,7 +222,7 @@ class Emulator(PySRRegressor):
             start_time = time.monotonic()
             # By default, we log with tensorboard the progress for each iteration of the run
             # See https://github.com/MilesCranmer/PySR/discussions/840 for more details on log_interval
-            logging = self.logger_spec is True
+            logging = (self.logger_spec is True)
             if logging:
                 self.logger_spec = run.get_logger_spec(log_interval=1 * self.populations)
             #  Fit on the train set
@@ -230,8 +236,9 @@ class Emulator(PySRRegressor):
             end_time = time.monotonic()
             duration = str(timedelta(seconds=end_time - start_time))
             # Save duration and tensorboard command to file
-            log_info(f'Save fit to file')
-            run.save_fit(duration, verbose=False)
+            if AUTOMATIC_LOADING_AND_SAVING:
+                log_info(f'Save fit to file')
+                run.save_fit(duration, verbose=False)
 
         #  Add a 'validation_loss' column in self.equations_
         if validation_mask is not None:
