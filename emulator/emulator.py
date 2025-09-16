@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
 from pysr.utils import ArrayLike
-from sympy import Expr, Symbol
+from sympy import Expr, Symbol, expand
 
 from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_run.run import Run
@@ -312,7 +312,9 @@ class Emulator(PySRRegressor):
     @property
     def selected_expr(self) -> Expr:
         """Sympy expressions for the selected equation"""
-        return self.selected_row['sympy_format']
+        expr = self.selected_row['sympy_format']
+        # expr = sum(expand(expr).args[:-3])
+        return expr
 
     @property
     def selected_complexity(self) -> int:

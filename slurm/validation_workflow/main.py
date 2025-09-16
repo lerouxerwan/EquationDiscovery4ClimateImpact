@@ -16,24 +16,15 @@ class SbatchValidationWorkflow(Sbatch):
         return 8
 
 
-def main_fast():
-    for n_iter in [3]:
-        # for nb_top_hyperparameters in range(1, 11):
-        for nb_top_hyperparameters in [1, 2, 3][:]:
-            indices = [0, 0, n_iter, nb_top_hyperparameters, 0]
-            sbatch = SbatchValidationWorkflow(indices)
-            sbatch.run()
-
 
 def main():
-    for n_iter in [100]:
+    for n_iter in [1000]:
         # for nb_top_hyperparameters in range(1, 11):
-        for nb_top_hyperparameters in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10][:]:
+        for nb_top_hyperparameters in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10][-1:]:
             indices = [0, 0, n_iter, nb_top_hyperparameters, 0]
             sbatch = SbatchValidationWorkflow(indices)
             sbatch.run()
 
 
 if __name__ == '__main__':
-    #main_fast()
     main()

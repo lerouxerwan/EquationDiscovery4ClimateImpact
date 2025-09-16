@@ -21,6 +21,7 @@ class ValidationWorkflow(object):
     nb_top_hyperparameters: int
     model_selection: str
     validation_size: float = 0.3
+    maxsize: int = 30
     fast: bool = False
     sorted_param_names: Optional[list[str]] = None
     top_emulator_with_search_marginal: Optional[EmulatorWithSearch] = None
@@ -83,6 +84,7 @@ class ValidationWorkflow(object):
     @cached_property
     def params_emulator(self) -> dict[str, Any]:
         params_emulator: dict[str, Any] = {'model_selection': self.model_selection}
+        params_emulator['maxsize'] = self.maxsize
         if self.fast:
             params_emulator['niterations'] = 2
         return params_emulator
