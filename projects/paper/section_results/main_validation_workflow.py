@@ -24,25 +24,12 @@ def load_setting(fast):
              f'model_selection={model_selection}')
     return validation_splits, n_iter, nb_top_hyperparameters, model_selection
 
-def run_validation_workflow_from_indices(indices: list[int]):
-    model_selection = ['best', 'validated'][indices[0]]
-    validation_split = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END,
-                         ValidationSplit.RCP_START, ValidationSplit.EXTREME][indices[1]]
-    n_iter = indices[2]
-    nb_top_hyperparameters = indices[3]
-    validation_size = [0.3, 0.2, 0.4][indices[4]]
-    validation_split = ValidationWorkflow(validation_split, n_iter, nb_top_hyperparameters, model_selection, validation_size)
-    print('Run validation workflow:')
-    print(validation_split.emulator.selected_expr)
-    print(validation_split.emulator.selected_complexity)
-    print(validation_split.rmse_test)
-
 
 def main_get_top_emulator(fast: bool):
     validation_splits, n_iter, nb_top_hyperparameters, model_selection = load_setting(fast)
     # Load sorted validation workflows
     validation_workflows = [ValidationWorkflow(validation_split, n_iter, nb_top_hyperparameters,
-                                               model_selection)
+                                               model_selection, validation_size=0.2)
                             for validation_split in validation_splits]
     sorted_validation_workflow = sorted(validation_workflows, key=lambda vw: vw.rmse_test)
     # Create array with a summary of all validation workflows

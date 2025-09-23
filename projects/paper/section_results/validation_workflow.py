@@ -6,7 +6,6 @@ import pandas as pd
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit
-from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from plot.utils_metric.metric import Metric
 from plot.workflow import fit, compute_loss_test
@@ -21,7 +20,6 @@ class ValidationWorkflow(object):
     nb_top_hyperparameters: int
     model_selection: str
     validation_size: float = 0.3
-    maxsize: int = 30
     fast: bool = False
     sorted_param_names: Optional[list[str]] = None
     top_emulator_with_search_marginal: Optional[EmulatorWithSearch] = None
@@ -42,7 +40,7 @@ class ValidationWorkflow(object):
         # Run a random search with respect to these top hyperparameters
         top_param_names = self.sorted_param_names[:self.nb_top_hyperparameters]
         log_info(f'Start random search with: {top_param_names}')
-        param_grid = {param_name: param_value for param_name, param_value in self.get_param_name_to_values().items()
+        param_grid = {param_name: param_values for param_name, param_values in self.get_param_name_to_values().items()
                       if param_name in top_param_names}
         params_search = {'param_grid': param_grid, 'search_style': 'random', 'n_iter': self.n_iter, 'n_jobs': -1}
         emulator_with_search_random = EmulatorWithSearch(**self.params_emulator, **params_search)
@@ -66,7 +64,7 @@ class ValidationWorkflow(object):
         param_name_to_emulator_with_search: dict[str, EmulatorWithSearch] = {}
         for param_name, param_values in param_name_to_values.items():
             log_info(f'Run marginal search for {param_name}')
-            param_search = {'param_grid': {param_name: param_values}, 'search_style': 'grid'}
+            param_search = {'param_grid': {param_name: param_values}, 'search_style': 'grid', 'n_jobs': -1}
             emulator_with_search_marginal = EmulatorWithSearch(**self.params_emulator, **param_search)
             fit(emulator_with_search_marginal, self.dataset)
             param_name_to_emulator_with_search[param_name] = emulator_with_search_marginal
@@ -84,7 +82,6 @@ class ValidationWorkflow(object):
     @cached_property
     def params_emulator(self) -> dict[str, Any]:
         params_emulator: dict[str, Any] = {'model_selection': self.model_selection}
-        params_emulator['maxsize'] = self.maxsize
         if self.fast:
             params_emulator['niterations'] = 2
         return params_emulator

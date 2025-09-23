@@ -8,7 +8,7 @@ def main():
     if len(sys.argv) > 1:
         indices = [int(sys.argv[i]) for i in range(1, 6)]
     else:
-        indices = [0, 0, 1, 1, 0]
+        indices = [0, 0, 1000, 5, 5]
     print(f'Run with indices={indices}')
 
     # Transform indices as arguments
@@ -17,11 +17,11 @@ def main():
                         ValidationSplit.RCP_START, ValidationSplit.EXTREME][indices[1]]
     n_iter = indices[2]
     nb_top_hyperparameters = indices[3]
-    validation_size = [0.3, 0.2, 0.4][indices[4]]
+    validation_size = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5][indices[4] - 1]
 
     # Run validation workflow
     validation_split = ValidationWorkflow(validation_split, n_iter, nb_top_hyperparameters, model_selection,
-                                          validation_size, maxsize=15)
+                                          validation_size)
     print('Run validation workflow:')
     print('Equation:', validation_split.emulator.selected_expr)
     print('Complexity:', validation_split.emulator.selected_complexity)
