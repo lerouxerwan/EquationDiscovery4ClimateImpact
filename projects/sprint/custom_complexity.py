@@ -1,5 +1,9 @@
 
 
+# Missing docstring for Symbolics.get_variables!. Check Documenter's build log for details.
+# la fonction "arguments" ne semble pas fonctionner sur mes nodes. En gros ca ne retourne qu'un seul term dont la valeur est l'expression d'origine
+# et donc les contraintes (celle du nombre de variable et celle de la saisonalité) était appliqué sur l expression entière
+# Bref il faut comprendre comment faire marcher "arguments" dans mon cas. Est-ce que je dois faire un "convert" avant ?
 complexity_mapping = """
 using Symbolics
 using SymbolicUtils
@@ -10,25 +14,40 @@ function variable_sparsity_complexity(expression)
         complexity += 1
     end
     # Penalize any term with more than 3 features
-    for term in arguments(Symbolics.unwrap(expression), +)
-        # features = Set{Symbol}()
+    println("start loop on terms")
+    # println(complexity)
+    # terms = arguments(Symbolics.unwrap(expression), +)
+    terms = Symbolics.arguments(Symbolics.unwrap(expression), +)
+    # terms = arguments(expression, -)
+    println(length(terms))
+    dump(terms)
+    for term in terms
         features = Set{UInt16}()
+        local_complexity = 0
         for node in get_tree(term)
-            if node isa AbstractExpressionNode
-                if node.degree == 0 && !node.constant
-                    push!(features, node.feature)
-                end
-                # if node.op == :variable
-                #     push!(features, node.val)
-                # end
+            local_complexity += 1
+            if node.degree == 0 && !node.constant
+                push!(features, node.feature)
             end
         end
-        println("List of features")
-        for feature in features
-            println(feature)
+        if local_complexity < complexity
+            println("here")
+            # println(local_complexity)
         end
-        if length(features) >= 3
-            complexity *= 2
+        seasons = Set{UInt8}()
+        for feature in features
+            push!(seasons, feature % 4)
+        end
+        if (length(features) >= 3) || (length(seasons) >= 2)
+            # println("Features")
+            # for feature in features        
+            #     println(feature)
+            # end
+            # println("Seasons")
+            # for season in seasons
+            #     println(season)        
+            # end
+            complexity = 31
             break # End quickly the function if there is a term with 3 features
         end
     end
