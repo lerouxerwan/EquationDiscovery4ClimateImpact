@@ -320,7 +320,8 @@ class Emulator(PySRRegressor):
     def selected_expr(self) -> Expr:
         """Sympy expressions for the selected equation"""
         expr = self.selected_row['sympy_format']
-        expr = sum(expand(expr).args[:-3])
+        # print(expand(expr).args)
+        # expr = sum(expand(expr).args[:-3])
         return expr
 
     @property
