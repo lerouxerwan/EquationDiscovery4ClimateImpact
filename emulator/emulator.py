@@ -5,8 +5,9 @@ from typing import Literal, Callable, Optional, Any
 import numpy as np
 import pandas as pd
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
+from pysr.export_numpy import CallableEquation
 from pysr.utils import ArrayLike
-from sympy import Expr, Symbol, expand
+from sympy import Expr, Symbol, expand, symbols, lambdify
 
 from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_run.run import Run
@@ -207,6 +208,12 @@ class Emulator(PySRRegressor):
         Parameters & Results
         ----------
         Same as the self.fit method"""
+        # Extract X_fit and y_fit
+        if validation_mask is None:
+            X_fit, y_fit = X, y
+        else:
+            X_fit, y_fit = get_X_and_y(X, y, validation_mask, validation_set=False)
+
         # Load checkpoint if it exists, otherwise run _fit method
         if run.has_been_saved and AUTOMATIC_LOADING_AND_SAVING:
             #  Start loading from a pickle file
@@ -226,10 +233,6 @@ class Emulator(PySRRegressor):
             if logging:
                 self.logger_spec = run.get_logger_spec(log_interval=1 * self.populations)
             #  Fit on the train set
-            if validation_mask is None:
-                X_fit, y_fit = X, y
-            else:
-                X_fit, y_fit = get_X_and_y(X, y, validation_mask, validation_set=False)
             super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
             if logging:
                 self.logger_spec = True
@@ -239,6 +242,38 @@ class Emulator(PySRRegressor):
             if AUTOMATIC_LOADING_AND_SAVING:
                 log_info(f'Save fit to file')
                 run.save_fit(duration, verbose=False)
+
+        # #  Insert some columns inside equations_ with some simplified members
+        # indexes_to_simplify = list(self.equations_.index.copy()[1:])
+        # new_index = indexes_to_simplify[-1] + 1
+        # simplified_equations = []
+        # for index in indexes_to_simplify:
+        #     # For each equation we compute a simplification of it
+        #     series = self.equations_.loc[index]
+        #     expr = series.loc['sympy_format']
+        #     simplified_expr = sum(expand(expr).args[:-1])
+        #     variable_symbols = symbols(' '.join(variable_names))
+        #     # lambda_function = lambdify(variable_symbols, simplified_expr, 'numpy')
+        #     loss_function = metric_to_function[Metric.MSE]
+        #
+        #     f = CallableEquation(simplified_expr, variable_symbols)
+        #     # f = lambda x: lambda_function(**dict(zip(variable_names, x)))
+        #     loss = loss_function(y_true=y_fit, y_pred=f(X_fit))
+        #     d = {
+        #         'sympy_format': simplified_expr,
+        #         'lambda_format': f,
+        #         'loss': loss,
+        #         'score': None,
+        #         'equation': str(simplified_expr),
+        #         'complexity': series['complexity'] - 1,
+        #     }
+        #     new_series = pd.DataFrame(index=[new_index], columns=self.equations_.columns,
+        #                               data={k: [v] for k,v in d.items()})
+        #     self.equations_ = pd.concat([self.equations_, new_series])
+        # # Sort equations_ by complexity
+        # self.equations_.sort_values(by='complexity', inplace=True)
+
+
 
         #  Add a 'validation_loss' column in self.equations_
         if validation_mask is not None:
