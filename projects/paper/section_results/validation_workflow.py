@@ -3,7 +3,6 @@ from functools import cached_property
 from typing import Any, OrderedDict, Optional
 
 import pandas as pd
-from pysr import PySRRegressor
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit

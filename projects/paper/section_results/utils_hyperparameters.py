@@ -18,7 +18,7 @@ def get_param_name_to_values():
         "maxsize": list(range(13, 41, 3)),
         "warmup_maxsize_by": probability_values,
         'niterations': up_and_down_factors_int(100),
-        'populations': [2] + up_and_down_factors_int(31)[1:], # avoid having 2 times the value "3" in the list
+        'populations': list(range(15, 45, 3)),
         'population_size': [3 * i + 17 for i in range(10)],
         'ncycles_per_iteration': up_and_down_factors_int(380),
         'topn': nb_of_members,

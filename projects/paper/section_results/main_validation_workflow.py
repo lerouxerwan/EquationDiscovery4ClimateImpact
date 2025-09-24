@@ -13,8 +13,9 @@ def load_setting(fast):
     val_id = 0
     validation_splits = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END,
                          ValidationSplit.RCP_START, ValidationSplit.EXTREME][val_id:val_id+1]
-    n_iter = 1000
+    n_iter = 100
     nb_top_hyperparameters = 5
+    validation_size = 0.25
     if fast:
         validation_splits = validation_splits[:2]
         n_iter = 2
@@ -22,19 +23,19 @@ def load_setting(fast):
     log_info(f'Start validation workflow with: '
              f'validation_splits={validation_splits} n_iter={n_iter} nb_top_hyperparameters={nb_top_hyperparameters}, '
              f'model_selection={model_selection}')
-    return validation_splits, n_iter, nb_top_hyperparameters, model_selection
+    return validation_splits, n_iter, nb_top_hyperparameters, model_selection, validation_size
 
 
 def main_get_top_emulator(fast: bool):
-    validation_splits, n_iter, nb_top_hyperparameters, model_selection = load_setting(fast)
+    validation_splits, n_iter, nb_top_hyperparameters, model_selection, validation_size = load_setting(fast)
     # Load sorted validation workflows
     non_default_dict = None
-    non_default_dict = {
-        'maxsize': 15,
-        'niterations': 500,
-    }
+    # non_default_dict = {
+    #     'maxsize': 15,
+    #     'niterations': 500,
+    # }
     validation_workflows = [ValidationWorkflow(validation_split, n_iter, nb_top_hyperparameters,
-                                               model_selection, non_default_dict=non_default_dict, fast=fast)
+                                               model_selection, validation_size, non_default_dict=non_default_dict, fast=fast)
                             for validation_split in validation_splits]
     sorted_validation_workflow = sorted(validation_workflows, key=lambda vw: vw.rmse_test)
     # Create array with a summary of all validation workflows
