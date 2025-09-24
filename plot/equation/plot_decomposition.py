@@ -2,10 +2,9 @@ from typing import Optional
 
 import numpy as np
 from matplotlib import pyplot as plt
-from sympy import Expr, symbols, expand
+from sympy import Expr, expand
 
 from data.utils_dataset.dataset import Dataset
-from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
 from emulator.emulator import Emulator
 from utils.utils_plot import show_and_save_with_optional_plot_folder
 
@@ -49,12 +48,3 @@ def extract_terms_and_percentages(expr: Expr, X: np.ndarray, variable_names: lis
     return matrix_of_percentages, terms
 
 
-if __name__ == '__main__':
-    dataset = dataset_npp_season_v1
-    SST_DJF, SeaSurfaceStericHeight_DJF, SSS_MAM, Shortwave_DJF, SST_MAM = symbols('SST_DJF, SeaSurfaceStericHeight_DJF, SSS_MAM, Shortwave_DJF, SST_MAM')
-    expr = -1.0864899*SST_DJF + 42.891544*SeaSurfaceStericHeight_DJF**2 + 2550.9436*(SSS_MAM + 0.010449366*Shortwave_DJF)/SST_MAM
-
-    print(dataset.X_variables_names)
-    X = dataset.X_train
-    years = dataset.years_train
-    _plot_decomposition(expr, X, dataset.X_variables_names, years)
