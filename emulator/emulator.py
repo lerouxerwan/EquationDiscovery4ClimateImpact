@@ -246,30 +246,26 @@ class Emulator(PySRRegressor):
         # #  Insert some columns inside equations_ with some simplified members
         # indexes_to_simplify = list(self.equations_.index.copy()[1:])
         # new_index = indexes_to_simplify[-1] + 1
-        # simplified_equations = []
-        # for index in indexes_to_simplify:
+        # new_complexity = 31
+        # for index in indexes_to_simplify[8:11]:
         #     # For each equation we compute a simplification of it
-        #     series = self.equations_.loc[index]
-        #     expr = series.loc['sympy_format']
-        #     simplified_expr = sum(expand(expr).args[:-1])
-        #     variable_symbols = symbols(' '.join(variable_names))
-        #     # lambda_function = lambdify(variable_symbols, simplified_expr, 'numpy')
-        #     loss_function = metric_to_function[Metric.MSE]
-        #
-        #     f = CallableEquation(simplified_expr, variable_symbols)
-        #     # f = lambda x: lambda_function(**dict(zip(variable_names, x)))
-        #     loss = loss_function(y_true=y_fit, y_pred=f(X_fit))
+        #     nb_terms_to_simplify = 2
+        #     simplified_expr = sum(expand(self.equations_.loc[index, 'sympy_format']).args[:-nb_terms_to_simplify])
+        #     f = CallableEquation(simplified_expr, symbols(' '.join(variable_names)))
+        #     loss = metric_to_function[Metric.MSE](y_true=y_fit, y_pred=f(X_fit))
         #     d = {
         #         'sympy_format': simplified_expr,
         #         'lambda_format': f,
         #         'loss': loss,
         #         'score': None,
         #         'equation': str(simplified_expr),
-        #         'complexity': series['complexity'] - 1,
+        #         'complexity': new_complexity,
         #     }
         #     new_series = pd.DataFrame(index=[new_index], columns=self.equations_.columns,
         #                               data={k: [v] for k,v in d.items()})
         #     self.equations_ = pd.concat([self.equations_, new_series])
+        #     new_index += 1
+        #     new_complexity += 2
         # # Sort equations_ by complexity
         # self.equations_.sort_values(by='complexity', inplace=True)
 

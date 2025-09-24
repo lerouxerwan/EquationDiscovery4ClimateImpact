@@ -15,7 +15,7 @@ class ValidationSplit(StrEnum):
     PRELIMINARY_TEST = 'preliminary test'
 
 def get_train_label(rcp_name_train: str, validation_split: ValidationSplit, validation_size: float) -> str:
-    percent = f'{int(100 * validation_size)}%'
+    percent = f'{int(100 * (1 - validation_size))}%'
     if validation_split in [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END]:
         match validation_split:
             case ValidationSplit.START:
