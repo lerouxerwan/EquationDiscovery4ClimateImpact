@@ -25,7 +25,9 @@ def compute_df_cv_results(cv_results: dict, X: np.ndarray, y: np.ndarray, valida
 def get_series(emulator: Emulator, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.Series:
     """For each model selection, compute RMSE train, RMSE validation, selected complexity/expr/variables names"""
     # Compute data
-    if (emulator.equations_ is None) and (emulator.run_ is not None):
+    empty_data = not hasattr(emulator, 'equations')
+    empty_data |= (emulator.equations_ is None) and (emulator.run_ is not None)
+    if empty_data:
         data = [np.inf, np.inf, np.inf, np.nan, []]
     else:
         rmse_train = compute_loss_for_set(emulator, X, y, validation_mask, False, Metric.RMSE)
