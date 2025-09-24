@@ -13,14 +13,14 @@ class SbatchValidationWorkflow(Sbatch):
 
     @property
     def nb_cores(self) -> int:
-        return 8
+        return 10
 
 
 
 def main():
     for n_iter in [100]:
         for nb_top_hyperparameters in [5]:
-            for index in range(3, 10):
+            for index in range(2, 10):
                 indices = [0, 0, n_iter, nb_top_hyperparameters, index]
                 sbatch = SbatchValidationWorkflow(indices)
                 sbatch.run()

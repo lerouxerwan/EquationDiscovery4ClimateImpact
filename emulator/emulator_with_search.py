@@ -229,7 +229,7 @@ class EmulatorWithSearch(Emulator):
         log_info(f'Start hyperparameter search with {self.nb_combinations} combinations, with param grid = {self.param_grid}')
         # Run a simple/fast regressor fit, just to load julia before using multiprocessing
         if self.n_jobs is not None:
-            Emulator(niterations=1).fit(X, y)
+            PySRRegressor(niterations=1, verbosity=0).fit(X, y)
         # Some check
         assert validation_mask is not None
         # Run hyperparameter search with respect to self.param_grid
