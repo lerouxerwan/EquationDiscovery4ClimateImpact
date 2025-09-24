@@ -24,9 +24,12 @@ def compute_df_cv_results(cv_results: dict, X: np.ndarray, y: np.ndarray, valida
 
 def get_series(emulator: Emulator, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.Series:
     """For each model selection, compute RMSE train, RMSE validation, selected complexity/expr/variables names"""
-    # Compute data
-    empty_data = not hasattr(emulator, 'equations')
-    empty_data |= (emulator.equations_ is None) and (emulator.run_ is not None)
+    # Check for empty data
+    if hasattr(emulator, 'equations'):
+        empty_data = (emulator.equations_ is None) and (emulator.run_ is not None)
+    else:
+        empty_data = True
+    #  Format data
     if empty_data:
         data = [np.inf, np.inf, np.inf, np.nan, []]
     else:
