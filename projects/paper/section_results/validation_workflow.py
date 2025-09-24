@@ -30,8 +30,6 @@ class ValidationWorkflow(object):
     def __post_init__(self):
         # Load dataset
         self.dataset = Dataset("NPP_season.csv", "RCP85", "RCP45", self.validation_size, self.validation_split)
-        # Run a simple regressor fit, just to load julia
-        PySRRegressor(niterations=1).fit(self.dataset.X_train, self.dataset.y_train)
         # Run/Load marginal search if needed
         if self.sorted_param_names is None:
             self.sorted_param_names, self.top_emulator_with_search_marginal = self.run_marginal_search()
