@@ -95,7 +95,8 @@ class ValidationWorkflow(object):
         # Delete from the search parameters that are non default
         if self.non_default_dict is not None:
             for param_name in self.non_default_dict.keys():
-                param_name_to_values.pop(param_name)
+                if param_name in param_name_to_values:
+                    param_name_to_values.pop(param_name)
         if self.fast:
             # Reduce the number of hyperparameters for the marginal search
             nb_hyperparameters = 2
