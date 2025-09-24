@@ -20,6 +20,7 @@ class ValidationWorkflow(object):
     nb_top_hyperparameters: int
     model_selection: str
     validation_size: float = 0.3
+    non_default_dict: Optional[dict] = None
     fast: bool = False
     sorted_param_names: Optional[list[str]] = None
     top_emulator_with_search_marginal: Optional[EmulatorWithSearch] = None
@@ -82,12 +83,16 @@ class ValidationWorkflow(object):
     @cached_property
     def params_emulator(self) -> dict[str, Any]:
         params_emulator: dict[str, Any] = {'model_selection': self.model_selection}
+        params_emulator.update(self.non_default_dict)
         if self.fast:
             params_emulator['niterations'] = 2
         return params_emulator
 
     def get_param_name_to_values(self) -> dict[str, list]:
         param_name_to_values = get_param_name_to_values()
+        # Delete from the search parameters that are non default
+        for param_name in self.non_default_dict.keys():
+            param_name_to_values.pop(param_name)
         if self.fast:
             # Reduce the number of hyperparameters for the marginal search
             nb_hyperparameters = 2

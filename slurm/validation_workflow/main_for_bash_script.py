@@ -20,8 +20,13 @@ def main():
     validation_size = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5][indices[4] - 1]
 
     # Run validation workflow
+    non_default_dict = {
+        'maxsize': 15,
+        'niterations': 500,
+    }
+    non_default_dict = None
     validation_split = ValidationWorkflow(validation_split, n_iter, nb_top_hyperparameters, model_selection,
-                                          validation_size)
+                                          validation_size, non_default_dict=non_default_dict)
     print('Run validation workflow:')
     print('Equation:', validation_split.emulator.selected_expr)
     print('Complexity:', validation_split.emulator.selected_complexity)
