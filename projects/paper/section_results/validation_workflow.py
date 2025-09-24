@@ -3,6 +3,7 @@ from functools import cached_property
 from typing import Any, OrderedDict, Optional
 
 import pandas as pd
+from pysr import PySRRegressor
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit
@@ -29,6 +30,8 @@ class ValidationWorkflow(object):
     def __post_init__(self):
         # Load dataset
         self.dataset = Dataset("NPP_season.csv", "RCP85", "RCP45", self.validation_size, self.validation_split)
+        # Run a simple regressor fit, just to load julia
+        PySRRegressor(niterations=1).fit(self.dataset.X_train, self.dataset.y_train)
         # Run/Load marginal search if needed
         if self.sorted_param_names is None:
             self.sorted_param_names, self.top_emulator_with_search_marginal = self.run_marginal_search()
@@ -65,7 +68,7 @@ class ValidationWorkflow(object):
         param_name_to_emulator_with_search: dict[str, EmulatorWithSearch] = {}
         for param_name, param_values in param_name_to_values.items():
             log_info(f'Run marginal search for {param_name}')
-            param_search = {'param_grid': {param_name: param_values}, 'search_style': 'grid', 'n_jobs': None}
+            param_search = {'param_grid': {param_name: param_values}, 'search_style': 'grid', 'n_jobs': -1}
             emulator_with_search_marginal = EmulatorWithSearch(**self.params_emulator, **param_search)
             fit(emulator_with_search_marginal, self.dataset)
             param_name_to_emulator_with_search[param_name] = emulator_with_search_marginal
