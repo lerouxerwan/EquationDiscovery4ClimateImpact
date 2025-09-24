@@ -65,7 +65,7 @@ class ValidationWorkflow(object):
         param_name_to_emulator_with_search: dict[str, EmulatorWithSearch] = {}
         for param_name, param_values in param_name_to_values.items():
             log_info(f'Run marginal search for {param_name}')
-            param_search = {'param_grid': {param_name: param_values}, 'search_style': 'grid', 'n_jobs': -1}
+            param_search = {'param_grid': {param_name: param_values}, 'search_style': 'grid', 'n_jobs': None}
             emulator_with_search_marginal = EmulatorWithSearch(**self.params_emulator, **param_search)
             fit(emulator_with_search_marginal, self.dataset)
             param_name_to_emulator_with_search[param_name] = emulator_with_search_marginal
