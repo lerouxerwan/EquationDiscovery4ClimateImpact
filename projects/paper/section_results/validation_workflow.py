@@ -83,7 +83,8 @@ class ValidationWorkflow(object):
     @cached_property
     def params_emulator(self) -> dict[str, Any]:
         params_emulator: dict[str, Any] = {'model_selection': self.model_selection}
-        params_emulator.update(self.non_default_dict)
+        if self.non_default_dict is not None:
+            params_emulator.update(self.non_default_dict)
         if self.fast:
             params_emulator['niterations'] = 2
         return params_emulator
@@ -91,8 +92,9 @@ class ValidationWorkflow(object):
     def get_param_name_to_values(self) -> dict[str, list]:
         param_name_to_values = get_param_name_to_values()
         # Delete from the search parameters that are non default
-        for param_name in self.non_default_dict.keys():
-            param_name_to_values.pop(param_name)
+        if self.non_default_dict is not None:
+            for param_name in self.non_default_dict.keys():
+                param_name_to_values.pop(param_name)
         if self.fast:
             # Reduce the number of hyperparameters for the marginal search
             nb_hyperparameters = 2
