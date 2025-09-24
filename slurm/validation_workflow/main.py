@@ -29,12 +29,12 @@ def main_max_depth():
     for n_iter in [100]:
         for nb_top_hyperparameters in [5]:
             # for index in range(2, 10):
-            for max_depth in [3, 4, 5, 6]:
+            for max_depth in [5, 6]:
                 indices = [0, 0, n_iter, nb_top_hyperparameters, max_depth]
                 sbatch = SbatchValidationWorkflow(indices)
                 sbatch.run()
 
 
 if __name__ == '__main__':
-    main_validation_size()
-    # main_max_depth()
+    # main_validation_size()
+    main_max_depth()
