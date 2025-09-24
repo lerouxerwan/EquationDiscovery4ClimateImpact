@@ -29,7 +29,7 @@ def main():
         'maxsize': 15,
         'niterations': 1,
     }
-    # non_default_dict = None
+    non_default_dict = None
     validation_split = ValidationWorkflow(validation_split, n_iter, nb_top_hyperparameters, model_selection,
                                           validation_size, non_default_dict=non_default_dict)
     print('Run validation workflow:')
