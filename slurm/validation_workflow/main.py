@@ -13,13 +13,13 @@ class SbatchValidationWorkflow(Sbatch):
 
     @property
     def nb_cores(self) -> int:
-        return 40
+        return 32
 
 
 def main_validation_size():
     for n_iter in [1000]:
         for nb_top_hyperparameters in [5]:
-            for index in [2, 3, 4, 5, 6, 7, 8][:1]:
+            for index in [2, 3, 4, 5, 6, 7, 8][3:4]:
                 indices = [0, 0, n_iter, nb_top_hyperparameters, index]
                 sbatch = SbatchValidationWorkflow(indices)
                 sbatch.run()
