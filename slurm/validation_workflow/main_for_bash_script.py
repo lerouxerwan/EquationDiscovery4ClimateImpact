@@ -17,15 +17,27 @@ def main():
                         ValidationSplit.RCP_START, ValidationSplit.EXTREME][indices[1]]
     n_iter = indices[2]
     nb_top_hyperparameters = indices[3]
-    # max_depth = indices[4]
-    # non_default_dict = {
-    #     'maxdepth': max_depth,
-    # }
     validation_size = 0.25
-    niterations = [100, 1000][indices[4] - 1]
-    non_default_dict = {
-        'niterations': niterations,
-    }
+
+
+    index_4 = indices[4]
+    if index_4 == 1:
+        non_default_dict = None
+    elif index_4 == 2:
+        non_default_dict = {
+            'maxsize': 20,
+        }
+    elif index_4 == 3:
+        non_default_dict = {
+            'niterations': 1000,
+        }
+    elif index_4 == 4:
+        non_default_dict = {
+            'niterations': 1000,
+            'maxsize': 20,
+        }
+    else:
+        raise NotImplementedError
 
     validation_split = ValidationWorkflow(validation_split, n_iter, nb_top_hyperparameters, model_selection,
                                           validation_size, non_default_dict=non_default_dict)
