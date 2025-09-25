@@ -17,13 +17,13 @@ def main():
                         ValidationSplit.RCP_START, ValidationSplit.EXTREME][indices[1]]
     n_iter = indices[2]
     nb_top_hyperparameters = indices[3]
-    max_depth = indices[4]
-    non_default_dict = {
-        'maxdepth': max_depth,
-    }
-    validation_size = 0.3
-    # validation_size = [0.35, 0.4][indices[4] - 1]
-    # non_default_dict = None
+    # max_depth = indices[4]
+    # non_default_dict = {
+    #     'maxdepth': max_depth,
+    # }
+    # validation_size = 0.3
+    validation_size = [0.25][indices[4] - 1]
+    non_default_dict = None
 
 
     # Run validation workflow

@@ -11,7 +11,7 @@ def main_sensitivity_validation_size():
                          ValidationSplit.RCP_START, ValidationSplit.EXTREME][0]
     n_iter = 100
     nb_top_hyperparameters = 5
-    validation_size_list = [0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45][:]
+    validation_size_list = [0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45][2:-3]
     log_info(f'validation_size_list = {validation_size_list}')
     # Create the plot
     rmse_test_list = []
