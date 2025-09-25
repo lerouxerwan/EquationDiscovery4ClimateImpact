@@ -214,11 +214,18 @@ class Emulator(PySRRegressor):
         else:
             X_fit, y_fit = get_X_and_y(X, y, validation_mask, validation_set=False)
 
+        try_loading = run.has_been_saved and AUTOMATIC_LOADING_AND_SAVING
+        if try_loading:
+            try:
+                emulator_from_file = self.from_file(run_directory=run.run_directory)
+            except RuntimeError:
+                emulator_from_file = None
+        else:
+            emulator_from_file = None
         # Load checkpoint if it exists, otherwise run _fit method
-        if run.has_been_saved and AUTOMATIC_LOADING_AND_SAVING:
+        if emulator_from_file is not None:
             #  Start loading from a pickle file
             log_info("Load fit from file")
-            emulator_from_file = self.from_file(run_directory=run.run_directory)
             self.selection_mask_ = emulator_from_file.selection_mask_
             self.nout_ = emulator_from_file.nout_
             self.feature_names_in_ = emulator_from_file.feature_names_in_

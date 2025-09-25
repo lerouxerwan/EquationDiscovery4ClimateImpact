@@ -15,7 +15,7 @@ def load_setting(fast):
                          ValidationSplit.RCP_START, ValidationSplit.EXTREME][val_id:val_id+1]
     n_iter = 100
     nb_top_hyperparameters = 5
-    validation_size = 0.25
+    validation_size = 0.35
     if fast:
         validation_splits = validation_splits[:2]
         n_iter = 2
