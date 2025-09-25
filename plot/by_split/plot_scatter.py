@@ -3,6 +3,7 @@ from typing import Optional
 import matplotlib
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.cm import ScalarMappable
 
 from data.utils_dataset.dataset import Dataset
 from emulator.emulator import Emulator
@@ -23,12 +24,19 @@ def plot_scatter(emulator: Emulator, dataset: Dataset, show: Optional[bool] = Fa
         show_and_save_with_optional_plot_folder(f'plot_scatter_{split_name}', show, plot_folder)
 
 
-def _plot_scatter(ax, dataset, emulator, fig, split_name, y, y_predicted, years, ymax, ymin):
-    cmap = matplotlib.cm.viridis
+def _plot_scatter(ax, dataset, emulator, fig, split_name, y, y_predicted, years, ymax, ymin,
+                  add_colorbar: bool = True, cmap = None, vmin_and_vmax = None):
+    if cmap is None:
+        cmap = matplotlib.cm.viridis
     c = years
-    ax.scatter(y, y_predicted, c=c, cmap=cmap)
-    norm = matplotlib.colors.BoundaryNorm(c, cmap.N)
-    fig.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, orientation='horizontal', label='Years')
+    if vmin_and_vmax is None:
+        ax.scatter(y, y_predicted, c=c, cmap=cmap)
+    else:
+        vmin, vmax = vmin_and_vmax
+        ax.scatter(y, y_predicted, c=c, cmap=cmap, vmin=vmin, vmax=vmax)
+    if add_colorbar:
+        norm = matplotlib.colors.BoundaryNorm(c, cmap.N)
+        fig.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, orientation='horizontal', label='Years')
     #  Add grid and diagonal line
     ax.grid()
     ax.plot([ymin, ymax], [ymin, ymax], color='grey', linestyle='--')
@@ -46,6 +54,7 @@ def _plot_scatter(ax, dataset, emulator, fig, split_name, y, y_predicted, years,
 
 def plot_scatter_side_by_side(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None) -> None:
     """Plot predicted values VS True values (in a scattered way) side by side"""
+
     split_name_to_X_and_y_and_y_predicted_and_years = load_split_name_to_X_and_y_and_y_predicted_and_years(emulator, dataset.X_train, dataset.y_train, dataset.X_test,
                                                        dataset.y_test, dataset.years_train, dataset.years_test, dataset.validation_mask)
     ymin, ymax = get_ymin_and_ymax(split_name_to_X_and_y_and_y_predicted_and_years)
@@ -69,12 +78,23 @@ def plot_scatter_side_by_side(emulator: Emulator, dataset: Dataset, show: Option
             years.append(years_validation[i_validation])
             i_validation += 1
     y, y_predicted, years = np.array(y), np.array(y_predicted), np.array(years)
-    _plot_scatter(axs[0], dataset, emulator, fig, "Train + Validation", y, y_predicted, years, ymax, ymin)
+    _, y_test, y_predicted_test, years_test = split_name_to_X_and_y_and_y_predicted_and_years['test']
+    all_years = sorted(list(set(years).union(set(years_test))))
+    vmin_and_vmax = min(all_years), max(all_years)
+    cmap = matplotlib.cm.viridis
+    # cmap = matplotlib.cm.gist_rainbow
+
+    # Plot first axis
+    _plot_scatter(axs[0], dataset, emulator, fig, "Train + Validation", y, y_predicted, years, ymax, ymin,
+                  add_colorbar=False, cmap=cmap, vmin_and_vmax=vmin_and_vmax)
 
     # Plot second axis
-    split_name = 'test'
-    _, y, y_predicted, years = split_name_to_X_and_y_and_y_predicted_and_years[split_name]
-    _plot_scatter(axs[1], dataset, emulator, fig, split_name, y, y_predicted, years, ymax, ymin)
+    _plot_scatter(axs[1], dataset, emulator, fig, 'test', y_test, y_predicted_test, years_test, ymax, ymin,
+                  add_colorbar=False, cmap=cmap, vmin_and_vmax=vmin_and_vmax)
+
+    norm = matplotlib.colors.BoundaryNorm(all_years, cmap.N)
+    fig.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=axs, orientation='horizontal', label='Years',
+                 pad=-0.25, fraction=0.065)
 
     show_and_save_with_optional_plot_folder(f'plot_scatter_side_by_side', show, plot_folder)
 
