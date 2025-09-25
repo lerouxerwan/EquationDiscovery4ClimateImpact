@@ -17,7 +17,7 @@ def plot_values_target(ax: Axes, dataset: Dataset):
 def plot_values(ax: Axes, dataset: Dataset, values_train: np.ndarray, values_test: np.ndarray, label: str):
     rcp_name_to_list_of_years_and_y_and_color_and_label = load_rcp_name_to_list_of_years_and_y_and_color_and_label(
         values_train, values_test, dataset.years_train, dataset.years_test, dataset.rcp_name_train, dataset.rcp_name_test,
-        dataset.validation_mask)
+        dataset.nb_historical_years)
     _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_color_and_label, values_train, label,
                                      None)
     y_all = np.concat([values_train, values_test], axis=0)

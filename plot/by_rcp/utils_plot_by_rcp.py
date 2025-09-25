@@ -11,7 +11,7 @@ from plot.by_split.utils_plot_by_split import set_default_years
 def load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train: np.ndarray,
                                                              y_test: Optional[np.ndarray] = None,
                                                              years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None, rcp_name_train: str='RCP85',
-                                                             rcp_name_test: Optional[str]=None, validation_mask:Optional[np.ndarray[bool]] = None):
+                                                             rcp_name_test: Optional[str]=None, nb_historical_years: Optional[int] = None):
     rcp_name_to_list_of_years_and_y_and_color = dict()
     # Some checks
     assert y_train.ndim == 1
@@ -24,7 +24,7 @@ def load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train: np.ndarray
     # Set default for years_train and years_test if needed
     years_test, years_train = set_default_years(y_test, y_train, years_test, years_train)
     # Set value of nb_historical_years
-    start_rcp_index = 0 if validation_mask is None else list(validation_mask).index(True)
+    start_rcp_index = 0 if nb_historical_years is None else nb_historical_years
     # Add rcp_name_train
     rcp_name_to_list_of_years_and_y_and_color[rcp_name_train] = [
         (years_train[:start_rcp_index], y_train[:start_rcp_index], 'k', 'Historical'),

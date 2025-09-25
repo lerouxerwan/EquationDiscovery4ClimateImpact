@@ -40,6 +40,7 @@ def load_dataset_values(csv_filename: str, rcp_name_train: str, rcp_name_test: O
     df = df.astype(float)
     # Check dataframe: at best 2 RCP scenarios should be in the index values (and that other prefix can only be 'HIST')
     prefixes = np.array([str(i.split('_')[0]) for i in df.index.values])
+    nb_historical_years = sum([prefix == 'HIST' for prefix in prefixes])
     prefix_set = set(list(prefixes))
     found_rcp_scenarios = set([prefix for prefix in prefix_set if prefix.startswith('RCP')])
     expected_rcp_scenarios = {rcp_name_train} if rcp_name_test is None else {rcp_name_train, rcp_name_test}
@@ -64,7 +65,7 @@ def load_dataset_values(csv_filename: str, rcp_name_train: str, rcp_name_test: O
     return (
         X_train, y_train, X_test, y_test, years_train, years_test,
         X_units, y_units, X_labels, y_labels, X_variables_names, y_variable_names,
-        validation_mask
+        validation_mask, nb_historical_years
     )
 
 def load_additional_row(df: pd.DataFrame, additional_row_name: str) -> tuple[DataFrame, Optional[list[str]], Optional[list[str]]]:

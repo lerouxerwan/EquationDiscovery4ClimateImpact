@@ -17,7 +17,7 @@ class Dataset(object):
     def __post_init__(self):
         (self.X_train, self.y_train, self.X_test, self.y_test, self.years_train, self.years_test,
          self.X_units, self.y_units, self.X_labels, self.y_labels, self.X_variables_names, self.y_variable_names,
-         self.validation_mask) = load_dataset_values(self.csv_filename, self.rcp_name_train, self.rcp_name_test, self.validation_size, self.validation_split)
+         self.validation_mask, self.nb_historical_years) = load_dataset_values(self.csv_filename, self.rcp_name_train, self.rcp_name_test, self.validation_size, self.validation_split)
         # Check and display
         self.check()
         log_info(str(self))

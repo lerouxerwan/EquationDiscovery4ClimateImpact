@@ -19,9 +19,9 @@ def plot_climato_side_by_side(emulator: Emulator, dataset: Dataset, show: Option
     ymin_and_ymax = compute_axis_lim(y_values)
     true_target_label, predicted_target_label = get_true_label_and_predicted_label(dataset.target_label)
     _plot_climato(dataset.y_train, dataset.y_test, dataset.years_train, dataset.years_test, dataset.rcp_name_train, dataset.rcp_name_test,
-                  dataset.validation_mask, true_target_label, show, ymin_and_ymax, plot_folder, axs[0, 0])
+                  dataset.nb_historical_years, true_target_label, show, ymin_and_ymax, plot_folder, axs[0, 0])
     _plot_climato(y_train_predicted, y_test_predicted, dataset.years_train, dataset.years_test, dataset.rcp_name_train, dataset.rcp_name_test,
-                  dataset.validation_mask, predicted_target_label, show, ymin_and_ymax, plot_folder, axs[0, 1])
+                  dataset.nb_historical_years, predicted_target_label, show, ymin_and_ymax, plot_folder, axs[0, 1])
 
     # Second row
     loc = 'upper left'
