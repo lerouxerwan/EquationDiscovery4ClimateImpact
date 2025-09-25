@@ -21,16 +21,11 @@ def main():
     # non_default_dict = {
     #     'maxdepth': max_depth,
     # }
-    # validation_size = 0.3
-    validation_size = [0.25][indices[4] - 1]
-    non_default_dict = None
-
-
-    # Run validation workflow
-    # non_default_dict = {
-    #     'maxsize': 15,
-    #     'niterations': 1000,
-    # }
+    validation_size = 0.25
+    niterations = [100, 1000][indices[4] - 1]
+    non_default_dict = {
+        'niterations': niterations,
+    }
 
     validation_split = ValidationWorkflow(validation_split, n_iter, nb_top_hyperparameters, model_selection,
                                           validation_size, non_default_dict=non_default_dict)

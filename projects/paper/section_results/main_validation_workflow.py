@@ -13,7 +13,7 @@ def load_setting(fast):
     val_id = 0
     validation_splits = [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END,
                          ValidationSplit.RCP_START, ValidationSplit.EXTREME][val_id:val_id+1]
-    n_iter = 100
+    n_iter = 1
     nb_top_hyperparameters = 5
     validation_size = 0.25
     if fast:
@@ -30,10 +30,9 @@ def main_get_top_emulator(fast: bool):
     validation_splits, n_iter, nb_top_hyperparameters, model_selection, validation_size = load_setting(fast)
     # Load sorted validation workflows
     non_default_dict = None
-    # non_default_dict = {
-    #     'maxsize': 15,
-    #     'niterations': 500,
-    # }
+    non_default_dict = {
+        'niterations': 1000,
+    }
     validation_workflows = [ValidationWorkflow(validation_split, n_iter, nb_top_hyperparameters,
                                                model_selection, validation_size, non_default_dict=non_default_dict, fast=fast)
                             for validation_split in validation_splits]
