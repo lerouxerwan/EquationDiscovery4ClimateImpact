@@ -36,6 +36,10 @@ def main():
             'niterations': 1000,
             'maxsize': 20,
         }
+    elif index_4 in [5, 6, 7, 8]:
+        non_default_dict = {
+            'maxdepth': index_4 - 1,
+        }
     else:
         raise NotImplementedError
 
