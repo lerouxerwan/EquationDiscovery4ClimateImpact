@@ -12,12 +12,12 @@ from sympy import Expr, Symbol, expand, symbols, lambdify
 from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_run.run import Run
 from data.utils_run.utils_run import get_output_directory, get_run_id
+from emulator.utils_emulator import Config
 from plot.utils_metric.metric import Metric, metric_to_function
 from utils.utils_log import log_info
 from utils.utils_non_default_params import get_non_default_params
 from utils.utils_run import random_seed
 
-AUTOMATIC_LOADING_AND_SAVING = True
 
 
 
@@ -147,7 +147,7 @@ class Emulator(PySRRegressor):
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
         # Update logger_spec if needed
-        if not AUTOMATIC_LOADING_AND_SAVING:
+        if not Config.automatic_loading_and_saving:
             self.logger_spec = None
         # Create attributes
         self.index_for_validated_model_selection_ = None
@@ -214,7 +214,7 @@ class Emulator(PySRRegressor):
         else:
             X_fit, y_fit = get_X_and_y(X, y, validation_mask, validation_set=False)
 
-        try_loading = run.has_been_saved and AUTOMATIC_LOADING_AND_SAVING
+        try_loading = run.has_been_saved and Config.automatic_loading_and_saving
         if try_loading:
             try:
                 emulator_from_file = self.from_file(run_directory=run.run_directory)
@@ -246,7 +246,7 @@ class Emulator(PySRRegressor):
             end_time = time.monotonic()
             duration = str(timedelta(seconds=end_time - start_time))
             # Save duration and tensorboard command to file
-            if AUTOMATIC_LOADING_AND_SAVING:
+            if Config.automatic_loading_and_saving:
                 log_info(f'Save fit to file')
                 run.save_fit(duration, verbose=False)
 
