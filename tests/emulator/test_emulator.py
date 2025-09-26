@@ -36,6 +36,15 @@ def test_deterministic_and_compute_loss():
     emulator.remove_folder()
 
 
+def test_model_selection_validated():
+    emulator = Emulator(niterations=1, model_selection='validated')
+    X, y = load_X_and_y_for_test()
+    emulator.fit(X, y)
+    # Assert that the fit of the emulator is the same as with the model selection 'best'
+    np.testing.assert_almost_equal(float(sum(emulator.loss_list)), 35698078.93297232)
+    emulator.remove_folder()
+
+
 list_of_X_units_and_expected_variable_names = [
     (['m', 's', 'mol', 'K', 'A', 'kg', 'cd'], ['x1']),
     (['s', 'm', 'mol', 'K', 'A', 'kg', 'cd'], ['x2']),

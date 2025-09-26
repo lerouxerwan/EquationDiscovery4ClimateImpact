@@ -6,7 +6,6 @@ import joblib
 import numpy as np
 
 from emulator.utils_emulator import params_that_do_not_impact_the_fit_results
-from utils.utils_log import log_info
 
 
 def get_hash_str(*iterables) -> str:
