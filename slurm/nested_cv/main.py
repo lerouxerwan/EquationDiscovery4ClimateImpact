@@ -16,9 +16,13 @@ class SbatchNestedCV(Sbatch):
     def nb_cores(self) -> int:
         return 1
 
+    @property
+    def server_name(self) -> str:
+        return '--nodelist=sl-mee-br-113'
+
 
 def main_validation_size():
-    for index1 in [0, 1][:1]:
+    for index1 in [0, 1][1:]:
         for index2 in range(len(param_names)):
             indices = [index1, index2]
             sbatch = SbatchNestedCV(indices)
