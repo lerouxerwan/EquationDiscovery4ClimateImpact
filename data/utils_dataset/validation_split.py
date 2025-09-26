@@ -13,6 +13,7 @@ class ValidationSplit(StrEnum):
     EXTREME = 'extreme'
     NONE = 'no validation set'
     PRELIMINARY_TEST = 'preliminary test'
+    QUANTILE_WITH_BINNING = 'quantile_with_binning'
 
 def get_train_label(rcp_name_train: str, validation_split: ValidationSplit, validation_size: float) -> str:
     percent = f'{int(100 * (1 - validation_size))}%'

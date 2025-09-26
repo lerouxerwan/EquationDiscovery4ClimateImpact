@@ -24,6 +24,14 @@ def get_validation_mask(y_train: np.ndarray, validation_size: float = 0.3,
         indices = list(range(length_mask))
         indices_validation_set = set(train_test_split(np.array(indices), test_size=validation_size, random_state=random_seed)[1])
         return np.array([i in indices_validation_set for i in indices])
+    elif validation_split is ValidationSplit.QUANTILE_WITH_BINNING:
+        indices = list(range(length_mask))
+        quantiles = np.linspace(0, 1, validation_length + 1)
+        bin_edges = np.percentile(y_train, quantiles * 100)  # Limites des bins adaptées à y
+        y_binned = np.digitize(y_train, bins=bin_edges[1:-1])
+        indices_validation_set = set(train_test_split(np.array(indices), test_size=validation_size, random_state=random_seed,
+                                                      shuffle=True, stratify=y_binned)[1])
+        return np.array([i in indices_validation_set for i in indices])
     else:
         # Some checks
         assert (years_train is not None) and (rcp_name_train is not None) and (prefixes_train is not None)
