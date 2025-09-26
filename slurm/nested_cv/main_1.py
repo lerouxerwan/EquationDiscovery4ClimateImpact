@@ -1,7 +1,6 @@
 from slurm.nested_cv.utils_param_names import param_names
 from slurm.sbatch import Sbatch
 
-
 class SbatchNestedCV(Sbatch):
 
     @property
@@ -21,12 +20,12 @@ class SbatchNestedCV(Sbatch):
         return '--nodelist=sl-mee-br-113'
 
 
+
 def main_validation_size():
-    for index1 in [0, 1][1:]:
-        for index2 in range(len(param_names)):
-            indices = [index1, index2]
-            sbatch = SbatchNestedCV(indices)
-            sbatch.run()
+    for index2 in range(len(param_names)):
+        indices = [1, index2]
+        sbatch = SbatchNestedCV(indices)
+        sbatch.run()
 
 
 if __name__ == '__main__':

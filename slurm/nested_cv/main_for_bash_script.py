@@ -22,7 +22,7 @@ def main():
 
     dataset = Dataset("NPP_season.csv", "RCP85", "RCP45", 0.2, ValidationSplit.QUANTILE_WITH_BINNING)
     opt = OptimizationMarginalSearch(model_selection, param_name)
-    run_nested_cv(dataset, opt, True)
+    run_nested_cv(dataset, opt, False)
 
 
 if __name__ == '__main__':
