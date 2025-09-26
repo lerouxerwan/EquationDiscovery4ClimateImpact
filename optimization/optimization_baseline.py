@@ -13,16 +13,16 @@ class OptimizationBaseline(Optimization):
     """Optimization with Default Hyperparameters except Validated Model Selection"""
     model_selection: Literal["best", "accuracy", "score", "validated"]
 
+    @property
+    def name(self):
+        return f"Baseline with model selection '{self.model_selection}'"
+
     def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
                           variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                           y_units: Optional[ArrayLike[str]] = None) -> Emulator:
         emulator = Emulator(model_selection=self.model_selection)
         emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
         return emulator
-
-    @property
-    def name(self):
-        return f"Baseline with model selection '{self.model_selection}'"
 
 
 optimization_baseline_with_best_model_selection = OptimizationBaseline('best')

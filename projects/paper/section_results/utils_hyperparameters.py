@@ -50,7 +50,8 @@ def relative_error(true: float, pred: float) -> float:
 if __name__ == '__main__':
     # print(list(range(1, 21, 2)))
     # print([3 * i + 17 for i in range(10)])
-    for param_name, param_values in get_param_name_to_values().items():
-        if param_name != 'unary_operators':
-            if len(set(param_values)) != len(param_values):
-                print(param_name, param_values)
+    print((get_param_name_to_values().keys()))
+    # for param_name, param_values in get_param_name_to_values().items():
+    #     if param_name != 'unary_operators':
+    #         if len(set(param_values)) != len(param_values):
+    #             print(param_name, param_values)
