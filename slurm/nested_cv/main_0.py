@@ -23,7 +23,7 @@ class SbatchNestedCV(Sbatch):
 
 
 def main_validation_size():
-    for index2 in range(len(param_names)):
+    for index2 in list(range(len(param_names)))[::-1]:
         indices = [0, index2]
         sbatch = SbatchNestedCV(indices)
         sbatch.run()
