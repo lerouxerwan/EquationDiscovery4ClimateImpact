@@ -8,6 +8,7 @@ from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from optimization.optimization import Optimization
 from projects.paper.section_results.utils_hyperparameters import get_param_name_to_values
+from utils.utils_log import log_info
 
 
 @dataclass
@@ -27,9 +28,10 @@ class OptimizationMarginalSearch(Optimization):
     def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
                          variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                          y_units: Optional[ArrayLike[str]] = None) -> Emulator:
+        log_info(f'Run marginal search for {self.param_name}')
         params_emulator = {'model_selection': self.model_selection}
-        param_search = {'param_grid': {self.param_name: self.param_values}, 'search_style': 'grid', 'n_jobs': None}
-        emulator = EmulatorWithSearch(**params_emulator, **param_search)
+        params_search = {'param_grid': {self.param_name: self.param_values}, 'search_style': 'grid', 'n_jobs': None}
+        emulator = EmulatorWithSearch(**params_emulator, **params_search)
         emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
         return emulator
 
