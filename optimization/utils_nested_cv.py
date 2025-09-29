@@ -30,4 +30,5 @@ def run_nested_cv(dataset: Dataset, optimization: Optimization, fast: bool = Fal
     rmse_test_list = np.array(rmse_test_list)
     log_info(f'Summary of nested cv for {optimization.name}:')
     log_info(f' {np.mean(rmse_test_list)} ({np.min(rmse_test_list)}, {np.max(rmse_test_list)})')
+    return rmse_test_list
 
