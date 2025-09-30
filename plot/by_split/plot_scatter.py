@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 
 import matplotlib
 import numpy as np
@@ -43,6 +43,23 @@ def _plot_scatter(ax, dataset, emulator, fig, split_name, y, y_predicted, years,
     # Annotate equation and metric box
     add_equation(ax, emulator.selected_expr)
     add_metric_box(ax, y, y_predicted, dataset.target_label, split_name)
+    # Add second metric box
+    nb_years = dataset.nb_historical_years
+    y_reference_future, y_predicted_future, years_future = y[-nb_years:], y_predicted[-nb_years:], years[-nb_years:]
+    y_reference_historical, years_historical = dataset.y_train[:nb_years], dataset.years_train[:nb_years]
+    y_predicted_historical = emulator.predict(dataset.X_train[:nb_years, :])
+    delta_reference = compute_delta(y_reference_historical, y_reference_future)
+    delta_predicted = compute_delta(y_predicted_historical, y_predicted_future)
+    difference = delta_predicted - delta_reference
+    text_to_annotate = f'Change between {years_historical[0]}-{years_historical[-1]} and {years_future[0]}-{years_future[-1]}:\n'
+    text_to_annotate += f'Reference = {round(delta_reference, 2)}%, '
+    text_to_annotate += f'Predicted = {round(delta_predicted, 2)}%'
+    # text_to_annotate += f'Difference = {round(difference, 2)}%'
+    coef = 0.95
+    x_and_y_location = (0.03, 0.85)
+    ax.annotate(text_to_annotate, xy=x_and_y_location, xycoords='axes fraction', textcoords='offset points',
+                xytext=x_and_y_location,
+                bbox=dict(boxstyle="round", fc=(coef, coef, coef), ec="none"))
     #  Add legend and labels
     x_label, y_label = get_true_label_and_predicted_label(dataset.target_label)
     ax.set_xlabel(x_label)
@@ -50,6 +67,10 @@ def _plot_scatter(ax, dataset, emulator, fig, split_name, y, y_predicted, years,
     #  Set ranges of axis
     ax.set_xlim((ymin, ymax))
     ax.set_ylim((ymin, ymax))
+
+def compute_delta(y_historical, y_future) -> float:
+    mean_historical, mean_future = np.mean(y_historical), np.mean(y_future)
+    return 100 * (mean_future - mean_historical) / mean_historical
 
 
 def plot_scatter_side_by_side(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None) -> None:

@@ -7,7 +7,6 @@ def add_metric_box(ax, y, y_predicted, target_label:str, split_name: str, x_and_
     assert y_predicted.ndim == 1
     if x_and_y_location is None:
         x_and_y_location = (0.65, 0.05)
-    coef = 0.95
     metrics = [Metric.MRAE, Metric.RMSE, Metric.MEDAE, Metric.COR, Metric.SPREADRATIO]
     metrics = [Metric.RMSE, Metric.MRAE, Metric.COR]
     summary = []
@@ -21,6 +20,7 @@ def add_metric_box(ax, y, y_predicted, target_label:str, split_name: str, x_and_
         summary.append(text)
     text_to_annotate = f'{split_name.capitalize()} metrics\n'
     text_to_annotate += '\n'.join(summary)
+    coef = 0.95
     ax.annotate(text_to_annotate, xy=x_and_y_location, xycoords='axes fraction', textcoords='offset points',
                 xytext=x_and_y_location,
                 bbox=dict(boxstyle="round", fc=(coef, coef, coef), ec="none"))

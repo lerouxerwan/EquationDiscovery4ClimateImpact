@@ -29,7 +29,8 @@ def get_unit(label: str) -> str:
 
 def add_equation(ax: Axes, expr: Expr):
     coef = 0.95
-    ax.annotate(f'Equation with rounded coefficients: {get_equation_str(expr)}', xy=(0.02, 0.9),
-                xycoords='axes fraction', textcoords='offset points', size=7,
-                bbox=dict(boxstyle="round", fc=(coef, coef, coef), ec="none"))
+    ax.set_title(f'Rounded equation: {get_equation_str(expr)}')
+    # ax.set_title(f'Equation with rounded coefficients: {get_equation_str(expr)}', xy=(0.02, 0.02),
+    #             xycoords='axes fraction', textcoords='offset points', size=7,
+    #             bbox=dict(boxstyle="round", fc=(coef, coef, coef), ec="none"))
 
