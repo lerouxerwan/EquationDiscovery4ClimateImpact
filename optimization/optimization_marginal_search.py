@@ -23,12 +23,12 @@ class OptimizationMarginalSearch(Optimization):
 
     @property
     def name(self):
-        return f"Marginal search for the hyperparameter '{self.param_name}'"
+        return f"marginal search for the hyperparameter '{self.param_name}'"
 
     def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
                          variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                          y_units: Optional[ArrayLike[str]] = None) -> Emulator:
-        log_info(f'Run marginal search for {self.param_name}')
+        log_info(f'Run {self.name}')
         params_emulator = {'model_selection': self.model_selection}
         params_search = {'param_grid': {self.param_name: self.param_values}, 'search_style': 'grid', 'n_jobs': None}
         emulator = EmulatorWithSearch(**params_emulator, **params_search)

@@ -22,13 +22,14 @@ class OptimizationDoubleSearch(Optimization):
 
     @property
     def name(self):
-        return f"Random search with top{self.nb_top_hyperparameters} hyperparameters from the marginal search"
+        return f"random search with top{self.nb_top_hyperparameters} hyperparameters from the marginal search"
 
     def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
                          variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                          y_units: Optional[ArrayLike[str]] = None) -> Emulator:
+        log_info(f'Run {self.name}')
         top_param_names = self.get_top_param_names(X, y, validation_mask, variable_names, X_units, y_units)
-        log_info(f'Run random search with: {top_param_names}')
+        log_info(f'Top parameters are: {top_param_names}')
         param_grid = {param_name: param_values for param_name, param_values in get_param_name_to_values().items()
                       if param_name in top_param_names}
         params_emulator = {'model_selection': self.model_selection}
