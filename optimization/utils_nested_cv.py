@@ -1,6 +1,4 @@
 import numpy as np
-from numpy import ndarray, dtype
-from numpy._core.multiarray import _SCT
 from sklearn.model_selection import KFold
 
 from data.utils_dataset.dataset import Dataset
