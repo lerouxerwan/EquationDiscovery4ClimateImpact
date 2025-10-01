@@ -1,4 +1,6 @@
 import numpy as np
+from numpy import ndarray, dtype
+from numpy._core.multiarray import _SCT
 from sklearn.model_selection import KFold
 
 from data.utils_dataset.dataset import Dataset
@@ -10,7 +12,11 @@ from utils.utils_log import log_info
 from utils.utils_run import random_seed
 
 
-def run_nested_cv(dataset: Dataset, optimization: Optimization, fast: bool = False):
+def run_nested_cv(dataset: Dataset, optimization: Optimization, fast: bool = False) :
+    """Nested cv on the train set. Several folds are created randomly from the train set.
+    Each fold is considered successively as the test set while other folds are used as train & validation sets.
+    For each fold, the validation set is built using the validation_size and validation_split as the original dataset
+    Finally the algorithm returns the list of RMSE test, the length of the list equals the number of folds."""
     # Consider only datapoints from the train set (and exclude datapoints from the validation set and test set)
     X, y = get_X_and_y(dataset.X_train, dataset.y_train, dataset.validation_mask, validation_set=False)
     # Run outer loop
