@@ -9,7 +9,7 @@ from data.utils_dataset.validation_split import ValidationSplit
 from emulator.emulator_with_search import EmulatorWithSearch
 from plot.utils_metric.metric import Metric
 from plot.workflow import fit, compute_loss_test
-from projects.paper.section_results.utils_hyperparameters import get_param_name_to_values
+from optimization.utils_params.utils_default_centred_values import get_param_name_to_default_centred_values
 from utils.utils_log import log_info
 
 
@@ -90,7 +90,7 @@ class ValidationWorkflow(object):
         return params_emulator
 
     def get_param_name_to_values(self) -> dict[str, list]:
-        param_name_to_values = get_param_name_to_values()
+        param_name_to_values = get_param_name_to_default_centred_values()
         # Delete from the search parameters that are non default
         if self.non_default_dict is not None:
             for param_name in self.non_default_dict.keys():

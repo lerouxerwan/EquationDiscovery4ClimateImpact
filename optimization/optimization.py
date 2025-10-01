@@ -1,13 +1,23 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from dataclasses import dataclass
+from functools import cached_property
+from typing import Optional, Any, Literal
 
 import numpy as np
 from pysr.utils import ArrayLike
 
 from emulator.emulator import Emulator
+from optimization.utils_params.utils_params_values import ParamsValues, get_param_name_to_values
 
 
+@dataclass
 class Optimization(ABC):
+    model_selection: str = 'best'
+    params_ranges: Optional[ParamsValues] = None
+
+    @cached_property
+    def param_name_to_values(self) -> Optional[dict[str, list[Any]]]:
+        return get_param_name_to_values(self.params_ranges)
 
     @property
     @abstractmethod
@@ -19,5 +29,4 @@ class Optimization(ABC):
                           variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                           y_units: Optional[ArrayLike[str]] = None) -> Emulator:
         pass
-
 

@@ -11,7 +11,6 @@ from optimization.optimization import Optimization
 @dataclass
 class OptimizationBaseline(Optimization):
     """Optimization with Default Hyperparameters except Validated Model Selection"""
-    model_selection: Literal["best", "accuracy", "score", "validated"]
 
     @property
     def name(self):

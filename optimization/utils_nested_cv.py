@@ -27,7 +27,6 @@ def run_nested_cv(dataset: Dataset, optimization: Optimization, fast: bool = Fal
         validation_mask = get_validation_mask(y_train, dataset.validation_size, dataset.validation_split)
         top_emulator = optimization.get_top_emulator(X_train, y_train, validation_mask,
                                                      dataset.X_variables_names, dataset.X_units, dataset.y_units)
-        log_info(f'Sum of loss list {top_emulator.loss_list}')
         rmse_test = top_emulator.compute_loss(X_test, y_test, Metric.RMSE)
         log_info(f'RMSE test for the fold #{j}: {rmse_test}')
         rmse_test_list.append(rmse_test)

@@ -1,4 +1,3 @@
-from slurm.nested_cv.utils_param_names import param_names
 from slurm.sbatch import Sbatch
 
 

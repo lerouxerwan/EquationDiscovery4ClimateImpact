@@ -2,7 +2,7 @@ import pandas as pd
 
 from data.utils_dataset.validation_split import ValidationSplit
 from plot.plot_diagnosis import plot_diagnosis
-from projects.paper.section_results.validation_workflow import ValidationWorkflow
+from projects.experiments.validation_workflow.validation_workflow import ValidationWorkflow
 from utils.utils_latex import print_df_latex
 from utils.utils_log import log_info
 
@@ -32,6 +32,7 @@ def main_get_top_emulator(fast: bool):
     non_default_dict = None
     non_default_dict = {
         'maxdepth': None,
+        'niterations': 100,
     }
     validation_workflows = [ValidationWorkflow(validation_split, n_iter, nb_top_hyperparameters,
                                                model_selection, validation_size, non_default_dict=non_default_dict, fast=fast)

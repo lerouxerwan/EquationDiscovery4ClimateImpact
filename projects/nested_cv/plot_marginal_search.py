@@ -1,16 +1,15 @@
 from typing import OrderedDict
 
 import pandas as pd
-from pandas import DataFrame
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from optimization.optimization_marginal_search import OptimizationMarginalSearch
 from optimization.utils_nested_cv import run_nested_cv
-from slurm.nested_cv.utils_param_names import param_names
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from optimization.utils_params.utils_params_values import param_names, ParamsValues
 from utils.utils_plot import show_or_save_plot
 
 NB_PARAMS_FAST = 2
@@ -21,7 +20,7 @@ def get_data(model_selection: str, fast: bool):
     dataset = Dataset("NPP_season.csv", "RCP85", "RCP45", 0.2, ValidationSplit.QUANTILE_WITH_BINNING)
     param_names_for_plot = param_names[:NB_PARAMS_FAST] if fast else param_names
     for param_name in param_names_for_plot:
-        opt = OptimizationMarginalSearch(model_selection, param_name)
+        opt = OptimizationMarginalSearch(model_selection, ParamsValues.DEFAULT_CENTRED, param_name)
         rmse_test_list = run_nested_cv(dataset, opt, fast)
         data[param_name] = rmse_test_list
     df = pd.DataFrame(data)

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Literal, Optional
+from typing import Literal, Optional, Any
 
 import numpy as np
 import optuna
@@ -12,7 +12,6 @@ from utils.utils_log import log_info
 
 @dataclass
 class OptimizationOptuna(Optimization):
-    model_selection: Literal["best", "accuracy", "score", "validated"]
     n_trials: int = 50
 
     @property
@@ -24,12 +23,26 @@ class OptimizationOptuna(Optimization):
                          y_units: Optional[ArrayLike[str]] = None) -> Emulator:
         log_info(f'Run {self.name}')
         def objective(trial):
-            emulator = Emulator(
-                niterations=trial.suggest_int("niterations", 10, 20),
-                maxsize=trial.suggest_int("maxsize", 20, 30),
-            )
+            emulator = Emulator(**self.get_params(trial))
             emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
             return emulator.selected_validation_loss
         study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler())
         study.optimize(objective, n_trials=self.n_trials)
-        return Emulator(**study.best_params).fit(X, y, validation_mask, variable_names, X_units, y_units)
+        emulator = Emulator(**study.best_params)
+        emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
+        return emulator
+
+    def get_params(self, trial) -> dict[str, Any]:
+        params = {}
+        for param_name, param_values in self.param_name_to_values.items():
+            first_value = param_values[0]
+            if (first_value is None) or (isinstance(first_value, str) or (isinstance(first_value, list))):
+                params[param_name] = trial.suggest_categorical(param_name, param_values)
+            elif isinstance(first_value, int):
+                params[param_name] = trial.suggest_int(param_name, min(param_values), max(param_values))
+            elif isinstance(first_value, float):
+                params[param_name] = trial.suggest_float(param_name, min(param_values), max(param_values))
+            else:
+                raise NotImplementedError(f'{param_values} for type {type(param_values[0])}')
+        return params
+

@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 
 from data.utils_dataset.validation_split import ValidationSplit
-from projects.paper.section_results.validation_workflow import ValidationWorkflow
+from projects.experiments.validation_workflow.validation_workflow import ValidationWorkflow
 from utils.utils_log import log_info
 
 

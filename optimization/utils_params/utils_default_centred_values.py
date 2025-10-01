@@ -1,4 +1,5 @@
 from itertools import combinations
+from typing import Any
 
 from emulator.emulator import Emulator
 
@@ -8,7 +9,7 @@ up_and_down_factors= lambda v: [v / f for f in factors[::-1]] + [v * f for f in 
 up_and_down_factors_int = lambda v: [int(f) for f in up_and_down_factors(v)]
 
 
-def get_param_name_to_values():
+def get_param_name_to_default_centred_values() -> dict[str, list[Any]]:
     emulator_with_default_params = Emulator()
     probability_values = [round(0.1 + i / 10, 1) for i in range(10)]
     nb_of_members = list(range(2, 21, 2))
@@ -27,6 +28,7 @@ def get_param_name_to_values():
         'tournament_selection_n': nb_of_members,
         'weight_optimize': probability_values,
         'maxdepth': [None, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        'niterations': up_and_down_factors_int(1000),
     }
 
 
@@ -43,16 +45,3 @@ def get_param_name_to_values():
         param_name_to_values[param_name] = up_and_down_factors(default_param_value)
 
     return param_name_to_values
-
-def relative_error(true: float, pred: float) -> float:
-    return 100 * (pred - true) / true
-
-
-if __name__ == '__main__':
-    # print(list(range(1, 21, 2)))
-    # print([3 * i + 17 for i in range(10)])
-    print((get_param_name_to_values().keys()))
-    # for param_name, param_values in get_param_name_to_values().items():
-    #     if param_name != 'unary_operators':
-    #         if len(set(param_values)) != len(param_values):
-    #             print(param_name, param_values)

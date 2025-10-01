@@ -3,7 +3,9 @@ import sys
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from optimization.optimization_double_search import OptimizationDoubleSearch
+from optimization.optimization_optuna import OptimizationOptuna
 from optimization.utils_nested_cv import run_nested_cv
+from optimization.utils_params.utils_params_values import ParamsValues
 
 
 def main():
@@ -20,12 +22,12 @@ def main():
     model_selection = model_selection_list[indices[0]]
 
     # Optimization with double search
-    nb_top_hyperparameters = indices[1]
-    opt = OptimizationDoubleSearch(model_selection, nb_top_hyperparameters)
+    # nb_top_hyperparameters = indices[1]
+    # opt = OptimizationDoubleSearch(model_selection, nb_top_hyperparameters)
 
     # Optimization with optuna
-    # nb_trials = indices[1]
-    # opt= OptimizationOptuna(model_selection, nb_trials)
+    nb_trials = indices[1]
+    opt= OptimizationOptuna(model_selection, ParamsValues.DEFAULT_CENTRED, nb_trials)
 
     run_nested_cv(dataset, opt, fast)
 

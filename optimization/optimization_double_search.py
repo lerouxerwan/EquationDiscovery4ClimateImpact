@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Literal
 
 import numpy as np
 from pysr.utils import ArrayLike
@@ -9,15 +8,12 @@ from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from optimization.optimization import Optimization
 from optimization.optimization_marginal_search import OptimizationMarginalSearch
-from projects.paper.section_results.utils_hyperparameters import get_param_name_to_values
-from slurm.nested_cv.utils_param_names import param_names
 from utils.utils_log import log_info
 
 
 @dataclass
 class OptimizationDoubleSearch(Optimization):
-    model_selection: Literal["best", "accuracy", "score", "validated"]
-    nb_top_hyperparameters: str
+    nb_top_hyperparameters: int =  5
     n_iter: int = 100
 
     @property
@@ -30,7 +26,7 @@ class OptimizationDoubleSearch(Optimization):
         log_info(f'Run {self.name}')
         top_param_names = self.get_top_param_names(X, y, validation_mask, variable_names, X_units, y_units)
         log_info(f'Top parameters are: {top_param_names}')
-        param_grid = {param_name: param_values for param_name, param_values in get_param_name_to_values().items()
+        param_grid = {param_name: param_values for param_name, param_values in self.param_name_to_values.items()
                       if param_name in top_param_names}
         params_emulator = {'model_selection': self.model_selection}
         params_search = {'param_grid': param_grid, 'search_style': 'random', 'n_iter': self.n_iter, 'n_jobs': None}
@@ -43,8 +39,9 @@ class OptimizationDoubleSearch(Optimization):
                          y_units: Optional[ArrayLike[str]] = None) -> list[str]:
         # Map each param_name to its validation rmse
         param_name_to_validation_rmse = dict()
+        param_names = sorted(self.param_name_to_values.keys())
         for param_name in param_names:
-            marginal_optimization = OptimizationMarginalSearch(self.model_selection, param_name)
+            marginal_optimization = OptimizationMarginalSearch(self.model_selection, self.params_ranges, param_name)
             emulator = marginal_optimization.get_top_emulator(X, y, validation_mask, variable_names, X_units, y_units)
             param_name_to_validation_rmse[param_name] = emulator.selected_validation_rmse
         # Compute the list of top param names
