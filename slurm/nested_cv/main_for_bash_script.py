@@ -20,12 +20,14 @@ def main():
     model_selection_list = ['best', 'validated']
     model_selection = model_selection_list[indices[0]]
 
-    # Transform index as argument
-    # nb_top_hyperparameters = indices[1]
-    # opt = OptimizationDoubleSearch(model_selection, nb_top_hyperparameters)
+    # Optimization with double search
+    nb_top_hyperparameters = indices[1]
+    opt = OptimizationDoubleSearch(model_selection, nb_top_hyperparameters)
 
-    nb_trials = indices[1]
-    opt= OptimizationOptuna(model_selection, nb_trials)
+    # Optimization with optuna
+    # nb_trials = indices[1]
+    # opt= OptimizationOptuna(model_selection, nb_trials)
+
     run_nested_cv(dataset, opt, fast)
 
 

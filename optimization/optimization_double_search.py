@@ -18,7 +18,7 @@ from utils.utils_log import log_info
 class OptimizationDoubleSearch(Optimization):
     model_selection: Literal["best", "accuracy", "score", "validated"]
     nb_top_hyperparameters: str
-    n_iter: int = 1000
+    n_iter: int = 100
 
     @property
     def name(self):
