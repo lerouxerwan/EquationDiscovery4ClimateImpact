@@ -28,7 +28,7 @@ def get_param_name_to_default_centred_values() -> dict[str, list[Any]]:
         'tournament_selection_n': nb_of_members,
         'weight_optimize': probability_values,
         'maxdepth': [None, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        'niterations': up_and_down_factors_int(1000),
+        'niterations': up_and_down_factors_int(100),
     }
 
 
