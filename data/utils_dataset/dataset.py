@@ -16,7 +16,7 @@ class Dataset(object):
 
     def __post_init__(self):
         (self.X_train, self.y_train, self.X_test, self.y_test, self.years_train, self.years_test,
-         self.X_units, self.y_units, self.X_labels, self.y_labels, self.X_variables_names, self.y_variable_names,
+         self.X_units, self.y_units, self.X_labels, self.y_labels, self.X_variable_names, self.y_variable_names,
          self.validation_mask, self.nb_historical_years) = load_dataset_values(self.csv_filename, self.rcp_name_train, self.rcp_name_test, self.validation_size, self.validation_split)
         # Check and display
         self.check()
@@ -25,7 +25,7 @@ class Dataset(object):
     def check(self):
         """Check values are consistent between themselves"""
         assert len(self.X_units) == self.X_train.shape[1] == self.X_test.shape[1]
-        assert len(self.X_units) == len(self.X_labels) == len(self.X_variables_names)
+        assert len(self.X_units) == len(self.X_labels) == len(self.X_variable_names)
 
     def __str__(self):
         return (f"Dataset to predict {self.y_variable_names[0]} with {self.X_train.shape[1]} features, "

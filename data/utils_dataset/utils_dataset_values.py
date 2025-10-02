@@ -35,7 +35,7 @@ def load_dataset_values(csv_filename: str, rcp_name_train: str, rcp_name_test: O
     df, X_units, y_units = load_additional_row(df, 'UNIT')
     df, X_labels, y_labels = load_additional_row(df, 'LABEL')
     variable_names = list(df.columns)
-    X_variables_names, y_variable_names = variable_names[1:], variable_names[:1]
+    X_variable_names, y_variable_names = variable_names[1:], variable_names[:1]
     # Cast dataframe to the float type
     df = df.astype(float)
     # Check dataframe: at best 2 RCP scenarios should be in the index values (and that other prefix can only be 'HIST')
@@ -64,7 +64,7 @@ def load_dataset_values(csv_filename: str, rcp_name_train: str, rcp_name_test: O
                                           list(years_train), rcp_name_train, list(prefixes_train))
     return (
         X_train, y_train, X_test, y_test, years_train, years_test,
-        X_units, y_units, X_labels, y_labels, X_variables_names, y_variable_names,
+        X_units, y_units, X_labels, y_labels, X_variable_names, y_variable_names,
         validation_mask, nb_historical_years
     )
 

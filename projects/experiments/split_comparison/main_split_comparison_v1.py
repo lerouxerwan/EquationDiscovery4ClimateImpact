@@ -102,7 +102,7 @@ def compute_dataframes(validation_split, niter) -> tuple[pd.DataFrame, pd.DataFr
 
 def get_res(dataset, params_emulator, params_search, folder:str):
     emulator = EmulatorWithSearch(**params_emulator, **params_search)
-    emulator.fit(dataset.X_train, dataset.y_train, variable_names=dataset.X_variables_names, X_units=dataset.X_units,
+    emulator.fit(dataset.X_train, dataset.y_train, variable_names=dataset.X_variable_names, X_units=dataset.X_units,
                  y_units=dataset.y_units, validation_mask=dataset.validation_mask)
     y_test_predict = emulator.predict(dataset.X_test)
     plot_folder = op.join(folder, dataset.y_variable_names[0])

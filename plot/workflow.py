@@ -26,7 +26,7 @@ def workflow(dataset: Dataset, params_emulator: dict[str, Any],
 
 def fit(emulator: Emulator, dataset: Dataset) -> None:
     emulator.fit(dataset.X_train, dataset.y_train, dataset.validation_mask,
-                 dataset.X_variables_names, dataset.X_units, dataset.y_units)
+                 dataset.X_variable_names, dataset.X_units, dataset.y_units)
 
 def compute_loss_test(emulator: Emulator, dataset: Dataset, metric: Metric) -> float:
     return emulator.compute_loss(dataset.X_test, dataset.y_test, metric)

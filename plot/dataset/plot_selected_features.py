@@ -12,7 +12,7 @@ from utils.utils_plot import show_and_save_with_optional_plot_folder, get_subplo
 def plot_selected_features(emulator: Emulator, dataset:Dataset, show: Optional[bool] = False,
                             plot_folder: Optional[str] = None) -> None:
     """Plot the features in the selected equation"""
-    selected_feature_indexes = get_selected_feature_indexes(emulator.selected_variable_names, dataset.X_variables_names)
+    selected_feature_indexes = get_selected_feature_indexes(emulator.selected_variable_names, dataset.X_variable_names)
     selected_feature_indexes = selected_feature_indexes[:2]
     ncols = 2
     nrows = math.ceil(len(selected_feature_indexes) / ncols)

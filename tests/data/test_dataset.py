@@ -4,7 +4,7 @@ from data.utils_dataset.validation_split import ValidationSplit
 
 def test_load_dataset():
     (X_train, y_train, X_test, y_test, years_train, years_test,
-        X_units, y_units, X_labels, y_labels, X_variables_names, y_variable_names,
+        X_units, y_units, X_labels, y_labels, X_variable_names, y_variable_names,
         validation_mask, nb_historical_years) = load_dataset_values("NPP_season.csv", "RCP85", "RCP45", 0.3, ValidationSplit.RCP_START)
     any_value = X_train[0, 0]
     assert isinstance(any_value, float), type(any_value)

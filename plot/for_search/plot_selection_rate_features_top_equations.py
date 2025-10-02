@@ -20,7 +20,7 @@ def plot_selection_rate_features_top_equations(dataset: Dataset, run: Run,
         # Gather feature indexes from the top 10 equations
         all_feature_indexes = []
         for selected_variable_names in df[VARIABLE_NAMES_COLUMN_NAME].values[:nb_top_equations]:
-            all_feature_indexes.extend(get_selected_feature_indexes(selected_variable_names, dataset.X_variables_names))
+            all_feature_indexes.extend(get_selected_feature_indexes(selected_variable_names, dataset.X_variable_names))
         c = Counter(all_feature_indexes)
         feature_indexes, occurrences = zip(*sorted(c.items(), key=lambda t: t[1], reverse=True))
         percentages = [100 * o / nb_top_equations for o in occurrences]
@@ -28,7 +28,7 @@ def plot_selection_rate_features_top_equations(dataset: Dataset, run: Run,
         x_values = range(len(c))
         ax.bar(x_values, percentages, width=0.5)
         ax.set_xticks(x_values)
-        xticklabels = [dataset.X_variables_names[feature_index] for feature_index in feature_indexes]
+        xticklabels = [dataset.X_variable_names[feature_index] for feature_index in feature_indexes]
         xticklabels = ['$' + label.replace('_', '_{') + '}$' for label in xticklabels]
         for selected_feature_index in all_feature_indexes[0]:
             i = feature_indexes.index(selected_feature_index)

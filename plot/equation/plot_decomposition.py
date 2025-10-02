@@ -11,9 +11,9 @@ from utils.utils_plot import show_and_save_with_optional_plot_folder
 
 def plot_decomposition(emulator: Emulator, dataset:Dataset, show: Optional[bool] = False,
                             plot_folder: Optional[str] = None) -> None:
-    _plot_decomposition(emulator.selected_expr, dataset.X_train, dataset.X_variables_names, dataset.years_train,
+    _plot_decomposition(emulator.selected_expr, dataset.X_train, dataset.X_variable_names, dataset.years_train,
                         'train', show, plot_folder)
-    _plot_decomposition(emulator.selected_expr, dataset.X_test, dataset.X_variables_names, dataset.years_test,
+    _plot_decomposition(emulator.selected_expr, dataset.X_test, dataset.X_variable_names, dataset.years_test,
                         'test', show, plot_folder)
 
 def _plot_decomposition(expr: Expr, X: np.ndarray, variable_names: list[str], years: list[int], split_name: str,

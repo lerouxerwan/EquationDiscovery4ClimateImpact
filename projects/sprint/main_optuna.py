@@ -12,7 +12,7 @@ def objective(trial):
     )
 
     dataset = Dataset("NPP_season.csv", "RCP85", "RCP45", 0.2, ValidationSplit.QUANTILE_WITH_BINNING)
-    emulator.fit(dataset.X_train, dataset.y_train, variable_names=dataset.X_variables_names, X_units=dataset.X_units,
+    emulator.fit(dataset.X_train, dataset.y_train, variable_names=dataset.X_variable_names, X_units=dataset.X_units,
                  y_units=dataset.y_units, validation_mask=dataset.validation_mask)
     return emulator.selected_validation_loss
 

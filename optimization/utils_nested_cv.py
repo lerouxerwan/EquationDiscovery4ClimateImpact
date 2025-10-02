@@ -27,7 +27,7 @@ def run_nested_cv(dataset: Dataset, optimization: Optimization, fast: bool = Fal
         y_train, y_test = y[train_idx], y[test_idx]
         validation_mask = get_validation_mask(y_train, dataset.validation_size, dataset.validation_split)
         rmse_test = get_loss_test(optimization, X_train, y_train, validation_mask,
-                                  X_test, y_test, Metric.RMSE, dataset.X_variables_names, dataset.X_units, dataset.y_units)
+                                  X_test, y_test, Metric.RMSE, dataset.X_variable_names, dataset.X_units, dataset.y_units)
         log_info(f'RMSE test for the fold #{j}: {rmse_test}')
         rmse_test_list.append(rmse_test)
     rmse_test_list = np.array(rmse_test_list)

@@ -11,7 +11,7 @@ def main_plot_data(show=False):
     dataset =  dataset_npp_season_v1
 
     # Add two plots
-    column_index = dataset.X_variables_names.index('SST_JJA')
+    column_index = dataset.X_variable_names.index('SST_JJA')
     sst_train = dataset.X_train[:, column_index] - 273.15
     sst_test = dataset.X_test[:, column_index] - 273.15
     label_sst = dataset.X_labels[column_index].replace('(K)', '($^o$C)')
@@ -33,7 +33,7 @@ def main_plot_all_features(show=False):
     variable_names = ['SSH_DJF', 'SSS_MAM', 'Shortwave_DJF', 'MerWindStr_MAM']
     for variable_name in variable_names:
         ax = plt.gca()
-        plot_values_feature(ax, dataset, dataset.X_variables_names.index(variable_name))
+        plot_values_feature(ax, dataset, dataset.X_variable_names.index(variable_name))
         show_or_save_plot(f'data_{variable_name}', show)
 
 
