@@ -20,6 +20,10 @@ class OptimizationDoubleSearch(Optimization):
     def name(self):
         return f"random search with top{self.nb_top_hyperparameters} hyperparameters from the marginal search"
 
+    @property
+    def subclass_id(self) -> str:
+        return f'{self.nb_top_hyperparameters}_{self.n_iter}'
+
     def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
                          variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                          y_units: Optional[ArrayLike[str]] = None) -> Emulator:

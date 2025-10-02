@@ -30,3 +30,14 @@ class Optimization(ABC):
                           y_units: Optional[ArrayLike[str]] = None) -> Emulator:
         pass
 
+    @property
+    def opt_id(self) -> str:
+        return f'{self.model_selection}_{self.params_ranges}_{self.subclass_id}'
+
+    @property
+    @abstractmethod
+    def subclass_id(self) -> str:
+        pass
+
+
+

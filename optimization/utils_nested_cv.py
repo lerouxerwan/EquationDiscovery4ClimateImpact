@@ -5,6 +5,7 @@ from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_dataset.utils_validation_split import get_validation_mask
 from optimization.optimization import Optimization
+from optimization.utils_optimization import get_loss_test
 from plot.utils_metric.metric import Metric
 from utils.utils_log import log_info
 from utils.utils_run import random_seed
@@ -25,9 +26,8 @@ def run_nested_cv(dataset: Dataset, optimization: Optimization, fast: bool = Fal
         X_train, X_test = X[train_idx, :], X[test_idx, :]
         y_train, y_test = y[train_idx], y[test_idx]
         validation_mask = get_validation_mask(y_train, dataset.validation_size, dataset.validation_split)
-        top_emulator = optimization.get_top_emulator(X_train, y_train, validation_mask,
-                                                     dataset.X_variables_names, dataset.X_units, dataset.y_units)
-        rmse_test = top_emulator.compute_loss(X_test, y_test, Metric.RMSE)
+        rmse_test = get_loss_test(optimization, X_train, y_train, validation_mask,
+                                  X_test, y_test, Metric.RMSE, dataset.X_variables_names, dataset.X_units, dataset.y_units)
         log_info(f'RMSE test for the fold #{j}: {rmse_test}')
         rmse_test_list.append(rmse_test)
     rmse_test_list = np.array(rmse_test_list)
