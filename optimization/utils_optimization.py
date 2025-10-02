@@ -11,23 +11,35 @@ from plot.utils_metric.metric import Metric, metric_to_str
 from utils.utils_path import OPT_PATH
 
 
-def get_loss_test(optimization: Optimization,
-                  X_train: np.ndarray, y_train: np.ndarray, validation_mask: np.ndarray[bool],
-                  X_test: np.ndarray, y_test: np.ndarray, metric: Metric,
-                  variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
-                  y_units: Optional[ArrayLike[str]] = None) -> float:
+def get_loss(optimization: Optimization,
+             X_train: np.ndarray, y_train: np.ndarray, validation_mask: np.ndarray[bool],
+             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
+             y_units: Optional[ArrayLike[str]] = None, metric: Metric = Metric.RMSE,
+             X_test: np.ndarray = None, y_test: np.ndarray = None) -> float:
     assert validation_mask is not None
-    dataset_folder = get_hash_str(X_train, y_train, validation_mask, X_test, y_test)
+    with_test_data = (X_test is not None) and (y_test is not None)
+    if with_test_data:
+        name = 'test'
+        dataset_folder = get_hash_str(X_train, y_train, validation_mask, X_test, y_test)
+    else:
+        name = 'val'
+        dataset_folder = get_hash_str(X_train, y_train, validation_mask)
+
+    # Compute filepath
     opt_path = op.join(OPT_PATH, dataset_folder, optimization.opt_id)
-    filepath = op.join(opt_path, f'{metric_to_str[metric]}.txt')
-    if op.exists(opt_path):
+    filepath = op.join(opt_path, f'{metric_to_str[metric]}_{name}.txt')
+
+    # Load the loss or Compute it and save it
+    if op.exists(filepath):
         f = open(filepath, 'r')
         loss = float(f.readline())
         f.close()
     else:
-        top_emulator = optimization.get_top_emulator(X_train, y_train, validation_mask,
-                                                     variable_names, X_units, y_units)
-        loss = top_emulator.compute_loss(X_test, y_test, Metric.RMSE)
+        emulator = optimization.get_top_emulator(X_train, y_train, validation_mask, variable_names, X_units, y_units)
+        if with_test_data:
+            loss = emulator.compute_loss(X_test, y_test, Metric.RMSE)
+        else:
+            loss = emulator.selected_validation_loss
         if not op.exists(opt_path):
             os.makedirs(opt_path)
         f = open(filepath, 'w')  # w : writing mode  /  r : reading mode  /  a  :  appending mode

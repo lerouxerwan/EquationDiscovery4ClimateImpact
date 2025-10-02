@@ -8,6 +8,7 @@ from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from optimization.optimization import Optimization
 from optimization.optimization_marginal_search import OptimizationMarginalSearch
+from optimization.utils_optimization import get_loss
 from utils.utils_log import log_info
 
 
@@ -45,9 +46,9 @@ class OptimizationDoubleSearch(Optimization):
         param_name_to_validation_rmse = dict()
         param_names = sorted(self.param_name_to_values.keys())
         for param_name in param_names:
-            marginal_optimization = OptimizationMarginalSearch(self.model_selection, self.params_ranges, param_name)
-            emulator = marginal_optimization.get_top_emulator(X, y, validation_mask, variable_names, X_units, y_units)
-            param_name_to_validation_rmse[param_name] = emulator.selected_validation_rmse
+            optimization = OptimizationMarginalSearch(self.model_selection, self.params_ranges, param_name)
+            validation_loss = get_loss(optimization, X, y, validation_mask, variable_names, X_units, y_units)
+            param_name_to_validation_rmse[param_name] = validation_loss
         # Compute the list of top param names
         sorted_param_names = list(sorted(param_names, key=lambda param_name: param_name_to_validation_rmse[param_name]))
         top_param_names = sorted_param_names[:self.nb_top_hyperparameters]
