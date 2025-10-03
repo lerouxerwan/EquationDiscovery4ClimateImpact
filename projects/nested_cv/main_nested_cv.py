@@ -12,4 +12,4 @@ if __name__ == '__main__':
     # opt = OptimizationMarginalSearch('best', 'warmup_maxsize_by')
     for model_selection in ['best', 'validated']:
         opt = OptimizationMarginalSearch(model_selection, ParamsValues.DEFAULT_CENTRED, 'niterations')
-        run_nested_cv(dataset, opt, False)
+        run_nested_cv(dataset, opt)

@@ -3,6 +3,7 @@ from typing import Optional
 
 from data.utils_dataset.utils_dataset_values import load_dataset_values
 from data.utils_dataset.validation_split import ValidationSplit
+from data.utils_run.utils_key import get_hash_str
 from utils.utils_log import log_info
 
 
@@ -35,3 +36,7 @@ class Dataset(object):
     @property
     def target_label(self) -> str:
         return self.y_labels[0]
+
+    @property
+    def hash(self) -> str:
+        return get_hash_str(self.X_train, self.y_train, self.validation_mask, self.X_test, self.y_test)

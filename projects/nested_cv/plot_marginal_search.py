@@ -21,7 +21,7 @@ def get_data(model_selection: str, fast: bool):
     param_names_for_plot = param_names[:NB_PARAMS_FAST] if fast else param_names
     for param_name in param_names_for_plot:
         opt = OptimizationMarginalSearch(model_selection, ParamsValues.DEFAULT_CENTRED, param_name)
-        rmse_test_list = run_nested_cv(dataset, opt, fast)
+        rmse_test_list = run_nested_cv(dataset, opt)
         data[param_name] = rmse_test_list
     df = pd.DataFrame(data)
     plot_name = f"compare_marginal_search_{len(rmse_test_list)}folds_for_{model_selection}"

@@ -18,13 +18,12 @@ NB_TOP_FAST = 6
 def get_data(model_selection: str, fast: bool):
     data = OrderedDict()
     dataset = Dataset("NPP_season.csv", "RCP85", "RCP45", 0.2, ValidationSplit.QUANTILE_WITH_BINNING)
-    nb_top = NB_TOP_FAST if fast else 10
-    nb_top_ranges = list(range(1, nb_top + 1))[-1:]
-    nb_top_ranges = [4, 5, 6, 7]
+    nb_top = 7 if fast else 10
+    nb_top_ranges = list(range(1, nb_top + 1))
     for nb_top_hyperparameters in nb_top_ranges:
         log_info(f'Log for {nb_top_hyperparameters}')
         opt = OptimizationDoubleSearch(model_selection, ParamsValues.DEFAULT_CENTRED, nb_top_hyperparameters)
-        rmse_test_list = run_nested_cv(dataset, opt, fast=False)
+        rmse_test_list = run_nested_cv(dataset, opt)
         data[nb_top_hyperparameters] = rmse_test_list
     df = pd.DataFrame(data)
     plot_name = f"compare_double_search_{len(rmse_test_list)}folds_for_{model_selection}"
@@ -48,7 +47,8 @@ def plot_compare_search(fast: bool):
         _plot_compare_double_search(*data, fast)
 
 def _plot_compare_double_search(df: pd.DataFrame, plot_name: str, label: str, fast: bool):
-    df_plot = df[df.sum().sort_values().index]
+    # df_plot = df[df.sum().sort_values().index]
+    df_plot = df
     ax = plt.gca()
     sns.boxplot(ax=ax, data=df_plot.melt(), x="variable", y="value")
     ax.set_ylabel(label)

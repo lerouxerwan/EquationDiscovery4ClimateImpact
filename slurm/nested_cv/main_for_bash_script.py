@@ -10,10 +10,8 @@ from optimization.utils_params.utils_params_values import ParamsValues
 def main():
     if len(sys.argv) > 1:
         indices = [int(sys.argv[i]) for i in range(1, 3)]
-        fast = False
     else:
         indices = [0, 4]
-        fast = True
     print(f'Run with indices={indices}')
 
     dataset = Dataset("NPP_season.csv", "RCP85", "RCP45", 0.2, ValidationSplit.QUANTILE_WITH_BINNING)
@@ -28,7 +26,7 @@ def main():
     # nb_trials = indices[1]
     # opt= OptimizationOptuna(model_selection, ParamsValues.DEFAULT_CENTRED, nb_trials)
 
-    run_nested_cv(dataset, opt, fast)
+    run_nested_cv(dataset, opt)
 
 
 if __name__ == '__main__':
