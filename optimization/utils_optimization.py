@@ -5,6 +5,7 @@ from typing import Optional
 import numpy as np
 from pysr.utils import ArrayLike
 
+from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_run.utils_key import get_hash_str
 from optimization.optimization import Optimization
 from plot.utils_metric.metric import Metric, metric_to_str
@@ -39,7 +40,8 @@ def get_loss(optimization: Optimization,
         if with_test_data:
             loss = emulator.compute_loss(X_test, y_test, Metric.RMSE)
         else:
-            loss = emulator.selected_validation_loss
+            X_validation, y_validation = get_X_and_y(X_train, y_train, validation_mask, validation_set=True)
+            loss = emulator.compute_loss(X_validation, y_validation, Metric.RMSE)
         if not op.exists(opt_path):
             os.makedirs(opt_path)
         f = open(filepath, 'w')  # w : writing mode  /  r : reading mode  /  a  :  appending mode
