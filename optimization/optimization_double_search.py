@@ -17,13 +17,6 @@ class OptimizationDoubleSearch(Optimization):
     nb_top_hyperparameters: int =  5
     n_iter: int = 100
 
-    @property
-    def name(self):
-        return f"random search with top{self.nb_top_hyperparameters} hyperparameters from the marginal search"
-
-    @property
-    def subclass_id(self) -> str:
-        return f'{self.nb_top_hyperparameters}_{self.n_iter}'
 
     def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
                          variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
@@ -46,7 +39,7 @@ class OptimizationDoubleSearch(Optimization):
         param_name_to_validation_rmse = dict()
         param_names = sorted(self.param_name_to_values.keys())
         for param_name in param_names:
-            optimization = OptimizationMarginalSearch(self.model_selection, self.params_ranges, param_name)
+            optimization = OptimizationMarginalSearch(self.model_selection, self.params_values, param_name)
             validation_loss = get_loss(optimization, X, y, validation_mask, variable_names, X_units, y_units)
             param_name_to_validation_rmse[param_name] = validation_loss
         # Compute the list of top param names
@@ -56,3 +49,23 @@ class OptimizationDoubleSearch(Optimization):
         for rank, param_name in enumerate(sorted_param_names, 1):
             log_info(f'#{rank}: {param_name} with RMSE validation = {param_name_to_validation_rmse[param_name]}')
         return top_param_names
+
+    @property
+    def subclass_id(self) -> str:
+        return f'{self.nb_top_hyperparameters}_{self.n_iter}'
+
+
+    """ Properties for logs, plots"""
+
+    @property
+    def name(self):
+        return f"random search with top{self.nb_top_hyperparameters} hyperparameters from the marginal search"
+
+    @property
+    def _label(self):
+        return f"Double search with top{self.nb_top_hyperparameters}\nhyperparameters and {self.n_iter} samples"
+    @property
+    def color(self):
+        return 'red'
+
+

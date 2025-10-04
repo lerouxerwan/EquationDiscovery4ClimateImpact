@@ -14,14 +14,6 @@ from utils.utils_log import log_info
 class OptimizationMarginalSearch(Optimization):
     param_name: str = 'niterations'
 
-    @property
-    def name(self):
-        return f"marginal search for the hyperparameter '{self.param_name}'"
-
-    @property
-    def subclass_id(self) -> str:
-        return self.param_name
-
     def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
                          variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                          y_units: Optional[ArrayLike[str]] = None) -> Emulator:
@@ -32,6 +24,30 @@ class OptimizationMarginalSearch(Optimization):
         emulator = EmulatorWithSearch(**params_emulator, **params_search)
         emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
         return emulator
+
+    @property
+    def subclass_id(self) -> str:
+        return self.param_name
+
+    """ Properties for logs, plots"""
+
+    @property
+    def name(self):
+        return f"marginal search for the hyperparameter '{self.param_name}'"
+
+    @property
+    def _label(self):
+        return f"Marginal search for '{self.param_name}'"
+
+    @property
+    def color(self):
+        return 'orange'
+
+
+
+
+
+
 
 
 

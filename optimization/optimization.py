@@ -13,16 +13,7 @@ from optimization.utils_params.utils_params_values import ParamsValues, get_para
 @dataclass
 class Optimization(ABC):
     model_selection: str = 'best'
-    params_ranges: Optional[ParamsValues] = None
-
-    @cached_property
-    def param_name_to_values(self) -> Optional[dict[str, list[Any]]]:
-        return get_param_name_to_values(self.params_ranges)
-
-    @property
-    @abstractmethod
-    def name(self):
-        pass
+    params_values: Optional[ParamsValues] = None
 
     @abstractmethod
     def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
@@ -32,12 +23,35 @@ class Optimization(ABC):
 
     @property
     def opt_id(self) -> str:
-        return f'{self.model_selection}_{self.params_ranges}_{self.subclass_id}'
+        return f'{self.model_selection}_{self.params_values}_{self.subclass_id}'
 
     @property
     @abstractmethod
     def subclass_id(self) -> str:
         pass
 
+    @cached_property
+    def param_name_to_values(self) -> Optional[dict[str, list[Any]]]:
+        return get_param_name_to_values(self.params_values)
 
+    """ Properties for logs, plots"""
 
+    @property
+    @abstractmethod
+    def name(self):
+        pass
+
+    @property
+    @abstractmethod
+    def color(self):
+        pass
+
+    @property
+    def label(self):
+        model_selection_str = '' if self.model_selection == 'best' else " with 'validated' method"
+        return self._label + model_selection_str
+
+    @property
+    @abstractmethod
+    def _label(self):
+        pass

@@ -3,7 +3,7 @@ import sys
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from optimization.optimization_double_search import OptimizationDoubleSearch
-from optimization.utils_nested_cv import run_nested_cv
+from optimization.utils_nested_cv.run_nested_cv import run_nested_cv
 from optimization.utils_params.utils_params_values import ParamsValues
 
 

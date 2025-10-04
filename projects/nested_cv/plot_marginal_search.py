@@ -5,7 +5,7 @@ import pandas as pd
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from optimization.optimization_marginal_search import OptimizationMarginalSearch
-from optimization.utils_nested_cv import run_nested_cv
+from optimization.utils_nested_cv.run_nested_cv import run_nested_cv
 import seaborn as sns
 import matplotlib.pyplot as plt
 
