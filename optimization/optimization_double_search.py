@@ -63,9 +63,15 @@ class OptimizationDoubleSearch(Optimization):
 
     @property
     def _label(self):
-        return f"Double search with top{self.nb_top_hyperparameters}\nhyperparameters and {self.n_iter} samples"
-    @property
-    def color(self):
+        return f"{self.n_iter} random samples with\ntop{self.nb_top_hyperparameters} hyperparameters"
+
+    @classmethod
+    def color(cls):
         return 'red'
+
+    @classmethod
+    def legend_label(cls):
+        return "Double search"
+
 
 

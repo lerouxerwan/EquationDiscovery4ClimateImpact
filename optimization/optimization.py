@@ -41,10 +41,13 @@ class Optimization(ABC):
     def name(self):
         pass
 
-    @property
-    @abstractmethod
-    def color(self):
-        pass
+    @classmethod
+    def color(cls):
+        return 'k'
+
+    @classmethod
+    def legend_label(cls):
+        return ""
 
     @property
     def label(self):

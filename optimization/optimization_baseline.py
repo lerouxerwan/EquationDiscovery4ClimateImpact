@@ -25,13 +25,17 @@ class OptimizationBaseline(Optimization):
 
     """ Properties for logs, plots"""
 
-    @property
-    def color(self):
+    @classmethod
+    def color(cls):
         return "green"
+
+    @classmethod
+    def legend_label(cls):
+        return "Baseline"
 
     @property
     def _label(self):
-        return "baseline"
+        return "Default hyperparameters"
 
     @property
     def name(self):
