@@ -11,7 +11,7 @@ from utils.utils_log import log_info
 
 
 @dataclass
-class OptimizationMarginalSearch(Optimization):
+class OptimizationMarginalGrid(Optimization):
     param_name: str = 'niterations'
 
     def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],

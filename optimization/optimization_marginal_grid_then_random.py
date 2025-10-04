@@ -7,13 +7,13 @@ from typing_extensions import Optional
 from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from optimization.optimization import Optimization
-from optimization.optimization_marginal_search import OptimizationMarginalSearch
+from optimization.optimization_marginal_grid import OptimizationMarginalGrid
 from optimization.utils_optimization import get_loss
 from utils.utils_log import log_info
 
 
 @dataclass
-class OptimizationDoubleSearch(Optimization):
+class OptimizationMarginalGridThenRandom(Optimization):
     nb_top_hyperparameters: int =  5
     n_iter: int = 100
 
@@ -39,7 +39,7 @@ class OptimizationDoubleSearch(Optimization):
         param_name_to_validation_rmse = dict()
         param_names = sorted(self.param_name_to_values.keys())
         for param_name in param_names:
-            optimization = OptimizationMarginalSearch(self.model_selection, self.params_values, param_name)
+            optimization = OptimizationMarginalGrid(self.model_selection, self.params_values, param_name)
             validation_loss = get_loss(optimization, X, y, validation_mask, variable_names, X_units, y_units)
             param_name_to_validation_rmse[param_name] = validation_loss
         # Compute the list of top param names
@@ -71,7 +71,7 @@ class OptimizationDoubleSearch(Optimization):
 
     @classmethod
     def legend_label(cls):
-        return "Double search"
+        return "Random search driven by marginal search"
 
 
 
