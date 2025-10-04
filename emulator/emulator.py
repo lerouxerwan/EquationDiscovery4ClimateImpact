@@ -231,9 +231,9 @@ class Emulator(PySRRegressor):
             self.feature_names_in_ = emulator_from_file.feature_names_in_
             self.equations_ = emulator_from_file.equations_
         else:
-            log_info(f'Tried loading: {try_loading}')
-            if not try_loading:
-                raise ValueError(f'this should not have happened')
+            # log_info(f'Tried loading: {try_loading}')
+            # if not try_loading:
+            #     raise ValueError(f'this should not have happened')
             log_info(f'Fit with {self.non_default_params}')
             #  Fit with logging and compute its duration
             start_time = time.monotonic()

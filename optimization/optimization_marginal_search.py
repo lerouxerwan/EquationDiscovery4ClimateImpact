@@ -19,14 +19,10 @@ class OptimizationMarginalSearch(Optimization):
                          y_units: Optional[ArrayLike[str]] = None) -> Emulator:
         log_info(f'Run {self.name}')
         params_emulator = {'model_selection': self.model_selection}
-        params_search = {'param_grid': {self.param_name: self.param_values}, 'search_style': 'grid', 'n_jobs': None}
+        params_search = {'param_grid': {self.param_name: self.param_name_to_values[self.param_name]}, 'search_style': 'grid', 'n_jobs': None}
         emulator = EmulatorWithSearch(**params_emulator, **params_search)
         emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
         return emulator
-
-    @property
-    def param_values(self):
-        return self.param_name_to_values[self.param_name]
 
     @property
     def subclass_id(self) -> str:
@@ -40,7 +36,7 @@ class OptimizationMarginalSearch(Optimization):
 
     @property
     def _label(self):
-        return f"{len(self.params_values)} fixed values for the\nhyperparameter '{self.param_name}'"
+        return f"{len(self.param_name_to_values[self.param_name])} fixed values for the\nhyperparameter '{self.param_name}'"
 
     @classmethod
     def color(cls):

@@ -12,7 +12,7 @@ dataset= Dataset("NPP_season.csv", "RCP85", "RCP45", 0.2, ValidationSplit.QUANTI
 
 def main_plot_diagnosis_top_emulator():
     opt = OptimizationDoubleSearch('best', ParamsValues.DEFAULT_CENTRED, 4)
-    emulator = opt.get_top_param_names(dataset.X_train, dataset.y_train, dataset.validation_mask,
+    emulator = opt.get_top_emulator(dataset.X_train, dataset.y_train, dataset.validation_mask,
                                     dataset.X_variable_names, dataset.X_units, dataset.y_units)
     plot_diagnosis(emulator, dataset)
 
@@ -21,13 +21,14 @@ def main_compare_nested_cv():
     for model_selection in ['best']:
         opt_list.append(OptimizationBaseline(model_selection))
         # Add optimization with marginal search
-        for param_name in param_names[:]:
+        for param_name in param_names[:1]:
             opt_list.append(OptimizationMarginalSearch(model_selection, ParamsValues.DEFAULT_CENTRED, param_name))
         # Add optimization with double search
-        for nb_top_hyperparameters in range(1, 8):
-            opt_list.append(OptimizationDoubleSearch(model_selection, ParamsValues.DEFAULT_CENTRED, nb_top_hyperparameters))
+        # for nb_top_hyperparameters in range(1, 5):
+        #     opt_list.append(OptimizationDoubleSearch(model_selection, ParamsValues.DEFAULT_CENTRED, nb_top_hyperparameters))
     compare_nested_cv(dataset, opt_list)
 
 
 if __name__ == '__main__':
-    main_compare_nested_cv()
+    # main_compare_nested_cv()
+    main_plot_diagnosis_top_emulator()

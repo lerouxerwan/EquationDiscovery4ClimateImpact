@@ -33,6 +33,7 @@ def compare_nested_cv(dataset: Dataset, optimizations: list[Optimization]):
         upper_xticklabels = [f'Mean = {round(mean, 2)}\n CV = {round(cv, 0)}%'
                              for mean, cv in zip(mean_values, cv_values)]
         ax_twin.set_xticklabels(upper_xticklabels)
+        ax.tick_params(axis='both', which='major', labelsize=8)
         add_legend(ax_twin, optimizations)
         show_or_save_plot('compare_nested_cv', show=True)
 
