@@ -67,11 +67,11 @@ class OptimizationMarginalGridThenRandom(Optimization):
 
     @classmethod
     def color(cls):
-        return 'red'
+        return 'darkgreen'
 
     @classmethod
     def legend_label(cls):
-        return "Random search driven by marginal search"
+        return "Random search driven by marginal grid search"
 
 
 

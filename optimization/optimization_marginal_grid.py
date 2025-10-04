@@ -40,11 +40,11 @@ class OptimizationMarginalGrid(Optimization):
 
     @classmethod
     def color(cls):
-        return 'orange'
+        return 'limegreen'
 
     @classmethod
     def legend_label(cls):
-        return "Marginal search"
+        return "Marginal grid search"
 
 
 

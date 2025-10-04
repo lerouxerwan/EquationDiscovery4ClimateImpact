@@ -12,8 +12,9 @@ from plot.plot_diagnosis import plot_diagnosis
 dataset= Dataset("NPP_season.csv", "RCP85", "RCP45", 0.2, ValidationSplit.QUANTILE_WITH_BINNING)
 
 def main_plot_diagnosis_top_emulator():
-    opt = OptimizationMarginalGridThenRandom('best', ParamsValues.DEFAULT_CENTRED, 4)
-    # opt = OptimizationCoupleRandom('best', ParamsValues.DEFAULT_CENTRED)
+    # opt = OptimizationMarginalGridThenRandom('best', ParamsValues.DEFAULT_CENTRED, 4)
+    opt = OptimizationBaseline('best')
+    # opt = OptimizationMarginalGrid('best', ParamsValues.DEFAULT_CENTRED, 'weight_swap_operands')
     emulator = opt.get_top_emulator(dataset.X_train, dataset.y_train, dataset.validation_mask,
                                     dataset.X_variable_names, dataset.X_units, dataset.y_units)
     plot_diagnosis(emulator, dataset)
@@ -23,18 +24,19 @@ def main_compare_nested_cv():
     for model_selection in ['best']:
         opt_list.append(OptimizationBaseline(model_selection))
         # Add optimization marginal
-        for param_name in param_names[:1]:
+        # for param_name in param_names[:]:
+        for param_name in ['weight_swap_operands']:
             opt_list.append(OptimizationMarginalGrid(model_selection, ParamsValues.DEFAULT_CENTRED, param_name))
         # Add optimization marginal then random
-        # for nb_top_hyperparameters in range(1, 5):
-        #     opt_list.append(OptimizationMarginalThenRandom(model_selection, ParamsValues.DEFAULT_CENTRED, nb_top_hyperparameters))
+        for nb_top_hyperparameters in [4]:
+            opt_list.append(OptimizationMarginalGridThenRandom(model_selection, ParamsValues.DEFAULT_CENTRED, nb_top_hyperparameters))
         # Add optimization couple
-        for param_name_1 in ['weight_swap_operands']:
-            for param_name_2 in ['niterations']:
-                    opt_list.append(OptimizationCoupleRandom(model_selection, ParamsValues.DEFAULT_CENTRED, param_name_1, param_name_2))
+        # for param_name_1 in ['weight_swap_operands']:
+        #     for param_name_2 in ['niterations']:
+        #             opt_list.append(OptimizationCoupleRandom(model_selection, ParamsValues.DEFAULT_CENTRED, param_name_1, param_name_2))
         compare_nested_cv(dataset, opt_list)
 
 
 if __name__ == '__main__':
-    # main_compare_nested_cv()
-    main_plot_diagnosis_top_emulator()
+    main_compare_nested_cv()
+    # main_plot_diagnosis_top_emulator()

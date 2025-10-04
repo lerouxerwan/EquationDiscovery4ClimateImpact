@@ -27,7 +27,7 @@ class OptimizationBaseline(Optimization):
 
     @classmethod
     def color(cls):
-        return "green"
+        return "lightgreen"
 
     @classmethod
     def legend_label(cls):
