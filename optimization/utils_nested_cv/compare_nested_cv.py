@@ -15,8 +15,9 @@ def compare_nested_cv(dataset: Dataset, optimizations: list[Optimization]):
     # Create dataframe
     d = {optimization.opt_id: run_nested_cv(dataset, optimization) for optimization in optimizations}
     df = pd.DataFrame.from_dict(d)
-    s_sorted_mean =  df.sum().sort_values()
-    for nb_box_plot in [5]:
+    s_sorted_mean =  df.mean().sort_values()
+    s_sorted_median =  df.median().sort_values()
+    for nb_box_plot in [5, 10]:
         df_loop = df[s_sorted_mean.index.values[:nb_box_plot][::-1]]
         ax = plt.gca()
         sns.boxplot(ax=ax, data=df_loop.melt(), x="variable", y="value", palette=opt_id_to_color, whis=1000)
@@ -29,10 +30,10 @@ def compare_nested_cv(dataset: Dataset, optimizations: list[Optimization]):
         ax_twin = ax.twiny()
         ax_twin.set_xlim(ax.get_xlim())
         ax_twin.set_xticks(ax.get_xticks())
-        mean_values, std_values = df_loop.mean().values, df_loop.std().values
+        median_values, mean_values, std_values = df_loop.median().values, df_loop.mean().values, df_loop.std().values
         cv_values = 100 * std_values / mean_values
-        upper_xticklabels = [f'Mean = {round(mean, 2)} {unit}\n CV = {round(cv, 0)}%'
-                             for mean, cv in zip(mean_values, cv_values)]
+        upper_xticklabels = [f'Mean={round(mean, 2)}{unit}\nMedian={round(median, 2)}{unit}\n CV={round(cv, 0)}%'
+                             for mean, median, cv in zip(mean_values, median_values, cv_values)]
         ax_twin.set_xticklabels(upper_xticklabels)
         ax.tick_params(axis='both', which='major', labelsize=8)
         add_legend(ax_twin, optimizations)
