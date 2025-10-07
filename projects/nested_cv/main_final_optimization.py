@@ -11,15 +11,18 @@ from plot.plot_diagnosis import plot_diagnosis
 dataset= Dataset("NPP_season.csv", "RCP85", "RCP45", 0.2, ValidationSplit.QUANTILE_WITH_BINNING)
 
 def main_plot_diagnosis_top_emulator():
-    # opt = OptimizationBaseline('best')
-
-    for nb_top in [10]:
-        # opt = OptimizationMarginalGridThenRandom('validated', ParamsValues.DEFAULT_CENTRED, nb_top)
-        opt = OptimizationBaseline('best')
-        # opt = OptimizationMarginalGrid('best', ParamsValues.DEFAULT_CENTRED, 'weight_swap_operands')
+    for param_name in param_names[:]:
+        opt = OptimizationMarginalGrid('best', ParamsValues.DEFAULT_CENTRED, param_name)
         emulator = opt.get_top_emulator(dataset.X_train, dataset.y_train, dataset.validation_mask,
                                         dataset.X_variable_names, dataset.X_units, dataset.y_units)
-        plot_diagnosis(emulator, dataset)
+
+    # for nb_top in range(1, 10):
+    #     opt = OptimizationMarginalGridThenRandom('best', ParamsValues.DEFAULT_CENTRED, nb_top)
+        # opt = OptimizationBaseline('best')
+        # opt = OptimizationMarginalGrid('best', ParamsValues.DEFAULT_CENTRED, 'weight_swap_operands')
+        # emulator = opt.get_top_emulator(dataset.X_train, dataset.y_train, dataset.validation_mask,
+        #                                 dataset.X_variable_names, dataset.X_units, dataset.y_units)
+        # plot_diagnosis(emulator, dataset)
 
 def main_compare_nested_cv():
     opt_list: list[Optimization] = []

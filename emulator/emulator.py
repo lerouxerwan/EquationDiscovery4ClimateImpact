@@ -230,6 +230,7 @@ class Emulator(PySRRegressor):
             self.nout_ = emulator_from_file.nout_
             self.feature_names_in_ = emulator_from_file.feature_names_in_
             self.equations_ = emulator_from_file.equations_
+            self.julia_state_stream_ = emulator_from_file.julia_state_stream_
         else:
             # log_info(f'Tried loading: {try_loading}')
             # if not try_loading:

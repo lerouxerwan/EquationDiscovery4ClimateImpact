@@ -90,5 +90,19 @@ def test_save_then_load():
     emulator.predict(X)
     emulator.remove_folder()
 
+def test_warm_start():
+    X, y = load_X_and_y_for_test()
+    emulator = Emulator(niterations=20)
+    emulator.fit(X, y)
+    complexity_to_loss = dict(zip(emulator.complexity_list, emulator.loss_list))
+    emulator.warm_start = True
+    emulator.niterations = 15
+    emulator.fit(X, y)
+    for complexity, loss in zip(emulator.complexity_list, emulator.loss_list):
+        if complexity in complexity_to_loss:
+            # Assert that the new loss (with one more iteration) is equal or smaller than the previous loss
+            assert round(loss, 2) <= round(complexity_to_loss[complexity], 2)
+            # print(round(loss, 2), round(complexity_to_loss[complexity], 2))
+    assert emulator.loss_list
 
 
