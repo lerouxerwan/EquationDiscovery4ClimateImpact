@@ -3,16 +3,14 @@ from typing import Optional, Any
 from optimization.utils_params.utils_default_centred_values import get_param_name_to_default_centred_values
 
 
-class ParamsValues(StrEnum):
+class ParamNameToValues(StrEnum):
     DEFAULT_CENTRED = 'default_centred'
 
-def get_param_name_to_values(params_values: Optional[ParamsValues]) -> Optional[dict[str, list[Any]]]:
-    if params_values is None:
-        param_name_to_values = None
-    elif params_values is ParamsValues.DEFAULT_CENTRED:
+def get_param_name_to_values(param_name_to_values: ParamNameToValues) -> Optional[dict[str, list[Any]]]:
+    if param_name_to_values is ParamNameToValues.DEFAULT_CENTRED:
         param_name_to_values = get_param_name_to_default_centred_values()
     else:
-        raise ValueError(params_values)
+        raise ValueError(param_name_to_values)
     if isinstance(param_name_to_values, dict):
         param_names_defined = set(param_name_to_values.keys())
         param_names_expected = set(param_names)

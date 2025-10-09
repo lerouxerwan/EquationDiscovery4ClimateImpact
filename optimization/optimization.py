@@ -7,13 +7,18 @@ import numpy as np
 from pysr.utils import ArrayLike
 
 from emulator.emulator import Emulator
-from optimization.utils_params.utils_params_values import ParamsValues, get_param_name_to_values
+from optimization.utils_params.utils_param_name_to_values import ParamNameToValues, get_param_name_to_values
 
 
 @dataclass
 class Optimization(ABC):
     model_selection: str = 'best'
-    params_values: Optional[ParamsValues] = None
+    params_name_to_values: Optional[ParamNameToValues | dict[str, list]] = None
+
+    def __post_init__(self):
+        if isinstance(self.params_name_to_values, ParamNameToValues):
+            self.param_name_to_values = get_param_name_to_values(self.params_name_to_values)
+        assert (self.param_name_to_values is None) or isinstance(self.params_name_to_values, dict)
 
     @abstractmethod
     def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
@@ -23,7 +28,7 @@ class Optimization(ABC):
 
     @property
     def opt_id(self) -> str:
-        return f'{self.model_selection}_{self.params_values}_{self.subclass_id}'
+        return f'{self.model_selection}_{self.params_name_to_values}_{self.subclass_id}'
 
     @property
     @abstractmethod
@@ -32,7 +37,7 @@ class Optimization(ABC):
 
     @cached_property
     def param_name_to_values(self) -> Optional[dict[str, list[Any]]]:
-        return get_param_name_to_values(self.params_values)
+        return get_param_name_to_values(self.params_name_to_values)
 
     """ Properties for logs, plots"""
 
