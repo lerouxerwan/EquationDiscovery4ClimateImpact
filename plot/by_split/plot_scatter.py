@@ -36,7 +36,8 @@ def _plot_scatter(ax, dataset, emulator, fig, split_name, y, y_predicted, years,
         ax.scatter(y, y_predicted, c=c, cmap=cmap, vmin=vmin, vmax=vmax)
     if add_colorbar:
         norm = matplotlib.colors.BoundaryNorm(c, cmap.N)
-        fig.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, orientation='horizontal', label='Years')
+        fig.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, orientation='horizontal', label='Years',
+                     pad=0.2)
     #  Add grid and diagonal line
     ax.grid()
     ax.plot([ymin, ymax], [ymin, ymax], color='grey', linestyle='--')

@@ -38,7 +38,7 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
         barplot = ax.bar(coordinates, loss_list, width=width, label=get_label_split_name(split_name, dataset),
                color=split_name_to_color[split_name])
         loss_list_labels = [str(round(loss, 2)) for loss in loss_list]
-        ax.bar_label(barplot, labels=loss_list_labels, label_type='edge', padding=1)
+        ax.bar_label(barplot, labels=loss_list_labels, label_type='edge', padding=1, rotation=90)
         all_loss_list.extend(loss_list)
 
     # Add rounded equations on the lower X axis
