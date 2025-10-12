@@ -221,9 +221,17 @@ class EmulatorWithSearch(Emulator):
         if self.search_style == 'random':
             return self.n_iter
         elif self.search_style == 'grid':
-            return prod([len(grid) for grid in self.param_grid.values()])
+            if isinstance(self.param_grid, list):
+                return sum([self._nb_combinations(param_grid) for param_grid in self.param_grid])
+            else:
+                return self._nb_combinations(self.param_grid)
         else:
             raise NotImplementedError
+
+    @staticmethod
+    def _nb_combinations(param_grid: dict):
+        assert isinstance(param_grid, dict)
+        return prod([len(grid) for grid in param_grid.values()])
 
     def run_and_save_hyperparameter_search(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
                                            variable_names: ArrayLike[str] | None = None, X_units: ArrayLike[str] | None = None,

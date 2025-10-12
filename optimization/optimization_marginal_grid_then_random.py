@@ -39,7 +39,7 @@ class OptimizationMarginalGridThenRandom(Optimization):
         param_name_to_validation_rmse = dict()
         param_names = sorted(self.param_name_to_values.keys())
         for param_name in param_names:
-            optimization = OptimizationMarginalGrid(self.model_selection, self.params_name_to_values, param_name)
+            optimization = OptimizationMarginalGrid(self.model_selection, self.param_name_to_values, param_name)
             validation_loss = get_loss(optimization, X, y, validation_mask, variable_names, X_units, y_units)
             param_name_to_validation_rmse[param_name] = validation_loss
         # Compute the list of top param names

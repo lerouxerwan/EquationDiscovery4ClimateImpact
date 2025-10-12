@@ -6,7 +6,6 @@ from optimization.optimization_marginal_grid import OptimizationMarginalGrid
 from optimization.optimization_marginal_grid_then_random import OptimizationMarginalGridThenRandom
 from optimization.utils_nested_cv.compare_nested_cv import compare_nested_cv
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues, param_names
-from plot.plot_diagnosis import plot_diagnosis
 
 dataset= Dataset("NPP_season.csv", "RCP85", "RCP45", 0.2, ValidationSplit.QUANTILE_WITH_BINNING)
 

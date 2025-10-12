@@ -30,7 +30,7 @@ class OptimizationMarginalGrid(Optimization):
 
     @property
     def param_values(self) -> list:
-        return self.params_name_to_values[self.param_name]
+        return self.param_name_to_values[self.param_name]
 
     """ Properties for logs, plots"""
 

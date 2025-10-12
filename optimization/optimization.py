@@ -13,12 +13,18 @@ from optimization.utils_params.utils_param_name_to_values import ParamNameToValu
 @dataclass
 class Optimization(ABC):
     model_selection: str = 'best'
-    params_name_to_values: Optional[ParamNameToValues | dict[str, list]] = None
+    param_name_to_values: Optional[ParamNameToValues | dict[str, list]] = None
 
     def __post_init__(self):
-        if isinstance(self.params_name_to_values, ParamNameToValues):
-            self.param_name_to_values = get_param_name_to_values(self.params_name_to_values)
-        assert (self.param_name_to_values is None) or isinstance(self.params_name_to_values, dict)
+        if isinstance(self.param_name_to_values, ParamNameToValues):
+            self.param_name_to_values = get_param_name_to_values(self.param_name_to_values)
+        assert (self.param_name_to_values is None) or isinstance(self.param_name_to_values, dict)
+
+    def run(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+                          variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
+                          y_units: Optional[ArrayLike[str]] = None) -> tuple[Emulator, dict[str, list] | None]:
+        top_emulator = self.get_top_emulator(X, y, validation_mask, variable_names, X_units, y_units)
+        return top_emulator, self.param_name_to_values
 
     @abstractmethod
     def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
@@ -28,16 +34,12 @@ class Optimization(ABC):
 
     @property
     def opt_id(self) -> str:
-        return f'{self.model_selection}_{self.params_name_to_values}_{self.subclass_id}'
+        return f'{self.model_selection}_{self.param_name_to_values}_{self.subclass_id}'
 
     @property
     @abstractmethod
     def subclass_id(self) -> str:
         pass
-
-    @cached_property
-    def param_name_to_values(self) -> Optional[dict[str, list[Any]]]:
-        return get_param_name_to_values(self.params_name_to_values)
 
     """ Properties for logs, plots"""
 
