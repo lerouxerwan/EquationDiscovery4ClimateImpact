@@ -2,7 +2,9 @@ import sys
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit
-from optimization.optimization_random.optimimization_random_zoo import OptimizationRandom_500
+from optimization.optimization_marginal.optimization_marginal import OptimizationMarginal
+from optimization.optimization_random.optimimization_random_zoo import OptimizationRandom_500, OptimizationRandom_200_5
+from optimization.optmization_pipeline.optimization_pipeline_factory import optimization_pipeline_factory
 from optimization.utils_optimization import get_loss
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
 from plot.utils_metric.metric import Metric
@@ -14,7 +16,7 @@ def main():
         indices = [int(sys.argv[i]) for i in range(1, 3)]
         param_name_to_values = ParamNameToValues.DEFAULT_CENTRED
     else:
-        indices = [0, 0]
+        indices = [2, 2]
         # 'populations': [2, 4],
         # param_name_to_values = {'niterations': [2, 4], 'ncycles_per_iteration': [2, 4]}
         param_name_to_values = ParamNameToValues.DEFAULT_CENTRED
@@ -26,7 +28,8 @@ def main():
     dataset = Dataset("NPP_season_and_annual_season.csv", "RCP85", "RCP45", validation_size, validation_split)
 
     # Run optimization
-    opt = OptimizationRandom_500('best', param_name_to_values, n_jobs=-1)
+    opt_type = optimization_pipeline_factory([OptimizationMarginal, OptimizationRandom_200_5])
+    opt = opt_type('best', param_name_to_values, n_jobs=-1)
     top_emulator, _  = opt.run(dataset.X_train, dataset.y_train, dataset.validation_mask,
              dataset.X_variable_names, dataset.X_units, dataset.y_units)
     rmse_test = get_loss(opt, dataset.X_train, dataset.y_train, dataset.validation_mask,

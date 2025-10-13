@@ -43,7 +43,7 @@ class Optimization(ABC):
 
     @property
     def opt_id(self) -> str:
-        return f'{self.model_selection}_{self.param_name_to_values}_{self.subclass_id}'
+        return f'{self.model_selection}_{self.subclass_id}'
 
     @property
     @abstractmethod
