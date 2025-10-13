@@ -5,24 +5,17 @@ from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from optimization.optimization import Optimization
 from optimization.optimization_baseline import OptimizationBaseline
-from optimization.optimization_marginal_grid import OptimizationMarginalGrid
-from optimization.optimization_marginal_grid_then_random import OptimizationMarginalGridThenRandom
 from optimization.utils_nested_cv.run_nested_cv import run_nested_cv
 from optimization.utils_optimization import get_loss
-from optimization.utils_params.utils_param_name_to_values import param_names, ParamNameToValues
+from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
 from plot.utils_metric.metric import Metric
 from utils.utils_plot import show_or_save_plot
 
 dataset= Dataset("NPP_season.csv", "RCP85", "RCP45", 0.2, ValidationSplit.QUANTILE_WITH_BINNING)
 
-def get_opt_list(model_selection='best') -> list[Optimization]:
+def get_opt_list(model_selection='best', param_name_to_values=ParamNameToValues.DEFAULT_CENTRED) -> list[Optimization]:
     opt_list: list[Optimization] = []
     opt_list.append(OptimizationBaseline(model_selection))
-    for param_name in param_names[:]:
-        opt_list.append(OptimizationMarginalGrid(model_selection, ParamNameToValues.DEFAULT_CENTRED, param_name))
-    for nb_top_hyperparameters in range(1, 11):
-        opt_list.append(
-            OptimizationMarginalGridThenRandom(model_selection, ParamNameToValues.DEFAULT_CENTRED, nb_top_hyperparameters))
     return opt_list
 
 def main_plot_mean_rmse_consistency(fast: bool):
