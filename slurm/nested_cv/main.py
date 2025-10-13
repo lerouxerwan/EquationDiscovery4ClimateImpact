@@ -5,7 +5,7 @@ class SbatchNestedCV(Sbatch):
 
     @property
     def sbatch_name(self) -> str:
-        return 'nested'
+        return 'rand'
 
     @property
     def filepath_from_root(self):
@@ -17,7 +17,7 @@ class SbatchNestedCV(Sbatch):
 
     @property
     def server_name(self) -> str:
-        return '--nodelist=sl-mee-br-112'
+        return '--nodelist=sl-mee-br-111'
 
 
 def main_validation_size():
