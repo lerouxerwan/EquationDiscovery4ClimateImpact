@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Optional, Any, OrderedDict
 
 import numpy as np
 from pysr.utils import ArrayLike
@@ -37,7 +37,10 @@ def optimization_pipeline_factory(optimization_types: list[type]):
         def optimizations_fake(self) -> list[Optimization]:
             # In order to get the budget without running the whole pipeline,
             # we instantiate each optimization_type with the initial self.param_name_to_values
-            return [optimization_type(self.model_selection, self.param_name_to_values)
+            param_name_to_value_fake = OrderedDict()
+            for param_name, param_values in self.param_name_to_values.items():
+                param_name_to_value_fake[param_name] = param_values
+            return [optimization_type(self.model_selection, param_name_to_value_fake)
                     for optimization_type in self.optimization_types]
 
         def get_budget(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],

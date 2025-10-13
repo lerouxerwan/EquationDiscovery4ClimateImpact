@@ -66,8 +66,8 @@ def optimization_random_factory(n_iter: int, nb_top_hyperparameters: Optional[in
 
         @classmethod
         def legend_label(cls):
-            return "Random search driven by marginal grid search"
+            return "Random search"
 
 
-    OptimizationRandom.__name__ += f'_{n_iter}_{nb_top_hyperparameters}'  # Optionnel : renomme la classe
+    OptimizationRandom.__name__ += f'_{n_iter}_{nb_top_hyperparameters}'
     return OptimizationRandom
