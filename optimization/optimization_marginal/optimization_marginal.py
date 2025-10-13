@@ -40,6 +40,12 @@ class OptimizationMarginal(Optimization):
         emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
         return emulator
 
+    def get_budget(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+                   variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
+                   y_units: Optional[ArrayLike[str]] = None) -> int:
+        list_of_values = [list(param_name_to_values.values())[0]  for param_name_to_values in self.param_grid]
+        return sum([len(values) for values in list_of_values])
+
     @property
     def param_grid(self):
         return [{param_name: param_values} for param_name, param_values in self.param_name_to_values.items()]

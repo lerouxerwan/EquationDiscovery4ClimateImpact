@@ -29,6 +29,11 @@ def optimization_random_factory(n_iter: int, nb_top_hyperparameters: Optional[in
             emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
             return emulator
 
+        def get_budget(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+                       variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
+                       y_units: Optional[ArrayLike[str]] = None) -> int:
+            return self.n_iter
+
         @property
         def param_grid(self):
             if self.nb_top_hyperparameters is None:
@@ -45,6 +50,7 @@ def optimization_random_factory(n_iter: int, nb_top_hyperparameters: Optional[in
             return f'{self.nb_top_hyperparameters}_{self.n_iter}'
 
         """ Properties for logs, plots"""
+
 
         @property
         def name(self):

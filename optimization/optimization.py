@@ -32,6 +32,14 @@ class Optimization(ABC):
                           y_units: Optional[ArrayLike[str]] = None) -> Emulator:
         pass
 
+
+    @abstractmethod
+    def get_budget(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+                          variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
+                          y_units: Optional[ArrayLike[str]] = None) -> int:
+        pass
+
+
     @property
     def opt_id(self) -> str:
         return f'{self.model_selection}_{self.param_name_to_values}_{self.subclass_id}'

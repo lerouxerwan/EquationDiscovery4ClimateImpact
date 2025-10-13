@@ -5,4 +5,4 @@ from optimization.optmization_pipeline.optimization_pipeline_factory import opti
 OptimizationPipelineRandom = OptimizationRandom_500
 OptimizationPipelineMarginalRandom = optimization_pipeline_factory([OptimizationMarginal, OptimizationRandom_200_5])
 
-optimization_types_500 = [OptimizationPipelineRandom, OptimizationPipelineMarginalRandom]
+optimization_types_500 = [OptimizationPipelineRandom, OptimizationPipelineMarginalRandom][1:]
