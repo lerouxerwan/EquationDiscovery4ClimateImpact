@@ -35,7 +35,7 @@ class OptimizationMarginal(Optimization):
                          y_units: Optional[ArrayLike[str]] = None) -> Emulator:
         log_info(f'Run {self.name}')
         params_emulator = {'model_selection': self.model_selection}
-        params_search = {'param_grid': self.param_grid, 'search_style': 'grid', 'n_jobs': None}
+        params_search = {'param_grid': self.param_grid, 'search_style': 'grid', 'n_jobs': self.n_jobs}
         emulator = EmulatorWithSearch(**params_emulator, **params_search)
         emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
         return emulator

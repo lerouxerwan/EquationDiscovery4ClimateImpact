@@ -26,7 +26,7 @@ def main():
     dataset = Dataset("NPP_season_and_annual_season.csv", "RCP85", "RCP45", validation_size, validation_split)
 
     # Run optimization
-    opt = OptimizationMarginal('best', param_name_to_values)
+    opt = OptimizationMarginal('best', param_name_to_values, n_jobs=-1)
     top_emulator, _  = opt.run(dataset.X_train, dataset.y_train, dataset.validation_mask,
              dataset.X_variable_names, dataset.X_units, dataset.y_units)
     rmse_test = get_loss(opt, dataset.X_train, dataset.y_train, dataset.validation_mask,

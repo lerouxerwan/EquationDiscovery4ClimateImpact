@@ -44,7 +44,7 @@ def optimization_bayesian_factory(n_iter: int, nb_top_hyperparameters: Optional[
                 return emulator.selected_validation_loss
 
             study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler())
-            study.optimize(objective, n_trials=self.n_iter)
+            study.optimize(objective, n_trials=self.n_iter, n_jobs=self.n_jobs)
             emulator = Emulator(**study.best_params)
             emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
             return emulator
