@@ -74,7 +74,8 @@ def optimization_bayesian_factory(n_iter: int, nb_top_hyperparameters: Optional[
 
         @property
         def name(self):
-            return f"bayesian search with top{self.nb_top_hyperparameters} hyperparameters from the marginal search"
+            which_parameters = 'all' if self.nb_top_hyperparameters is None else f'top{self.nb_top_hyperparameters}'
+            return f"bayesian search for {self.n_iter} samples, with {which_parameters} hyperparameters"
 
         @property
         def _label(self):

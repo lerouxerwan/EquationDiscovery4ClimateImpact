@@ -54,7 +54,8 @@ def optimization_random_factory(n_iter: int, nb_top_hyperparameters: Optional[in
 
         @property
         def name(self):
-            return f"random search with top{self.nb_top_hyperparameters} hyperparameters from the marginal search"
+            which_parameters = 'all' if self.nb_top_hyperparameters is None else f'top{self.nb_top_hyperparameters}'
+            return f"random search for {self.n_iter} with {which_parameters} hyperparameters"
 
         @property
         def _label(self):
