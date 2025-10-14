@@ -8,6 +8,7 @@ from pysr.utils import ArrayLike
 from emulator.emulator import Emulator
 from optimization.optimization import Optimization
 from utils.utils_log import log_info
+from utils.utils_run import random_seed
 
 
 def optimization_bayesian_factory(n_iter: int, nb_top_hyperparameters: Optional[int] =  None):
@@ -43,7 +44,7 @@ def optimization_bayesian_factory(n_iter: int, nb_top_hyperparameters: Optional[
                 emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
                 return emulator.selected_validation_loss
 
-            study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler())
+            study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=random_seed))
             study.optimize(objective, n_trials=self.n_iter, n_jobs=self.n_jobs)
             emulator = Emulator(**study.best_params)
             emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)

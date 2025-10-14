@@ -5,7 +5,7 @@ class SbatchNestedCV(Sbatch):
 
     @property
     def sbatch_name(self) -> str:
-        return 'r200'
+        return 'b100'
 
     @property
     def filepath_from_root(self):
