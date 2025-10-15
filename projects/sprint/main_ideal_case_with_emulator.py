@@ -1,6 +1,7 @@
 import numpy as np
 
 from data.utils_dataset.dataset import Dataset
+from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from emulator.emulator import Emulator
 from plot.plot_diagnosis import plot_diagnosis
@@ -32,7 +33,7 @@ if __name__ == '__main__':
     # X, y = get_X_y_from_normal(nb_samples=1000)
     # emulator = fit_gaussian(X, y)
 
-    dataset = Dataset("NPP_season.csv", "RCP85", "RCP45", 0.3, ValidationSplit.RCP_START)
+    dataset = get_dataset()
     emulator = Emulator(niterations=1, gaussian_fit=True,
                         X_variable_names_for_gaussian_fit=dataset.X_variable_names,
                         y_variable_name_for_gaussian_fit=dataset.y_variable_names[0])

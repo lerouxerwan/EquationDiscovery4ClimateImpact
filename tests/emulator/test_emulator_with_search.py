@@ -1,11 +1,12 @@
-from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
+from data.utils_dataset.npp_season_v1 import get_dataset
+from data.utils_dataset.validation_split import ValidationSplit
 from emulator.emulator_with_search import EmulatorWithSearch
 from emulator.utils_hyperparameter_search.utils_params_distribution import get_param_distributions
 from utils.utils_run import random_seed
 
 
 def test_emulator_validation_with_search():
-    dataset = dataset_npp_season_v1
+    dataset = get_dataset("NPP_season", 0.3, ValidationSplit.RCP_START)
     emulator = EmulatorWithSearch(niterations=5, n_iter=3, search_style='random', scaling_factor=2,
                                   model_selection='validated',
                                   param_list_to_optimize=['adaptive_parsimony_scaling'])

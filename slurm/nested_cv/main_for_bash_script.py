@@ -1,6 +1,7 @@
 import sys
 
 from data.utils_dataset.dataset import Dataset
+from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import OptimizationPipelineMarginalRandomGaussian, \
     OptimizationPipelineMarginalGaussian, OptimizationPipelineBayesian
@@ -23,8 +24,7 @@ def main():
     opt_type = [OptimizationPipelineMarginalRandomGaussian, OptimizationPipelineMarginalGaussian, OptimizationPipelineBayesian][indices[0]]
     validation_size = [0.2, 0.25, 0.3][indices[1]]
     validation_split = [ValidationSplit.RANDOM, ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.EXTREME][indices[2]]
-
-    dataset = Dataset("NPP_season_and_annual_season.csv", "RCP85", "RCP45", validation_size, validation_split)
+    dataset = get_dataset(validation_size=validation_size, validation_split=validation_split)
 
     # Run optimization
     # opt_type = optimization_pipeline_factory([OptimizationMarginal, OptimizationRandom_200_5])

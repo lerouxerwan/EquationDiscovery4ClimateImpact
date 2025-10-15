@@ -2,6 +2,7 @@ import numpy as np
 from pysr import TemplateExpressionSpec, PySRRegressor
 
 from data.utils_dataset.dataset import Dataset
+from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit
 
 custom_function = """
@@ -28,7 +29,7 @@ template = TemplateExpressionSpec(
 )
 
 emulator = PySRRegressor(niterations=1, expression_spec=template, elementwise_loss="my_custom_loss(predicted, target) = predicted")
-dataset = Dataset("NPP_season.csv", "RCP85", "RCP45", 0.25, ValidationSplit.START)
+dataset = get_dataset()
 # Limit the number of featurest to two
 X_train = np.concat([dataset.X_train[:, :2],  np.expand_dims(dataset.y_train, axis=1)], axis=1)
 X_units = dataset.X_units[:2] + dataset.y_units

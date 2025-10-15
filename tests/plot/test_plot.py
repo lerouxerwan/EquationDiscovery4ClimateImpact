@@ -1,4 +1,5 @@
-from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
+from data.utils_dataset.npp_season_v1 import get_dataset
+from data.utils_dataset.validation_split import ValidationSplit
 from emulator.emulator import Emulator
 from plot.dataset.plot_selected_features import get_selected_feature_indexes
 from plot.plot_diagnosis import plot_diagnosis
@@ -6,7 +7,7 @@ from plot.plot_diagnosis import plot_diagnosis
 
 def test_plot_with_emulator():
     emulator = Emulator(niterations=1)
-    dataset = dataset_npp_season_v1
+    dataset = get_dataset("NPP_season", 0.3, ValidationSplit.RCP_START)
     emulator.fit(dataset.X_train, dataset.y_train, variable_names=dataset.X_variable_names)
     plot_diagnosis(emulator, dataset, show=None)
     emulator.remove_folder()

@@ -1,6 +1,6 @@
 from sympy import symbols
 
-from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1, get_dataset
+from data.utils_dataset.npp_season_v1 import get_dataset
 from plot.equation.plot_decomposition import _plot_decomposition
 
 if __name__ == '__main__':

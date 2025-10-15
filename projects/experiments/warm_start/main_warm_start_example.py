@@ -1,11 +1,10 @@
-from data.utils_dataset.dataset import Dataset
-from data.utils_dataset.validation_split import ValidationSplit
+from data.utils_dataset.npp_season_v1 import get_dataset
 from emulator.emulator import Emulator
 from plot.plot_diagnosis import plot_diagnosis
 from plot.workflow import fit
 
 if __name__ == '__main__':
-    dataset= Dataset("NPP_season.csv", "RCP85", "RCP45", 0.25, ValidationSplit.START)
+    dataset= get_dataset()
 
     # Old emulator
     params_emulator = {'optimize_probability': 0.1, 'population_size': 25, 'populations': 86,

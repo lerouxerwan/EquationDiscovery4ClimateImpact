@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from data.utils_dataset.dataset import Dataset
+from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from optimization.optimization import Optimization
 from optimization.optimization_baseline import OptimizationBaseline
@@ -11,14 +12,13 @@ from optimization.utils_params.utils_param_name_to_values import ParamNameToValu
 from plot.utils_metric.metric import Metric
 from utils.utils_plot import show_or_save_plot
 
-dataset= Dataset("NPP_season.csv", "RCP85", "RCP45", 0.2, ValidationSplit.QUANTILE_WITH_BINNING)
-
 def get_opt_list(model_selection='best', param_name_to_values=ParamNameToValues.DEFAULT_CENTRED) -> list[Optimization]:
     opt_list: list[Optimization] = []
     opt_list.append(OptimizationBaseline(model_selection))
     return opt_list
 
 def main_plot_mean_rmse_consistency(fast: bool):
+    dataset = get_dataset()
     opt_list = get_opt_list('best')
     if fast:
         opt_list = opt_list[:]

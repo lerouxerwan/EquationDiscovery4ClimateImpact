@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 
-from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
+from data.utils_dataset.npp_season_v1 import get_dataset
 from plot.dataset.plot_dataset import plot_values_feature, plot_values_target, plot_values
 from utils.utils_plot import get_subplots, show_or_save_plot
 
@@ -8,7 +8,7 @@ from utils.utils_plot import get_subplots, show_or_save_plot
 def main_plot_data(show=False):
     # Load axis and dataset
     fig, (ax1, ax2) = get_subplots(1, 2, wspace=0.15)
-    dataset =  dataset_npp_season_v1
+    dataset =  get_dataset()
 
     # Add two plots
     column_index = dataset.X_variable_names.index('SST_JJA')
@@ -29,7 +29,7 @@ def main_plot_data(show=False):
 
 def main_plot_all_features(show=False):
     # Load axis and dataset
-    dataset =  dataset_npp_season_v1
+    dataset =  get_dataset()
     variable_names = ['SSH_DJF', 'SSS_MAM', 'Shortwave_DJF', 'MerWindStr_MAM']
     for variable_name in variable_names:
         ax = plt.gca()
@@ -38,5 +38,5 @@ def main_plot_all_features(show=False):
 
 
 if __name__ == '__main__':
-    # main_plot_data(show=False)
-    main_plot_all_features(show=False)
+    main_plot_data(show=True)
+    # main_plot_all_features(show=False)

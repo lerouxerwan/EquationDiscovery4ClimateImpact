@@ -1,11 +1,10 @@
-from data.utils_dataset.dataset import Dataset
-from data.utils_dataset.validation_split import ValidationSplit
+from data.utils_dataset.npp_season_v1 import get_dataset
 from optimization.optimization_baseline import OptimizationBaseline
 from plot.plot_diagnosis import plot_diagnosis
 
-dataset= Dataset("NPP_season.csv", "RCP85", "RCP45", 0.2, ValidationSplit.QUANTILE_WITH_BINNING)
 
 def main_plot_diagnosis_top_emulator():
+    dataset = get_dataset()
     opt = OptimizationBaseline('best')
     emulator = opt.get_top_emulator(dataset.X_train, dataset.y_train, dataset.validation_mask,
                                     dataset.X_variable_names, dataset.X_units, dataset.y_units)
