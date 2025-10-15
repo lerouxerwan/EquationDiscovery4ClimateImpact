@@ -2,11 +2,6 @@ import sys
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit
-from optimization.optimization_bayesian.optimization_bayesian_zoo import OptimizationBayesian_500, \
-    OptimizationBayesian_4
-from optimization.optimization_marginal.optimization_marginal import OptimizationMarginal
-from optimization.optimization_random.optimimization_random_zoo import OptimizationRandom_500, OptimizationRandom_200_5
-from optimization.optmization_pipeline.optimization_pipeline_factory import optimization_pipeline_factory
 from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import OptimizationPipelineMarginalRandomGaussian, \
     OptimizationPipelineMarginalGaussian, OptimizationPipelineBayesian
 from optimization.utils_optimization import get_loss

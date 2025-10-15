@@ -12,7 +12,7 @@ from data.utils_run.utils_run import CSV_FILENAME, \
     JSON_FILENAME
 from emulator.utils_emulator import params_that_do_not_impact_the_fit_results
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
-    RMSE_VALIDATION_COLUMN_NAME, PARAMS_COLUMN_NAME
+    RMSE_VALIDATION_COLUMN_NAME, PARAMS_COLUMN_NAME, RMSE_TRAIN_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -125,6 +125,12 @@ class Run(object):
         log_info('Load search results from files')
         #  Load dataframe from csv file
         df_cv_results = pd.read_csv(self.filepath_search_result, index_col=0)
+        #  Handle deprecated df_cv_results files
+        if RMSE_VALIDATION_COLUMN_NAME not in df_cv_results.columns:
+            assert 'RMSE_validation' in df_cv_results.columns
+            old_and_new_column_names = zip(['RMSE_train', 'RMSE_validation'], [RMSE_TRAIN_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME])
+            for old_column_name, new_column_name in old_and_new_column_names:
+                df_cv_results[new_column_name] = df_cv_results[old_column_name]
         #  Sort the DataFrame by their predictive performance on the validation set
         df_cv_results = df_cv_results.sort_values(by=RMSE_VALIDATION_COLUMN_NAME)
         #  Cast some columns to their original type
