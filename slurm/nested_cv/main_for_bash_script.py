@@ -13,7 +13,7 @@ from utils.utils_log import log_info
 
 def main():
     if len(sys.argv) > 1:
-        indices = [int(sys.argv[i]) for i in range(1, 3)]
+        indices = [int(sys.argv[i]) for i in range(1, 4)]
         param_name_to_values = ParamNameToValues.DEFAULT_CENTRED
     else:
         indices = [0, 0, 0]
