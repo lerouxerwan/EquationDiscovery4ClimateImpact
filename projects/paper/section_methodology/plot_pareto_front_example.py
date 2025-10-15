@@ -11,14 +11,13 @@ from utils.utils_plot import show_or_save_plot
 
 
 def plot_pareto_front_example(emulator: Emulator, X: np.ndarray, y: np.ndarray,
-                              target_label: str = "Target (-)", show: bool = False, metric=Metric.MSE) -> None:
+                              target_label: str = "Target (-)", show: bool = False) -> None:
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""
     ax = plt.gca()
     complexity_list = emulator.complexity_list
     width, coordinate_list = load_bar_attributes(nb_bars=2, complexity_list=complexity_list)
-    loss_list = emulator.compute_loss_list_other_metric(X, y, metric=metric)
-    ax.bar(coordinate_list[0], loss_list, width=width, color='red')
+    ax.bar(coordinate_list[0], emulator.loss_list, width=width, color='red')
     ax.set_xlabel('Equation f')
     # Add rounded equations on the lower X axis
     x_ticks = complexity_list
@@ -28,7 +27,7 @@ def plot_pareto_front_example(emulator: Emulator, X: np.ndarray, y: np.ndarray,
     # xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True).replace('x0', 'x')
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     # Add y-axis with special scaling
-    set_log_y_axis_example(ax, loss_list, target_label, metric)
+    set_log_y_axis_example(ax, emulator.loss_list, target_label, emulator.metric_)
     # General settings for the plot
     # ax.legend(loc='upper right')
     show_or_save_plot(f'pareto_front_example', show)

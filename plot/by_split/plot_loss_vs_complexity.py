@@ -18,7 +18,6 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
                             plot_folder: Optional[str] = None) -> None:
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""
-    metric = Metric.RMSE
     split_name_to_x_and_y = load_split_name_to_X_and_y(emulator, dataset.X_train, dataset.y_train, dataset.X_test,
                                                        dataset.y_test, dataset.years_train, dataset.years_test, dataset.validation_mask)
     fig, ax = plt.subplots(figsize=(16, 9))
@@ -32,7 +31,12 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
     for bar_id, split_name in enumerate(sorted_split_names):
         X, y = split_name_to_x_and_y[split_name]
         coordinates = coordinate_list[bar_id]
-        loss_list = emulator.compute_loss_list_other_metric(X, y, metric=metric)
+        # if split_name == 'train':
+        #     loss_list = emulator.loss_list
+        # elif split_name == 'validation':
+        #     loss_list = emulator.validation_loss_list
+        # else:
+        loss_list = emulator.compute_loss_list(X, y)
         # Filter values where the loss is equal np.nan
         coordinates, loss_list = list(zip(*[(coordinate, loss) for coordinate, loss in zip(coordinates, loss_list) if not np.isnan(loss)]))
         barplot = ax.bar(coordinates, loss_list, width=width, label=get_label_split_name(split_name, dataset),
@@ -50,7 +54,7 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
     xticklabels = [get_equation_str(expr) for expr in emulator.expr_list]
     xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True)
     # Add y-axis with special scaling
-    set_log_y_axis(ax, all_loss_list, dataset.target_label, metric)
+    set_log_y_axis(ax, all_loss_list, dataset.target_label, emulator.metric_)
     # General settings for the plot
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     ax.legend(loc='upper right')

@@ -1,5 +1,6 @@
 from enum import Enum
 
+import numpy as np
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 from plot.utils_metric.utils_metric_function import correlation, \
@@ -15,6 +16,15 @@ class Metric(Enum):
     RMSE = 4
     MEDAE = 5
     SPREADRATIO = 6
+    NLL = 7
+
+def compute_loss(y_true: np.ndarray, y_predicted: np.ndarray, metric: Metric) -> float:
+    """Compute loss for a given metric, if the computation raises a ValueError we return np.nan as result"""
+    loss_function = metric_to_function[metric]
+    try:
+        return loss_function(y_true=y_true, y_pred=y_predicted)
+    except ValueError:
+        return  np.nan
 
 metric_to_function = {
     Metric.MSE: mean_squared_error,

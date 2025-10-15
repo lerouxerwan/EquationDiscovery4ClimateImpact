@@ -13,7 +13,7 @@ from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_run.run import Run
 from data.utils_run.utils_run import get_output_directory, get_run_id
 from emulator.utils_emulator import Config
-from plot.utils_metric.metric import Metric, metric_to_function
+from plot.utils_metric.metric import Metric, compute_loss
 from utils.utils_log import log_info
 from utils.utils_non_default_params import get_non_default_params
 from utils.utils_run import random_seed
@@ -101,17 +101,29 @@ class Emulator(PySRRegressor):
             assert isinstance(y_variable_name_for_gaussian_fit, str)
             X_variable_names_as_string = ', '.join(X_variable_names_for_gaussian_fit)
             elementwise_loss = "my_custom_loss(predicted, target) = predicted"
-            # sigma = exp(g({X_variable_names_as_string}) + 0.1)
             expression_spec = TemplateExpressionSpec(
                 expressions=["f", "g"],
                 variable_names=X_variable_names_for_gaussian_fit + [y_variable_name_for_gaussian_fit],
                 combine=f"""
                     mu = f({X_variable_names_as_string})
-                    sigma = g({X_variable_names_as_string})
+                    sigma = exp(g({X_variable_names_as_string}))
 
                     log(sigma) + ({y_variable_name_for_gaussian_fit} - mu)^2 / (2 * sigma^2)
                 """
             )
+            self.metric_ = Metric.NLL
+        else:
+            loss_function = """
+            function f(tree, dataset::Dataset{T,L}, options) where {T,L}
+                ypred, completed = eval_tree_array(tree, dataset.X, options)
+                if !completed
+                    return L(Inf)
+                end
+                y = dataset.y
+                return sqrt(sum(i -> (ypred[i] - y[i])^2, eachindex(y))/length(y)) 
+            end
+            """
+            self.metric_ = Metric.RMSE
         # Randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
         if random_state is None:
             random_state = random_seed
@@ -300,40 +312,54 @@ class Emulator(PySRRegressor):
             variable_names = self.X_variable_names_for_gaussian_fit + [self.y_variable_name_for_gaussian_fit]
         super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
-    """Method to compute loss"""
+    """Properties/method for the selected equations"""
+
+    def compute_loss(self, X: np.ndarray, y: np.ndarray, metric: Metric) -> float:
+        """Compute loss for the selected equation"""
+        return compute_loss(y, self.predict(X), metric)
+
+    def get_best(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
+        """Compute a Series (or list of Series) representing the selected equations (complexity, loss, ...)
+         If index=None, then the equation is selected using self.model_selection"""
+        if (index is None) and (self.model_selection == 'validated'):
+            assert self.index_for_validated_model_selection_ is not None
+            index = self.index_for_validated_model_selection_
+        return super().get_best(index)
+
+    @property
+    def selected_row(self) -> pd.Series:
+        """Selected row/pd.Series from the Dataframe self.equations_"""
+        return self.get_best()
+
+    @property
+    def selected_complexity(self) -> int:
+        """Complexity for the selected equation"""
+        return self.selected_row['complexity']
+
+    @property
+    def selected_loss(self):
+        return self.selected_row['loss']
+
+    @property
+    def selected_validation_loss(self) -> float:
+        return self.selected_row['validation_loss']
+
+    @property
+    def selected_expr(self) -> Expr:
+        """Sympy expressions for the selected equation"""
+        return self.selected_row['sympy_format']
+
+    @property
+    def selected_variable_names(self) -> list[str]:
+        """List of variables names in the selected equation"""
+        return [str(s) for s in self.selected_expr.atoms(Symbol)]
+
+    """Properties/method for every equation of the Pareto optimal set of equations"""
 
     def compute_loss_list(self, X: np.ndarray, y: np.ndarray) -> list[float]:
         """Compute a list of loss: one loss for every equation of the Pareto optimal set of equations"""
-        return [self._compute_loss(y, y_predicted, self.metric) for y_predicted in self.compute_y_predicted_list(X)]
-
-    @property
-    def metric(self) -> Metric:
-        if self.loss_function is None:
-            return Metric.MSE
-        else:
-            raise NotImplementedError('this loss function does not have a corresponding metric')
-
-    def compute_loss_list_other_metric(self, X: np.ndarray, y: np.ndarray, metric: Metric) -> list[float]:
-        """Compute a list of loss: one loss for every equation of the Pareto optimal set of equations"""
-        return [self._compute_loss(y, y_predicted, metric) for y_predicted in self.compute_y_predicted_list(X)]
-
-    @staticmethod
-    def _compute_loss(y_true: np.ndarray, y_predicted: np.ndarray, metric: Metric) -> float:
-        """Compute loss for a given metric, if the computation raises a ValueError we return np.nan as result"""
-        loss_function = metric_to_function[metric]
-        try:
-            return loss_function(y_true=y_true, y_pred=y_predicted)
-        except ValueError:
-            return  np.nan
-
-    def compute_loss(self, X: np.ndarray, y: np.ndarray, metric: Metric) -> float:
-        return self._compute_loss(y, self.predict(X), metric)
-
-    def compute_y_predicted_list(self, X: np.ndarray) -> list[np.ndarray]:
-        """Compute predicted vector for every equation of the Pareto front"""
-        return [self.predict(X, index=index) for index in range(len(self.equations_))]
-
-    """Properties"""
+        y_predicted_list = [self.predict(X, index=index) for index in range(len(self.equations_))]
+        return [compute_loss(y, y_predicted, self.metric_) for y_predicted in y_predicted_list]
 
     @property
     def complexity_list(self) -> list[int]:
@@ -351,56 +377,11 @@ class Emulator(PySRRegressor):
         return self.equations_['validation_loss'].to_list()
 
     @property
-    def selected_loss(self):
-        return self.selected_row['loss']
-
-    @property
-    def selected_validation_loss(self) -> float:
-        return self.selected_row['validation_loss']
-
-    @property
-    def selected_validation_rmse(self) -> float:
-        return np.sqrt(self.selected_validation_loss)
-
-    @property
     def expr_list(self) -> list[Expr]:
         """List of sympy expressions for the equations of the Pareto front"""
         return self.equations_['sympy_format'].to_list()
 
-    @property
-    def selected_expr(self) -> Expr:
-        """Sympy expressions for the selected equation"""
-        expr = self.selected_row['sympy_format']
-        # print(expand(expr).args)
-        # expr = sum(expand(expr).args[:-3])
-        return expr
-
-    @property
-    def selected_complexity(self) -> int:
-        """Complexity for the selected equation"""
-        return self.selected_row['complexity']
-
-    @property
-    def selected_variable_names(self) -> list[str]:
-        """List of variables names in the selected equation"""
-        return [str(s) for s in self.selected_expr.atoms(Symbol)]
-
-    """Model/equation selection"""
-
-    @property
-    def selected_row(self) -> pd.Series:
-        """Selected row/pd.Series from the Dataframe self.equations_"""
-        return self.get_best()
-
-    def get_best(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
-        """Compute a Series (or list of Series) representing the selected equations (complexity, loss, ...)
-         If index=None, then the equation is selected using self.model_selection"""
-        if (index is None) and (self.model_selection == 'validated'):
-            assert self.index_for_validated_model_selection_ is not None
-            index = self.index_for_validated_model_selection_
-        return super().get_best(index)
-
-    """Other changes"""
+    """Other methods/properties"""
 
     @property
     def non_default_params(self) -> dict[str, Any]:
