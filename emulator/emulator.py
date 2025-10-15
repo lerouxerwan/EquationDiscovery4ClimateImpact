@@ -95,6 +95,7 @@ class Emulator(PySRRegressor):
                  y_variable_name_for_gaussian_fit: Optional[str] = None,
                  **kwargs):
         # Specify loss and template expression for Gaussian fit
+        # we follow the trick illustrated in https://github.com/MilesCranmer/PySR/discussions/1002
         if gaussian_fit:
             assert X_variable_names_for_gaussian_fit is not None
             assert isinstance(X_variable_names_for_gaussian_fit, list)
