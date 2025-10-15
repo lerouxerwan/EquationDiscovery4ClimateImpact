@@ -1,3 +1,4 @@
+import numpy as np
 
 params_that_do_not_impact_the_fit_results = {'logger_spec', 'output_directory', 'run_id',
                                              'parallelism', 'procs', 'cluster_manager',
@@ -11,3 +12,6 @@ params_that_do_not_impact_the_fit_results = {'logger_spec', 'output_directory', 
 
 class Config:
     automatic_loading_and_saving = True
+
+def get_X_for_gaussian_fit(X: np.ndarray, y: np.ndarray) -> np.ndarray:
+    return np.concat([X, np.expand_dims(y, axis=1)], axis=1)

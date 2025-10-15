@@ -12,7 +12,7 @@ from sympy import Expr, Symbol
 from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_run.run import Run
 from data.utils_run.utils_run import get_output_directory, get_run_id
-from emulator.utils_emulator import Config
+from emulator.utils_emulator import Config, get_X_for_gaussian_fit
 from plot.utils_metric.metric import Metric, compute_loss
 from utils.utils_log import log_info
 from utils.utils_non_default_params import get_non_default_params
@@ -307,17 +307,28 @@ class Emulator(PySRRegressor):
                               'see https://github.com/MilesCranmer/PySR/discussions/869 ')
             X_units, y_units = None, None
             assert variable_names == self.X_variable_names_for_gaussian_fit
-            X_fit = np.concat([X_fit, np.expand_dims(y_fit, axis=1)], axis=1)
+            X_fit = get_X_for_gaussian_fit(X_fit, y_fit)
             y_fit = np.zeros(len(X_fit))
             variable_names = self.X_variable_names_for_gaussian_fit + [self.y_variable_name_for_gaussian_fit]
         super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
+    # def predict(
+    #     self,
+    #     X,
+    #     index: int | list[int] | None = None,
+    #     *,
+    #     category: ndarray | None = None,
+    # ) -> ndarray:
+    #     # self.su
+    #     super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
+
+
     """Method to compute the loss"""
 
     def compute_loss(self, X: np.ndarray, y: np.ndarray, index: int | list[int] | None) -> float:
-        """Compute loss for the selected equation"""
+        """Compute loss for the equation at some specific index"""
         if self.metric_ is Metric.NLL:
-            raise NotImplementedError
+            return super().predict(get_X_for_gaussian_fit(X, y), index=index).mean()
         else:
             return compute_loss(y, self.predict(X, index), self.metric_)
 
