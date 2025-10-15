@@ -33,15 +33,9 @@ def get_series(emulator: Emulator, X: np.ndarray, y: np.ndarray, validation_mask
     if empty_data:
         data = [np.inf, np.inf, np.inf, np.nan, []]
     else:
-        rmse_train = compute_loss_for_set(emulator, X, y, validation_mask, False, Metric.RMSE)
-        rmse_validation = compute_loss_for_set(emulator, X, y, validation_mask, True, Metric.RMSE)
-        data = [rmse_train, rmse_validation, emulator.selected_complexity, emulator.selected_expr,
-                emulator.selected_variable_names]
+        data = [emulator.selected_complexity, emulator.selected_expr, emulator.selected_variable_names]
     # Return Series
     return pd.Series(data=data, index=COLUMN_NAMES)
 
-def compute_loss_for_set(emulator: Emulator, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
-                         validation_set: bool, metric: Metric) -> float:
-    return emulator.compute_loss(*get_X_and_y(X, y, validation_mask, validation_set), metric=metric)
 
 

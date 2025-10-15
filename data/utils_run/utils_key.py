@@ -32,7 +32,7 @@ def get_hash_params(params: dict[str, Any]) -> list[tuple[Any] | Any]:
         elif isinstance(v, dict):
             hash_params =  tuple([k])  + tuple(get_hash_params(v))
         else:
-            raise ValueError(f'type(v)={type(v)} with v={v}')
+            raise ValueError(f'For the key {k}, type(v)={type(v)} with v={v}')
         entire_hash_params.append(hash_params)
     return entire_hash_params
 

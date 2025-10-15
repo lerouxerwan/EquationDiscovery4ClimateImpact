@@ -312,11 +312,20 @@ class Emulator(PySRRegressor):
             variable_names = self.X_variable_names_for_gaussian_fit + [self.y_variable_name_for_gaussian_fit]
         super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
+    """Method to compute the loss"""
+
+    def compute_loss(self, X: np.ndarray, y: np.ndarray, index: int | list[int] | None) -> float:
+        """Compute loss for the selected equation"""
+        if self.metric_ is Metric.NLL:
+            raise NotImplementedError
+        else:
+            return compute_loss(y, self.predict(X, index), self.metric_)
+
     """Properties/method for the selected equations"""
 
-    def compute_loss(self, X: np.ndarray, y: np.ndarray, metric: Metric) -> float:
+    def compute_selected_loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """Compute loss for the selected equation"""
-        return compute_loss(y, self.predict(X), metric)
+        return self.compute_loss(X, y, index=None)
 
     def get_best(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
         """Compute a Series (or list of Series) representing the selected equations (complexity, loss, ...)
@@ -337,11 +346,11 @@ class Emulator(PySRRegressor):
         return self.selected_row['complexity']
 
     @property
-    def selected_loss(self):
+    def selected_loss_train(self):
         return self.selected_row['loss']
 
     @property
-    def selected_validation_loss(self) -> float:
+    def selected_loss_validation(self) -> float:
         return self.selected_row['validation_loss']
 
     @property
@@ -358,8 +367,7 @@ class Emulator(PySRRegressor):
 
     def compute_loss_list(self, X: np.ndarray, y: np.ndarray) -> list[float]:
         """Compute a list of loss: one loss for every equation of the Pareto optimal set of equations"""
-        y_predicted_list = [self.predict(X, index=index) for index in range(len(self.equations_))]
-        return [compute_loss(y, y_predicted, self.metric_) for y_predicted in y_predicted_list]
+        return [self.compute_loss(X, y, index) for index in range(len(self.equations_))]
 
     @property
     def complexity_list(self) -> list[int]:

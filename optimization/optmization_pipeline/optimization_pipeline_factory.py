@@ -24,7 +24,7 @@ def optimization_pipeline_factory(optimization_types: list[type]):
                 optimization = optimization_type(self.model_selection, param_name_to_values, self.n_jobs)
                 top_emulator, param_name_to_values  = optimization.run(X, y, validation_mask, variable_names, X_units, y_units)
                 top_emulators.append(top_emulator)
-            sorted_top_emulators = sorted(top_emulators, key=lambda emulator: emulator.selected_validation_loss)
+            sorted_top_emulators = sorted(top_emulators, key=lambda emulator: emulator.selected_loss_validation)
             top_emulator = sorted_top_emulators[0]
             return top_emulator, param_name_to_values
 

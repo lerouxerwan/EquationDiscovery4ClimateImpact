@@ -38,10 +38,10 @@ def get_loss(optimization: Optimization,
     else:
         emulator = optimization.get_top_emulator(X_train, y_train, validation_mask, variable_names, X_units, y_units)
         if with_test_data:
-            loss = emulator.compute_loss(X_test, y_test, Metric.RMSE)
+            loss = emulator.compute_selected_loss(X_test, y_test)
         else:
             X_validation, y_validation = get_X_and_y(X_train, y_train, validation_mask, validation_set=True)
-            loss = emulator.compute_loss(X_validation, y_validation, Metric.RMSE)
+            loss = emulator.compute_selected_loss(X_validation, y_validation)
         if not op.exists(opt_path):
             os.makedirs(opt_path)
         f = open(filepath, 'w')  # w : writing mode  /  r : reading mode  /  a  :  appending mode
