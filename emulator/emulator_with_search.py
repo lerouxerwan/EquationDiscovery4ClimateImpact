@@ -5,7 +5,7 @@ from typing import Literal, Callable, Optional
 import numpy as np
 from pysr import AbstractExpressionSpec, AbstractLoggerSpec, PySRRegressor
 from pysr.utils import ArrayLike
-from sklearn.metrics import make_scorer, mean_squared_error
+from sklearn.metrics import make_scorer, root_mean_squared_error
 from sklearn.model_selection._search import BaseSearchCV
 
 from data.utils_run.run import Run
@@ -17,6 +17,7 @@ from emulator.utils_hyperparameter_search.utils_df_cv_results import compute_df_
 from emulator.utils_hyperparameter_search.utils_scaling_factor import get_param_grid
 from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs, get_cv
 from emulator.utils_hyperparameter_search.utils_search_style import search_style_to_search_cv_type
+from plot.utils_metric.metric import Metric
 from utils.utils_log import log_info
 from utils.utils_non_default_params import get_non_default_params
 
@@ -252,8 +253,8 @@ class EmulatorWithSearch(Emulator):
         search_cv_type = search_style_to_search_cv_type[self.search_style]
         assert issubclass(search_cv_type, BaseSearchCV)
         search_cv = search_cv_type(estimator=self.load_emulator_with_same_attributes(),
-                                   scoring={'MSE': make_scorer(mean_squared_error, greater_is_better=False)},
-                                   cv=get_cv(validation_mask), refit=False, return_train_score=False,
+                                   scoring=self.scoring,
+                                   cv=get_cv(validation_mask), refit=False, return_train_score=True,
                                    n_jobs=self.n_jobs,
                                    **get_search_cv_kwargs(search_cv_type, self.param_grid, self.n_iter))
         search_cv.fit(X, y, validation_mask=validation_mask, variable_names=variable_names,
@@ -262,6 +263,14 @@ class EmulatorWithSearch(Emulator):
         df_cv_results = compute_df_cv_results(search_cv.cv_results_, X, y, validation_mask)
         # Save df_cv_results to file
         self.run_.save_search_results(df_cv_results, self.non_default_params)
+
+    @property
+    def scoring(self):
+        if self.metric_ is Metric.RMSE:
+            return {'RMSE': make_scorer(root_mean_squared_error, greater_is_better=False)}
+        else:
+            raise NotImplementedError
+
 
     def load_emulator_with_same_attributes(self) -> Emulator:
         """Load an emulator object with the same attributes as self,

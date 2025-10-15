@@ -32,7 +32,7 @@ def test_deterministic_and_compute_loss():
     X, y = load_X_and_y_for_test()
     emulator.fit(X, y)
     # Assert that the fit of the emulator is deterministic
-    np.testing.assert_almost_equal(float(sum(emulator.loss_list)), 35698078.93297232)
+    np.testing.assert_almost_equal(float(sum(emulator.loss_list)), 8511.4327203031)
     emulator.remove_folder()
 
 
@@ -41,7 +41,7 @@ def test_model_selection_validated():
     X, y = load_X_and_y_for_test()
     emulator.fit(X, y)
     # Assert that the fit of the emulator is the same as with the model selection 'best'
-    np.testing.assert_almost_equal(float(sum(emulator.loss_list)), 35698078.93297232)
+    np.testing.assert_almost_equal(float(sum(emulator.loss_list)), 8511.4327203031)
     emulator.remove_folder()
 
 
@@ -113,3 +113,9 @@ def test_is_gaussian():
     emulator.fit(X, y, variable_names=X_variable_names)
     assert round(emulator.compute_selected_loss(X, y), 2) == round(emulator.selected_loss_train, 2)
 
+
+def test_loss():
+    X, y = load_X_and_y_for_test()
+    emulator = Emulator(niterations=1)
+    emulator.fit(X, y)
+    assert round(emulator.compute_selected_loss(X, y), 2) == round(emulator.selected_loss_train, 2)

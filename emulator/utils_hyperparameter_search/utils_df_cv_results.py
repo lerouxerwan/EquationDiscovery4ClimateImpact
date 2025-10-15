@@ -1,10 +1,9 @@
 import numpy as np
 import pandas as pd
 
-from data.utils_dataset.utils_validation import get_X_and_y
 from emulator.emulator import Emulator
-from emulator.utils_hyperparameter_search.utils_column_names import  PARAMS_EMULATOR_COLUMN_NAME, COLUMN_NAMES
-from plot.utils_metric.metric import Metric
+from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, COLUMN_NAMES, \
+    RMSE_TRAIN_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME
 
 
 def compute_df_cv_results(cv_results: dict, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.DataFrame:
@@ -16,6 +15,9 @@ def compute_df_cv_results(cv_results: dict, X: np.ndarray, y: np.ndarray, valida
     # Add params emulator
     params_emulator_list = [emulator.get_params().copy() for emulator in emulators]
     df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = params_emulator_list
+    #  Change the sign for the RMSE column
+    for column_name in [RMSE_TRAIN_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME]:
+        df_cv_results[column_name] *= -1
     #  Add columns for the selected equation
     data = [get_series(emulator, X, y, validation_mask) for emulator in emulators]
     df_cv_results = pd.concat([df_cv_results, pd.DataFrame(index=df_cv_results.index, data=data)], axis=1)

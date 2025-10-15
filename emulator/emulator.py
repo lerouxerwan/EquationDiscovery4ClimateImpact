@@ -113,16 +113,6 @@ class Emulator(PySRRegressor):
             )
             self.metric_ = Metric.NLL
         else:
-            loss_function = """
-            function f(tree, dataset::Dataset{T,L}, options) where {T,L}
-                ypred, completed = eval_tree_array(tree, dataset.X, options)
-                if !completed
-                    return L(Inf)
-                end
-                y = dataset.y
-                return sqrt(sum(i -> (ypred[i] - y[i])^2, eachindex(y))/length(y)) 
-            end
-            """
             self.metric_ = Metric.RMSE
         # Randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
         if random_state is None:
@@ -281,6 +271,11 @@ class Emulator(PySRRegressor):
                 log_info(f'Save fit to file')
                 run.save_fit(duration, verbose=False)
 
+        # Update 'loss' column if needed
+        if self.metric_ is Metric.RMSE:
+            #  Take the sqrt of the mean squared error
+            self.equations_['loss'] = self.equations_['loss'].apply(np.sqrt)
+
         #  Add a 'validation_loss' column in self.equations_
         if validation_mask is not None:
             X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
@@ -312,16 +307,11 @@ class Emulator(PySRRegressor):
             variable_names = self.X_variable_names_for_gaussian_fit + [self.y_variable_name_for_gaussian_fit]
         super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
-    # def predict(
-    #     self,
-    #     X,
-    #     index: int | list[int] | None = None,
-    #     *,
-    #     category: ndarray | None = None,
-    # ) -> ndarray:
-    #     # self.su
-    #     super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
-
+    def predict(self, X, index: int | list[int] | None = None, *, category: np.ndarray | None = None) -> np.ndarray:
+        if self.metric_ is Metric.NLL:
+            raise NotImplementedError
+        else:
+            return super().predict(X, index, category=category)
 
     """Method to compute the loss"""
 
@@ -329,8 +319,10 @@ class Emulator(PySRRegressor):
         """Compute loss for the equation at some specific index"""
         if self.metric_ is Metric.NLL:
             return super().predict(get_X_for_gaussian_fit(X, y), index=index).mean()
-        else:
+        elif self.metric_ is Metric.RMSE:
             return compute_loss(y, self.predict(X, index), self.metric_)
+        else:
+            raise NotImplementedError
 
     """Properties/method for the selected equations"""
 
@@ -387,12 +379,12 @@ class Emulator(PySRRegressor):
 
     @property
     def loss_list(self) -> list[float]:
-        """List of Train loss (Mean squared error) for the equations of the Pareto front"""
+        """List of Train loss for the equations of the Pareto front"""
         return self.equations_['loss'].to_list()
 
     @property
     def validation_loss_list(self) -> list[float]:
-        """List of Validation loss (Mean squared error) for the equations of the Pareto front"""
+        """List of Validation loss for the equations of the Pareto front"""
         return self.equations_['validation_loss'].to_list()
 
     @property
