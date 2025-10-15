@@ -1,13 +1,13 @@
 import time
+import warnings
 from datetime import timedelta
 from typing import Literal, Callable, Optional, Any
 
 import numpy as np
 import pandas as pd
-from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec
-from pysr.export_numpy import CallableEquation
+from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec, TemplateExpressionSpec
 from pysr.utils import ArrayLike
-from sympy import Expr, Symbol, expand, symbols, lambdify
+from sympy import Expr, Symbol
 
 from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_run.run import Run
@@ -17,8 +17,6 @@ from plot.utils_metric.metric import Metric, metric_to_function
 from utils.utils_log import log_info
 from utils.utils_non_default_params import get_non_default_params
 from utils.utils_run import random_seed
-
-
 
 
 class Emulator(PySRRegressor):
@@ -92,7 +90,28 @@ class Emulator(PySRRegressor):
                  extra_torch_mappings: dict[Callable, Callable] | None = None,
                  extra_jax_mappings: dict[Callable, str] | None = None, denoise: bool = False,
                  select_k_features: int | None = None,
+                 gaussian_fit: bool = False,
+                 X_variable_names_for_gaussian_fit: Optional[list[str]] = None,
+                 y_variable_name_for_gaussian_fit: Optional[str] = None,
                  **kwargs):
+        # Specify loss and template expression for Gaussian fit
+        if gaussian_fit:
+            assert X_variable_names_for_gaussian_fit is not None
+            assert isinstance(X_variable_names_for_gaussian_fit, list)
+            assert isinstance(y_variable_name_for_gaussian_fit, str)
+            X_variable_names_as_string = ', '.join(X_variable_names_for_gaussian_fit)
+            elementwise_loss = "my_custom_loss(predicted, target) = predicted"
+            # sigma = exp(g({X_variable_names_as_string}) + 0.1)
+            expression_spec = TemplateExpressionSpec(
+                expressions=["f", "g"],
+                variable_names=X_variable_names_for_gaussian_fit + [y_variable_name_for_gaussian_fit],
+                combine=f"""
+                    mu = f({X_variable_names_as_string})
+                    sigma = g({X_variable_names_as_string})
+
+                    log(sigma) + ({y_variable_name_for_gaussian_fit} - mu)^2 / (2 * sigma^2)
+                """
+            )
         # Randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
         if random_state is None:
             random_state = random_seed
@@ -149,6 +168,10 @@ class Emulator(PySRRegressor):
         # Update logger_spec if needed
         if not Config.automatic_loading_and_saving:
             self.logger_spec = None
+        # Add parameter
+        self.gaussian_fit = gaussian_fit
+        self.X_variable_names_for_gaussian_fit = X_variable_names_for_gaussian_fit
+        self.y_variable_name_for_gaussian_fit = y_variable_name_for_gaussian_fit
         # Create attributes
         self.index_for_validated_model_selection_ = None
         self.run_ = None
@@ -208,20 +231,15 @@ class Emulator(PySRRegressor):
         Parameters & Results
         ----------
         Same as the self.fit method"""
-        # Extract X_fit and y_fit
-        if validation_mask is None:
-            X_fit, y_fit = X, y
-        else:
-            X_fit, y_fit = get_X_and_y(X, y, validation_mask, validation_set=False)
-
-        try_loading = run.has_been_saved and Config.automatic_loading_and_saving
-        if try_loading:
+        # Try loading emulator from file
+        if run.has_been_saved and Config.automatic_loading_and_saving and (not self.gaussian_fit):
             try:
                 emulator_from_file = self.from_file(run_directory=run.run_directory)
             except RuntimeError:
                 emulator_from_file = None
         else:
             emulator_from_file = None
+
         # Load checkpoint if it exists, otherwise run _fit method
         if emulator_from_file is not None:
             #  Start loading from a pickle file
@@ -232,9 +250,6 @@ class Emulator(PySRRegressor):
             self.equations_ = emulator_from_file.equations_
             self.julia_state_stream_ = emulator_from_file.julia_state_stream_
         else:
-            # log_info(f'Tried loading: {try_loading}')
-            # if not try_loading:
-            #     raise ValueError(f'this should not have happened')
             log_info(f'Fit with {self.non_default_params}')
             #  Fit with logging and compute its duration
             start_time = time.monotonic()
@@ -243,8 +258,8 @@ class Emulator(PySRRegressor):
             logging = (self.logger_spec is True)
             if logging:
                 self.logger_spec = run.get_logger_spec(log_interval=1 * self.populations)
-            #  Fit on the train set
-            super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
+            #  Fit
+            self._fit(X, y, validation_mask, variable_names, X_units, y_units)
             if logging:
                 self.logger_spec = True
             end_time = time.monotonic()
@@ -254,34 +269,6 @@ class Emulator(PySRRegressor):
                 log_info(f'Save fit to file')
                 run.save_fit(duration, verbose=False)
 
-        # #  Insert some columns inside equations_ with some simplified members
-        # indexes_to_simplify = list(self.equations_.index.copy()[1:])
-        # new_index = indexes_to_simplify[-1] + 1
-        # new_complexity = 31
-        # for index in indexes_to_simplify[8:11]:
-        #     # For each equation we compute a simplification of it
-        #     nb_terms_to_simplify = 2
-        #     simplified_expr = sum(expand(self.equations_.loc[index, 'sympy_format']).args[:-nb_terms_to_simplify])
-        #     f = CallableEquation(simplified_expr, symbols(' '.join(variable_names)))
-        #     loss = metric_to_function[Metric.MSE](y_true=y_fit, y_pred=f(X_fit))
-        #     d = {
-        #         'sympy_format': simplified_expr,
-        #         'lambda_format': f,
-        #         'loss': loss,
-        #         'score': None,
-        #         'equation': str(simplified_expr),
-        #         'complexity': new_complexity,
-        #     }
-        #     new_series = pd.DataFrame(index=[new_index], columns=self.equations_.columns,
-        #                               data={k: [v] for k,v in d.items()})
-        #     self.equations_ = pd.concat([self.equations_, new_series])
-        #     new_index += 1
-        #     new_complexity += 2
-        # # Sort equations_ by complexity
-        # self.equations_.sort_values(by='complexity', inplace=True)
-
-
-
         #  Add a 'validation_loss' column in self.equations_
         if validation_mask is not None:
             X_validation, y_validation = get_X_and_y(X, y, validation_mask, validation_set=True)
@@ -290,6 +277,28 @@ class Emulator(PySRRegressor):
             self.index_for_validated_model_selection_ = np.nanargmin(self.validation_loss_list)
 
         return self
+
+    def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
+             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
+             y_units: Optional[ArrayLike[str]] = None):
+        #  Extract X_fit and y_fit
+        if validation_mask is None:
+            X_fit, y_fit = X, y
+        else:
+            X_fit, y_fit = get_X_and_y(X, y, validation_mask, validation_set=False)
+        # Modify X_fit and y_fit for Gaussian fit
+        if self.gaussian_fit:
+            if (X_units is not None) or (y_units is not None):
+                # warn if some units were specified
+                warnings.warn('Units are not accounted for in a gaussian fit, '
+                              'because TemplateExpr does not handle units,'
+                              'see https://github.com/MilesCranmer/PySR/discussions/869 ')
+            X_units, y_units = None, None
+            assert variable_names == self.X_variable_names_for_gaussian_fit
+            X_fit = np.concat([X_fit, np.expand_dims(y_fit, axis=1)], axis=1)
+            y_fit = np.zeros(len(X_fit))
+            variable_names = self.X_variable_names_for_gaussian_fit + [self.y_variable_name_for_gaussian_fit]
+        super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
 
     """Method to compute loss"""
 

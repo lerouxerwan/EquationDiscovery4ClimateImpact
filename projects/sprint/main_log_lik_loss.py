@@ -2,13 +2,7 @@ import numpy as np
 from pysr import TemplateExpressionSpec, PySRRegressor
 
 from data.utils_dataset.dataset import Dataset
-from data.utils_dataset.npp_season_v1 import dataset_npp_season_v1
 from data.utils_dataset.validation_split import ValidationSplit
-from emulator.emulator import Emulator
-from plot.by_rcp.plot_climato import plot_climato
-from plot.by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
-from plot.by_split.plot_scatter import plot_scatter_side_by_side, plot_scatter
-from plot.plot_diagnosis import plot_diagnosis
 
 custom_function = """
 function eval_loss(tree, dataset::Dataset{T,L}, options)::L where {T,L}

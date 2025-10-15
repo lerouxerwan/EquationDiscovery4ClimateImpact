@@ -97,6 +97,9 @@ class EmulatorWithSearch(Emulator):
                  extra_torch_mappings: dict[Callable, Callable] | None = None,
                  extra_jax_mappings: dict[Callable, str] | None = None, denoise: bool = False,
                  select_k_features: int | None = None,
+                 gaussian_fit: bool = False,
+                 X_variable_names_for_gaussian_fit: Optional[list[str]] = None,
+                 y_variable_name_for_gaussian_fit: Optional[str] = None,
                  # Additional parameters
                  search_style: Optional[str] = None,
                  n_iter: int = 10,
@@ -146,6 +149,8 @@ class EmulatorWithSearch(Emulator):
                          update=update, output_jax_format=output_jax_format, output_torch_format=output_torch_format,
                          extra_sympy_mappings=extra_sympy_mappings, extra_torch_mappings=extra_torch_mappings,
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
+                         gaussian_fit=gaussian_fit, X_variable_names_for_gaussian_fit=X_variable_names_for_gaussian_fit,
+                         y_variable_name_for_gaussian_fit=y_variable_name_for_gaussian_fit,
                          **kwargs)
         self.search_style = 'random' if search_style is None else search_style
         self.n_iter = n_iter
