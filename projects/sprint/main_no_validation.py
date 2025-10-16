@@ -1,8 +1,10 @@
+import numpy as np
+
 from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from emulator.emulator import Emulator
-from emulator.utils_emulator import Config
 from plot.plot_diagnosis import plot_diagnosis
+
 
 def main_gaussian(niterations: int):
     print('Gaussian')
@@ -18,17 +20,31 @@ def main_gaussian(niterations: int):
     # plot_loss_vs_complexity(emulator, dataset, show=True)
     # plot_diagnosis(emulator, dataset, show=False)
 
-def main_normal(niterations: int):
+def main_normal(niterations: int, scaling_data_augmentation: int = None):
     print('Normal')
     dataset = get_dataset(validation_split=ValidationSplit.NONE)
     emulator = Emulator(niterations=niterations)
-    emulator.fit(dataset.X_train, dataset.y_train,
+    if scaling_data_augmentation is None:
+        X_fit, y_fit = dataset.X_train, dataset.y_train
+    else:
+        X_fit, y_fit = augment_target(dataset.X_train, dataset.y_train, scaling_data_augmentation)
+    emulator.fit(X_fit, y_fit,
                  X_units=dataset.X_units, y_units=dataset.y_units, variable_names=dataset.X_variable_names)
     # plot_loss_vs_complexity(emulator, dataset, show=True)
     plot_diagnosis(emulator, dataset, show=False)
 
+def augment_target(X, y, scaling: int):
+    percent_of_std = [0.1, 0.5, 1][2]
+    print(f'Percent={percent_of_std}')
+    X = np.concat([X] * scaling, axis=0)
+    noise_level = percent_of_std * np.std(y) / 100
+    y = np.concat([y] + [np.random.normal(y, noise_level) for _ in range(scaling - 1)], axis=0)
+    assert len(X) == len(y)
+    return X, y
+
 if __name__ == '__main__':
-    niterations = 10000
+    niterations = 2000
     print(niterations)
     # main_gaussian(niterations=niterations)
-    main_normal(niterations=niterations)
+    for scaling in [2, 10, 20]:
+        main_normal(niterations=niterations, scaling_data_augmentation=scaling)
