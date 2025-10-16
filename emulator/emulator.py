@@ -5,6 +5,7 @@ from typing import Literal, Callable, Optional, Any
 
 import numpy as np
 import pandas as pd
+from pandas.errors import EmptyDataError
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec, TemplateExpressionSpec
 from pysr.utils import ArrayLike
 from sympy import Expr, Symbol
@@ -238,7 +239,7 @@ class Emulator(PySRRegressor):
         if run.has_been_saved and Config.automatic_loading_and_saving and (not self.gaussian_fit):
             try:
                 emulator_from_file = self.from_file(run_directory=run.run_directory)
-            except RuntimeError:
+            except (RuntimeError, EmptyDataError):
                 emulator_from_file = None
         else:
             emulator_from_file = None

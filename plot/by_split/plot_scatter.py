@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from matplotlib.cm import ScalarMappable
 
 from data.utils_dataset.dataset import Dataset
+from data.utils_dataset.validation_split import ValidationSplit
 from emulator.emulator import Emulator
 from plot.utils_metric.utlis_metric_box import add_metric_box
 from plot.by_split.utils_plot_by_split import load_split_name_to_X_and_y_and_y_predicted_and_years, get_ymin_and_ymax
@@ -84,22 +85,25 @@ def plot_scatter_side_by_side(emulator: Emulator, dataset: Dataset, show: Option
 
     # Plot first axis
     _, y_train, y_predicted_train, years_train = split_name_to_X_and_y_and_y_predicted_and_years['train']
-    _, y_validation, y_predicted_validation, years_validation = split_name_to_X_and_y_and_y_predicted_and_years['validation']
-    y, y_predicted, years = [], [], []
-    i_train, i_validation = 0, 0
-    n_train, n_validation = len(y_train), len(y_validation)
-    while (i_train < n_train) or (i_validation < n_validation):
-        if (i_train < n_train) and ((i_validation == n_validation) or (years_train[i_train] < years_validation[i_validation])):
-            y.append(y_train[i_train])
-            y_predicted.append(y_predicted_train[i_train])
-            years.append(years_train[i_train])
-            i_train += 1
-        else:
-            y.append(y_validation[i_validation])
-            y_predicted.append(y_predicted_validation[i_validation])
-            years.append(years_validation[i_validation])
-            i_validation += 1
-    y, y_predicted, years = np.array(y), np.array(y_predicted), np.array(years)
+    if dataset.validation_split is ValidationSplit.NONE:
+        y, y_predicted, years = y_train, y_predicted_train, years_train
+    else:
+        _, y_validation, y_predicted_validation, years_validation = split_name_to_X_and_y_and_y_predicted_and_years['validation']
+        y, y_predicted, years = [], [], []
+        i_train, i_validation = 0, 0
+        n_train, n_validation = len(y_train), len(y_validation)
+        while (i_train < n_train) or (i_validation < n_validation):
+            if (i_train < n_train) and ((i_validation == n_validation) or (years_train[i_train] < years_validation[i_validation])):
+                y.append(y_train[i_train])
+                y_predicted.append(y_predicted_train[i_train])
+                years.append(years_train[i_train])
+                i_train += 1
+            else:
+                y.append(y_validation[i_validation])
+                y_predicted.append(y_predicted_validation[i_validation])
+                years.append(years_validation[i_validation])
+                i_validation += 1
+        y, y_predicted, years = np.array(y), np.array(y_predicted), np.array(years)
     _, y_test, y_predicted_test, years_test = split_name_to_X_and_y_and_y_predicted_and_years['test']
     all_years = sorted(list(set(years).union(set(years_test))))
     vmin_and_vmax = min(all_years), max(all_years)

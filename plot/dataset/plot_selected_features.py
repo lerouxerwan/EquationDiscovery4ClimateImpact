@@ -15,7 +15,7 @@ def plot_selected_features(emulator: Emulator, dataset:Dataset, show: Optional[b
     selected_feature_indexes = get_selected_feature_indexes(emulator.selected_variable_names, dataset.X_variable_names)
     selected_feature_indexes = selected_feature_indexes[:2]
     ncols = 2
-    nrows = math.ceil(len(selected_feature_indexes) / ncols)
+    nrows = max(1, math.ceil(len(selected_feature_indexes) / ncols))
     fig, axs = get_subplots(nrows=nrows, ncols=ncols, sharex=True)
     if nrows == 1:
         for selected_feature_index, ax in zip(selected_feature_indexes, axs):
