@@ -21,12 +21,27 @@ class SbatchNestedCV(Sbatch):
 
 
 def main_validation_size():
-    for index1 in [0, 1, 2][:]:
-        for index2 in [0, 1, 2][:]:
-            for index3 in [0, 1, 2][:]:
-                indices = [index1, index2, index3]
-                sbatch = SbatchNestedCV(indices)
-                sbatch.run()
+    crashes = [
+        [0, 2, 1],
+        [0, 0, 0],
+        [0, 0, 1],
+
+        [2, 1, 0],
+        [2, 1, 1],
+        [2, 1, 2],
+        [2, 2, 0],
+        [2, 2, 1],
+        [2, 2, 2],
+    ]
+    for crash in crashes:
+        sbatch = SbatchNestedCV(crash)
+        sbatch.run()
+    # for index1 in [0, 1, 2][:]:
+    #     for index2 in [0, 1, 2][:]:
+    #         for index3 in [0, 1, 2][:]:
+    #             indices = [index1, index2, index3]
+    #             sbatch = SbatchNestedCV(indices)
+    #             sbatch.run()
 
 
 if __name__ == '__main__':

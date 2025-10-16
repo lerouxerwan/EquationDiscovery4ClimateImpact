@@ -95,6 +95,11 @@ class Emulator(PySRRegressor):
                  X_variable_names_for_gaussian_fit: Optional[list[str]] = None,
                  y_variable_name_for_gaussian_fit: Optional[str] = None,
                  **kwargs):
+        # Avoid some Julia crashes
+        if population_size <= tournament_selection_n:
+            tournament_selection_n = population_size - 1
+            warnings.warn(f'Set tournament_selection_n={tournament_selection_n} to avoid Julia crash '
+                          f'(because tournament_selection_n must be less than population_size={population_size})')
         # Specify loss and template expression for Gaussian fit
         # we follow the trick illustrated in https://github.com/MilesCranmer/PySR/discussions/1002
         if gaussian_fit:

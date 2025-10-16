@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pytest
 from sympy import Symbol
@@ -119,3 +121,9 @@ def test_loss():
     emulator = Emulator(niterations=1)
     emulator.fit(X, y)
     assert round(emulator.compute_selected_loss(X, y), 2) == round(emulator.selected_loss_train, 2)
+
+def test_corner_case_tournament_selection_n():
+    X, y = load_X_and_y_for_test()
+    emulator = Emulator(niterations=1, tournament_selection_n=15, population_size=14)
+    emulator.fit(X, y)
+
