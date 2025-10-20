@@ -23,12 +23,15 @@ def plot_diagnosis(emulator: Emulator, dataset:Dataset, show: Optional[bool] = F
     log_info('Start plot diagnosis')
     # Select plot functions
     plot_functions = [
-        plot_selected_features, # plot related to the selected equation
         plot_loss_vs_complexity, plot_scatter, plot_residuals, plot_time_series, # plot by split
         plot_climato, plot_errors_climato, plot_climato_side_by_side, # plot by rcp
         plot_scatter_side_by_side, # plot side by side
         plot_decomposition, # plot a decomposition for the selected equation
+        plot_selected_features,  #  plot related to the selected equation
     ]
+    # Remove the two last plots for gaussian fit
+    if emulator.gaussian_fit:
+        plot_functions = plot_functions[:-2]
     if isinstance(emulator, EmulatorWithSearch):
         plot_functions.append(plot_diagnosis_search)
     # Run several plot functions

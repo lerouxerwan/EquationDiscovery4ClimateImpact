@@ -45,6 +45,7 @@ metric_to_label = {
     Metric.RMSE: 'Root mean squared error',
     Metric.MEDAE: 'Median absolute error',
     Metric.SPREADRATIO: 'Spread ratio',
+    Metric.NLL: 'Negative log likelihood',
 }
 
 metric_to_str = {
@@ -55,6 +56,7 @@ metric_to_str = {
     Metric.RMSE: 'RMSE',
     Metric.MEDAE: 'MEDAE',
     Metric.SPREADRATIO: 'SR',
+    Metric.NLL: 'NLL',
 }
 
 str_to_metric = {v: k for k, v in metric_to_str.items()}

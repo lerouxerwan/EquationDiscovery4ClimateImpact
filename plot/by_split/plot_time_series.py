@@ -25,7 +25,7 @@ def plot_time_series(emulator: Emulator, dataset: Dataset, show: Optional[bool] 
         ax.plot(years, y, label=y_true_label, **common_kwargs)
         ax.plot(years, y_predicted, label=y_predicted_label, **common_kwargs)
         # Annotate equation and metric box
-        add_equation(ax, emulator.selected_expr)
+        add_equation(emulator.selected_equation)
         add_metric_box(ax, y, y_predicted, dataset.target_label, split_name, x_and_y_location=(0.05, 0.05))
         #  Add legend and labels
         ax.set_xlabel('Years')

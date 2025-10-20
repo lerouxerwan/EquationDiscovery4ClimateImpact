@@ -2,7 +2,6 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from sympy import Expr
 
-from plot.by_split.utils_equation_str import get_equation_str
 
 
 def get_true_label_and_predicted_label(label: str, remove_units=False) -> list[str]:
@@ -27,11 +26,6 @@ def get_unit(label: str) -> str:
     return '(' + label.split('(')[-1].replace(' ', '')
 
 
-
-def add_equation(ax: Axes, expr: Expr):
-    coef = 0.95
-    plt.suptitle(f'Rounded equation: {get_equation_str(expr)}')
-    # ax.set_title(f'Equation with rounded coefficients: {get_equation_str(expr)}', xy=(0.02, 0.02),
-    #             xycoords='axes fraction', textcoords='offset points', size=7,
-    #             bbox=dict(boxstyle="round", fc=(coef, coef, coef), ec="none"))
+def add_equation(equation: str):
+    plt.suptitle(f'Rounded equation: {equation}')
 

@@ -19,12 +19,12 @@ def compute_df_cv_results(cv_results: dict, X: np.ndarray, y: np.ndarray, valida
     for column_name in [RMSE_TRAIN_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME]:
         df_cv_results[column_name] *= -1
     #  Add columns for the selected equation
-    data = [get_series(emulator, X, y, validation_mask) for emulator in emulators]
+    data = [get_series(emulator) for emulator in emulators]
     df_cv_results = pd.concat([df_cv_results, pd.DataFrame(index=df_cv_results.index, data=data)], axis=1)
     return df_cv_results
 
 
-def get_series(emulator: Emulator, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool]) -> pd.Series:
+def get_series(emulator: Emulator) -> pd.Series:
     """For each model selection, compute RMSE train, RMSE validation, selected complexity/expr/variables names"""
     # Check for empty data
     if hasattr(emulator, 'equations'):
@@ -35,7 +35,7 @@ def get_series(emulator: Emulator, X: np.ndarray, y: np.ndarray, validation_mask
     if empty_data:
         data = [np.inf, np.inf, np.inf, np.nan, []]
     else:
-        data = [emulator.selected_complexity, emulator.selected_expr, emulator.selected_variable_names]
+        data = [emulator.selected_complexity, emulator.selected_equation, emulator.selected_variable_names]
     # Return Series
     return pd.Series(data=data, index=COLUMN_NAMES)
 

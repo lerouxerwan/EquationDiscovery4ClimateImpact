@@ -16,6 +16,7 @@ from data.utils_run.run import Run
 from data.utils_run.utils_run import get_output_directory, get_run_id
 from emulator.utils_emulator import get_X_for_gaussian_fit, get_lambda_function_list, get_loss_str_gaussian_fit, \
     compute_loss_gaussian_fit
+from plot.by_split.utils_equation_str import get_equation
 from plot.utils_metric.metric import Metric, compute_loss
 from utils.utils_log import log_info
 from utils.utils_non_default_params import get_non_default_params
@@ -290,6 +291,9 @@ class Emulator(PySRRegressor):
             # Add two columns
             self.equations_['mu'] = mu_functions
             self.equations_['sigma'] = sigma_functions
+        else:
+            # Add 'equation' column
+            self.equations_['equation'] = self.equations_['sympy_format'].apply(get_equation)
 
         # Update 'loss' column if needed
         if self.metric_ is Metric.RMSE:
@@ -389,12 +393,20 @@ class Emulator(PySRRegressor):
     @property
     def selected_expr(self) -> Expr:
         """Sympy expressions for the selected equation"""
-        return self.selected_row['sympy_format']
+        if self.gaussian_fit:
+            raise NotImplementedError
+        else:
+            return self.selected_row['sympy_format']
+
+    @property
+    def selected_equation(self) -> str:
+        """Equation as a string (potentially rounded to reduce the length)"""
+        return self.selected_row['equation']
 
     @property
     def selected_variable_names(self) -> list[str]:
         """List of variables names in the selected equation"""
-        return [str(s) for s in self.selected_expr.atoms(Symbol)]
+        return list(set([str(s) for s in self.selected_expr.atoms(Symbol)]))
 
     """Properties/method for every equation of the Pareto optimal set of equations"""
 
@@ -420,7 +432,15 @@ class Emulator(PySRRegressor):
     @property
     def expr_list(self) -> list[Expr]:
         """List of sympy expressions for the equations of the Pareto front"""
-        return self.equations_['sympy_format'].to_list()
+        if self.gaussian_fit:
+            raise NotImplementedError
+        else:
+            return self.equations_['sympy_format'].to_list()
+
+    @property
+    def equation_list(self) -> list[str]:
+        """List of equations as string that belongs to the Pareto front"""
+        return self.equations_['equation'].to_list()
 
     """Other methods/properties"""
 

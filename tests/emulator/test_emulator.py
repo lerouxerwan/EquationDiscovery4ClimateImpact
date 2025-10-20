@@ -61,8 +61,7 @@ def test_units(X_units_and_expected_variable_names):
     X, y = load_X_and_y_for_test(nb_features=nb_features)
     variable_names = [f'x{i+1}' for i in range(nb_features)]
     emulator.fit(X, y, variable_names=variable_names, X_units=X_units, y_units=y_units)
-    selected_variable_names = set(emulator.selected_expr.atoms(Symbol))
-    sorted_selected_variable_names = sorted([str(variable_name) for variable_name in set(selected_variable_names)])
+    sorted_selected_variable_names = sorted([variable_name for variable_name in emulator.selected_variable_names])
     # The selected expression should only contain expected variable to agree with the unit of the target
     assert list(sorted_selected_variable_names) == expected_variable_names
     emulator.remove_folder()

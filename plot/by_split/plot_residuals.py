@@ -26,7 +26,7 @@ def plot_residuals(emulator: Emulator, dataset: Dataset, show: Optional[bool] = 
         # Add grid and diagonal line
         ax.grid()
         # Annotate equation and metric box
-        add_equation(ax, emulator.selected_expr)
+        add_equation(emulator.selected_equation)
         # Add legend and labels
         ax.legend()
         ax.set_xlabel(f'Residuals for {split_name} set ({dataset.y_units[0]})')

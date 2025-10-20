@@ -6,48 +6,23 @@ from sympy import Expr, Number
 from utils.utils_date import get_short_month_names, get_season_short_names
 
 
-def get_equation_str(expr: Expr, add_bold=False, add_underline=False) -> str:
-    equation_str = str(round_expr_v3(expr))
-    if add_bold:
-        equation_str  = '$\\mathbf{' + equation_str + '}$'
-        # equation_str  = '$\\mathbf{' + equation_str + '}$ (selected equation)'
-    # elif add_underline:
-    #     equation_str = '$\\mathbf{' + equation_str + '}$ (selected equation with PySR)'
-    else:
-        equation_str = f'${equation_str}$'
+def get_equation(expr: Expr) -> str:
+    equation_str = str(round_expr(expr))
     # Replace the month or the season
     for short_name in get_short_month_names() + get_season_short_names():
         equation_str = equation_str.replace(f'_{short_name}', '_{' + short_name + '}')
     # Remove the "_" after "Max", "Min" and "Mean"
     for s in ["Max", "Min", "Mean"]:
         equation_str = equation_str.replace(f'{s}_', s)
-    equation_str = text_on_two_lines_if_too_long(equation_str)
-    return equation_str
-
-def round_expr(expr: Expr, num_digits: int) -> Expr:
-    number_replacement = 1
-    while number_replacement > 0:
-        numbers = expr.atoms(Number)
-        number_replacement = 0
-        for number in numbers:
-            round_number = round(number, num_digits)
-            if round_number != number:
-                number_replacement += 1
-                expr = expr.subs(number, round_number)
-    return expr
+    # Split the equation on 2 lines if it is too long
+    return text_on_two_lines_if_too_long(equation_str)
 
 
-def round_expr_v2(expr: Expr, num_digits: int) -> Expr:
-    numbers = expr.atoms(Number)
-    for number in numbers:
-        round_number = round(number, num_digits)
-        new_expr = expr.subs(number, round_number)
-        if len(new_expr.atoms(Number)) == len(numbers):
-            expr = new_expr
-    return expr
+def get_bold_equation(equation_str: str) -> str:
+    return '$\\mathbf{' + equation_str + '}$'
 
 
-def round_expr_v3(expr: Expr) -> Expr:
+def round_expr(expr: Expr) -> Expr:
     numbers = expr.atoms(Number)
     for number in numbers:
         for num_digits in range(5):

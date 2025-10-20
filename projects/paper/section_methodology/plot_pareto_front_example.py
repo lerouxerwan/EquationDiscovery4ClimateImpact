@@ -4,9 +4,8 @@ from matplotlib.axes import Axes
 from matplotlib.scale import FuncScale
 
 from emulator.emulator import Emulator
-from plot.utils_metric.metric import Metric
 from plot.by_split.utils_axis import functions_for_yaxis
-from plot.by_split.utils_equation_str import get_equation_str
+from plot.utils_metric.metric import Metric
 from utils.utils_plot import show_or_save_plot
 
 
@@ -23,7 +22,7 @@ def plot_pareto_front_example(emulator: Emulator, X: np.ndarray, y: np.ndarray,
     x_ticks = complexity_list
     set_x_axis_example(ax, x_ticks)
     ax.set_xticks(x_ticks)
-    xticklabels = [get_equation_str(expr).replace('x0', 'x') for expr in emulator.expr_list]
+    xticklabels = [equation.replace('x0', 'x') for equation in emulator.equation_list]
     # xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True).replace('x0', 'x')
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     # Add y-axis with special scaling

@@ -35,7 +35,6 @@ def _plot_decomposition(expr: Expr, X: np.ndarray, variable_names: list[str], ye
 
 def extract_terms_and_percentages(expr: Expr, X: np.ndarray, variable_names: list[str]):
     #  Extract terms
-    print(expr)
     terms = expand(expr).args
     #  Extract list of percentages
     matrix_of_percentages = []

@@ -5,12 +5,12 @@ import numpy as np
 
 from data.utils_dataset.dataset import Dataset
 from emulator.emulator import Emulator
-from plot.utils_metric.metric import Metric
 from plot.by_split.utils_axis import set_log_y_axis, set_x_axis
+from plot.by_split.utils_equation_str import get_bold_equation
 from plot.by_split.utils_plot_by_split import load_split_name_to_X_and_y
-from plot.by_split.utils_equation_str import get_equation_str
 from plot.by_split.utils_plot_split_name import SPLIT_NAMES, split_name_to_color, \
     get_label_split_name
+from plot.utils_metric.metric import Metric
 from utils.utils_plot import show_and_save_with_optional_plot_folder
 
 
@@ -51,8 +51,9 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
     set_x_axis(ax, x_ticks)
     ax.set_xticks(x_ticks)
     # Add equations as ticklabels (show in bold the selected equation)
-    xticklabels = [get_equation_str(expr) for expr in emulator.expr_list]
-    xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True)
+    xticklabels = emulator.equation_list
+    index_selected_equation = complexity_list.index(emulator.selected_complexity)
+    xticklabels[index_selected_equation] = get_bold_equation(xticklabels[index_selected_equation])
     # Add y-axis with special scaling
     set_log_y_axis(ax, all_loss_list, dataset.target_label, emulator.metric_)
     # General settings for the plot

@@ -41,4 +41,3 @@ if __name__ == '__main__':
                  dataset.X_variable_names)
     plot_diagnosis(emulator, dataset)
     print(emulator.loss_list)
-    print(emulator.expr_list)

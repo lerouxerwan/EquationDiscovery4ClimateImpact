@@ -43,7 +43,7 @@ def _plot_scatter(ax, dataset, emulator, fig, split_name, y, y_predicted, years,
     ax.grid()
     ax.plot([ymin, ymax], [ymin, ymax], color='grey', linestyle='--')
     # Annotate equation and metric box
-    add_equation(ax, emulator.selected_expr)
+    add_equation(emulator.selected_equation)
     add_metric_box(ax, y, y_predicted, dataset.target_label, split_name)
     # Add second metric box
     nb_years = dataset.nb_historical_years
