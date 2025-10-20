@@ -1,12 +1,9 @@
-import warnings
-
 import numpy as np
 import pytest
 from sympy import Symbol
 
 from data.utils_dataset.utils_validation import get_X_and_y
 from emulator.emulator import Emulator
-from emulator.emulator_with_search import EmulatorWithSearch
 from tests.data.utils_tests_dataset import load_X_and_y_and_validation_mask_for_test, load_X_and_y_for_test
 
 
@@ -96,6 +93,7 @@ def test_warm_start():
     X, y = load_X_and_y_for_test()
     emulator = Emulator(niterations=20)
     emulator.fit(X, y)
+    emulator.remove_folder()
     complexity_to_loss = dict(zip(emulator.complexity_list, emulator.loss_list))
     emulator.warm_start = True
     emulator.niterations = 15
@@ -104,8 +102,7 @@ def test_warm_start():
         if complexity in complexity_to_loss:
             # Assert that the new loss (with one more iteration) is equal or smaller than the previous loss
             assert round(loss, 2) <= round(complexity_to_loss[complexity], 2)
-            # print(round(loss, 2), round(complexity_to_loss[complexity], 2))
-    assert emulator.loss_list
+    emulator.remove_folder()
 
 def test_is_gaussian():
     X, y = load_X_and_y_for_test()
@@ -134,9 +131,11 @@ def test_loss():
     emulator = Emulator(niterations=1)
     emulator.fit(X, y)
     assert round(emulator.compute_selected_loss(X, y), 2) == round(emulator.selected_loss_train, 2)
+    emulator.remove_folder()
 
 def test_corner_case_tournament_selection_n():
     X, y = load_X_and_y_for_test()
     emulator = Emulator(niterations=1, tournament_selection_n=15, population_size=14)
     emulator.fit(X, y)
+    emulator.remove_folder()
 

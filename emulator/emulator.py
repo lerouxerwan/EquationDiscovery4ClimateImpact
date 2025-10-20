@@ -1,22 +1,20 @@
-import pickle as pkl
+import time
 import time
 import warnings
 from datetime import timedelta
-from pathlib import Path
-from typing import Literal, Callable, Optional, Any, cast
+from typing import Literal, Callable, Optional, Any
 
 import numpy as np
 import pandas as pd
-from numpy.typing import NDArray
 from pandas.errors import EmptyDataError
-from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec, TemplateExpressionSpec, pysr_logger
-from pysr.utils import ArrayLike, _subscriptify, PathLike
+from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec, TemplateExpressionSpec
+from pysr.utils import ArrayLike
 from sympy import Expr, Symbol
 
 from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_run.run import Run
 from data.utils_run.utils_run import get_output_directory, get_run_id
-from emulator.utils_emulator import Config, get_X_for_gaussian_fit, get_lambda_function_list, get_loss_str_gaussian_fit, \
+from emulator.utils_emulator import get_X_for_gaussian_fit, get_lambda_function_list, get_loss_str_gaussian_fit, \
     compute_loss_gaussian_fit
 from plot.utils_metric.metric import Metric, compute_loss
 from utils.utils_log import log_info
@@ -178,9 +176,6 @@ class Emulator(PySRRegressor):
         # Change default dimensional_constraint_penalty
         if self.dimensional_constraint_penalty is None:
             self.dimensional_constraint_penalty = 10 ** 8
-        # Update logger_spec if needed
-        if not Config.automatic_loading_and_saving:
-            self.logger_spec = None
         # Add parameter
         self.gaussian_fit = gaussian_fit
         self.X_variable_names_for_gaussian_fit = X_variable_names_for_gaussian_fit
@@ -245,7 +240,7 @@ class Emulator(PySRRegressor):
         ----------
         Same as the self.fit method"""
         # Try loading emulator from file
-        if run.has_been_saved and Config.automatic_loading_and_saving:
+        if run.has_been_saved:
             try:
                 emulator_from_file = self.from_file(run_directory=run.run_directory)
             except (RuntimeError, EmptyDataError):
@@ -278,9 +273,8 @@ class Emulator(PySRRegressor):
             end_time = time.monotonic()
             duration = str(timedelta(seconds=end_time - start_time))
             # Save duration and tensorboard command to file
-            if Config.automatic_loading_and_saving:
-                log_info(f'Save fit to file')
-                run.save_fit(duration, verbose=False)
+            log_info(f'Save fit to file')
+            run.save_fit(duration, verbose=False)
 
         # Post-processing for Gaussian fit,
         if self.gaussian_fit:
@@ -334,8 +328,8 @@ class Emulator(PySRRegressor):
         super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
         #  Save checkpoint without the 2 columns containing julia objects, including dynamical equations
         if self.gaussian_fit and (not self.temp_equation_file):
-            # self.expression_spec = None
             self.equations_.drop(columns=['julia_expression', 'lambda_format'], inplace=True)
+            # renaming variable names from #1 -> x1 because it seems to hurt loading from pickle files
             self.equations_['equation'] = self.equations_['equation'].apply(lambda s: s.replace('#', 'x'))
             self._checkpoint()
 
@@ -441,144 +435,3 @@ class Emulator(PySRRegressor):
 
     def remove_folder(self):
         self.run_.remove_folder()
-
-
-    @classmethod
-    def from_file(
-        cls,
-        equation_file: None = None,  # Deprecated
-        *,
-        run_directory: PathLike,
-        binary_operators: list[str] | None = None,
-        unary_operators: list[str] | None = None,
-        n_features_in: int | None = None,
-        feature_names_in: ArrayLike[str] | None = None,
-        selection_mask: NDArray[np.bool_] | None = None,
-        nout: int = 1,
-        **pysr_kwargs,
-    ) -> "PySRRegressor":
-        """
-        Create a model from a saved model checkpoint or equation file.
-
-        Parameters
-        ----------
-        run_directory : str
-            The directory containing outputs from a previous run.
-            This is of the form `[output_directory]/[run_id]`.
-            Default is `None`.
-        binary_operators : list[str]
-            The same binary operators used when creating the model.
-            Not needed if loading from a pickle file.
-        unary_operators : list[str]
-            The same unary operators used when creating the model.
-            Not needed if loading from a pickle file.
-        n_features_in : int
-            Number of features passed to the model.
-            Not needed if loading from a pickle file.
-        feature_names_in : list[str]
-            Names of the features passed to the model.
-            Not needed if loading from a pickle file.
-        selection_mask : NDArray[np.bool_]
-            If using `select_k_features`, you must pass `model.selection_mask_` here.
-            Not needed if loading from a pickle file.
-        nout : int
-            Number of outputs of the model.
-            Not needed if loading from a pickle file.
-            Default is `1`.
-        **pysr_kwargs : dict
-            Any other keyword arguments to initialize the PySRRegressor object.
-            These will overwrite those stored in the pickle file.
-            Not needed if loading from a pickle file.
-
-        Returns
-        -------
-        model : PySRRegressor
-            The model with fitted equations.
-        """
-        if equation_file is not None:
-            raise ValueError(
-                "Passing `equation_file` is deprecated and no longer compatible with "
-                "the most recent versions of PySR's backend. Please pass `run_directory` "
-                "instead, which contains all checkpoint files."
-            )
-
-        pkl_filename = Path(run_directory) / "checkpoint.pkl"
-        if pkl_filename.exists():
-            pysr_logger.info(f"Attempting to load model from {pkl_filename}...")
-            assert binary_operators is None
-            assert unary_operators is None
-            assert n_features_in is None
-            with open(pkl_filename, "rb") as f:
-                model = cast("Emulator", pkl.load(f))
-
-            # Update any parameters if necessary, such as
-            # extra_sympy_mappings:
-            model.set_params(**pysr_kwargs)
-
-            if "equations_" not in model.__dict__ or model.equations_ is None:
-                model.refresh()
-
-            if model.expression_spec is not None:
-                warnings.warn(
-                    "Loading model from checkpoint file with a non-default expression spec "
-                    "is not fully supported as it relies on dynamic objects. This may result in unexpected behavior.",
-                )
-
-            return model
-        else:
-            pysr_logger.info(
-                f"Checkpoint file {pkl_filename} does not exist. "
-                "Attempting to recreate model from scratch..."
-            )
-            csv_filename = Path(run_directory) / "hall_of_fame.csv"
-            csv_filename_bak = Path(run_directory) / "hall_of_fame.csv.bak"
-            if not csv_filename.exists() and not csv_filename_bak.exists():
-                raise FileNotFoundError(
-                    f"Hall of fame file `{csv_filename}` or `{csv_filename_bak}` does not exist. "
-                    "Please pass a `run_directory` containing a valid checkpoint file."
-                )
-            assert binary_operators is not None or unary_operators is not None
-            assert n_features_in is not None
-            model = cls(
-                binary_operators=binary_operators,
-                unary_operators=unary_operators,
-                **pysr_kwargs,
-            )
-            model.nout_ = nout
-            model.n_features_in_ = n_features_in
-
-            if feature_names_in is None:
-                model.feature_names_in_ = np.array(
-                    [f"x{i}" for i in range(n_features_in)]
-                )
-                model.display_feature_names_in_ = np.array(
-                    [f"x{_subscriptify(i)}" for i in range(n_features_in)]
-                )
-            else:
-                assert len(feature_names_in) == n_features_in
-                model.feature_names_in_ = feature_names_in
-                model.display_feature_names_in_ = feature_names_in
-
-            if selection_mask is None:
-                model.selection_mask_ = np.ones(n_features_in, dtype=np.bool_)
-            else:
-                model.selection_mask_ = selection_mask
-
-            model.refresh(run_directory=run_directory)
-
-            return model
-
-    def _checkpoint(self):
-        """Save the model's current state to a checkpoint file.
-
-        This should only be used internally by PySRRegressor.
-        """
-        # Save model state:
-        self.show_pickle_warnings_ = False
-        with open(self.get_pkl_filename(), "wb") as f:
-            try:
-                pkl.dump(self, f)
-            except Exception as e:
-                pysr_logger.debug(f"Error checkpointing model: {e}")
-        self.show_pickle_warnings_ = True
-

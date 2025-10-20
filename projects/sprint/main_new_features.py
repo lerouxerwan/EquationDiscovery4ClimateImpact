@@ -1,6 +1,5 @@
 from data.utils_dataset.npp_season_v1 import get_dataset
 from emulator.emulator import Emulator
-from emulator.utils_emulator import Config
 from plot.plot_diagnosis import plot_diagnosis
 
 def main_gaussian():
@@ -15,7 +14,6 @@ def main_gaussian():
     plot_diagnosis(emulator, dataset, show=False)
 
 def main_normal():
-    Config.automatic_loading_and_saving = False
     emulator = Emulator()
     dataset = get_dataset()
     emulator.fit(dataset.X_train, dataset.y_train, dataset.validation_mask,

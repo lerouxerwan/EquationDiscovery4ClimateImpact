@@ -14,9 +14,6 @@ params_that_do_not_impact_the_fit_results = {'logger_spec', 'output_directory', 
                                              # depend on 'gaussian_fit' params, so  we do not need to include
                                              'expression_spec', 'elementwise_loss', 'loss_function'}
 
-class Config:
-    automatic_loading_and_saving = True
-
 ### Some methods for gaussian fit ###
 
 def get_loss_str_gaussian_fit(y_variable_name: str):

@@ -1,11 +1,9 @@
 from typing import Optional, Any
 
 import numpy as np
-from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, ParameterSampler
 
 from emulator.utils_hyperparameter_search.utils_params_distribution import get_param_distributions
-from emulator.utils_hyperparameter_search.utils_scaling_factor import get_param_grid
 from utils.utils_run import random_seed
 
 
@@ -31,8 +29,3 @@ def get_random_params_list_from_param_grid(param_grid: dict, n_iter: Optional[in
     """Return the list of hyperparameters sampled for the hyperparameter search"""
     return list(ParameterSampler(**get_search_cv_kwargs(RandomizedSearchCV, param_grid, n_iter)))
 
-def get_random_params_list_from_estimator(estimator: BaseEstimator, scaling_factor: float, n_iter: int,
-                                          param_list_to_optimize: Optional[list[str]] = None) -> list[dict[str, Any]]:
-    """Return the list of hyperparameters sampled for the hyperparameter search"""
-    param_grid = get_param_grid(estimator, scaling_factor, 'random', n_iter, param_list_to_optimize)
-    return get_random_params_list_from_param_grid(param_grid, n_iter)

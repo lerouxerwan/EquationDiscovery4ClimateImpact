@@ -11,7 +11,6 @@ from sklearn.model_selection._search import BaseSearchCV
 from data.utils_run.run import Run
 from data.utils_run.utils_run import get_run_id
 from emulator.emulator import Emulator
-from emulator.utils_emulator import Config
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME
 from emulator.utils_hyperparameter_search.utils_df_cv_results import compute_df_cv_results
 from emulator.utils_hyperparameter_search.utils_scaling_factor import get_param_grid
@@ -207,7 +206,7 @@ class EmulatorWithSearch(Emulator):
         self.initialize_run(X, y, validation_mask)
 
         # Check if the hyperparameter search has been run before
-        if op.exists(self.run_.filepath_search_result) and Config.automatic_loading_and_saving:
+        if op.exists(self.run_.filepath_search_result):
             pass
         else:
             self.run_and_save_hyperparameter_search(X, y, validation_mask, variable_names, X_units, y_units)
