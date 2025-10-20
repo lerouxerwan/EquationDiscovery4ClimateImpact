@@ -340,10 +340,15 @@ class Emulator(PySRRegressor):
     def predict(self, X, index: int | list[int] | None = None, *, category: np.ndarray | None = None) -> np.ndarray:
         if self.metric_ is Metric.NLL:
             assert category is None
-            row = self.get_best() if index is None else self.equations_.iloc[index]
-            return np.apply_along_axis(row['mu'], axis=1, arr=X)
+            return self.get_distri_param(X, 'mu', index)
         else:
             return super().predict(X, index, category=category)
+
+    def get_distri_param(self, X, distri_param_name: str, index: int | list[int] | None = None) -> np.ndarray:
+        assert self.gaussian_fit
+        assert distri_param_name in self.equations_.columns
+        row = self.get_best() if index is None else self.equations_.iloc[index]
+        return np.apply_along_axis(row[distri_param_name], axis=1, arr=X)
 
     """Method to compute the loss"""
 
