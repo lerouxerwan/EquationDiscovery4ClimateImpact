@@ -111,9 +111,17 @@ def test_is_gaussian():
     X, y = load_X_and_y_for_test()
     X_variable_names = ['x']
     y_variable_name = 'y'
-    emulator = Emulator(niterations=1, gaussian_fit=True,
-                        X_variable_names_for_gaussian_fit=X_variable_names, y_variable_name_for_gaussian_fit=y_variable_name)
+    emulator = Emulator(niterations=1, gaussian_fit=True, X_variable_names_for_gaussian_fit=X_variable_names,
+                        y_variable_name_for_gaussian_fit=y_variable_name)
     emulator.fit(X, y, variable_names=X_variable_names)
+    check_loss_and_predict(emulator, X, y)
+    emulator = Emulator(niterations=1, gaussian_fit=True, X_variable_names_for_gaussian_fit=X_variable_names,
+                        y_variable_name_for_gaussian_fit=y_variable_name)
+    emulator.fit(X, y, variable_names=X_variable_names)
+    check_loss_and_predict(emulator, X, y)
+    emulator.remove_folder()
+
+def check_loss_and_predict(emulator: Emulator, X: np.ndarray, y: np.ndarray):
     loss_train_computed = round(float(emulator.compute_selected_loss(X, y)), 2)
     loss_train = round(float(emulator.selected_loss_train), 2)
     assert loss_train_computed == loss_train
