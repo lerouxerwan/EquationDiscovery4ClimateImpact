@@ -1,3 +1,5 @@
+from typing import Callable
+
 import numpy as np
 
 params_that_do_not_impact_the_fit_results = {'logger_spec', 'output_directory', 'run_id',
@@ -15,3 +17,10 @@ class Config:
 
 def get_X_for_gaussian_fit(X: np.ndarray, y: np.ndarray) -> np.ndarray:
     return np.concat([X, np.expand_dims(y, axis=1)], axis=1)
+
+
+def get_lambda_function_kwargs(s: str) -> Callable:
+    return lambda **kwargs: eval(s, {}, kwargs)
+
+def get_lambda_function_list(s: str, variable_names: list[str]) -> Callable:
+    return lambda *args: eval(s, {}, dict(zip(variable_names, args[0])))

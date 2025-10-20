@@ -117,6 +117,8 @@ def test_is_gaussian():
     loss_train_computed = round(float(emulator.compute_selected_loss(X, y)), 2)
     loss_train = round(float(emulator.selected_loss_train), 2)
     assert loss_train_computed == loss_train
+    emulator.predict(X)
+    emulator.predict(X, index=0)
 
 
 def test_loss():
