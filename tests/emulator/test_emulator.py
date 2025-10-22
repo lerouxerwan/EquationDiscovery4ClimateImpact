@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from sympy import Symbol
+from numpy import ndarray
 
 from data.utils_dataset.utils_validation import get_X_and_y
 from emulator.emulator import Emulator
@@ -117,7 +117,7 @@ def test_is_gaussian():
     check_loss_and_predict(emulator, X, y)
     emulator.remove_folder()
 
-def check_loss_and_predict(emulator: Emulator, X: np.ndarray, y: np.ndarray):
+def check_loss_and_predict(emulator: Emulator, X: ndarray, y: ndarray):
     loss_train_computed = round(float(emulator.compute_selected_loss(X, y)), 2)
     loss_train = round(float(emulator.selected_loss_train), 2)
     assert loss_train_computed == loss_train

@@ -1,6 +1,6 @@
-from typing import Optional, Any, OrderedDict
+from typing import Optional, OrderedDict
 
-import numpy as np
+from numpy import ndarray
 from pysr.utils import ArrayLike
 
 from emulator.emulator import Emulator
@@ -15,7 +15,7 @@ def optimization_pipeline_factory(optimization_types: list[type]):
             super().__post_init__()
             self.optimization_types = optimization_types
 
-        def run(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
+        def run(self, X: ndarray, y: ndarray, validation_mask: ndarray,
                              variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                              y_units: Optional[ArrayLike[str]] = None) -> tuple[Emulator, dict[str, list] | None]:
             top_emulators = []
@@ -28,7 +28,7 @@ def optimization_pipeline_factory(optimization_types: list[type]):
             top_emulator = sorted_top_emulators[0]
             return top_emulator, param_name_to_values
 
-        def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
+        def get_top_emulator(self, X: ndarray, y: ndarray, validation_mask: ndarray,
                              variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                              y_units: Optional[ArrayLike[str]] = None) -> Emulator:
             return self.run(X, y, validation_mask, variable_names, X_units, y_units)[0]
@@ -43,7 +43,7 @@ def optimization_pipeline_factory(optimization_types: list[type]):
             return [optimization_type(self.model_selection, param_name_to_value_fake)
                     for optimization_type in self.optimization_types]
 
-        def get_budget(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
+        def get_budget(self, X: ndarray, y: ndarray, validation_mask: ndarray,
                        variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                        y_units: Optional[ArrayLike[str]] = None) -> int:
             budgets = [optimization.get_budget(X, y, validation_mask, variable_names, X_units, y_units)

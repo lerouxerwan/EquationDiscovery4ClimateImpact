@@ -1,6 +1,7 @@
 from typing import Optional
 
 import numpy as np
+from numpy import ndarray
 
 from data.utils_dataset.dataset import Dataset
 from emulator.emulator import Emulator
@@ -38,8 +39,8 @@ def plot_climato(emulator: Emulator, dataset: Dataset, show: Optional[bool] = Fa
 
 
 
-def _plot_climato(y_train: np.ndarray, y_test: Optional[np.ndarray] = None,
-                  years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None, rcp_name_train: str= 'RCP85',
+def _plot_climato(y_train: ndarray, y_test: Optional[ndarray] = None,
+                  years_train: Optional[ndarray]=None, years_test: Optional[ndarray]=None, rcp_name_train: str= 'RCP85',
                   rcp_name_test: Optional[str]=None, nb_historical_years:Optional[int] = None,
                   target_label: str = "Target (-)", show: bool = False, ymin_and_ymax: Optional[tuple[float, float]] = None,
                   plot_folder: Optional[str] = None, ax=None):
@@ -71,8 +72,9 @@ def _plot_errors_climato(emulator: Emulator, dataset: Dataset, show: Optional[bo
     plot_climatological_time_series(rcp_name_to_list_of_years_and_errors_and_color_and_label, errors_train, y_label, plot_name, show, plot_folder=plot_folder,
                                     ax=ax, loc=loc)
 
-def compute_differences(emulator: Emulator, X: Optional[np.ndarray], y: Optional[np.ndarray],
-                        relative_error: bool = False) -> Optional[np.ndarray]:
+def compute_differences(emulator: Emulator, X: Optional[ndarray], y: Optional[ndarray],
+                        relative_error: bool = False) -> Optional[ndarray]:
+
     if X is None:
         return None
     else:

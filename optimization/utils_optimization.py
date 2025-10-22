@@ -2,7 +2,7 @@ import os
 import os.path as op
 from typing import Optional
 
-import numpy as np
+from numpy import ndarray
 from pysr.utils import ArrayLike
 
 from data.utils_dataset.utils_validation import get_X_and_y
@@ -13,10 +13,10 @@ from utils.utils_path import OPT_PATH
 
 
 def get_loss(optimization: Optimization,
-             X_train: np.ndarray, y_train: np.ndarray, validation_mask: np.ndarray,
+             X_train: ndarray, y_train: ndarray, validation_mask: ndarray,
              variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
              y_units: Optional[ArrayLike[str]] = None, metric: Metric = Metric.RMSE,
-             X_test: np.ndarray = None, y_test: np.ndarray = None) -> float:
+             X_test: ndarray = None, y_test: ndarray = None) -> float:
     assert validation_mask is not None
     with_test_data = (X_test is not None) and (y_test is not None)
     if with_test_data:

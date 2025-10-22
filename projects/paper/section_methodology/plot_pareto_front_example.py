@@ -9,8 +9,7 @@ from plot.utils_metric.metric import Metric
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_pareto_front_example(emulator: Emulator, X: np.ndarray, y: np.ndarray,
-                              target_label: str = "Target (-)", show: bool = False) -> None:
+def plot_pareto_front_example(emulator: Emulator, show: bool = False) -> None:
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""
     ax = plt.gca()
@@ -26,7 +25,7 @@ def plot_pareto_front_example(emulator: Emulator, X: np.ndarray, y: np.ndarray,
     # xticklabels[complexity_list.index(emulator.selected_complexity)] = get_equation_str(emulator.selected_expr, add_bold=True).replace('x0', 'x')
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     # Add y-axis with special scaling
-    set_log_y_axis_example(ax, emulator.loss_list, target_label, emulator.metric_)
+    set_log_y_axis_example(ax, emulator.loss_list, "Target (-)", emulator.metric_)
     # General settings for the plot
     # ax.legend(loc='upper right')
     show_or_save_plot(f'pareto_front_example', show)

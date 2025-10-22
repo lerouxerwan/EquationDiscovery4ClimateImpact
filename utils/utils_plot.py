@@ -1,11 +1,11 @@
-from datetime import datetime
-
 import os
 import os.path as op
+from datetime import datetime
 from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy import ndarray
 
 from utils.utils_path import RESULT_PATH
 
@@ -17,8 +17,8 @@ VERSION = ''.join(VERSION)
 PLOT_PATH = op.join(RESULT_PATH, VERSION)
 
 
-def compute_axis_lim(values: np.ndarray) -> tuple[float, float]:
-    lower_lim, upper_lim = np.min(values), np.max(values)
+def compute_axis_lim(values: ndarray) -> tuple[float, float]:
+    lower_lim, upper_lim = float(np.min(values)), float(np.max(values))
     delta = 0.01 * (upper_lim - lower_lim)
     return lower_lim - delta, upper_lim + delta
 

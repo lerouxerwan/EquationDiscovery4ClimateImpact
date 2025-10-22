@@ -3,6 +3,7 @@ import os.path as op
 
 import numpy as np
 import pandas as pd
+from numpy import ndarray
 from sklearn.model_selection import KFold
 
 from data.utils_dataset.dataset import Dataset
@@ -16,7 +17,7 @@ from utils.utils_path import NESTED_CV_PATH
 from utils.utils_run import random_seed
 
 
-def run_nested_cv(dataset: Dataset, optimization: Optimization) -> np.ndarray[float]:
+def run_nested_cv(dataset: Dataset, optimization: Optimization) -> ndarray:
     metric = Metric.RMSE
     filename = f'{metric_to_str[metric]}_test.txt'
     filepath = op.join(NESTED_CV_PATH, dataset.hash, optimization.opt_id, filename)

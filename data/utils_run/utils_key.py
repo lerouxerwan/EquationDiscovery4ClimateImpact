@@ -6,12 +6,12 @@ import joblib
 import numpy as np
 
 from emulator.utils_emulator import params_that_do_not_impact_the_fit_results
-
+from numpy import ndarray
 
 def get_hash_str(*iterables) -> str:
     tuples = []
     for iterable in iterables:
-        if isinstance(iterable, np.ndarray):
+        if isinstance(iterable, ndarray):
             iterable = iterable.flatten()
         elif isinstance(iterable, list):
             pass

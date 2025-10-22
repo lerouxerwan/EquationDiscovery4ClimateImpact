@@ -1,13 +1,14 @@
 from typing import Optional, Any
 
 import numpy as np
+from numpy import ndarray
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, ParameterSampler
 
 from emulator.utils_hyperparameter_search.utils_params_distribution import get_param_distributions
 from utils.utils_run import random_seed
 
 
-def get_cv(validation_mask: np.ndarray):
+def get_cv(validation_mask: ndarray):
     """Generator that returns the single split for the validation, i.e. train_indices, validation_indices"""
     indices = np.arange(len(validation_mask))
     yield indices, indices[validation_mask]

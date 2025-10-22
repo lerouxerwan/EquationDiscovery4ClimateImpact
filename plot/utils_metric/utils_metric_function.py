@@ -1,26 +1,27 @@
 import warnings
 
 import numpy as np
+from numpy import ndarray
 from scipy.stats import pearsonr, ConstantInputWarning
 from sklearn.metrics import mean_squared_error
 
 
-def mean_relative_absolute_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+def mean_relative_absolute_error(y_true: ndarray, y_pred: ndarray) -> float:
     biases_percentage = [np.abs((pred - true) / true) * 100 if true != 0 else 0 for true, pred in
                          zip(y_true, y_pred)]
     return np.sum(biases_percentage) / len(biases_percentage)
 
-def root_mean_squared_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+def root_mean_squared_error(y_true: ndarray, y_pred: ndarray) -> float:
     return np.sqrt(mean_squared_error(y_true, y_pred))
 
-def median_absolute_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+def median_absolute_error(y_true: ndarray, y_pred: ndarray) -> float:
     return float(np.median([np.abs(true - pred) for true, pred in zip(y_true, y_pred)]))
 
 
-def spread_ratio(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+def spread_ratio(y_true: ndarray, y_pred: ndarray) -> float:
     return np.std(y_pred) / np.std(y_true)
 
-def correlation(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+def correlation(y_true: ndarray, y_pred: ndarray) -> float:
     assert (1 <= y_true.ndim <= 2)
     if y_true.ndim == 2:
         y_true = y_true[:, 0]
@@ -40,25 +41,25 @@ def mean_relative_error(value_true: float, predict_value: float) -> float:
     assert isinstance(value_true, float) and isinstance(predict_value, float)
     return 100 * (predict_value - value_true) / value_true if value_true != 0 else 0
 
-def condition_for_climatological_metrics(y_true: np.ndarray) -> bool:
+def condition_for_climatological_metrics(y_true: ndarray) -> bool:
     """To compute climatological metrics, at least 40 years of data are needed"""
     return len(y_true) >= 40
 
-def compute_climatological_averages(y: np.ndarray) -> tuple[float, float]:
+def compute_climatological_averages(y: ndarray) -> tuple[float, float]:
     assert condition_for_climatological_metrics(y)
     return float(np.mean(y[:20])), float(np.mean(y[-20:]))
 
-def mean_relative_error_first_20_years(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+def mean_relative_error_first_20_years(y_true: ndarray, y_pred: ndarray) -> float:
     y_true_first, _ = compute_climatological_averages(y_true)
     y_pred_first, _ = compute_climatological_averages(y_pred)
     return mean_relative_error(y_true_first, y_pred_first)
 
-def mean_relative_error_last_20_years(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+def mean_relative_error_last_20_years(y_true: ndarray, y_pred: ndarray) -> float:
     _, y_true_last = compute_climatological_averages(y_true)
     _, y_pred_last = compute_climatological_averages(y_pred)
     return mean_relative_error(y_true_last, y_pred_last)
 
-def mean_relative_error_trend_between_first_and_last_20_years(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+def mean_relative_error_trend_between_first_and_last_20_years(y_true: ndarray, y_pred: ndarray) -> float:
     y_true_first, y_true_last = compute_climatological_averages(y_true)
     y_pred_first, y_pred_last = compute_climatological_averages(y_pred)
     return mean_relative_error(y_true_last - y_true_first, y_pred_last - y_pred_first)

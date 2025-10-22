@@ -6,21 +6,16 @@ from matplotlib.axes import Axes
 
 from plot.by_rcp.utils_rcp import rcp_name_to_color, get_rcp_label
 from plot.by_split.utils_plot_by_split import set_default_years
+from numpy import ndarray
 
-
-def load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train: np.ndarray,
-                                                             y_test: Optional[np.ndarray] = None,
-                                                             years_train: Optional[np.ndarray]=None, years_test: Optional[np.ndarray]=None, rcp_name_train: str='RCP85',
+def load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train: ndarray,
+                                                             y_test: Optional[ndarray] = None,
+                                                             years_train: Optional[ndarray]=None, years_test: Optional[ndarray]=None, rcp_name_train: str='RCP85',
                                                              rcp_name_test: Optional[str]=None, nb_historical_years: Optional[int] = None):
     rcp_name_to_list_of_years_and_y_and_color = dict()
     # Some checks
     assert y_train.ndim == 1
     assert (years_train is None) or (years_train.ndim == 1)
-    # Cast all y as ndarray (instead of Series) if it is not already done
-    if isinstance(y_train, pd.Series):
-        y_train = y_train.values
-        if y_test is not None:
-            y_test = y_test.values
     # Set default for years_train and years_test if needed
     years_test, years_train = set_default_years(y_test, y_train, years_test, years_train)
     # Set value of nb_historical_years
@@ -42,7 +37,7 @@ def load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train: np.ndarray
             assert len(years) == len(y)
     return rcp_name_to_list_of_years_and_y_and_color
 
-def plot_average_value(ax: Axes, color: str, values: np.ndarray, dates: np.ndarray, window_size: int = 30, plot_std: bool = True):
+def plot_average_value(ax: Axes, color: str, values: ndarray, dates: ndarray, window_size: int = 30, plot_std: bool = True):
     assert len(values) == len(dates)
     #  Plot average value as line
     # Only plot a line if the number of years is larger than the window size

@@ -3,10 +3,10 @@ from math import prod
 from typing import Literal, Callable, Optional
 
 import numpy as np
+from numpy import ndarray
 from pysr import AbstractExpressionSpec, AbstractLoggerSpec, PySRRegressor
 from pysr.utils import ArrayLike
 from sklearn.metrics import make_scorer, root_mean_squared_error
-from sklearn.model_selection._search import BaseSearchCV
 
 from data.utils_run.run import Run
 from data.utils_run.utils_run import get_run_id
@@ -146,14 +146,14 @@ class EmulatorWithSearch(Emulator):
         self.n_jobs = n_jobs
         self.param_grid = param_grid
 
-    def some_checks(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray] = None):
+    def some_checks(self, X: ndarray, y: ndarray, validation_mask: Optional[ndarray] = None):
         super().some_checks(X, y, validation_mask)
         assert self.param_grid is not None, 'self.param_grid must be specified before calling the fit method'
         assert isinstance(self.search_style, str)
         assert isinstance(self.n_iter, int) and self.n_iter > 0
         assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
 
-    def fit_with_run(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray] = None,
+    def fit_with_run(self, X: ndarray, y: ndarray, validation_mask: Optional[ndarray] = None,
                      variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                      y_units: Optional[ArrayLike[str]] = None, run: Run = Optional) -> "PySRRegressor":
         # Check if the hyperparameter search has been run before
@@ -172,7 +172,7 @@ class EmulatorWithSearch(Emulator):
         # Fit with a specific run
         return super().fit_with_run(X, y, validation_mask, variable_names, X_units, y_units, run_top_params)
 
-    def run_and_save_hyperparameter_search(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
+    def run_and_save_hyperparameter_search(self, X: ndarray, y: ndarray, validation_mask: ndarray,
                                            variable_names: ArrayLike[str] | None = None, X_units: ArrayLike[str] | None = None,
                                            y_units: str | ArrayLike[str] | None = None) -> None:
         """Run hyperparameter search and save the results as a csv"""
@@ -184,7 +184,6 @@ class EmulatorWithSearch(Emulator):
         assert validation_mask is not None
         # Run hyperparameter search with respect to self.param_grid
         search_cv_type = search_style_to_search_cv_type[self.search_style]
-        assert issubclass(search_cv_type, BaseSearchCV)
         search_cv = search_cv_type(estimator=self.load_emulator_with_same_attributes(),
                                    scoring=self.scoring,
                                    cv=get_cv(validation_mask), refit=False, return_train_score=True,

@@ -6,12 +6,12 @@ from sklearn.model_selection import train_test_split
 
 from data.utils_dataset.validation_split import ValidationSplit
 from utils.utils_run import random_seed
+from numpy import ndarray
 
-
-def get_validation_mask(y_train: np.ndarray, validation_size: float = 0.3,
+def get_validation_mask(y_train: ndarray, validation_size: float = 0.3,
                         validation_split: ValidationSplit = ValidationSplit.RANDOM,
                         years_train: Optional[list[int]] = None, rcp_name_train: Optional[str] = None,
-                        prefixes_train: Optional[list[str]] = None) -> Optional[np.ndarray]:
+                        prefixes_train: Optional[list[str]] = None) -> Optional[ndarray]:
     """Compute an array of boolean such that validation_mask[i] = True if the index 'i' is in the validation set"""
     # Initialize validation_mask as False
     length_mask = len(y_train)

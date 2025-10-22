@@ -3,13 +3,14 @@ from typing import Optional
 
 import numpy as np
 from matplotlib import pyplot as plt
+from numpy import ndarray
 
 from plot.by_rcp.utils_plot_by_rcp import plot_average_value
 from utils.utils_plot import show_and_save_with_optional_plot_folder
 
 
 def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label: dict[str, list[tuple[list[int], list[float], str, str]]],
-                                    y_train: np.ndarray, y_label: str, plot_name: str, show: Optional[bool], ymin_and_ymax: tuple[float, float] = None, 
+                                    y_train: ndarray, y_label: str, plot_name: str, show: Optional[bool], ymin_and_ymax: tuple[float, float] = None, 
                                     plot_std: bool = True, plot_folder: Optional[str] = None, ax=None,
                                     loc=None) -> dict[str, tuple[list[int], list[float], str]]:
     if ax is None:
@@ -17,19 +18,20 @@ def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_an
         ax = plt.gca()
     else:
         show_and_save = False
-    rcp_name_to_years_and_std_values_and_color = _plot_climatological_time_series(ax,
-                                                                                  rcp_name_to_list_of_years_and_y_and_color_and_label,
-                                                                                  y_train, y_label,
-                                                                                  ymin_and_ymax, plot_std, loc=loc)
+    rcp_name_to_years_and_std_values_and_color = plot_climatological_time_series_function(ax,
+                                                                                          rcp_name_to_list_of_years_and_y_and_color_and_label,
+                                                                                          y_train, y_label,
+                                                                                          ymin_and_ymax, plot_std, loc=loc)
     if show_and_save:
         show_and_save_with_optional_plot_folder(f'climatological_series_{plot_name}', show, plot_folder)
     return rcp_name_to_years_and_std_values_and_color
 
 
-def _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, y_label,
-                                     ymin_and_ymax, plot_std: bool = True, plot_average: bool = True,
-                                     loc=None):
+def plot_climatological_time_series_function(ax, rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, y_label,
+                                             ymin_and_ymax, plot_std: bool = True, plot_average: bool = True,
+                                             loc=None):
     window_size = 30
+    color = 'k'
     all_dates = []
     rcp_name_to_years_and_std_values_and_color = {}
     for rcp_name, list_of_y_and_years_and_color_and_label in rcp_name_to_list_of_years_and_y_and_color_and_label.items():
@@ -59,8 +61,7 @@ def _plot_climatological_time_series(ax, rcp_name_to_list_of_years_and_y_and_col
         ax.set_ylim(ymin_and_ymax)
     ax.set_ylabel(y_label)
     #  Add first legend
-    increasing_trend = (y_train[0] < y_train[-1]) if isinstance(y_train, np.ndarray) else (
-            y_train.values[0] < y_train.values[-1])
+    increasing_trend = y_train[0] < y_train[-1]
     loc1, loc2 = ('upper left', 'lower right') if increasing_trend else ('upper right', 'lower left')
     ax.legend(loc=loc1)
     #  Add a second legend to explain the dot and the line

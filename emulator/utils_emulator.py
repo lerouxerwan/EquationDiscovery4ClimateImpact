@@ -3,6 +3,7 @@ from typing import Callable
 
 import numpy as np
 from math import log
+from numpy import ndarray
 
 params_that_do_not_impact_the_fit_results = {'logger_spec', 'output_directory', 'run_id',
                                              'parallelism', 'procs', 'cluster_manager',
@@ -22,10 +23,10 @@ def get_loss_str_gaussian_fit(y_variable_name: str):
 def _compute_loss_gaussian_fit(y: float, mu: float, sigma: float):
     return log(sigma) + (y - mu)**2 / (2 * sigma**2)
 
-def compute_loss_gaussian_fit(y: np.ndarray, mu: np.ndarray, sigma: np.ndarray):
+def compute_loss_gaussian_fit(y: ndarray, mu: ndarray, sigma: ndarray):
     return np.mean([_compute_loss_gaussian_fit(*triple) for triple in zip(y, mu, sigma)])
 
-def get_X_for_gaussian_fit(X: np.ndarray, y: np.ndarray) -> np.ndarray:
+def get_X_for_gaussian_fit(X: ndarray, y: ndarray) -> ndarray:
     return np.concat([X, np.expand_dims(y, axis=1)], axis=1)
 
 def get_lambda_function_kwargs(s: str) -> Callable:

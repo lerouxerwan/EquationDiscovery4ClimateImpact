@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-import numpy as np
+from numpy import ndarray
 from pysr.utils import ArrayLike
 from typing_extensions import Optional, OrderedDict
 
@@ -19,7 +19,7 @@ def optimization_random_factory(n_iter: int, nb_top_hyperparameters: Optional[in
             self.n_iter = n_iter
             self.nb_top_hyperparameters = nb_top_hyperparameters
 
-        def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
+        def get_top_emulator(self, X: ndarray, y: ndarray, validation_mask: ndarray,
                              variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                              y_units: Optional[ArrayLike[str]] = None) -> Emulator:
             log_info(f'Run {self.name}')
@@ -29,7 +29,7 @@ def optimization_random_factory(n_iter: int, nb_top_hyperparameters: Optional[in
             emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
             return emulator
 
-        def get_budget(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
+        def get_budget(self, X: ndarray, y: ndarray, validation_mask: ndarray,
                        variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                        y_units: Optional[ArrayLike[str]] = None) -> int:
             return self.n_iter

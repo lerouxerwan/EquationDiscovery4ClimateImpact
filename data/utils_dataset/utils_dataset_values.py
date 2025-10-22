@@ -3,6 +3,7 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
+from numpy import ndarray
 from pandas import DataFrame
 
 from data.utils_dataset.utils_validation_split import get_validation_mask
@@ -13,9 +14,9 @@ from utils.utils_path import DATASET_CSV_PATH
 def load_dataset_values(csv_filename: str, rcp_name_train: str, rcp_name_test: Optional[str] = None,
                         validation_size: float = 0.3, validation_split: ValidationSplit = ValidationSplit.RCP_START) \
         -> tuple[
-            np.ndarray, np.ndarray, Optional[np.ndarray], Optional[np.ndarray], np.ndarray, Optional[np.ndarray],
+            ndarray, ndarray, Optional[ndarray], Optional[ndarray], ndarray, Optional[ndarray],
             Optional[list[str]], Optional[list[str]], Optional[list[str]], Optional[list[str]], list[str], list[str],
-            np.ndarray[bool]
+            ndarray[bool]
         ]:
     """Load dataset values from a csv filename.
         -Values for each set (train and test) including X an array, y an array, years an array of int.

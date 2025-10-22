@@ -2,6 +2,7 @@ from typing import Optional
 
 import numpy as np
 from matplotlib import pyplot as plt
+from numpy import ndarray
 from sympy import Expr, expand
 
 from data.utils_dataset.dataset import Dataset
@@ -16,7 +17,7 @@ def plot_decomposition(emulator: Emulator, dataset:Dataset, show: Optional[bool]
     _plot_decomposition(emulator.selected_expr, dataset.X_test, dataset.X_variable_names, dataset.years_test,
                         'test', show, plot_folder)
 
-def _plot_decomposition(expr: Expr, X: np.ndarray, variable_names: list[str], years: list[int], split_name: str,
+def _plot_decomposition(expr: Expr, X: ndarray, variable_names: list[str], years: list[int], split_name: str,
                         show: Optional[bool] = False, plot_folder: Optional[str] = None):
     # Extract the term of the equation and their percentages through time
     matrix_of_percentages, terms = extract_terms_and_percentages(expr, X, variable_names)
@@ -33,7 +34,7 @@ def _plot_decomposition(expr: Expr, X: np.ndarray, variable_names: list[str], ye
     show_and_save_with_optional_plot_folder(f'decomposition_for_{split_name}', show, plot_folder)
 
 
-def extract_terms_and_percentages(expr: Expr, X: np.ndarray, variable_names: list[str]):
+def extract_terms_and_percentages(expr: Expr, X: ndarray, variable_names: list[str]):
     #  Extract terms
     terms = expand(expr).args
     #  Extract list of percentages

@@ -1,11 +1,11 @@
 import time
-import time
 import warnings
 from datetime import timedelta
 from typing import Literal, Callable, Optional, Any
 
 import numpy as np
 import pandas as pd
+from numpy import ndarray
 from pandas.errors import EmptyDataError
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec, TemplateExpressionSpec
 from pysr.utils import ArrayLike
@@ -185,14 +185,14 @@ class Emulator(PySRRegressor):
         self.index_for_validated_model_selection_ = None
         self.run_ = None
 
-    def fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray] = None,
+    def fit(self, X: ndarray, y: ndarray, validation_mask: Optional[ndarray] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
             y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
         """Fit the emulator for some feature X, target y, and validation_mask.
         Additional information can be specified: variable_names & units (with X_units, y_units)
         Compared to the fit method of PySR, this 'fit' method:
             -has one more argument 'validation_mask', an array of bool (None by default) defining the validation split
-            -only handles np.ndarray as input for X and y
+            -only handles ndarray as input for X and y
             -does not handle additional parameters of PySR (weights, Xresampled, ...)
 
         If validation_mask is not None, we fit the emulator on the train set (X_train_train, y_train_train)
@@ -220,13 +220,13 @@ class Emulator(PySRRegressor):
         # Fit with a specific run
         return self.fit_with_run(X, y, validation_mask, variable_names, X_units, y_units, self.run_)
 
-    def some_checks(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray] = None):
-        assert isinstance(X, np.ndarray) and isinstance(y, np.ndarray)
-        assert isinstance(validation_mask, np.ndarray) or validation_mask is None
+    def some_checks(self, X: ndarray, y: ndarray, validation_mask: Optional[ndarray] = None):
+        assert isinstance(X, ndarray) and isinstance(y, ndarray)
+        assert isinstance(validation_mask, ndarray) or validation_mask is None
         if validation_mask is not None:
             assert all([isinstance(value, np.bool) for value in validation_mask])
 
-    def initialize_run(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray] = None):
+    def initialize_run(self, X: ndarray, y: ndarray, validation_mask: Optional[ndarray] = None):
         #  Run settings
         #  Set output_directory based on X,y and validation_mask.
         self.output_directory_ = self.output_directory = get_output_directory(X, y, validation_mask)
@@ -235,7 +235,7 @@ class Emulator(PySRRegressor):
         #  Initialize a Run object, which handles all the input/output processing
         self.run_ = Run(self.output_directory, self.run_id)
 
-    def fit_with_run(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray] = None,
+    def fit_with_run(self, X: ndarray, y: ndarray, validation_mask: Optional[ndarray] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
             y_units: Optional[ArrayLike[str]] = None, run: Run = Optional) -> "PySRRegressor":
         """Method that implement additional options compared to PySR:
@@ -315,7 +315,7 @@ class Emulator(PySRRegressor):
 
         return self
 
-    def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray] = None,
+    def _fit(self, X: ndarray, y: ndarray, validation_mask: Optional[ndarray] = None,
              variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
              y_units: Optional[ArrayLike[str]] = None):
         #  Extract X_fit and y_fit
@@ -343,14 +343,14 @@ class Emulator(PySRRegressor):
             self.equations_['equation'] = self.equations_['equation'].apply(lambda s: s.replace('#', 'x'))
             self._checkpoint()
 
-    def predict(self, X, index: int | list[int] | None = None, *, category: np.ndarray | None = None) -> np.ndarray:
+    def predict(self, X, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
         if self.metric_ is Metric.NLL:
             assert category is None
             return self.get_distri_param(X, 'mu', index)
         else:
             return super().predict(X, index, category=category)
 
-    def get_distri_param(self, X, distri_param_name: str, index: int | list[int] | None = None) -> np.ndarray:
+    def get_distri_param(self, X, distri_param_name: str, index: int | list[int] | None = None) -> ndarray:
         assert self.gaussian_fit
         assert distri_param_name in self.equations_.columns
         row = self.get_best() if index is None else self.equations_.iloc[index]
@@ -358,7 +358,7 @@ class Emulator(PySRRegressor):
 
     """Method to compute the loss"""
 
-    def compute_loss(self, X: np.ndarray, y: np.ndarray, index: int | list[int] | None) -> float:
+    def compute_loss(self, X: ndarray, y: ndarray, index: int | list[int] | None) -> float:
         """Compute loss for the equation at some specific index"""
         if self.metric_ is Metric.NLL:
             row = self.get_best() if index is None else self.equations_.iloc[index]
@@ -371,7 +371,7 @@ class Emulator(PySRRegressor):
 
     """Properties/method for the selected equations"""
 
-    def compute_selected_loss(self, X: np.ndarray, y: np.ndarray) -> float:
+    def compute_selected_loss(self, X: ndarray, y: ndarray) -> float:
         """Compute loss for the selected equation"""
         return self.compute_loss(X, y, index=None)
 
@@ -421,7 +421,7 @@ class Emulator(PySRRegressor):
 
     """Properties/method for every equation of the Pareto optimal set of equations"""
 
-    def compute_loss_list(self, X: np.ndarray, y: np.ndarray) -> list[float]:
+    def compute_loss_list(self, X: ndarray, y: ndarray) -> list[float]:
         """Compute a list of loss: one loss for every equation of the Pareto optimal set of equations"""
         return [self.compute_loss(X, y, index) for index in range(len(self.equations_))]
 

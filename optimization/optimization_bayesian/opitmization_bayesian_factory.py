@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional, Any, OrderedDict
 
-import numpy as np
 import optuna
+from numpy import ndarray
 from pysr.utils import ArrayLike
 
 from emulator.emulator import Emulator
@@ -28,13 +28,13 @@ def optimization_bayesian_factory(n_iter: int, nb_top_hyperparameters: Optional[
                                              for param_name, param_values in self.param_name_to_values.items()
                                              if param_name in top_param_names}
 
-        def get_budget(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
+        def get_budget(self, X: ndarray, y: ndarray, validation_mask: ndarray,
                        variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                        y_units: Optional[ArrayLike[str]] = None) -> int:
             return self.n_iter
 
 
-        def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
+        def get_top_emulator(self, X: ndarray, y: ndarray, validation_mask: ndarray,
                              variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                              y_units: Optional[ArrayLike[str]] = None) -> Emulator:
             log_info(f'Run {self.name}')

@@ -7,7 +7,7 @@ from matplotlib.scale import FuncScale
 
 from plot.utils_metric.metric import Metric, metric_to_label
 from plot.by_split.utlis_plot_selected_equation import get_unit
-
+from numpy import ndarray
 
 def set_x_axis(ax: Axes, x_ticks: list[int]):
     x_min, x_max = 0, max(x_ticks) + 1
@@ -41,10 +41,10 @@ def functions_for_yaxis(threshold: float) -> tuple[Callable, Callable]:
 
     scale = 0.05
 
-    def forward(value: np.ndarray) -> np.ndarray:
+    def forward(value: ndarray) -> ndarray:
         return np.where(value <= threshold, value, threshold + scale * np.log(value / threshold))
 
-    def inverse(value: np.ndarray) -> np.ndarray:
+    def inverse(value: ndarray) -> ndarray:
         return np.where(value <= threshold, value, threshold * np.exp((value - threshold) / scale))
 
     return forward, inverse

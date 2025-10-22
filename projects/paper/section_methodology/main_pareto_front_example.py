@@ -12,7 +12,7 @@ def main_example_1d(show: bool):
     X, y = get_data_example_1d()
     emulator = Emulator(niterations=5, maxsize=9)
     emulator.fit(X, y)
-    plot_pareto_front_example(emulator, X, y, show=show)
+    plot_pareto_front_example(emulator, show=show)
 
 
 def get_data_example_1d():
