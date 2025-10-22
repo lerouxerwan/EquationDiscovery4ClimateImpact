@@ -6,7 +6,7 @@ class ValidationSplit(StrEnum):
     RCP_START = 'start RCP'
     END = 'end'
     START = 'start'
-    SYMMETRICAL = 'symmetrical'
+    MIDDLE = 'middle'
     RANDOM_DECADE = 'random_decade'
     MAX = 'max'
     MIN = 'min'
@@ -17,13 +17,13 @@ class ValidationSplit(StrEnum):
 
 def get_train_label(rcp_name_train: str, validation_split: ValidationSplit, validation_size: float) -> str:
     percent = f'{int(100 * (1 - validation_size))}%'
-    if validation_split in [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END]:
+    if validation_split in [ValidationSplit.START, ValidationSplit.MIDDLE, ValidationSplit.END]:
         match validation_split:
             case ValidationSplit.START:
                 key_word = 'middle and end'
             case ValidationSplit.END:
                 key_word = 'start and middle'
-            case ValidationSplit.SYMMETRICAL:
+            case ValidationSplit.MIDDLE:
                 key_word = 'start and end'
         return f'{percent} at the {key_word} of the historical period + {rcp_name_train}'
     elif validation_split is ValidationSplit.RCP_START:
@@ -41,8 +41,8 @@ def get_train_label(rcp_name_train: str, validation_split: ValidationSplit, vali
 
 def get_validation_label(rcp_name_train: str, rcp_name_test: str, validation_split: ValidationSplit, validation_size: float) -> str:
     percent = f'{int(100 * validation_size)}%'
-    if validation_split in [ValidationSplit.START, ValidationSplit.SYMMETRICAL, ValidationSplit.END]:
-        key_word = 'middle' if validation_split is ValidationSplit.SYMMETRICAL else str(validation_split)
+    if validation_split in [ValidationSplit.START, ValidationSplit.MIDDLE, ValidationSplit.END]:
+        key_word = 'middle' if validation_split is ValidationSplit.MIDDLE else str(validation_split)
         return f'{percent} at the {key_word} of the historical period + {rcp_name_train}'
     elif validation_split is ValidationSplit.RCP_START:
         return f'{percent} at the start of {rcp_name_train}'

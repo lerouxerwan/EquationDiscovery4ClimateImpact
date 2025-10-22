@@ -33,7 +33,7 @@ def get_series(emulator: Emulator) -> pd.Series:
         empty_data = True
     #  Format data
     if empty_data:
-        data = [np.inf, np.inf, np.inf, np.nan, []]
+        data = [np.inf, np.nan, []]
     else:
         data = [emulator.selected_complexity, emulator.selected_equation, emulator.selected_variable_names]
     # Return Series

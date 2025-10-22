@@ -15,6 +15,7 @@ class Optimization(ABC):
     model_selection: str = 'best'
     param_name_to_values: Optional[ParamNameToValues | dict[str, list]] = None
     n_jobs: int = 1
+    timeout_in_seconds: float | None = None
 
     def __post_init__(self):
         if isinstance(self.param_name_to_values, ParamNameToValues):

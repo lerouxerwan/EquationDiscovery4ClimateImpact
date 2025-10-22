@@ -51,7 +51,7 @@ def optimization_bayesian_factory(n_iter: int, nb_top_hyperparameters: Optional[
             return emulator
 
         def get_params(self, trial) -> dict[str, Any]:
-            params = {}
+            params = {'model_selection': self.model_selection, 'timeout_in_seconds': self.timeout_in_seconds}
             for param_name, param_values in self.param_name_to_values.items():
                 first_value = param_values[0]
                 if (first_value is None) or (isinstance(first_value, str) or (isinstance(first_value, list))):

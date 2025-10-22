@@ -43,7 +43,7 @@ def get_validation_mask(y_train: np.ndarray, validation_size: float = 0.3,
             validation_mask[:validation_length] = True
         elif validation_split is ValidationSplit.END:
             validation_mask[-validation_length:] = True
-        elif validation_split is ValidationSplit.SYMMETRICAL:
+        elif validation_split is ValidationSplit.MIDDLE:
             start_validation = (length_mask - validation_length) // 2
             validation_mask[start_validation:start_validation+validation_length] = True
         elif validation_split in [ValidationSplit.MIN, ValidationSplit.MAX, ValidationSplit.EXTREME]:

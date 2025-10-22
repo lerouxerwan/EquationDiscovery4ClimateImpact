@@ -1,3 +1,5 @@
+from pysr import PySRRegressor
+
 from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from emulator.emulator import Emulator
@@ -14,13 +16,14 @@ def main_gaussian():
     # plot_loss_vs_complexity(emulator, dataset, show=True)
     plot_diagnosis(emulator, dataset, show=False)
 
-# def main_normal():
-#     emulator = Emulator()
-#     dataset = get_dataset()
-#     emulator.fit(dataset.X_train, dataset.y_train, dataset.validation_mask,
-#                  X_units=dataset.X_units, y_units=dataset.y_units, variable_names=dataset.X_variable_names)
-#     # plot_loss_vs_complexity(emulator, dataset, show=True)
-#     plot_diagnosis(emulator, dataset, show=False)
+def main_normal():
+    emulator = PySRRegressor(timeout_in_seconds=5)
+    dataset = get_dataset(validation_split=ValidationSplit.NONE)
+    emulator.fit(dataset.X_train, dataset.y_train, X_units=dataset.X_units, y_units=dataset.y_units, variable_names=dataset.X_variable_names)
+    print(emulator.equations_['loss'])
+    plot_loss_vs_complexity(emulator, dataset, show=True)
+    plot_diagnosis(emulator, dataset, show=False)
 
 if __name__ == '__main__':
-    main_gaussian()
+    # main_gaussian()
+    main_normal()

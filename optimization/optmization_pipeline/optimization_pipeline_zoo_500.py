@@ -12,6 +12,4 @@ OptimizationPipelineMarginalGaussian = optimization_pipeline_factory([Optimizati
 OptimizationPipelineMarginalRandomGaussian = optimization_pipeline_factory([OptimizationMarginal, OptimizationRandom_100_5, OptimizationBayesian_100_5])
 
 
-optimization_types_500 = [OptimizationPipelineRandom, OptimizationPipelineBayesian,
-                          OptimizationPipelineMarginalRandom, OptimizationPipelineMarginalGaussian,
-                          OptimizationPipelineMarginalRandomGaussian][:]
+optimization_types_500 = [OptimizationPipelineRandom, OptimizationPipelineMarginalRandom, OptimizationPipelineMarginalRandomGaussian][:]

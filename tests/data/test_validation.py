@@ -16,7 +16,7 @@ def test_validation_split_determinist():
     assert compute_validation_mask(ValidationSplit.START) == [True] * 3 + [False] * 7
     assert compute_validation_mask(ValidationSplit.END) == [False] * 7 + [True] * 3
     assert compute_validation_mask(ValidationSplit.RCP_START) == [False] * 2 + [True] * 3 + [False] * 5
-    assert compute_validation_mask(ValidationSplit.SYMMETRICAL) == [False] * 3 + [True] * 3 + [False] * 4
+    assert compute_validation_mask(ValidationSplit.MIDDLE) == [False] * 3 + [True] * 3 + [False] * 4
     assert compute_validation_mask(ValidationSplit.MIN) == [False, True] + 3 * [False] + [True] + 2 * [False]+ [True, False]
     assert compute_validation_mask(ValidationSplit.MAX) == [True, False, True] + 3 * [False] + [True] + 3 * [False]
     assert compute_validation_mask(ValidationSplit.EXTREME) == [True, False, True] + 5 * [False] + [True, False]
