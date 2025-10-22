@@ -13,7 +13,6 @@ from data.utils_run.utils_run import get_run_id
 from emulator.emulator import Emulator
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME
 from emulator.utils_hyperparameter_search.utils_df_cv_results import compute_df_cv_results
-from emulator.utils_hyperparameter_search.utils_scaling_factor import get_param_grid
 from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_kwargs, get_cv
 from emulator.utils_hyperparameter_search.utils_search_style import search_style_to_search_cv_type
 from plot.utils_metric.metric import Metric
@@ -41,15 +40,7 @@ class EmulatorWithSearch(Emulator):
             Dictionary with hyperparameters names (`str`) as keys and lists of hyperparameter settings to try as values,
             or a list of such dictionaries, in which case the grids spanned by each dictionary in the list are explored.
             This enables searching over any sequence of hyperparameter settings.
-            Default is None, this default is replaced by an empty dictionary in the __init__ method
-        param_list_to_optimize: list[str]
-            List of hyperparameter names that are optimized, i.e. specified inside the param_grid
-            If param_grid is specified, i.e. different from None, then this list is not accounted for
-            Default is None, which leads to optimizing only the hyperparameter "niterations"
-        scaling_factor: int
-            Scaling factor to optimize around default.
-            Hyperparameter are sampled in [default_value / scaling_factor, default * scaling_factor]
-            Default is 10"""
+            Default is None, but a param_grid not None is required to call the fit method"""
 
     def __init__(self, model_selection: Literal["best", "accuracy", "score", "validated"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
@@ -105,8 +96,6 @@ class EmulatorWithSearch(Emulator):
                  n_iter: int = 10,
                  n_jobs: Optional[int] = None,
                  param_grid: dict[str, list] | list[dict[str, list]] = None,
-                 param_list_to_optimize: Optional[list[str]] = None,
-                 scaling_factor: int = 10,
                  **kwargs):
         super().__init__(model_selection, binary_operators=binary_operators, unary_operators=unary_operators,
                          expression_spec=expression_spec, niterations=niterations, populations=populations,
@@ -155,21 +144,8 @@ class EmulatorWithSearch(Emulator):
         self.search_style = 'random' if search_style is None else search_style
         self.n_iter = n_iter
         self.n_jobs = n_jobs
-        self.param_grid = dict() if param_grid is None else param_grid
-        self.param_list_to_optimize = param_list_to_optimize
-            # Hyperparameters that could be added: 'populations', 'population_size' (but can lead to long computation)
-        self.scaling_factor = scaling_factor
-        # Some checks
-        assert isinstance(self.search_style, str)
-        assert isinstance(self.n_iter, int) and self.n_iter > 0
+        self.param_grid = param_grid
 
-        assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
-        #  Set param grid using param_list_to_optimize if param_grid has not been specified by the user
-        if not self.param_grid:
-            self.param_grid = get_param_grid(self, self.scaling_factor, self.search_style, self.n_iter, 
-                                             self.param_list_to_optimize)
-        # Some checks on param_grid
-        assert isinstance(self.param_grid, (dict, list))
 
     def fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
@@ -202,6 +178,9 @@ class EmulatorWithSearch(Emulator):
         -------
         self : object
             Fitted estimator"""
+        #  Some checks
+        self.some_checks()
+
         #  Initialize self.run_, a Run object that handles all the input/output processing
         self.initialize_run(X, y, validation_mask)
 
@@ -221,22 +200,12 @@ class EmulatorWithSearch(Emulator):
         # Fit with a specific run
         return self.fit_with_run(X, y, validation_mask, variable_names, X_units, y_units, run)
 
-    @property
-    def nb_combinations(self) -> int:
-        if self.search_style == 'random':
-            return self.n_iter
-        elif self.search_style == 'grid':
-            if isinstance(self.param_grid, list):
-                return sum([self._nb_combinations(param_grid) for param_grid in self.param_grid])
-            else:
-                return self._nb_combinations(self.param_grid)
-        else:
-            raise NotImplementedError
-
-    @staticmethod
-    def _nb_combinations(param_grid: dict):
-        assert isinstance(param_grid, dict)
-        return prod([len(grid) for grid in param_grid.values()])
+    def some_checks(self):
+        """ Some checks on the parameters"""
+        assert self.param_grid is not None, ('self.param_grid must be specified before calling the fit method')
+        assert isinstance(self.search_style, str)
+        assert isinstance(self.n_iter, int) and self.n_iter > 0
+        assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
 
     def run_and_save_hyperparameter_search(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
                                            variable_names: ArrayLike[str] | None = None, X_units: ArrayLike[str] | None = None,
@@ -262,6 +231,23 @@ class EmulatorWithSearch(Emulator):
         df_cv_results = compute_df_cv_results(search_cv.cv_results_, X, y, validation_mask)
         # Save df_cv_results to file
         self.run_.save_search_results(df_cv_results, self.non_default_params)
+
+    @property
+    def nb_combinations(self) -> int:
+        if self.search_style == 'random':
+            return self.n_iter
+        elif self.search_style == 'grid':
+            if isinstance(self.param_grid, list):
+                return sum([self._nb_combinations(param_grid) for param_grid in self.param_grid])
+            else:
+                return self._nb_combinations(self.param_grid)
+        else:
+            raise NotImplementedError
+
+    @staticmethod
+    def _nb_combinations(param_grid: dict):
+        assert isinstance(param_grid, dict)
+        return prod([len(grid) for grid in param_grid.values()])
 
     @property
     def scoring(self):

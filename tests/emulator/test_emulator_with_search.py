@@ -7,9 +7,9 @@ from utils.utils_run import random_seed
 
 def test_emulator_validation_with_search():
     dataset = get_dataset("NPP_season", 0.3, ValidationSplit.RCP_START)
-    emulator = EmulatorWithSearch(niterations=5, n_iter=3, search_style='random', scaling_factor=2,
-                                  model_selection='validated',
-                                  param_list_to_optimize=['adaptive_parsimony_scaling'])
+    emulator = EmulatorWithSearch(niterations=5, n_iter=3, search_style='random',
+                                  param_grid={'adaptive_parsimony_scaling': [520.0, 2080.0]},
+                                  model_selection='validated')
     emulator.fit(dataset.X_train, dataset.y_train, validation_mask=dataset.validation_mask,
                  variable_names=dataset.X_variable_names, X_units=dataset.X_units, y_units=dataset.y_units)
     assert emulator.selected_complexity == 27
