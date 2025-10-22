@@ -15,7 +15,8 @@ def get_equation(expr: Expr) -> str:
     for s in ["Max", "Min", "Mean"]:
         equation_str = equation_str.replace(f'{s}_', s)
     # Split the equation on 2 lines if it is too long
-    return text_on_two_lines_if_too_long(equation_str)
+    # return text_on_two_lines_if_too_long(equation_str)
+    return equation_str
 
 
 def get_bold_equation(equation_str: str) -> str:

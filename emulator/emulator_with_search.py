@@ -146,44 +146,16 @@ class EmulatorWithSearch(Emulator):
         self.n_jobs = n_jobs
         self.param_grid = param_grid
 
+    def some_checks(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray] = None):
+        super().some_checks(X, y, validation_mask)
+        assert self.param_grid is not None, 'self.param_grid must be specified before calling the fit method'
+        assert isinstance(self.search_style, str)
+        assert isinstance(self.n_iter, int) and self.n_iter > 0
+        assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
 
-    def fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
-            variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
-            y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
-        """Fit the emulator for some feature X, target y, and validation_mask.
-        Additional information can be specified: variable_names & units (with X_units, y_units)
-        Run hyperparameter search with several hyperparameter settings (load from file the results if it exists)
-        The top hyperparameter setting (minimizing validation error) is selected for the final 'fit' of the emulator
-
-        Compared to the fit method of PySR, this 'fit' method:
-            -has one more argument 'validation_mask', an array of bool (None by default) defining the validation split
-            -only handles np.ndarray as input for X and y
-            -does not handle additional parameters of PySR (weights, Xresampled, ...)
-
-        If validation_mask is not None, we fit the emulator on the train set (X_train_train, y_train_train)
-        and compute the 'index_for_validated_model_selection' on the validation set
-
-
-
-        Parameters
-        ----------
-        X : ndarray, Training data of shape (n_samples, n_features).
-        y : ndarray, Target values of shape (n_samples,) or (n_samples, n_targets).
-        validation_mask: Optional[ndarray], validation_mask[i] indicates if the index 'i' is in the validation set
-        variable_names : list[str], a list of names for the variables, rather than "x0", "x1", etc.
-        X_units : list[str], a list of units for each variable in `X`.
-        y_units : str | list[str], similar to `X_units`, but as a unit for the target variable, `y`.
-
-        Returns
-        -------
-        self : object
-            Fitted estimator"""
-        #  Some checks
-        self.some_checks()
-
-        #  Initialize self.run_, a Run object that handles all the input/output processing
-        self.initialize_run(X, y, validation_mask)
-
+    def fit_with_run(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray] = None,
+                     variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
+                     y_units: Optional[ArrayLike[str]] = None, run: Run = Optional) -> "PySRRegressor":
         # Check if the hyperparameter search has been run before
         if op.exists(self.run_.filepath_search_result):
             pass
@@ -194,20 +166,13 @@ class EmulatorWithSearch(Emulator):
         log_info("Fit with top params")
         top_params_emulator = self.run_.top_params_emulator
         self.set_params(**top_params_emulator)
-        run = Run(self.output_directory, get_run_id(get_non_default_params(top_params_emulator, Emulator)))
-        assert run.has_been_saved, f'{run.run_directory}'
+        run_top_params = Run(self.output_directory, get_run_id(get_non_default_params(top_params_emulator, Emulator)))
+        assert run_top_params.has_been_saved, f'{run_top_params.run_directory}'
 
         # Fit with a specific run
-        return self.fit_with_run(X, y, validation_mask, variable_names, X_units, y_units, run)
+        return super().fit_with_run(X, y, validation_mask, variable_names, X_units, y_units, run_top_params)
 
-    def some_checks(self):
-        """ Some checks on the parameters"""
-        assert self.param_grid is not None, ('self.param_grid must be specified before calling the fit method')
-        assert isinstance(self.search_style, str)
-        assert isinstance(self.n_iter, int) and self.n_iter > 0
-        assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
-
-    def run_and_save_hyperparameter_search(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+    def run_and_save_hyperparameter_search(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
                                            variable_names: ArrayLike[str] | None = None, X_units: ArrayLike[str] | None = None,
                                            y_units: str | ArrayLike[str] | None = None) -> None:
         """Run hyperparameter search and save the results as a csv"""
@@ -228,7 +193,7 @@ class EmulatorWithSearch(Emulator):
         search_cv.fit(X, y, validation_mask=validation_mask, variable_names=variable_names,
                       X_units=X_units, y_units=y_units)
         # Transform cv_results into a Dataframe sorted by ranking with additional columns
-        df_cv_results = compute_df_cv_results(search_cv.cv_results_, X, y, validation_mask)
+        df_cv_results = compute_df_cv_results(search_cv.cv_results_)
         # Save df_cv_results to file
         self.run_.save_search_results(df_cv_results, self.non_default_params)
 

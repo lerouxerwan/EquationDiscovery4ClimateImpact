@@ -15,7 +15,7 @@ from utils.utils_log import log_info
 @dataclass
 class OptimizationMarginal(Optimization):
 
-    def run(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+    def run(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
             y_units: Optional[ArrayLike[str]] = None) -> tuple[Emulator, dict[str, list] | None]:
         top_emulator = self.get_top_emulator(X, y, validation_mask, variable_names, X_units, y_units)
@@ -30,7 +30,7 @@ class OptimizationMarginal(Optimization):
                 param_name_to_values[param_name] = self.param_name_to_values[param_name]
         return top_emulator, param_name_to_values
 
-    def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+    def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
                          variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                          y_units: Optional[ArrayLike[str]] = None) -> Emulator:
         log_info(f'Run {self.name}')
@@ -40,7 +40,7 @@ class OptimizationMarginal(Optimization):
         emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
         return emulator
 
-    def get_budget(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+    def get_budget(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
                    variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                    y_units: Optional[ArrayLike[str]] = None) -> int:
         list_of_values = [list(param_name_to_values.values())[0]  for param_name_to_values in self.param_grid]

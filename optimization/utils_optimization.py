@@ -13,7 +13,7 @@ from utils.utils_path import OPT_PATH
 
 
 def get_loss(optimization: Optimization,
-             X_train: np.ndarray, y_train: np.ndarray, validation_mask: np.ndarray[bool],
+             X_train: np.ndarray, y_train: np.ndarray, validation_mask: np.ndarray,
              variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
              y_units: Optional[ArrayLike[str]] = None, metric: Metric = Metric.RMSE,
              X_test: np.ndarray = None, y_test: np.ndarray = None) -> float:

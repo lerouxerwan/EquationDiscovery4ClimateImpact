@@ -12,7 +12,7 @@ from optimization.utils_params.utils_param_name_to_values import ParamNameToValu
 
 @dataclass
 class Optimization(ABC):
-    model_selection: str = 'best'
+    model_selection: Literal["best", "accuracy", "score", "validated"] = 'best'
     param_name_to_values: Optional[ParamNameToValues | dict[str, list]] = None
     n_jobs: int = 1
     timeout_in_seconds: float | None = None
@@ -22,21 +22,21 @@ class Optimization(ABC):
             self.param_name_to_values = get_param_name_to_values(self.param_name_to_values)
         assert (self.param_name_to_values is None) or isinstance(self.param_name_to_values, dict)
 
-    def run(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+    def run(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
                           variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                           y_units: Optional[ArrayLike[str]] = None) -> tuple[Emulator, dict[str, list] | None]:
         top_emulator = self.get_top_emulator(X, y, validation_mask, variable_names, X_units, y_units)
         return top_emulator, self.param_name_to_values
 
     @abstractmethod
-    def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+    def get_top_emulator(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
                           variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                           y_units: Optional[ArrayLike[str]] = None) -> Emulator:
         pass
 
 
     @abstractmethod
-    def get_budget(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray[bool],
+    def get_budget(self, X: np.ndarray, y: np.ndarray, validation_mask: np.ndarray,
                           variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                           y_units: Optional[ArrayLike[str]] = None) -> int:
         pass

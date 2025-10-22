@@ -185,7 +185,7 @@ class Emulator(PySRRegressor):
         self.index_for_validated_model_selection_ = None
         self.run_ = None
 
-    def fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
+    def fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
             y_units: Optional[ArrayLike[str]] = None) -> "PySRRegressor":
         """Fit the emulator for some feature X, target y, and validation_mask.
@@ -211,16 +211,22 @@ class Emulator(PySRRegressor):
         -------
         self : object
             Fitted estimator"""
+        #  Some checks
+        self.some_checks(X, y, validation_mask)
+
         #  Initialize self.run_, a Run object that handles all the input/output processing
         self.initialize_run(X, y, validation_mask)
 
         # Fit with a specific run
         return self.fit_with_run(X, y, validation_mask, variable_names, X_units, y_units, self.run_)
 
-    def initialize_run(self, X, y, validation_mask):
-        #  Some checks
+    def some_checks(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray] = None):
         assert isinstance(X, np.ndarray) and isinstance(y, np.ndarray)
         assert isinstance(validation_mask, np.ndarray) or validation_mask is None
+        if validation_mask is not None:
+            assert all([isinstance(value, np.bool) for value in validation_mask])
+
+    def initialize_run(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray] = None):
         #  Run settings
         #  Set output_directory based on X,y and validation_mask.
         self.output_directory_ = self.output_directory = get_output_directory(X, y, validation_mask)
@@ -229,7 +235,7 @@ class Emulator(PySRRegressor):
         #  Initialize a Run object, which handles all the input/output processing
         self.run_ = Run(self.output_directory, self.run_id)
 
-    def fit_with_run(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
+    def fit_with_run(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
             y_units: Optional[ArrayLike[str]] = None, run: Run = Optional) -> "PySRRegressor":
         """Method that implement additional options compared to PySR:
@@ -309,7 +315,7 @@ class Emulator(PySRRegressor):
 
         return self
 
-    def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]] = None,
+    def _fit(self, X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray] = None,
              variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
              y_units: Optional[ArrayLike[str]] = None):
         #  Extract X_fit and y_fit

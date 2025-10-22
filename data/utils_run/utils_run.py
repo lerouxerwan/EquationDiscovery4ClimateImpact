@@ -9,7 +9,7 @@ from utils.utils_path import RUN_PATH
 CSV_FILENAME = 'cv_results.csv'
 JSON_FILENAME = 'params_emulator.json'
 
-def get_output_directory(X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray[bool]]):
+def get_output_directory(X: np.ndarray, y: np.ndarray, validation_mask: Optional[np.ndarray]):
     """Directory, containing subdirectories with results, for a dataset and a validation size"""
     if validation_mask is None:
         dataset_folder = get_hash_str(X, y)
