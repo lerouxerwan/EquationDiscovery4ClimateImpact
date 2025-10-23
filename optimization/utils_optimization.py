@@ -6,7 +6,7 @@ from numpy import ndarray
 from pysr.utils import ArrayLike
 
 from data.utils_dataset.utils_validation import get_X_and_y
-from data.utils_run.utils_key import get_hash_str
+from utils.utils_hash import get_hash_str
 from optimization.optimization import Optimization
 from utils.utils_path import OPT_PATH
 

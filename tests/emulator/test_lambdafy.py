@@ -1,4 +1,4 @@
-from emulator.utils_emulator import get_lambda_function_kwargs, get_lambda_function_list
+from emulator.utils_gaussian_fit import get_lambda_function_kwargs, get_lambda_function_list
 
 
 def test_create_lambda_function_kwargs():

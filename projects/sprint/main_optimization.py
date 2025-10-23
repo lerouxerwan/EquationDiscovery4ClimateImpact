@@ -8,19 +8,16 @@ from utils.utils_log import log_info
 
 def main():
     for opt_type in [OptimizationRandom_400]:
-        for validation_split in [ValidationSplit.RANDOM, ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.EXTREME][:]:
-        # for validation_split in [ValidationSplit.START, ValidationSplit.MIDDLE, ValidationSplit.END][:]:
-            for validation_size in [0.2, 0.25, 0.3][:]:
-                log_info(f'Run {validation_size} {validation_split} {opt_type} ')
-                dataset = get_dataset(validation_size=validation_size, validation_split=validation_split)
-                opt = opt_type('best', ParamNameToValues.DEFAULT_CENTRED, n_jobs=1)
-                # top_emulator, _ = opt.run(dataset.X_train, dataset.y_train, dataset.validation_mask,
-                #                           dataset.X_variable_names, dataset.X_units, dataset.y_units)
-                # plot_diagnosis(top_emulator, dataset)
-                rmse_test = get_loss(opt, dataset.X_train, dataset.y_train, dataset.validation_mask,
-                                     dataset.X_variable_names, dataset.X_units, dataset.y_units,
-                                     dataset.X_test, dataset.y_test)
-                log_info(f'RMSE test for top emulator = {rmse_test}')
+        for model_selection in ['best', 'validated']:
+            for validation_split in [ValidationSplit.RANDOM, ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.EXTREME][:]:
+                for validation_size in [0.2, 0.25, 0.3][:]:
+                    log_info(f'Run {validation_size} {validation_split} {opt_type} ')
+                    dataset = get_dataset(validation_size=validation_size, validation_split=validation_split)
+                    opt = opt_type(model_selection, ParamNameToValues.DEFAULT_CENTRED, n_jobs=1)
+                    rmse_test = get_loss(opt, dataset.X_train, dataset.y_train, dataset.validation_mask,
+                                         dataset.X_variable_names, dataset.X_units, dataset.y_units,
+                                         dataset.X_test, dataset.y_test)
+                    log_info(f'RMSE test for top emulator = {rmse_test}')
 
 if __name__ == '__main__':
     main()

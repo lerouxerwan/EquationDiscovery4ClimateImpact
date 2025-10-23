@@ -14,7 +14,7 @@ from sympy import Expr, Symbol
 from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_run.run import Run
 from data.utils_run.utils_run import get_output_directory, get_run_id, get_non_default_params
-from emulator.utils_emulator import get_X_for_gaussian_fit, get_lambda_function_list, get_loss_str_gaussian_fit, \
+from emulator.utils_gaussian_fit import get_X_for_gaussian_fit, get_lambda_function_list, get_loss_str_gaussian_fit, \
     compute_loss_gaussian_fit
 from plot.by_split.utils_equation_str import get_equation
 from plot.utils_metric.metric import Metric, compute_loss
@@ -252,6 +252,7 @@ class Emulator(PySRRegressor):
         # Try loading emulator from file
         if run.has_been_saved:
             try:
+                print(run.run_directory)
                 emulator_from_file = self.from_file(run_directory=run.run_directory)
             except (RuntimeError, EmptyDataError):
                 emulator_from_file = None

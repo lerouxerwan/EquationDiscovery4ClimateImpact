@@ -1,27 +1,25 @@
-from typing import Optional
-
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 
-from data.utils_run.run import Run
+from data.utils_dataset.dataset import Dataset
+from emulator.emulator_with_search import EmulatorWithSearch
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
     RMSE_VALIDATION_COLUMN_NAME, RMSE_TRAIN_COLUMN_NAME
 from plot.by_split.utils_axis import set_ylabel_with_metric
-from plot.utils_metric.metric import Metric
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_diagnosis_search_1d(run: Run, param_grid: dict[str, list], target_label: str, show: bool) -> None:
+def plot_diagnosis_search_1d(emulator: EmulatorWithSearch, dataset: Dataset, show: bool) -> None:
     """Plot the variation of RMSE validation for each hyperparameter in the param_grid"""
-    params_list = run.df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].to_list()
-    for param_name in param_grid.keys():
+    params_list = emulator.run_.df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].to_list()
+    for param_name in emulator.param_grid.keys():
         ax = plt.gca()
         params_values = [params[param_name] for params in params_list]
         for model_selection in ['best', 'validated']:
-            _plot_search_1d(ax, run.df_cv_results, params_values, model_selection)
+            _plot_search_1d(ax, emulator.run_.df_cv_results, params_values, model_selection)
         ax.set_xlabel(' '.join([w.capitalize() for w in param_name.split('_')]))
-        set_ylabel_with_metric(ax, Metric.RMSE, target_label)
+        set_ylabel_with_metric(ax, emulator.metric_, dataset.target_label)
         ax.legend()
         show_or_save_plot(f"search_1D/{param_name}", show)
 

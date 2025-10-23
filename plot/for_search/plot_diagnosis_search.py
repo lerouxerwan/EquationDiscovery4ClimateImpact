@@ -3,27 +3,26 @@ from typing import Optional
 import pandas as pd
 
 from data.utils_dataset.dataset import Dataset
-from data.utils_run.run import Run
 from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from emulator.utils_hyperparameter_search.utils_column_names import COLUMN_NAMES
 from plot.for_search.plot_search_1d import plot_diagnosis_search_1d
+from plot.for_search.plot_selection_rate_features_top_equations import plot_selection_rate_features_top_equations
 from utils.utils_latex import print_df_latex
 
 
 def plot_diagnosis_search(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False):
     assert isinstance(emulator, EmulatorWithSearch)
-    # for nb_top_equations in [5, 10, 20]:
-    #     plot_selection_rate_features_top_equations(dataset, emulator.run_, nb_top_equations, show)
-    plot_diagnosis_search_1d(emulator.run_, emulator.param_grid, dataset.target_label, show)
-    plot_summary_run(emulator.run_)
+    plot_selection_rate_features_top_equations(emulator, dataset)
+    plot_diagnosis_search_1d(emulator, dataset, show)
+    plot_summary_run(emulator)
 
-def plot_summary_run(run: Run, show: Optional[bool] = False) -> None:
-    df_list = [run.df_cv_results['params']]
+def plot_summary_run(emulator: EmulatorWithSearch) -> None:
+    df_list = [emulator.run_.df_cv_results['params']]
     for model_selection in ['best', 'validated']:
-        run.model_selection = model_selection
+        emulator.run_.model_selection = model_selection
         column_names = COLUMN_NAMES[:3]
-        df_list.append(run.df_cv_results.loc[:, column_names].copy())
+        df_list.append(emulator.run_.df_cv_results.loc[:, column_names].copy())
     df = pd.concat(df_list, axis=1)
     df.rename(columns={c: c.replace('_', ' ') for c in df.columns }, inplace=True)
     df.rename(columns={c: c.replace('validation', 'val') for c in df.columns }, inplace=True)

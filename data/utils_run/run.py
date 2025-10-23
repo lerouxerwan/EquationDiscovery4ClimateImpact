@@ -9,8 +9,7 @@ import pandas as pd
 from pysr import TensorBoardLoggerSpec
 
 from data.utils_run.utils_run import CSV_FILENAME, \
-    JSON_FILENAME
-from emulator.utils_emulator import params_that_do_not_impact_the_fit_results
+    JSON_FILENAME, params_that_do_not_impact_the_fit_results
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
     RMSE_VALIDATION_COLUMN_NAME, PARAMS_COLUMN_NAME, RMSE_TRAIN_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
