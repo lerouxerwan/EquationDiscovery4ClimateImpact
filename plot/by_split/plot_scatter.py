@@ -11,10 +11,10 @@ from emulator.emulator import Emulator
 from plot.utils_metric.utlis_metric_box import add_metric_box
 from plot.by_split.utils_plot_by_split import load_split_name_to_X_and_y_and_y_predicted_and_years, get_ymin_and_ymax
 from plot.by_split.utlis_plot_selected_equation import get_true_label_and_predicted_label, add_equation
-from utils.utils_plot import show_and_save_with_optional_plot_folder, get_subplots
+from utils.utils_plot import show_or_save_plot, get_subplots
 
 
-def plot_scatter(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None) -> None:
+def plot_scatter(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False) -> None:
     """Plot predicted values VS True values (in a scattered way) side by side"""
     split_name_to_X_and_y_and_y_predicted_and_years = load_split_name_to_X_and_y_and_y_predicted_and_years(emulator, dataset.X_train, dataset.y_train, dataset.X_test,
                                                        dataset.y_test, dataset.years_train, dataset.years_test, dataset.validation_mask)
@@ -22,7 +22,7 @@ def plot_scatter(emulator: Emulator, dataset: Dataset, show: Optional[bool] = Fa
     for split_name, (X, y, y_predicted, years) in split_name_to_X_and_y_and_y_predicted_and_years.items():
         fig, ax = plt.subplots()
         _plot_scatter(ax, dataset, emulator, fig, split_name, y, y_predicted, years, ymax, ymin)
-        show_and_save_with_optional_plot_folder(f'plot_scatter_{split_name}', show, plot_folder)
+        show_or_save_plot(f'plot_scatter_{split_name}', show)
 
 
 def _plot_scatter(ax, dataset, emulator, fig, split_name, y, y_predicted, years, ymax, ymin,
@@ -75,7 +75,7 @@ def compute_delta(y_historical, y_future) -> float:
     return 100 * (mean_future - mean_historical) / mean_historical
 
 
-def plot_scatter_side_by_side(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None) -> None:
+def plot_scatter_side_by_side(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False) -> None:
     """Plot predicted values VS True values (in a scattered way) side by side"""
 
     split_name_to_X_and_y_and_y_predicted_and_years = load_split_name_to_X_and_y_and_y_predicted_and_years(emulator, dataset.X_train, dataset.y_train, dataset.X_test,
@@ -122,7 +122,7 @@ def plot_scatter_side_by_side(emulator: Emulator, dataset: Dataset, show: Option
     fig.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=axs, orientation='horizontal', label='Years',
                  pad=-0.25, fraction=0.065)
 
-    show_and_save_with_optional_plot_folder(f'plot_scatter_side_by_side', show, plot_folder)
+    show_or_save_plot(f'plot_scatter_side_by_side', show)
 
 
 

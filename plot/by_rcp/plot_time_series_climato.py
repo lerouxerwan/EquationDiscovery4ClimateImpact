@@ -6,12 +6,12 @@ from matplotlib import pyplot as plt
 from numpy import ndarray
 
 from plot.by_rcp.utils_plot_by_rcp import plot_average_value
-from utils.utils_plot import show_and_save_with_optional_plot_folder
+from utils.utils_plot import show_or_save_plot
 
 
 def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label: dict[str, list[tuple[list[int], list[float], str, str]]],
                                     y_train: ndarray, y_label: str, plot_name: str, show: Optional[bool], ymin_and_ymax: tuple[float, float] = None, 
-                                    plot_std: bool = True, plot_folder: Optional[str] = None, ax=None,
+                                    plot_std: bool = True, ax=None,
                                     loc=None) -> dict[str, tuple[list[int], list[float], str]]:
     if ax is None:
         show_and_save = True
@@ -23,7 +23,7 @@ def plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_an
                                                                                           y_train, y_label,
                                                                                           ymin_and_ymax, plot_std, loc=loc)
     if show_and_save:
-        show_and_save_with_optional_plot_folder(f'climatological_series_{plot_name}', show, plot_folder)
+        show_or_save_plot(f'climatological_series_{plot_name}', show)
     return rcp_name_to_years_and_std_values_and_color
 
 

@@ -13,7 +13,7 @@ from utils.utils_log import log_info
 from utils.utils_plot import compute_axis_lim
 
 
-def plot_climato(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None):
+def plot_climato(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False):
     y_train_predicted = emulator.predict(dataset.X_train)
     y_test_predicted = None if dataset.X_test is None else emulator.predict(dataset.X_test)
     y_values = np.concat([y for y in [dataset.y_train, dataset.y_test, y_train_predicted, y_test_predicted] if y is not None])
@@ -21,9 +21,9 @@ def plot_climato(emulator: Emulator, dataset: Dataset, show: Optional[bool] = Fa
     # Plot observation and prediction using the same limit
     true_target_label, predicted_target_label = get_true_label_and_predicted_label(dataset.target_label)
     rcp_name_to_years_and_observed_std_values_years_and_color = _plot_climato(dataset.y_train, dataset.y_test, dataset.years_train, dataset.years_test, dataset.rcp_name_train, dataset.rcp_name_test,
-                  dataset.nb_historical_years, true_target_label, show, ymin_and_ymax, plot_folder)
+                  dataset.nb_historical_years, true_target_label, show, ymin_and_ymax)
     rcp_name_to_years_and_predicted_std_values_and_color = _plot_climato(y_train_predicted, y_test_predicted, dataset.years_train, dataset.years_test, dataset.rcp_name_train, dataset.rcp_name_test,
-                  dataset.nb_historical_years, predicted_target_label, show, ymin_and_ymax, plot_folder)
+                  dataset.nb_historical_years, predicted_target_label, show, ymin_and_ymax)
     # Plot ratio of std
     rcp_name_to_list_of_years_and_y_and_color_and_label = {}
     for rcp_name, (years, observed_std_values, color) in rcp_name_to_years_and_observed_std_values_years_and_color.items():
@@ -35,30 +35,28 @@ def plot_climato(emulator: Emulator, dataset: Dataset, show: Optional[bool] = Fa
         rcp_name_to_list_of_years_and_y_and_color_and_label[rcp_name] = [(years, values, color, prefix)]
     y_label = f'{prefix}\nfor {uncapitalize(get_label(dataset.target_label))}'
     plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label, dataset.y_train, y_label,
-                                    "Std", show, plot_std=False, plot_folder=plot_folder)
+                                    "Std", show, plot_std=False)
 
 
 
 def _plot_climato(y_train: ndarray, y_test: Optional[ndarray] = None,
                   years_train: Optional[ndarray]=None, years_test: Optional[ndarray]=None, rcp_name_train: str= 'RCP85',
                   rcp_name_test: Optional[str]=None, nb_historical_years:Optional[int] = None,
-                  target_label: str = "Target (-)", show: bool = False, ymin_and_ymax: Optional[tuple[float, float]] = None,
-                  plot_folder: Optional[str] = None, ax=None):
+                  target_label: str = "Target (-)", show: bool = False, ymin_and_ymax: Optional[tuple[float, float]] = None, ax=None):
     """Plot several RCP climatological time series on the same graph"""
     rcp_name_to_list_of_years_and_y_and_color_and_label = load_rcp_name_to_list_of_years_and_y_and_color_and_label(y_train, y_test, years_train, years_test, rcp_name_train, rcp_name_test, nb_historical_years)
     y_label = get_label(target_label)
     plot_name = y_label.split()[0]
-    return plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, y_label, plot_name, show, ymin_and_ymax,
-                                           plot_folder=plot_folder, ax=ax)
+    return plot_climatological_time_series(rcp_name_to_list_of_years_and_y_and_color_and_label, y_train, y_label, plot_name, show, ymin_and_ymax, ax=ax)
 
 
-def plot_errors_climato(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None, ax=None):
+def plot_errors_climato(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False, ax=None):
     for relative_error in [True, False]:
-        _plot_errors_climato(emulator, dataset, show, relative_error, plot_folder, ax)
+        _plot_errors_climato(emulator, dataset, show, relative_error, ax)
 
 
 def _plot_errors_climato(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False, relative_error: bool = False,
-                         plot_folder: Optional[str] = None, ax=None, loc=None):
+                         ax=None, loc=None):
     errors_train = compute_differences(emulator, dataset.X_train, dataset.y_train, relative_error)
     errors_test = compute_differences(emulator, dataset.X_test, dataset.y_test, relative_error)
     rcp_name_to_list_of_years_and_errors_and_color_and_label = load_rcp_name_to_list_of_years_and_y_and_color_and_label(errors_train, errors_test, dataset.years_train, dataset.years_test,
@@ -69,7 +67,7 @@ def _plot_errors_climato(emulator: Emulator, dataset: Dataset, show: Optional[bo
     else:
         y_label = f'Error of {target_label}'
     plot_name = y_label.split()[0]
-    plot_climatological_time_series(rcp_name_to_list_of_years_and_errors_and_color_and_label, errors_train, y_label, plot_name, show, plot_folder=plot_folder,
+    plot_climatological_time_series(rcp_name_to_list_of_years_and_errors_and_color_and_label, errors_train, y_label, plot_name, show,
                                     ax=ax, loc=loc)
 
 def compute_differences(emulator: Emulator, X: Optional[ndarray], y: Optional[ndarray],

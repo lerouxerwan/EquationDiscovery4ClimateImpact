@@ -9,8 +9,9 @@ from utils.utils_log import log_info
 
 
 def main():
-    for opt_type in optimization_types_500[:]:
-        for validation_split in [ValidationSplit.RANDOM, ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.EXTREME][:]:
+    for opt_type in optimization_types_500[1:2]:
+        # for validation_split in [ValidationSplit.RANDOM, ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.EXTREME][:]:
+        for validation_split in [ValidationSplit.START, ValidationSplit.MIDDLE, ValidationSplit.END][:]:
             for validation_size in [0.2, 0.25, 0.3][:]:
                 log_info(f'Run {validation_size} {validation_split} {opt_type} ')
                 dataset = get_dataset(validation_size=validation_size, validation_split=validation_split)

@@ -18,7 +18,7 @@ from utils.utils_log import log_info
 from utils.utils_plot import PLOT_PATH
 
 
-def plot_diagnosis(emulator: Emulator, dataset:Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None):
+def plot_diagnosis(emulator: Emulator, dataset:Dataset, show: Optional[bool] = False):
     """Plot diagnosis of this emulator i) by split ii) by rcp iii) for the search"""
     log_info('Start plot diagnosis')
     # Select plot functions
@@ -36,7 +36,7 @@ def plot_diagnosis(emulator: Emulator, dataset:Dataset, show: Optional[bool] = F
         plot_functions.append(plot_diagnosis_search)
     # Run several plot functions
     for plot_function in plot_functions:
-        plot_function(emulator, dataset, show, plot_folder)
+        plot_function(emulator, dataset, show)
     # Create two symbolic links between the run_directory in the plot path
     if show is False:
         add_two_symbolic_link(emulator.run_.run_directory, PLOT_PATH)

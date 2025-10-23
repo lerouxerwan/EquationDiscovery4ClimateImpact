@@ -9,11 +9,10 @@ from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULA
     RMSE_VALIDATION_COLUMN_NAME, RMSE_TRAIN_COLUMN_NAME
 from plot.by_split.utils_axis import set_ylabel_with_metric
 from plot.utils_metric.metric import Metric
-from utils.utils_plot import show_and_save_with_optional_plot_folder
+from utils.utils_plot import show_or_save_plot
 
 
-def plot_diagnosis_search_1d(run: Run, param_grid: dict[str, list], target_label: str,
-                             show: bool, plot_folder: Optional[str] = None) -> None:
+def plot_diagnosis_search_1d(run: Run, param_grid: dict[str, list], target_label: str, show: bool) -> None:
     """Plot the variation of RMSE validation for each hyperparameter in the param_grid"""
     params_list = run.df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].to_list()
     for param_name in param_grid.keys():
@@ -24,7 +23,7 @@ def plot_diagnosis_search_1d(run: Run, param_grid: dict[str, list], target_label
         ax.set_xlabel(' '.join([w.capitalize() for w in param_name.split('_')]))
         set_ylabel_with_metric(ax, Metric.RMSE, target_label)
         ax.legend()
-        show_and_save_with_optional_plot_folder(f"search_1D/{param_name}", show, plot_folder)
+        show_or_save_plot(f"search_1D/{param_name}", show)
 
 
 def _plot_search_1d(ax: Axes, df_cv_results: pd.DataFrame, param_values: list[float], model_selection: str) -> None:

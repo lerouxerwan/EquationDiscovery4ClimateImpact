@@ -6,11 +6,10 @@ from pysr.utils import ArrayLike
 from data.utils_dataset.dataset import Dataset
 from emulator.emulator import Emulator
 from plot.dataset.plot_dataset import plot_values_feature
-from utils.utils_plot import show_and_save_with_optional_plot_folder, get_subplots
+from utils.utils_plot import show_or_save_plot, get_subplots
 
 
-def plot_selected_features(emulator: Emulator, dataset:Dataset, show: Optional[bool] = False,
-                            plot_folder: Optional[str] = None) -> None:
+def plot_selected_features(emulator: Emulator, dataset:Dataset, show: Optional[bool] = False) -> None:
     """Plot the features in the selected equation"""
     selected_feature_indexes = get_selected_feature_indexes(emulator.selected_variable_names, dataset.X_variable_names)
     selected_feature_indexes = selected_feature_indexes[:2]
@@ -25,7 +24,7 @@ def plot_selected_features(emulator: Emulator, dataset:Dataset, show: Optional[b
             for j, ax in enumerate(ax_row):
                 selected_feature_index = selected_feature_indexes[i * ncols + j]
                 plot_values_feature(ax, dataset, selected_feature_index)
-    show_and_save_with_optional_plot_folder(f'selected_features', show, plot_folder)
+    show_or_save_plot(f'selected_features', show)
 
 def get_selected_feature_indexes(selected_variable_names: list[str], variable_names: Optional[ArrayLike[str]] = None) -> list[int]:
     if variable_names is None:

@@ -7,12 +7,10 @@ from data.utils_dataset.dataset import Dataset
 from data.utils_run.run import Run
 from emulator.utils_hyperparameter_search.utils_column_names import VARIABLE_NAMES_COLUMN_NAME
 from plot.dataset.plot_selected_features import get_selected_feature_indexes
-from utils.utils_plot import show_and_save_with_optional_plot_folder
+from utils.utils_plot import show_or_save_plot
 
 
-def plot_selection_rate_features_top_equations(dataset: Dataset, run: Run,
-                                               nb_top_equations: int = 10, show: bool = False,
-                                               plot_folder: Optional[str] = None):
+def plot_selection_rate_features_top_equations(dataset: Dataset, run: Run, nb_top_equations: int = 10, show: bool = False):
     """Plot the selected features for top equations"""
     df = run.df_cv_results.copy()
     if len(df) >= nb_top_equations:
@@ -35,6 +33,5 @@ def plot_selection_rate_features_top_equations(dataset: Dataset, run: Run,
             xticklabels[i] =  '$\\mathbf{' + xticklabels[i][1:-1] + '}$'
         ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
         ax.set_ylabel(f'Selection rate for top {nb_top_equations} equations (%)')
-        show_and_save_with_optional_plot_folder(f'selected_features_top_{nb_top_equations}_equations', show,
-                                                plot_folder)
+        show_or_save_plot(f'selected_features_top_{nb_top_equations}_equations', show)
 

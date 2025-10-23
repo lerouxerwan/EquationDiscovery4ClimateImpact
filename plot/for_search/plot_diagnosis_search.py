@@ -11,15 +11,14 @@ from plot.for_search.plot_search_1d import plot_diagnosis_search_1d
 from utils.utils_latex import print_df_latex
 
 
-def plot_diagnosis_search(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False, plot_folder: Optional[str] = None):
+def plot_diagnosis_search(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False):
     assert isinstance(emulator, EmulatorWithSearch)
     # for nb_top_equations in [5, 10, 20]:
-    #     plot_selection_rate_features_top_equations(dataset, emulator.run_, nb_top_equations, show, plot_folder)
-    plot_diagnosis_search_1d(emulator.run_, emulator.param_grid, dataset.target_label,
-                             show, plot_folder)
+    #     plot_selection_rate_features_top_equations(dataset, emulator.run_, nb_top_equations, show)
+    plot_diagnosis_search_1d(emulator.run_, emulator.param_grid, dataset.target_label, show)
     plot_summary_run(emulator.run_)
 
-def plot_summary_run(run: Run, show: Optional[bool] = False, plot_folder: Optional[str] = None) -> None:
+def plot_summary_run(run: Run, show: Optional[bool] = False) -> None:
     df_list = [run.df_cv_results['params']]
     for model_selection in ['best', 'validated']:
         run.model_selection = model_selection

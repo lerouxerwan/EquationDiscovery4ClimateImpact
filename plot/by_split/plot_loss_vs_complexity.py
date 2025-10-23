@@ -11,11 +11,10 @@ from plot.by_split.utils_plot_by_split import load_split_name_to_X_and_y
 from plot.by_split.utils_plot_split_name import SPLIT_NAMES, split_name_to_color, \
     get_label_split_name
 from plot.utils_metric.metric import Metric
-from utils.utils_plot import show_and_save_with_optional_plot_folder
+from utils.utils_plot import show_or_save_plot
 
 
-def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[bool] = False,
-                            plot_folder: Optional[str] = None) -> None:
+def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[bool] = False) -> None:
     """Plot prediction loss as a function of complexity for several splits
     Note that for the train split it will correspond to the pareto front"""
     split_name_to_x_and_y = load_split_name_to_X_and_y(emulator, dataset.X_train, dataset.y_train, dataset.X_test,
@@ -59,7 +58,7 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
     # General settings for the plot
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
     ax.legend(loc='upper right')
-    show_and_save_with_optional_plot_folder('loss_vs_complexity', show, plot_folder)
+    show_or_save_plot('loss_vs_complexity', show)
 
 def plot_threshold(ax, emulator, metric, xmax, xmin):
     if emulator.model_selection == 'best':
