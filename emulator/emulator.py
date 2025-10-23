@@ -378,10 +378,21 @@ class Emulator(PySRRegressor):
     def get_best(self, index: int | list[int] | None = None) -> pd.Series | list[pd.Series]:
         """Compute a Series (or list of Series) representing the selected equations (complexity, loss, ...)
          If index=None, then the equation is selected using self.model_selection"""
-        if (index is None) and (self.model_selection == 'validated'):
-            assert self.index_for_validated_model_selection_ is not None
-            index = self.index_for_validated_model_selection_
-        return super().get_best(index)
+        if index is None:
+            assert self.model_selection in ['best', 'validated']
+            if self.model_selection == 'validated':
+                assert self.index_for_validated_model_selection_ is not None
+                index = self.index_for_validated_model_selection_
+            elif self.model_selection == 'best':
+                if self.metric_ is Metric.RMSE:
+                    threshold = np.sqrt(1.5) * self.equations_["loss"].min()
+                    filtered_equations = self.equations_.query(f"loss <= {threshold}")
+                    index = filtered_equations["score"].idxmax()
+                else:
+                    raise NotImplementedError
+            else:
+                raise NotImplementedError
+        return self.equations_.iloc[index]
 
     @property
     def selected_row(self) -> pd.Series:

@@ -8,7 +8,6 @@ from optimization.optimization import Optimization
 from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import optimization_types_500
 from optimization.utils_optimization import get_loss
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
-from plot.utils_metric.metric import Metric
 from utils.utils_plot import show_or_save_plot
 
 
@@ -20,7 +19,7 @@ def plot_compare_split(opt: Optimization, validation_size: float, show: bool):
         dataset = get_dataset(validation_size=validation_size, validation_split=validation_split)
         rmse_test = get_loss(opt, dataset.X_train, dataset.y_train, dataset.validation_mask,
                              dataset.X_variable_names, dataset.X_units, dataset.y_units,
-                             Metric.RMSE, dataset.X_test, dataset.y_test)
+                             dataset.X_test, dataset.y_test)
         name_to_rmse_test_for_selected_equation[str(validation_split)] = rmse_test
     ax = plt.gca()
     ax.plot(name_to_rmse_test_for_selected_equation.keys(), name_to_rmse_test_for_selected_equation.values())

@@ -8,14 +8,13 @@ from pysr.utils import ArrayLike
 from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_run.utils_key import get_hash_str
 from optimization.optimization import Optimization
-from plot.utils_metric.metric import Metric, metric_to_str
 from utils.utils_path import OPT_PATH
 
 
 def get_loss(optimization: Optimization,
              X_train: ndarray, y_train: ndarray, validation_mask: ndarray,
-             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
-             y_units: Optional[ArrayLike[str]] = None, metric: Metric = Metric.RMSE,
+             variable_names: Optional[ArrayLike[str]] = None,
+             X_units: Optional[ArrayLike[str]] = None, y_units: Optional[ArrayLike[str]] = None,
              X_test: ndarray = None, y_test: ndarray = None) -> float:
     assert validation_mask is not None
     with_test_data = (X_test is not None) and (y_test is not None)
@@ -28,7 +27,7 @@ def get_loss(optimization: Optimization,
 
     # Compute filepath
     opt_path = op.join(OPT_PATH, dataset_folder, optimization.opt_id)
-    filepath = op.join(opt_path, f'{metric_to_str[metric]}_{name}.txt')
+    filepath = op.join(opt_path, f'{name}.txt')
 
     # Load the loss or Compute it and save it
     if op.exists(filepath):

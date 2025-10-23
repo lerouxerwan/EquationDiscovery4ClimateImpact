@@ -60,22 +60,6 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
     ax.legend(loc='upper right')
     show_or_save_plot('loss_vs_complexity', show)
 
-def plot_threshold(ax, emulator, metric, xmax, xmin):
-    if emulator.model_selection == 'best':
-        threshold = 1.5
-        # Add a line for PySR threshold
-        if metric is Metric.MSE:
-            constant_value = threshold
-        elif metric is Metric.RMSE:
-            constant_value = np.sqrt(threshold)
-        else:
-            raise NotImplementedError
-        x_for_threshold = [xmin, xmax]
-        threshold_constant_values = [constant_value for _ in x_for_threshold]
-        ax.plot(x_for_threshold, threshold_constant_values, color=split_name_to_color["train"],
-                linestyle='--', label='Threshold for equation selection')
-
-
 def load_bar_attributes(nb_bars: int, complexity_list: list[int]):
     # assert all([c % 2 == 1 for c in complexity_list]), 'A case with pair complexity must be implemented'
     width = (2 if nb_bars == 2 else 1) / (1 + nb_bars) # add one for the blank bar

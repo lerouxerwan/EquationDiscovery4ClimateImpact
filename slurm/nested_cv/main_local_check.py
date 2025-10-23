@@ -16,5 +16,6 @@ if __name__ == '__main__':
                                           dataset.X_variable_names, dataset.X_units, dataset.y_units)
                 rmse_test = get_loss(opt, dataset.X_train, dataset.y_train, dataset.validation_mask,
                                      dataset.X_variable_names, dataset.X_units, dataset.y_units,
-                                     Metric.RMSE, dataset.X_test, dataset.y_test)
+
+                                     dataset.X_test, dataset.y_test)
                 log_info(f'RMSE test for top emulator = {rmse_test}')
