@@ -5,7 +5,7 @@ class SbatchNestedCV(Sbatch):
 
     @property
     def sbatch_name(self) -> str:
-        return 'mrb'
+        return 'mb'
 
     @property
     def filepath_from_root(self):
@@ -17,16 +17,10 @@ class SbatchNestedCV(Sbatch):
 
     @property
     def server_name(self) -> str:
-        return '--nodelist=sl-mee-br-112'
+        return '--nodelist=sl-mee-br-111'
 
 
 def main_validation_size():
-    # crashes = [
-    #     [0, 2, 1],
-    # ]
-    # for crash in crashes:
-    #     sbatch = SbatchNestedCV(crash)
-    #     sbatch.run()
     index1 = 2
     for index2 in [0, 1, 2][:]:
         for index3 in [0, 1, 2][:]:

@@ -17,16 +17,10 @@ class SbatchNestedCV(Sbatch):
 
     @property
     def server_name(self) -> str:
-        return '--nodelist=sl-mee-br-111'
+        return '--nodelist=sl-mee-br-112'
 
 
 def main_validation_size():
-    # crashes = [
-    #     [0, 2, 1],
-    # ]
-    # for crash in crashes:
-    #     sbatch = SbatchNestedCV(crash)
-    #     sbatch.run()
     index1 = 0
     for index2 in [0, 1, 2][:]:
         for index3 in [0, 1, 2][:]:

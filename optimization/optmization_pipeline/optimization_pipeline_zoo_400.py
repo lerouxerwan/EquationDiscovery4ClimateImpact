@@ -1,0 +1,13 @@
+from optimization.optimization_bayesian.optimization_bayesian_zoo import OptimizationBayesian_500, \
+    OptimizationBayesian_200_5, OptimizationBayesian_100_5
+from optimization.optimization_marginal.optimization_marginal import OptimizationMarginal
+from optimization.optimization_random.optimimization_random_zoo import OptimizationRandom_500, OptimizationRandom_200_5, \
+    OptimizationRandom_100_5, OptimizationRandom_400
+from optimization.optmization_pipeline.optimization_pipeline_factory import optimization_pipeline_factory
+
+OptimizationPipelineRandom = OptimizationRandom_400
+OptimizationPipelineMarginalRandom = optimization_pipeline_factory([OptimizationMarginal, OptimizationRandom_100_5])
+OptimizationPipelineMarginalGaussian = optimization_pipeline_factory([OptimizationMarginal, OptimizationBayesian_100_5])
+
+
+optimization_types_400 = [OptimizationPipelineRandom, OptimizationPipelineMarginalRandom, OptimizationPipelineMarginalGaussian][:]

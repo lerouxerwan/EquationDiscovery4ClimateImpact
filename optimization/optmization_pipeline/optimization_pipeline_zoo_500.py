@@ -6,7 +6,6 @@ from optimization.optimization_random.optimimization_random_zoo import Optimizat
 from optimization.optmization_pipeline.optimization_pipeline_factory import optimization_pipeline_factory
 
 OptimizationPipelineRandom = OptimizationRandom_500
-OptimizationPipelineBayesian = OptimizationBayesian_500
 OptimizationPipelineMarginalRandom = optimization_pipeline_factory([OptimizationMarginal, OptimizationRandom_200_5])
 OptimizationPipelineMarginalGaussian = optimization_pipeline_factory([OptimizationMarginal, OptimizationBayesian_200_5])
 OptimizationPipelineMarginalRandomGaussian = optimization_pipeline_factory([OptimizationMarginal, OptimizationRandom_100_5, OptimizationBayesian_100_5])
