@@ -17,7 +17,6 @@ from emulator.utils_hyperparameter_search.utils_search_cv import get_search_cv_k
 from emulator.utils_hyperparameter_search.utils_search_style import search_style_to_search_cv_type
 from plot.utils_metric.metric import Metric
 from utils.utils_log import log_info
-from utils.utils_non_default_params import get_non_default_params
 
 
 class EmulatorWithSearch(Emulator):
@@ -153,6 +152,10 @@ class EmulatorWithSearch(Emulator):
         assert isinstance(self.n_iter, int) and self.n_iter > 0
         assert (self.n_jobs is None) or isinstance(self.n_jobs, int)
 
+    @classmethod
+    def get_run_id(cls, params: dict) -> str:
+        return get_run_id(cls.get_non_default_params(params))
+
     def fit_with_run(self, X: ndarray, y: ndarray, validation_mask: Optional[ndarray] = None,
                      variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                      y_units: Optional[ArrayLike[str]] = None, run: Run = Optional) -> "PySRRegressor":
@@ -166,7 +169,7 @@ class EmulatorWithSearch(Emulator):
         log_info("Fit with top params")
         top_params_emulator = self.run_.top_params_emulator
         self.set_params(**top_params_emulator)
-        run_top_params = Run(self.output_directory, get_run_id(get_non_default_params(top_params_emulator, Emulator)))
+        run_top_params = Run(self.output_directory, Emulator.get_run_id(top_params_emulator))
         assert run_top_params.has_been_saved, f'{run_top_params.run_directory}'
 
         # Fit with a specific run
@@ -232,7 +235,7 @@ class EmulatorWithSearch(Emulator):
 
     def remove_folder(self):
         for params in self.run_.df_cv_results[PARAMS_EMULATOR_COLUMN_NAME].values:
-            Run(self.output_directory, get_run_id(get_non_default_params(params, Emulator))).remove_folder()
+            Run(self.output_directory, Emulator.get_run_id(params)).remove_folder()
         super().remove_folder()
 
 

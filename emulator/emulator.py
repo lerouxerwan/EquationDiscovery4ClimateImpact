@@ -13,13 +13,12 @@ from sympy import Expr, Symbol
 
 from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_run.run import Run
-from data.utils_run.utils_run import get_output_directory, get_run_id
+from data.utils_run.utils_run import get_output_directory, get_run_id, get_non_default_params
 from emulator.utils_emulator import get_X_for_gaussian_fit, get_lambda_function_list, get_loss_str_gaussian_fit, \
     compute_loss_gaussian_fit
 from plot.by_split.utils_equation_str import get_equation
 from plot.utils_metric.metric import Metric, compute_loss
 from utils.utils_log import log_info
-from utils.utils_non_default_params import get_non_default_params
 from utils.utils_run import random_seed
 
 
@@ -214,8 +213,14 @@ class Emulator(PySRRegressor):
         #  Some checks
         self.some_checks(X, y, validation_mask)
 
-        #  Initialize self.run_, a Run object that handles all the input/output processing
-        self.initialize_run(X, y, validation_mask)
+        #  Set output_directory based on X,y and validation_mask.
+        self.output_directory_ = self.output_directory = get_output_directory(X, y, validation_mask)
+
+        # Set run_id based on the current parameters
+        self.run_id = self.run_id_ = self.get_run_id(self.params)
+
+        #  Initialize a Run object, which handles all the input/output processing
+        self.run_ = Run(self.output_directory, self.run_id)
 
         # Fit with a specific run
         return self.fit_with_run(X, y, validation_mask, variable_names, X_units, y_units, self.run_)
@@ -226,14 +231,12 @@ class Emulator(PySRRegressor):
         if validation_mask is not None:
             assert all([isinstance(value, np.bool) for value in validation_mask])
 
-    def initialize_run(self, X: ndarray, y: ndarray, validation_mask: Optional[ndarray] = None):
-        #  Run settings
-        #  Set output_directory based on X,y and validation_mask.
-        self.output_directory_ = self.output_directory = get_output_directory(X, y, validation_mask)
-        # Set run_id based on the current parameters
-        self.run_id_ = self.run_id = get_run_id(self.non_default_params)
-        #  Initialize a Run object, which handles all the input/output processing
-        self.run_ = Run(self.output_directory, self.run_id)
+    @classmethod
+    def get_run_id(cls, params: dict) -> str:
+        non_default_params = cls.get_non_default_params(params)
+        if 'model_selection' in non_default_params:
+            non_default_params.pop('model_selection')
+        return get_run_id(non_default_params)
 
     def fit_with_run(self, X: ndarray, y: ndarray, validation_mask: Optional[ndarray] = None,
             variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
@@ -386,10 +389,12 @@ class Emulator(PySRRegressor):
             elif self.model_selection == 'best':
                 if self.metric_ is Metric.RMSE:
                     threshold = np.sqrt(1.5) * self.equations_["loss"].min()
-                    filtered_equations = self.equations_.query(f"loss <= {threshold}")
-                    index = filtered_equations["score"].idxmax()
+                elif self.metric_ is Metric.NLL:
+                    threshold = 1.5  * self.equations_["loss"].min()
                 else:
                     raise NotImplementedError
+                filtered_equations = self.equations_.query(f"loss <= {threshold}")
+                index = filtered_equations["score"].idxmax()
             else:
                 raise NotImplementedError
         return self.equations_.iloc[index]
@@ -467,8 +472,16 @@ class Emulator(PySRRegressor):
     """Other methods/properties"""
 
     @property
+    def params(self):
+        return self.get_params()
+
+    @property
     def non_default_params(self) -> dict[str, Any]:
-        return get_non_default_params(self.get_params(), type(self))
+        return self.get_non_default_params(self.params)
+
+    @classmethod
+    def get_non_default_params(cls, params):
+        return get_non_default_params(params, cls)
 
     def __repr__(self) -> str:
         """If we do not override this method, then the __repr__ method from PySR fails
