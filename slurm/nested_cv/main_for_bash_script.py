@@ -27,7 +27,7 @@ def main():
     dataset = get_dataset(validation_size=validation_size, validation_split=validation_split)
 
     # Run optimization
-    opt = opt_type('best', param_name_to_values, n_jobs=-1, timeout_in_seconds=60*30)
+    opt = opt_type('best', param_name_to_values, n_jobs=1, timeout_in_seconds=60*30)
     # top_emulator, _  = opt.run(dataset.X_train, dataset.y_train, dataset.validation_mask,
     #          dataset.X_variable_names, dataset.X_units, dataset.y_units)
     rmse_test = get_loss(opt, dataset.X_train, dataset.y_train, dataset.validation_mask,
