@@ -6,10 +6,7 @@ from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULA
     RMSE_TRAIN_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME
 
 
-def compute_df_cv_results(cv_results: dict) -> pd.DataFrame:
-    # Pop estimator columns from cv_results dict
-    emulators: list[Emulator] = cv_results.pop('estimator')
-    assert all([isinstance(emulator, Emulator) for emulator in emulators])
+def compute_df_cv_results(cv_results: dict, emulators: list[Emulator]) -> pd.DataFrame:
     # Load Dataframe from cv_results
     df_cv_results = pd.DataFrame(cv_results)
     # Add params emulator

@@ -177,7 +177,7 @@ class EmulatorWithSearch(Emulator):
 
     def run_and_save_hyperparameter_search(self, X: ndarray, y: ndarray, validation_mask: ndarray,
                                            variable_names: ArrayLike[str] | None = None, X_units: ArrayLike[str] | None = None,
-                                           y_units: str | ArrayLike[str] | None = None) -> None:
+                                           y_units: str | ArrayLike[str] | None = None, just_return_estimator: bool = False) -> Optional[list[Emulator]]:
         """Run hyperparameter search and save the results as a csv"""
         log_info(f'Start hyperparameter search with {self.nb_combinations} combinations, with param grid = {self.param_grid}')
         # Run a simple/fast regressor fit, just to load julia before using multiprocessing
@@ -194,10 +194,18 @@ class EmulatorWithSearch(Emulator):
                                    **get_search_cv_kwargs(search_cv_type, self.param_grid, self.n_iter))
         search_cv.fit(X, y, validation_mask=validation_mask, variable_names=variable_names,
                       X_units=X_units, y_units=y_units)
-        # Transform cv_results into a Dataframe sorted by ranking with additional columns
-        df_cv_results = compute_df_cv_results(search_cv.cv_results_)
-        # Save df_cv_results to file
-        self.run_.save_search_results(df_cv_results, self.non_default_params)
+        # Pop estimator columns from cv_results dict
+        emulators: list[Emulator] = search_cv.cv_results_.pop('estimator')
+        assert all([isinstance(emulator, Emulator) for emulator in emulators])
+        if just_return_estimator:
+            # Return emulators that have been fitted successfully
+            return [emulator for emulator in emulators if emulator.equations_ is not None]
+        else:
+            # Transform cv_results into a Dataframe sorted by ranking with additional columns
+            df_cv_results = compute_df_cv_results(search_cv.cv_results_, emulators)
+            # Save df_cv_results to file
+            self.run_.save_search_results(df_cv_results, self.non_default_params)
+
 
     @property
     def nb_combinations(self) -> int:

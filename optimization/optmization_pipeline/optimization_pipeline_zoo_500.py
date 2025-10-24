@@ -1,7 +1,7 @@
 from optimization.optimization_bayesian.optimization_bayesian_zoo import OptimizationBayesian_500, \
     OptimizationBayesian_200_5, OptimizationBayesian_100_5
 from optimization.optimization_marginal.optimization_marginal import OptimizationMarginal
-from optimization.optimization_random.optimimization_random_zoo import OptimizationRandom_500, OptimizationRandom_200_5, \
+from optimization.optimization_random.optimization_random_zoo import OptimizationRandom_500, OptimizationRandom_200_5, \
     OptimizationRandom_100_5
 from optimization.optmization_pipeline.optimization_pipeline_factory import optimization_pipeline_factory
 

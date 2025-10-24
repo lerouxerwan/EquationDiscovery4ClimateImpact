@@ -22,12 +22,23 @@ def optimization_random_factory(n_iter: int, nb_top_hyperparameters: Optional[in
         def get_top_emulator(self, X: ndarray, y: ndarray, validation_mask: ndarray,
                              variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                              y_units: Optional[ArrayLike[str]] = None) -> Emulator:
-            log_info(f'Run {self.name}')
-            params_emulator = {'model_selection': self.model_selection, 'timeout_in_seconds': self.timeout_in_seconds}
-            params_search = {'param_grid': self.param_grid, 'search_style': 'random', 'n_iter': self.n_iter, 'n_jobs': self.n_jobs}
-            emulator = EmulatorWithSearch(**params_emulator, **params_search)
+            emulator = self.get_emulator_with_search()
             emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
             return emulator
+
+        def get_all_emulators(self, X: ndarray, y: ndarray, validation_mask: ndarray,
+                              variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
+                              y_units: Optional[ArrayLike[str]] = None) -> list[Emulator]:
+            emulator = self.get_emulator_with_search()
+            return emulator.run_and_save_hyperparameter_search(X, y, validation_mask, variable_names,
+                                                               X_units, y_units, just_return_estimator=True)
+
+        def get_emulator_with_search(self) -> EmulatorWithSearch:
+            log_info(f'Run {self.name}')
+            params_emulator = {'model_selection': self.model_selection, 'timeout_in_seconds': self.timeout_in_seconds}
+            params_search = {'param_grid': self.param_grid, 'search_style': 'random', 'n_iter': self.n_iter,
+                             'n_jobs': self.n_jobs}
+            return EmulatorWithSearch(**params_emulator, **params_search)
 
         def get_budget(self, X: ndarray, y: ndarray, validation_mask: ndarray,
                        variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
@@ -50,7 +61,6 @@ def optimization_random_factory(n_iter: int, nb_top_hyperparameters: Optional[in
             return f'{self.nb_top_hyperparameters}_{self.n_iter}'
 
         """ Properties for logs, plots"""
-
 
         @property
         def name(self):

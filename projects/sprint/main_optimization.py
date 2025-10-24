@@ -1,6 +1,6 @@
 from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit
-from optimization.optimization_random.optimimization_random_zoo import OptimizationRandom_400
+from optimization.optimization_random.optimization_random_zoo import OptimizationRandom_400
 from optimization.utils_optimization import get_loss
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
 from utils.utils_log import log_info
