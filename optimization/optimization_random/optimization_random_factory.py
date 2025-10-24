@@ -4,6 +4,7 @@ from numpy import ndarray
 from pysr.utils import ArrayLike
 from typing_extensions import Optional, OrderedDict
 
+from data.utils_run.run import Run
 from emulator.emulator import Emulator
 from emulator.emulator_with_search import EmulatorWithSearch
 from optimization.optimization import Optimization
@@ -25,13 +26,6 @@ def optimization_random_factory(n_iter: int, nb_top_hyperparameters: Optional[in
             emulator = self.get_emulator_with_search()
             emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
             return emulator
-
-        def get_all_emulators(self, X: ndarray, y: ndarray, validation_mask: ndarray,
-                              variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
-                              y_units: Optional[ArrayLike[str]] = None) -> list[Emulator]:
-            emulator = self.get_emulator_with_search()
-            return emulator.run_and_save_hyperparameter_search(X, y, validation_mask, variable_names,
-                                                               X_units, y_units, just_return_estimator=True)
 
         def get_emulator_with_search(self) -> EmulatorWithSearch:
             log_info(f'Run {self.name}')

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional, Literal
+from typing import Optional, Literal, Any
 
 from numpy import ndarray
 from pysr.utils import ArrayLike
@@ -32,13 +32,6 @@ class Optimization(ABC):
                           variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
                           y_units: Optional[ArrayLike[str]] = None) -> Emulator:
         pass
-
-
-    def get_all_emulators(self, X: ndarray, y: ndarray, validation_mask: ndarray,
-                          variable_names: Optional[ArrayLike[str]] = None, X_units: Optional[ArrayLike[str]] = None,
-                          y_units: Optional[ArrayLike[str]] = None) -> list[Emulator]:
-        raise NotImplementedError
-
 
     @abstractmethod
     def get_budget(self, X: ndarray, y: ndarray, validation_mask: ndarray,
