@@ -47,7 +47,7 @@ class Emulator(PySRRegressor):
     run_: Optional[Run]
 
 
-    def __init__(self, model_selection: Literal["best", "accuracy", "score", "validated"] = "best", *,
+    def __init__(self, model_selection: Literal["best", "accuracy", "score", "validated", "multiply"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
                  expression_spec: AbstractExpressionSpec | None = None, niterations: int = 100, populations: int = 31,
                  population_size: int = 27, max_evals: int | None = None, maxsize: int = 30,
@@ -182,6 +182,7 @@ class Emulator(PySRRegressor):
         self.y_variable_name_for_gaussian_fit = y_variable_name_for_gaussian_fit
         # Create attributes
         self.index_for_validated_model_selection_ = None
+        self.index_for_multiply_model_selection_ = None
         self.run_ = None
 
     def fit(self, X: ndarray, y: ndarray, validation_mask: Optional[ndarray] = None,
@@ -252,7 +253,6 @@ class Emulator(PySRRegressor):
         # Try loading emulator from file
         if run.has_been_saved:
             try:
-                print(run.run_directory)
                 emulator_from_file = self.from_file(run_directory=run.run_directory)
             except (RuntimeError, EmptyDataError):
                 emulator_from_file = None
@@ -316,6 +316,8 @@ class Emulator(PySRRegressor):
             self.equations_['validation_loss'] = self.compute_loss_list(X_validation, y_validation)
             #  Set the index for the 'validated' model selection using the validation set
             self.index_for_validated_model_selection_ = np.nanargmin(self.validation_loss_list)
+            #  Set the index for the 'multiply' model selection using the validation set
+            self.index_for_multiply_model_selection_ = np.nanargmin(np.multiply(self.loss_list, self.validation_loss_list))
 
         return self
 
@@ -383,10 +385,13 @@ class Emulator(PySRRegressor):
         """Compute a Series (or list of Series) representing the selected equations (complexity, loss, ...)
          If index=None, then the equation is selected using self.model_selection"""
         if index is None:
-            assert self.model_selection in ['best', 'validated']
+            assert self.model_selection in ['best', 'validated', 'multiply']
             if self.model_selection == 'validated':
                 assert self.index_for_validated_model_selection_ is not None
                 index = self.index_for_validated_model_selection_
+            elif self.model_selection == 'multiply':
+                assert self.index_for_multiply_model_selection_ is not None
+                index = self.index_for_multiply_model_selection_
             elif self.model_selection == 'best':
                 if self.metric_ is Metric.RMSE:
                     threshold = np.sqrt(1.5) * self.equations_["loss"].min()

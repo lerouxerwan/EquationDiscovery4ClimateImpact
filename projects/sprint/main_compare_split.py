@@ -13,12 +13,12 @@ from utils.utils_log import log_info
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_compare_split(opt_type: type, validation_size: float, show: bool):
+def plot_compare_split(opt_type: type, validation_size: float, validation_splits: list[ValidationSplit], show: bool):
+    title = f'Compare split for validation size {validation_size} and optimization {opt_type.__name__}'
     ax = plt.gca()
-    for model_selection in ['best', 'validated'][:1]:
+    for model_selection in ['multiply', 'best', 'validated'][:]:
         opt = opt_type(model_selection, ParamNameToValues.DEFAULT_CENTRED, n_jobs=1)
         validation_name_to_rmse_test_for_selected_equation = OrderedDict()
-        validation_splits = [ValidationSplit.RANDOM, ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.EXTREME][:]
         for validation_split in validation_splits:
             dataset = get_dataset(validation_size=validation_size, validation_split=validation_split)
             rmse_test = get_loss(opt, dataset.X_train, dataset.y_train, dataset.validation_mask,
@@ -28,12 +28,20 @@ def plot_compare_split(opt_type: type, validation_size: float, show: bool):
             log_info(f'RMSE test = {rmse_test} for {validation_name} {model_selection}')
             validation_name_to_rmse_test_for_selected_equation[validation_name] = rmse_test
         ax.plot(validation_name_to_rmse_test_for_selected_equation.keys(), validation_name_to_rmse_test_for_selected_equation.values(), label=model_selection)
+        ax.set_xlabel('Validation split')
+        ax.set_ylabel(f'RMSE test ({dataset.y_units[0]})')
+        ax.set_title(title)
     ax.legend()
-    show_or_save_plot(f'compare_split_{opt_type.__name__}_{validation_size}', show)
+    show_or_save_plot('_'.join(title.split()), show)
 
 
 if __name__ == '__main__':
-    for opt_type in [OptimizationMarginal]:
+    fast = False
+    validation_splits = [ValidationSplit.RANDOM, ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.EXTREME][:]
+    if fast:
+        validation_splits = validation_splits[:2]
+    # for opt_type in [OptimizationMarginal]:
+    for opt_type in [OptimizationRandom_10 if fast else OptimizationRandom_400]:
         for validation_size in [0.2, 0.25, 0.3][:]:
-            plot_compare_split(opt_type, validation_size, show=True)
+            plot_compare_split(opt_type, validation_size, validation_splits, show=fast)
 
