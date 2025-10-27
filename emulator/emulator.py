@@ -112,11 +112,11 @@ class Emulator(PySRRegressor):
             X_variable_names_as_string = ', '.join(X_variable_names_for_gaussian_fit)
             elementwise_loss = "my_custom_loss(predicted, target) = predicted"
             expression_spec = TemplateExpressionSpec(
-                expressions=["f", "g"],
+                expressions=["mu", "log_sigma"],
                 variable_names=X_variable_names_for_gaussian_fit + [y_variable_name_for_gaussian_fit],
                 combine=f"""
-                    mu = f({X_variable_names_as_string})
-                    sigma = exp(g({X_variable_names_as_string}))
+                    mu_value = mu({X_variable_names_as_string})
+                    sigma_value = exp(log_sigma({X_variable_names_as_string}))
 
                     {get_loss_str_gaussian_fit(y_variable_name_for_gaussian_fit)}
                 """

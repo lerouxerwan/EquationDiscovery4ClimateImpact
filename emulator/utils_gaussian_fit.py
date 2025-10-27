@@ -11,7 +11,7 @@ class UncertaintyInterval(StrEnum):
     ninety_percent = '90%'
 
 def get_loss_str_gaussian_fit(y_variable_name: str):
-    return f'log(sigma) + ({y_variable_name} - mu)^2 / (2 * sigma^2)'
+    return f'log(sigma_value) + ({y_variable_name} - mu_value)^2 / (2 * sigma_value^2)'
 
 def _compute_loss_gaussian_fit(y: float, mu: float, sigma: float):
     return log(sigma) + (y - mu)**2 / (2 * sigma**2)
