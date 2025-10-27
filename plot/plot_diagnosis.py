@@ -29,9 +29,10 @@ def plot_diagnosis(emulator: Emulator, dataset:Dataset, show: Optional[bool] = F
         plot_decomposition, # plot a decomposition for the selected equation
         plot_selected_features,  #  plot related to the selected equation
     ]
-    # Remove the two last plots for gaussian fit
+    # Remove the two last plots for gaussian fit (because we do not have equations as sympy.Expr for the gaussian fit)
     if emulator.gaussian_fit:
         plot_functions = plot_functions[:-2]
+        plot_functions.a
     if isinstance(emulator, EmulatorWithSearch):
         plot_functions.append(plot_diagnosis_search)
     # Run several plot functions

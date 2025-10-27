@@ -5,6 +5,7 @@ from data.utils_dataset.validation_split import ValidationSplit
 from emulator.emulator import Emulator
 from plot.by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
 from plot.by_split.plot_scatter import plot_scatter
+from plot.by_split.plot_uncertainty_vs_error import plot_uncertainty_vs_error
 from plot.plot_diagnosis import plot_diagnosis
 
 
@@ -16,7 +17,8 @@ def main_gaussian():
                         niterations=3)
     emulator.fit(dataset.X_train, dataset.y_train, variable_names=dataset.X_variable_names)
     # plot_loss_vs_complexity(emulator, dataset, show=True)
-    plot_scatter(emulator, dataset, show=True)
+    plot_uncertainty_vs_error(emulator, dataset, show=True)
+    # plot_scatter(emulator, dataset, show=True)
     # plot_diagnosis(emulator, dataset, show=False)
 
 # def main_normal():
