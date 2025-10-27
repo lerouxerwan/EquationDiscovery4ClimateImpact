@@ -25,8 +25,8 @@ def get_X_for_gaussian_fit(X: ndarray, y: ndarray) -> ndarray:
 def get_lambda_function_kwargs(s: str) -> Callable:
     return lambda **kwargs: eval(s, {}, kwargs)
 
-def get_lambda_function_list(s: str, variable_names: list[str], add_exp: bool = False) -> Callable:
-    if add_exp:
+def get_lambda_function_list(s: str, variable_names: list[str], add_exponential: bool = False) -> Callable:
+    if add_exponential:
         return lambda *args: exp(eval(s, {}, dict(zip(variable_names, args[0]))))
     else:
         return lambda *args: eval(s, {}, dict(zip(variable_names, args[0])))

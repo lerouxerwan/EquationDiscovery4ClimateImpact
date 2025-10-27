@@ -291,13 +291,12 @@ class Emulator(PySRRegressor):
         # Post-processing for Gaussian fit,
         if self.gaussian_fit:
             # Extract mu and sigma functions
-            variable_names_in_equation = [f'x{i}' for i in range(1, len(self.X_variable_names_for_gaussian_fit) + 1)]
             mu_functions, sigma_functions = [], []
             for equation_str in self.equations_['equation']:
                 mu_equation_str, sigma_equation_str = [s.split('=')[-1] for s in equation_str.split(';')]
-                mu_function = get_lambda_function_list(mu_equation_str, variable_names_in_equation)
+                mu_function = get_lambda_function_list(mu_equation_str, self.X_variable_names_for_gaussian_fit)
                 mu_functions.append(mu_function)
-                sigma_function = get_lambda_function_list(sigma_equation_str, variable_names_in_equation, add_exp=True)
+                sigma_function = get_lambda_function_list(sigma_equation_str, self.X_variable_names_for_gaussian_fit, add_exponential=True)
                 sigma_functions.append(sigma_function)
             # Add two columns
             self.equations_['mu'] = mu_functions
@@ -346,9 +345,20 @@ class Emulator(PySRRegressor):
         #  Save checkpoint without the 2 columns containing julia objects, including dynamical equations
         if self.gaussian_fit and (not self.temp_equation_file):
             self.equations_.drop(columns=['julia_expression', 'lambda_format'], inplace=True)
-            # renaming variable names from #1 -> x1 because it seems to hurt loading from pickle files
-            self.equations_['equation'] = self.equations_['equation'].apply(lambda s: s.replace('#', 'x'))
+            self.equations_['equation'] = self.equations_['equation'].apply(self.improve_equation_str)
             self._checkpoint()
+
+    def improve_equation_str(self, equation: str) -> str:
+        # renaming variable names from #1 -> x1 because it seems to hurt loading from pickle files
+        equation = equation.replace('#', 'x')
+        # Rename the function in the equation
+        equation = equation.replace('mu', '\mu')
+        equation = equation.replace('log_sigma', 'log(\sigma)')
+        # Improve variable names in the equation (start with longer variable names to avoid bugs)
+        for i, variable_name in list(enumerate(self.X_variable_names_for_gaussian_fit, 1))[::-1]:
+            old_name, new_name = f'x{i}', variable_name
+            equation = equation.replace(old_name, new_name)
+        return equation
 
     def predict(self, X, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
         if self.metric_ is Metric.NLL:

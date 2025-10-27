@@ -14,10 +14,10 @@ def main_gaussian():
     emulator = Emulator(gaussian_fit=True,
                         X_variable_names_for_gaussian_fit=dataset.X_variable_names,
                         y_variable_name_for_gaussian_fit=dataset.y_variable_names[0],
-                        niterations=3)
+                        niterations=1)
     emulator.fit(dataset.X_train, dataset.y_train, variable_names=dataset.X_variable_names)
-    # plot_loss_vs_complexity(emulator, dataset, show=True)
-    plot_uncertainty_vs_error(emulator, dataset, show=True)
+    plot_loss_vs_complexity(emulator, dataset, show=True)
+    # plot_uncertainty_vs_error(emulator, dataset, show=True)
     # plot_scatter(emulator, dataset, show=True)
     # plot_diagnosis(emulator, dataset, show=False)
 
