@@ -228,6 +228,11 @@ class EmulatorWithSearch(Emulator):
     def scoring(self):
         if self.metric_ is Metric.RMSE:
             return {'RMSE': make_scorer(root_mean_squared_error, greater_is_better=False)}
+        elif self.metric_ is Metric.NLL:
+            raise NotImplementedError
+            row = self.get_best() if index is None else self.equations_.iloc[index]
+            mu, sigma = [np.array([row[k](x) for x in X]) for k in ['mu', 'sigma']]
+            return compute_loss_gaussian_fit(y, mu, sigma)
         else:
             raise NotImplementedError
 

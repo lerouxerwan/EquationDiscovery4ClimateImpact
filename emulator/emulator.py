@@ -9,13 +9,14 @@ from numpy import ndarray
 from pandas.errors import EmptyDataError
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec, TemplateExpressionSpec
 from pysr.utils import ArrayLike
+from scipy.stats import norm
 from sympy import Expr, Symbol
 
 from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_run.run import Run
 from data.utils_run.utils_run import get_output_directory, get_run_id, get_non_default_params
 from emulator.utils_gaussian_fit import get_X_for_gaussian_fit, get_lambda_function_list, get_loss_str_gaussian_fit, \
-    compute_loss_gaussian_fit
+    compute_loss_gaussian_fit, UncertaintyInterval
 from plot.by_split.utils_equation_str import get_equation
 from plot.utils_metric.metric import Metric, compute_loss
 from utils.utils_log import log_info
@@ -355,6 +356,25 @@ class Emulator(PySRRegressor):
             return self.get_distri_param(X, 'mu', index)
         else:
             return super().predict(X, index, category=category)
+
+    def predict_uncertainty_interval(self, X, index: int | list[int] | None = None,
+                                     uncertainty_interval=UncertaintyInterval.plus_and_minus_std) -> ndarray:
+        """Compute uncertainty intervals, i.e. a 2D array with the same length as X and with 2 columns
+        The 1st column correspond to the lower error (it is negative) and the 2nd to the upper error.
+        Note that uncertainty interval are only available for certain fit configurations."""
+        if self.metric_ is Metric.NLL:
+            sigma_values = self.get_distri_param(X, 'sigma', index)
+            if uncertainty_interval is UncertaintyInterval.plus_and_minus_std:
+                return np.array([(- sigma, sigma) for sigma in sigma_values])
+            elif uncertainty_interval is UncertaintyInterval.ninety_percent:
+                quantiles = [0.05, 0.95]
+                rvs = [norm(loc=0, scale=sigma) for sigma in sigma_values]
+                return np.array([[rv.ppf(quantile) for quantile in quantiles] for rv in rvs])
+            else:
+                raise NotImplementedError(uncertainty_interval)
+        else:
+            raise ValueError('uncertainty is not handled by the other metrics')
+
 
     def get_distri_param(self, X, distri_param_name: str, index: int | list[int] | None = None) -> ndarray:
         assert self.gaussian_fit

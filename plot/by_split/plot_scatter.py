@@ -21,11 +21,11 @@ def plot_scatter(emulator: Emulator, dataset: Dataset, show: Optional[bool] = Fa
     ymin, ymax = get_ymin_and_ymax(split_name_to_X_and_y_and_y_predicted_and_years)
     for split_name, (X, y, y_predicted, years) in split_name_to_X_and_y_and_y_predicted_and_years.items():
         fig, ax = plt.subplots()
-        _plot_scatter(ax, dataset, emulator, fig, split_name, y, y_predicted, years, ymax, ymin)
+        _plot_scatter(ax, dataset, emulator, fig, split_name, X, y, y_predicted, years, ymax, ymin)
         show_or_save_plot(f'plot_scatter_{split_name}', show)
 
 
-def _plot_scatter(ax, dataset, emulator, fig, split_name, y, y_predicted, years, ymax, ymin,
+def _plot_scatter(ax, dataset, emulator, fig, split_name, X, y, y_predicted, years, ymax, ymin,
                   add_colorbar: bool = True, cmap = None, vmin_and_vmax = None):
     if cmap is None:
         cmap = matplotlib.cm.viridis
@@ -35,6 +35,12 @@ def _plot_scatter(ax, dataset, emulator, fig, split_name, y, y_predicted, years,
     else:
         vmin, vmax = vmin_and_vmax
         ax.scatter(y, y_predicted, c=c, cmap=cmap, vmin=vmin, vmax=vmax)
+
+    # Add error bar
+    if emulator.gaussian_fit:
+        yerr = np.abs(emulator.predict_uncertainty_interval(X).transpose())
+        ax.errorbar(y, y_predicted, xerr=None, yerr=yerr, fmt='none', ls='none', ecolor='k', capsize=1.)
+
     if add_colorbar:
         norm = matplotlib.colors.BoundaryNorm(c, cmap.N)
         fig.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, orientation='horizontal', label='Years',
@@ -70,6 +76,7 @@ def _plot_scatter(ax, dataset, emulator, fig, split_name, y, y_predicted, years,
     ax.set_xlim((ymin, ymax))
     ax.set_ylim((ymin, ymax))
 
+
 def compute_delta(y_historical, y_future) -> float:
     mean_historical, mean_future = np.mean(y_historical), np.mean(y_future)
     return 100 * (mean_future - mean_historical) / mean_historical
@@ -84,38 +91,40 @@ def plot_scatter_side_by_side(emulator: Emulator, dataset: Dataset, show: Option
     fig, axs = get_subplots(1, 2)
 
     # Plot first axis
-    _, y_train, y_predicted_train, years_train = split_name_to_X_and_y_and_y_predicted_and_years['train']
+    X_train, y_train, y_predicted_train, years_train = split_name_to_X_and_y_and_y_predicted_and_years['train']
     if dataset.validation_split is ValidationSplit.NONE:
-        y, y_predicted, years = y_train, y_predicted_train, years_train
+        X, y, y_predicted, years = X_train, y_train, y_predicted_train, years_train
     else:
-        _, y_validation, y_predicted_validation, years_validation = split_name_to_X_and_y_and_y_predicted_and_years['validation']
-        y, y_predicted, years = [], [], []
+        X_validation, y_validation, y_predicted_validation, years_validation = split_name_to_X_and_y_and_y_predicted_and_years['validation']
+        X, y, y_predicted, years = [], [], [], []
         i_train, i_validation = 0, 0
         n_train, n_validation = len(y_train), len(y_validation)
         while (i_train < n_train) or (i_validation < n_validation):
             if (i_train < n_train) and ((i_validation == n_validation) or (years_train[i_train] < years_validation[i_validation])):
+                X.append(X_train[i_train])
                 y.append(y_train[i_train])
                 y_predicted.append(y_predicted_train[i_train])
                 years.append(years_train[i_train])
                 i_train += 1
             else:
+                X.append(X_validation[i_validation])
                 y.append(y_validation[i_validation])
                 y_predicted.append(y_predicted_validation[i_validation])
                 years.append(years_validation[i_validation])
                 i_validation += 1
-        y, y_predicted, years = np.array(y), np.array(y_predicted), np.array(years)
-    _, y_test, y_predicted_test, years_test = split_name_to_X_and_y_and_y_predicted_and_years['test']
+        X, y, y_predicted, years = np.array(X), np.array(y), np.array(y_predicted), np.array(years)
+    X_test, y_test, y_predicted_test, years_test = split_name_to_X_and_y_and_y_predicted_and_years['test']
     all_years = sorted(list(set(years).union(set(years_test))))
     vmin_and_vmax = min(all_years), max(all_years)
     cmap = matplotlib.cm.viridis
     # cmap = matplotlib.cm.gist_rainbow
 
     # Plot first axis
-    _plot_scatter(axs[0], dataset, emulator, fig, "Train + Validation", y, y_predicted, years, ymax, ymin,
+    _plot_scatter(axs[0], dataset, emulator, fig, "Train + Validation", X, y, y_predicted, years, ymax, ymin,
                   add_colorbar=False, cmap=cmap, vmin_and_vmax=vmin_and_vmax)
 
     # Plot second axis
-    _plot_scatter(axs[1], dataset, emulator, fig, 'test', y_test, y_predicted_test, years_test, ymax, ymin,
+    _plot_scatter(axs[1], dataset, emulator, fig, 'test', X_test, y_test, y_predicted_test, years_test, ymax, ymin,
                   add_colorbar=False, cmap=cmap, vmin_and_vmax=vmin_and_vmax)
 
     norm = matplotlib.colors.BoundaryNorm(all_years, cmap.N)

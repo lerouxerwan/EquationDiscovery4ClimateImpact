@@ -1,9 +1,14 @@
+from enum import StrEnum
 from math import exp
 from typing import Callable
 
 import numpy as np
 from math import log
 from numpy import ndarray
+
+class UncertaintyInterval(StrEnum):
+    plus_and_minus_std = '+-std'
+    ninety_percent = '90%'
 
 def get_loss_str_gaussian_fit(y_variable_name: str):
     return f'log(sigma) + ({y_variable_name} - mu)^2 / (2 * sigma^2)'
