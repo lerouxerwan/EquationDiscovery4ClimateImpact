@@ -1,4 +1,5 @@
 from enum import StrEnum
+from functools import partial
 from math import exp
 from typing import Callable
 
@@ -26,8 +27,12 @@ def get_lambda_function_kwargs(s: str) -> Callable:
     return lambda **kwargs: eval(s, {}, kwargs)
 
 def get_lambda_function_list(s: str, variable_names: list[str], add_exponential: bool = False) -> Callable:
+    return partial(lambda_function, s=s, variable_names=variable_names, add_exponential=add_exponential)
+
+
+def lambda_function(x: list, s: str, variable_names: list[str], add_exponential: bool = False):
     if add_exponential:
-        return lambda *args: exp(eval(s, {}, dict(zip(variable_names, args[0]))))
+        return exp(eval(s, {}, dict(zip(variable_names, x))))
     else:
-        return lambda *args: eval(s, {}, dict(zip(variable_names, args[0])))
+        return eval(s, {}, dict(zip(variable_names, x)))
 
