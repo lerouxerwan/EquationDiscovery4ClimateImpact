@@ -9,7 +9,7 @@ import pandas as pd
 from pysr import TensorBoardLoggerSpec, TemplateExpressionSpec
 
 from data.utils_run.utils_run import CSV_FILENAME, \
-    JSON_FILENAME, params_that_do_not_impact_the_fit_results
+    JSON_FILENAME, params_that_do_not_impact_the_fit_results, remove_parameters_not_json_serializable
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
     RMSE_VALIDATION_COLUMN_NAME, PARAMS_COLUMN_NAME, RMSE_TRAIN_COLUMN_NAME, NLL_VALIDATION_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
@@ -145,11 +145,7 @@ class Run(object):
         df_cv_results.to_csv(self.filepath_search_result)
         #  Save the associated json config file
         with open(self.filepath_non_default_params, 'w') as fp:
-            # Object of type TemplateExpressionSpec is not JSON serializable
-            if 'expression_spec' in non_default_params:
-                if isinstance(non_default_params['expression_spec'], TemplateExpressionSpec):
-                    non_default_params.pop('expression_spec')
-            json.dump(non_default_params, fp, sort_keys=True, indent=4)
+            json.dump(remove_parameters_not_json_serializable(non_default_params), fp, sort_keys=True, indent=4)
 
     """Remove filepaths and folders"""
 

@@ -61,4 +61,12 @@ params_that_do_not_impact_the_fit_results = {'logger_spec', 'output_directory', 
                                              # depend on 'gaussian_fit' params, so  we do not need to include
                                              'expression_spec', 'elementwise_loss', 'loss_function'}
 
+def remove_parameters_not_json_serializable(params):
+    """Remove parameters that are not JSON serializable"""
+    for param_name in param_names_not_handled_by_json:
+        if param_name in params:
+            params.pop(param_name)
+    return params
+            
+param_names_not_handled_by_json = ['expression_spec']
 
