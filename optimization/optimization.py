@@ -15,6 +15,15 @@ class Optimization(ABC):
     param_name_to_values: Optional[ParamNameToValues | dict[str, list]] = None
     n_jobs: int = 1
     timeout_in_seconds: float | None = None
+    gaussian_fit: bool = False
+
+    def get_params_emulator(self, variable_names: Optional[list[str]] = None):
+        params_emulator = {'model_selection': self.model_selection, 'timeout_in_seconds': self.timeout_in_seconds}
+        if self.gaussian_fit:
+            params_emulator['gaussian_fit'] = True
+            params_emulator['X_variable_names_for_gaussian_fit'] = variable_names
+            params_emulator['y_variable_name_for_gaussian_fit'] = 'Target'
+        return params_emulator
 
     def __post_init__(self):
         if isinstance(self.param_name_to_values, ParamNameToValues):
@@ -42,7 +51,12 @@ class Optimization(ABC):
 
     @property
     def opt_id(self) -> str:
-        return f'{self.model_selection}_{self.subclass_id}'
+        opt_id = f'{self.model_selection}_{self.subclass_id}'
+        if self.timeout_in_seconds is not None:
+            opt_id += f'_{self.timeout_in_seconds}'
+        if self.gaussian_fit:
+            opt_id += '_g'
+        return opt_id
 
     @property
     @abstractmethod
