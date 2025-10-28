@@ -3,6 +3,8 @@ PARAMS_COLUMN_NAME = 'params'
 PARAMS_EMULATOR_COLUMN_NAME = 'params_emulator'
 RMSE_TRAIN_COLUMN_NAME = 'mean_train_RMSE'
 RMSE_VALIDATION_COLUMN_NAME = 'mean_test_RMSE'
+NLL_TRAIN_COLUMN_NAME = 'mean_train_NLL'
+NLL_VALIDATION_COLUMN_NAME = 'mean_test_NLL'
 
 # Column names for a specific model_selection
 COMPLEXITY_COLUMN_NAME = 'complexity'

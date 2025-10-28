@@ -13,8 +13,8 @@ class UncertaintyInterval(StrEnum):
 def get_loss_str_gaussian_fit(y_variable_name: str):
     return f'log(sigma_value) + ({y_variable_name} - mu_value)^2 / (2 * sigma_value^2)'
 
-def _compute_loss_gaussian_fit(y: float, mu: float, sigma: float):
-    return log(sigma) + (y - mu)**2 / (2 * sigma**2)
+def _compute_loss_gaussian_fit(y_value: float, mu_value: float, sigma_value: float):
+    return log(sigma_value) + (y_value - mu_value)**2 / (2 * sigma_value ** 2)
 
 def compute_loss_gaussian_fit(y: ndarray, mu: ndarray, sigma: ndarray):
     return np.mean([_compute_loss_gaussian_fit(*triple) for triple in zip(y, mu, sigma)])

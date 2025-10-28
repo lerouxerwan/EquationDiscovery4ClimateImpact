@@ -4,6 +4,7 @@ from numpy import ndarray
 
 from data.utils_dataset.utils_validation import get_X_and_y
 from emulator.emulator import Emulator
+from plot.by_split.utils_equation_str import replace_julia_square_by_python_power
 from tests.data.utils_tests_dataset import load_X_and_y_and_validation_mask_for_test, load_X_and_y_for_test
 
 
@@ -138,3 +139,14 @@ def test_corner_case_tournament_selection_n():
     emulator.fit(X, y)
     emulator.remove_folder()
 
+def test_replace_square():
+    equation = "square(0.5 * x - y)"
+    assert replace_julia_square_by_python_power(equation) == "(0.5 * x - y)**2"
+    equation = "square(0.5 * x - y) + square(0.5 * x - y)"
+    assert replace_julia_square_by_python_power(equation) == "(0.5 * x - y)**2 + (0.5 * x - y)**2"
+    equation = "square(square(2))"
+    assert replace_julia_square_by_python_power(equation) == "((2)**2)**2"
+    equation = "square(0.5 * square(x) - y)"
+    assert replace_julia_square_by_python_power(equation) == "(0.5 * (x)**2 - y)**2"
+    equation = "square(square(2) + square(square(x))) + square(y)"
+    assert replace_julia_square_by_python_power(equation) == "((2)**2 + ((x)**2)**2)**2 + (y)**2"

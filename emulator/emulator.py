@@ -1,6 +1,7 @@
 import time
 import warnings
 from datetime import timedelta
+from itertools import chain
 from typing import Literal, Callable, Optional, Any
 
 import numpy as np
@@ -10,14 +11,14 @@ from pandas.errors import EmptyDataError
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec, TemplateExpressionSpec
 from pysr.utils import ArrayLike
 from scipy.stats import norm
-from sympy import Expr, Symbol
+from sympy import Expr, Symbol, sympify, symbols
 
 from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_run.run import Run
 from data.utils_run.utils_run import get_output_directory, get_run_id, get_non_default_params
 from emulator.utils_gaussian_fit import get_X_for_gaussian_fit, get_lambda_function_list, get_loss_str_gaussian_fit, \
     compute_loss_gaussian_fit, UncertaintyInterval
-from plot.by_split.utils_equation_str import get_equation
+from plot.by_split.utils_equation_str import get_equation, replace_julia_square_by_python_power
 from plot.utils_metric.metric import Metric, compute_loss
 from utils.utils_log import log_info
 from utils.utils_run import random_seed
@@ -103,27 +104,6 @@ class Emulator(PySRRegressor):
             tournament_selection_n = population_size - 1
             warnings.warn(f'Set tournament_selection_n={tournament_selection_n} to avoid Julia crash '
                           f'(because tournament_selection_n must be less than population_size={population_size})')
-        # Specify loss and template expression for Gaussian fit
-        # we follow the trick illustrated in https://github.com/MilesCranmer/PySR/discussions/1002
-        if gaussian_fit:
-            assert X_variable_names_for_gaussian_fit is not None
-            assert isinstance(X_variable_names_for_gaussian_fit, list)
-            assert isinstance(y_variable_name_for_gaussian_fit, str)
-            X_variable_names_as_string = ', '.join(X_variable_names_for_gaussian_fit)
-            elementwise_loss = "my_custom_loss(predicted, target) = predicted"
-            expression_spec = TemplateExpressionSpec(
-                expressions=["mu", "log_sigma"],
-                variable_names=X_variable_names_for_gaussian_fit + [y_variable_name_for_gaussian_fit],
-                combine=f"""
-                    mu_value = mu({X_variable_names_as_string})
-                    sigma_value = exp(log_sigma({X_variable_names_as_string}))
-
-                    {get_loss_str_gaussian_fit(y_variable_name_for_gaussian_fit)}
-                """
-            )
-            self.metric_ = Metric.NLL
-        else:
-            self.metric_ = Metric.RMSE
         # Randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
         if random_state is None:
             random_state = random_seed
@@ -132,6 +112,29 @@ class Emulator(PySRRegressor):
         # Ensures that deterministic is True and parallelism is "serial"
         deterministic = True
         parallelism = "serial"
+        # Specify loss and template expression for Gaussian fit
+        # we follow the trick illustrated in https://github.com/MilesCranmer/PySR/discussions/1002
+        if gaussian_fit:
+            assert X_variable_names_for_gaussian_fit is not None
+            assert isinstance(X_variable_names_for_gaussian_fit, list)
+            assert isinstance(y_variable_name_for_gaussian_fit, str)
+            X_variable_names_as_string = ', '.join(X_variable_names_for_gaussian_fit)
+            if elementwise_loss is None:
+                elementwise_loss = "my_custom_loss(predicted, target) = predicted"
+            expressions = ["mu", "log_sigma"]
+            if expression_spec is None:
+                expression_spec = TemplateExpressionSpec(
+                    expressions=expressions,
+                    variable_names=X_variable_names_for_gaussian_fit + [y_variable_name_for_gaussian_fit],
+                    combine=f"""
+                        mu_value = mu({X_variable_names_as_string})
+                        sigma_value = exp(log_sigma({X_variable_names_as_string}))
+    
+                        {get_loss_str_gaussian_fit(y_variable_name_for_gaussian_fit)}
+                    """)
+            else:
+                if isinstance(expression_spec, TemplateExpressionSpec):
+                    assert expression_spec.expressions == expressions
         super().__init__(model_selection, binary_operators=binary_operators, unary_operators=unary_operators,
                          expression_spec=expression_spec, niterations=niterations, populations=populations,
                          population_size=population_size, max_evals=max_evals, maxsize=maxsize, maxdepth=maxdepth,
@@ -174,14 +177,15 @@ class Emulator(PySRRegressor):
                          extra_sympy_mappings=extra_sympy_mappings, extra_torch_mappings=extra_torch_mappings,
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          **kwargs)
-        # Change default dimensional_constraint_penalty
-        if self.dimensional_constraint_penalty is None:
-            self.dimensional_constraint_penalty = 10 ** 8
         # Add parameter
         self.gaussian_fit = gaussian_fit
         self.X_variable_names_for_gaussian_fit = X_variable_names_for_gaussian_fit
         self.y_variable_name_for_gaussian_fit = y_variable_name_for_gaussian_fit
+        # Change default dimensional_constraint_penalty
+        if self.dimensional_constraint_penalty is None:
+            self.dimensional_constraint_penalty = 10 ** 8
         # Create attributes
+        self.metric_ = Metric.NLL if self.gaussian_fit else Metric.RMSE
         self.index_for_validated_model_selection_ = None
         self.index_for_multiply_model_selection_ = None
         self.run_ = None
@@ -290,6 +294,8 @@ class Emulator(PySRRegressor):
 
         # Post-processing for Gaussian fit,
         if self.gaussian_fit:
+            # Replace julia square by python power
+            self.equations_['equation'] = self.equations_['equation'].apply(replace_julia_square_by_python_power)
             # Extract mu and sigma functions
             mu_functions, sigma_functions = [], []
             for equation_str in self.equations_['equation']:
@@ -301,6 +307,15 @@ class Emulator(PySRRegressor):
             # Add two columns
             self.equations_['mu'] = mu_functions
             self.equations_['sigma'] = sigma_functions
+            # Add 'sympy_format' column
+            def get_expr_function(sub_equation_number: int):
+                def get_expr(equations_separated_by_semi_colon: str):
+                    sub_equation = equations_separated_by_semi_colon.split(';')[sub_equation_number].split('=')[1]
+                    syms = symbols(' '.join(variable_names)) if len(variable_names) > 1 else symbols(variable_names)
+                    return sympify(sub_equation, locals={name: syms[i] for i, name in enumerate(variable_names)})
+                return get_expr
+            self.equations_['sympy_format_mu'] = self.equations_['equation'].apply(get_expr_function(0))
+            self.equations_['sympy_format_sigma'] = self.equations_['equation'].apply(get_expr_function(1))
         else:
             # Add 'equation' column
             self.equations_['equation'] = self.equations_['sympy_format'].apply(get_equation)
@@ -454,12 +469,13 @@ class Emulator(PySRRegressor):
         return self.selected_row['validation_loss']
 
     @property
-    def selected_expr(self) -> Expr:
-        """Sympy expressions for the selected equation"""
+    def selected_expressions(self) -> list[Expr]:
+        """Sympy expressions for the selected equation,
+        It returns a list of Expr because with 'gaussian_fit=True' we have two Expr in the selected equation"""
         if self.gaussian_fit:
-            raise NotImplementedError
+            return [self.selected_row['sympy_format_mu'], self.selected_row['sympy_format_sigma']]
         else:
-            return self.selected_row['sympy_format']
+            return [self.selected_row['sympy_format']]
 
     @property
     def selected_equation(self) -> str:
@@ -469,7 +485,8 @@ class Emulator(PySRRegressor):
     @property
     def selected_variable_names(self) -> list[str]:
         """List of variables names in the selected equation"""
-        return list(set([str(s) for s in self.selected_expr.atoms(Symbol)]))
+        list_of_variable_names = [list(set([str(s) for s in expr.atoms(Symbol)])) for expr in self.selected_expressions]
+        return list(chain.from_iterable(list_of_variable_names))
 
     """Properties/method for every equation of the Pareto optimal set of equations"""
 
@@ -491,14 +508,6 @@ class Emulator(PySRRegressor):
     def validation_loss_list(self) -> list[float]:
         """List of Validation loss for the equations of the Pareto front"""
         return self.equations_['validation_loss'].to_list()
-
-    @property
-    def expr_list(self) -> list[Expr]:
-        """List of sympy expressions for the equations of the Pareto front"""
-        if self.gaussian_fit:
-            raise NotImplementedError
-        else:
-            return self.equations_['sympy_format'].to_list()
 
     @property
     def equation_list(self) -> list[str]:

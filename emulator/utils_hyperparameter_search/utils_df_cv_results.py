@@ -3,7 +3,7 @@ import pandas as pd
 
 from emulator.emulator import Emulator
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, COLUMN_NAMES, \
-    RMSE_TRAIN_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME
+    RMSE_TRAIN_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME, NLL_TRAIN_COLUMN_NAME, NLL_VALIDATION_COLUMN_NAME
 
 
 def compute_df_cv_results(cv_results: dict, emulators: list[Emulator]) -> pd.DataFrame:
@@ -11,10 +11,14 @@ def compute_df_cv_results(cv_results: dict, emulators: list[Emulator]) -> pd.Dat
     df_cv_results = pd.DataFrame(cv_results)
     # Add params emulator
     params_emulator_list = [emulator.get_params().copy() for emulator in emulators]
+    for params in params_emulator_list:
+        if 'expression_spec' in params:
+            params.pop('expression_spec')
     df_cv_results[PARAMS_EMULATOR_COLUMN_NAME] = params_emulator_list
     #  Change the sign for the RMSE column
-    for column_name in [RMSE_TRAIN_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME]:
-        df_cv_results[column_name] *= -1
+    for column_name in [RMSE_TRAIN_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME, NLL_TRAIN_COLUMN_NAME, NLL_VALIDATION_COLUMN_NAME]:
+        if column_name in df_cv_results.columns:
+            df_cv_results[column_name] *= -1
     #  Add columns for the selected equation
     data = [get_series(emulator) for emulator in emulators]
     df_cv_results = pd.concat([df_cv_results, pd.DataFrame(index=df_cv_results.index, data=data)], axis=1)

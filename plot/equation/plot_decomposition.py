@@ -11,12 +11,13 @@ from utils.utils_plot import show_or_save_plot
 
 
 def plot_decomposition(emulator: Emulator, dataset:Dataset, show: Optional[bool] = False) -> None:
-    _plot_decomposition(emulator.selected_expr, dataset.X_train, dataset.X_variable_names, dataset.years_train,
-                        'train', show)
-    _plot_decomposition(emulator.selected_expr, dataset.X_test, dataset.X_variable_names, dataset.years_test,
-                        'test', show)
+    for j, expr in enumerate(emulator.selected_expressions):
+        _plot_decomposition(expr, dataset.X_train, dataset.X_variable_names, dataset.years_train,
+                            f'train_{j}', show)
+        _plot_decomposition(expr, dataset.X_test, dataset.X_variable_names, dataset.years_test,
+                            f'test_{j}', show)
 
-def _plot_decomposition(expr: Expr, X: ndarray, variable_names: list[str], years: list[int], split_name: str,
+def _plot_decomposition(expr: Expr, X: ndarray, variable_names: list[str], years: list[int], suffix_plot_name: str,
                         show: Optional[bool] = False):
     # Extract the term of the equation and their percentages through time
     matrix_of_percentages, terms = extract_terms_and_percentages(expr, X, variable_names)
@@ -25,12 +26,12 @@ def _plot_decomposition(expr: Expr, X: ndarray, variable_names: list[str], years
     for term, percentages in zip(terms, matrix_of_percentages):
         ax.plot(years, percentages, label=str(term))
     ax.legend()
-    show_or_save_plot(f'percentages_vs_time_for_{split_name}', show)
+    show_or_save_plot(f'percentages_vs_time_for_{suffix_plot_name}', show)
     # Plot the percentage with stacks
     ax = plt.gca()
     ax.stackplot(years, *matrix_of_percentages, labels=[str(term) for term in terms], alpha=0.7)
     ax.legend()
-    show_or_save_plot(f'decomposition_for_{split_name}', show)
+    show_or_save_plot(f'decomposition_for_{suffix_plot_name}', show)
 
 
 def extract_terms_and_percentages(expr: Expr, X: ndarray, variable_names: list[str]):

@@ -6,12 +6,12 @@ from functools import cached_property
 from typing import Optional, Any
 
 import pandas as pd
-from pysr import TensorBoardLoggerSpec
+from pysr import TensorBoardLoggerSpec, TemplateExpressionSpec
 
 from data.utils_run.utils_run import CSV_FILENAME, \
     JSON_FILENAME, params_that_do_not_impact_the_fit_results
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
-    RMSE_VALIDATION_COLUMN_NAME, PARAMS_COLUMN_NAME, RMSE_TRAIN_COLUMN_NAME
+    RMSE_VALIDATION_COLUMN_NAME, PARAMS_COLUMN_NAME, RMSE_TRAIN_COLUMN_NAME, NLL_VALIDATION_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -125,13 +125,14 @@ class Run(object):
         #  Load dataframe from csv file
         df_cv_results = pd.read_csv(self.filepath_search_result, index_col=0)
         #  Handle deprecated df_cv_results files
-        if RMSE_VALIDATION_COLUMN_NAME not in df_cv_results.columns:
+        if (RMSE_VALIDATION_COLUMN_NAME not in df_cv_results.columns) and ('RMSE_validation' in df_cv_results.columns):
             assert 'RMSE_validation' in df_cv_results.columns
             old_and_new_column_names = zip(['RMSE_train', 'RMSE_validation'], [RMSE_TRAIN_COLUMN_NAME, RMSE_VALIDATION_COLUMN_NAME])
             for old_column_name, new_column_name in old_and_new_column_names:
                 df_cv_results[new_column_name] = df_cv_results[old_column_name]
         #  Sort the DataFrame by their predictive performance on the validation set
-        df_cv_results = df_cv_results.sort_values(by=RMSE_VALIDATION_COLUMN_NAME)
+        sort_column = RMSE_VALIDATION_COLUMN_NAME if RMSE_VALIDATION_COLUMN_NAME in df_cv_results.columns else NLL_VALIDATION_COLUMN_NAME
+        df_cv_results = df_cv_results.sort_values(by=sort_column)
         #  Cast some columns to their original type
         for column_name in [PARAMS_COLUMN_NAME, PARAMS_EMULATOR_COLUMN_NAME]:
             df_cv_results[column_name] = df_cv_results[column_name].apply(string_to_dict)
@@ -144,6 +145,10 @@ class Run(object):
         df_cv_results.to_csv(self.filepath_search_result)
         #  Save the associated json config file
         with open(self.filepath_non_default_params, 'w') as fp:
+            # Object of type TemplateExpressionSpec is not JSON serializable
+            if 'expression_spec' in non_default_params:
+                if isinstance(non_default_params['expression_spec'], TemplateExpressionSpec):
+                    non_default_params.pop('expression_spec')
             json.dump(non_default_params, fp, sort_keys=True, indent=4)
 
     """Remove filepaths and folders"""

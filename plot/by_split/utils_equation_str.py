@@ -1,4 +1,6 @@
+import re
 from collections import Counter
+from typing import Any
 
 import numpy as np
 from sympy import Expr, Number
@@ -17,6 +19,33 @@ def get_equation(expr: Expr) -> str:
     # Split the equation on 2 lines if it is too long
     # return text_on_two_lines_if_too_long(equation_str)
     return equation_str
+
+def replace_julia_square_by_python_power(equation: str):
+    """Replace 'square(0.5 * x - y) by (0.5*x-y)**2 everywhere in the string"""
+    # Tant qu'il y a des "square(" dans le texte
+    while 'square(' in equation:
+        # On cherche la dernière parenthèse ouvrante "square("
+        start = equation.rfind('square(')
+        if start == -1:
+            break
+        # On trouve la parenthèse fermante correspondante
+        pile = 1  # On commence à 1 car on a déjà trouvé un "square("
+        end = start + len('square(')
+        while pile > 0 and end < len(equation):
+            if equation[end] == '(':
+                pile += 1
+            elif equation[end] == ')':
+                pile -= 1
+            end += 1
+        if pile != 0:
+            break  # Parentheses mal équilibrées
+        # On extrait le contenu entre parenthèses
+        contenu = equation[start + len('square('):end - 1]
+        # On remplace ce "square(contenu)" par "(contenu)**2"
+        equation = equation[:start] + f"({contenu})**2" + equation[end:]
+
+    return equation
+
 
 
 def get_bold_equation(equation_str: str) -> str:

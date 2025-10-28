@@ -10,6 +10,7 @@ from plot.by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
 from plot.by_split.plot_residuals import plot_residuals
 from plot.by_split.plot_scatter import plot_scatter, plot_scatter_side_by_side
 from plot.by_split.plot_time_series import plot_time_series
+from plot.by_split.plot_uncertainty_vs_error import plot_uncertainty_vs_error
 from plot.dataset.plot_selected_features import plot_selected_features
 from plot.equation.plot_decomposition import plot_decomposition
 from plot.for_search.plot_diagnosis_search import plot_diagnosis_search
@@ -29,10 +30,10 @@ def plot_diagnosis(emulator: Emulator, dataset:Dataset, show: Optional[bool] = F
         plot_decomposition, # plot a decomposition for the selected equation
         plot_selected_features,  #  plot related to the selected equation
     ]
-    # Remove the two last plots for gaussian fit (because we do not have equations as sympy.Expr for the gaussian fit)
+    # Special plot for gaussian fit
     if emulator.gaussian_fit:
-        plot_functions = plot_functions[:-2]
-        plot_functions.a
+        plot_functions.append(plot_uncertainty_vs_error)
+    #  Special plot for gaussian fit
     if isinstance(emulator, EmulatorWithSearch):
         plot_functions.append(plot_diagnosis_search)
     # Run several plot functions

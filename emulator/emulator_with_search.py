@@ -177,7 +177,7 @@ class EmulatorWithSearch(Emulator):
 
     def run_and_save_hyperparameter_search(self, X: ndarray, y: ndarray, validation_mask: ndarray,
                                            variable_names: ArrayLike[str] | None = None, X_units: ArrayLike[str] | None = None,
-                                           y_units: str | ArrayLike[str] | None = None, just_return_estimator: bool = False) -> Optional[list[Emulator]]:
+                                           y_units: str | ArrayLike[str] | None = None) -> None:
         """Run hyperparameter search and save the results as a csv"""
         log_info(f'Start hyperparameter search with {self.nb_combinations} combinations, with param grid = {self.param_grid}')
         # Run a simple/fast regressor fit, just to load julia before using multiprocessing
@@ -197,14 +197,10 @@ class EmulatorWithSearch(Emulator):
         # Pop estimator columns from cv_results dict
         emulators: list[Emulator] = search_cv.cv_results_.pop('estimator')
         assert all([isinstance(emulator, Emulator) for emulator in emulators])
-        if just_return_estimator:
-            # Return emulators that have been fitted successfully
-            return [emulator for emulator in emulators if emulator.equations_ is not None]
-        else:
-            # Transform cv_results into a Dataframe sorted by ranking with additional columns
-            df_cv_results = compute_df_cv_results(search_cv.cv_results_, emulators)
-            # Save df_cv_results to file
-            self.run_.save_search_results(df_cv_results, self.non_default_params)
+        # Transform cv_results into a Dataframe sorted by ranking with additional columns
+        df_cv_results = compute_df_cv_results(search_cv.cv_results_, emulators)
+        # Save df_cv_results to file
+        self.run_.save_search_results(df_cv_results, self.non_default_params)
 
 
     @property
@@ -229,10 +225,9 @@ class EmulatorWithSearch(Emulator):
         if self.metric_ is Metric.RMSE:
             return {'RMSE': make_scorer(root_mean_squared_error, greater_is_better=False)}
         elif self.metric_ is Metric.NLL:
-            raise NotImplementedError
-            row = self.get_best() if index is None else self.equations_.iloc[index]
-            mu, sigma = [np.array([row[k](x) for x in X]) for k in ['mu', 'sigma']]
-            return compute_loss_gaussian_fit(y, mu, sigma)
+            def scorer(emulator: Emulator, X, y_true):
+                return -emulator.compute_loss(X, y_true, index=None)
+            return {'NLL': scorer}
         else:
             raise NotImplementedError
 
