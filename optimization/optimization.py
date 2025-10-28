@@ -11,6 +11,10 @@ from optimization.utils_params.utils_param_name_to_values import ParamNameToValu
 
 @dataclass
 class Optimization(ABC):
+    """Optimization with
+    -3 parameters for each Emulator fit (model_selection, timeout_in_seconds, gaussian_fit)
+    -2 parameters for the hyperparameter search
+    """
     model_selection: Literal["best", "accuracy", "score", "validated"] = 'best'
     param_name_to_values: Optional[ParamNameToValues | dict[str, list]] = None
     n_jobs: int = 1

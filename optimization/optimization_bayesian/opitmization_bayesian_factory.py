@@ -40,7 +40,7 @@ def optimization_bayesian_factory(n_iter: int, nb_top_hyperparameters: Optional[
             log_info(f'Run {self.name}')
 
             def objective(trial):
-                emulator = Emulator(**self.get_params(trial))
+                emulator = Emulator(**self.get_params(trial, variable_names))
                 emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
                 return emulator.selected_loss_validation
 
@@ -50,8 +50,8 @@ def optimization_bayesian_factory(n_iter: int, nb_top_hyperparameters: Optional[
             emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
             return emulator
 
-        def get_params(self, trial) -> dict[str, Any]:
-            params = {'model_selection': self.model_selection, 'timeout_in_seconds': self.timeout_in_seconds}
+        def get_params(self, trial, variable_names) -> dict[str, Any]:
+            params = self.get_params_emulator(variable_names)
             for param_name, param_values in self.param_name_to_values.items():
                 first_value = param_values[0]
                 if (first_value is None) or (isinstance(first_value, str) or (isinstance(first_value, list))):
