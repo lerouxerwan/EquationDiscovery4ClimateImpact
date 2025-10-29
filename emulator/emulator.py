@@ -99,11 +99,6 @@ class Emulator(PySRRegressor):
                  X_variable_names_for_gaussian_fit: Optional[list[str]] = None,
                  y_variable_name_for_gaussian_fit: Optional[str] = None,
                  **kwargs):
-        # Avoid some Julia crashes
-        if population_size <= tournament_selection_n:
-            tournament_selection_n = population_size - 1
-            warnings.warn(f'Set tournament_selection_n={tournament_selection_n} to avoid Julia crash '
-                          f'(because tournament_selection_n must be less than population_size={population_size})')
         # Randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
         if random_state is None:
             random_state = random_seed
@@ -219,6 +214,12 @@ class Emulator(PySRRegressor):
         #  Some checks
         self.some_checks(X, y, validation_mask)
 
+        # Avoid some Julia crashes
+        if self.population_size <= self.tournament_selection_n:
+            self.tournament_selection_n = self.population_size - 1
+            warnings.warn(f'Set tournament_selection_n={self.tournament_selection_n} to avoid Julia crash '
+                          f'(because tournament_selection_n must be less than population_size={self.population_size})')
+
         #  Set output_directory based on X,y and validation_mask.
         self.output_directory_ = self.output_directory = get_output_directory(X, y, validation_mask)
 
@@ -259,7 +260,8 @@ class Emulator(PySRRegressor):
         if run.has_been_saved:
             try:
                 emulator_from_file = self.from_file(run_directory=run.run_directory)
-            except (RuntimeError, EmptyDataError):
+            except (RuntimeError, EmptyDataError) as e:
+                log_info(f'Catch the following error: {e.__repr__()}')
                 emulator_from_file = None
         else:
             emulator_from_file = None

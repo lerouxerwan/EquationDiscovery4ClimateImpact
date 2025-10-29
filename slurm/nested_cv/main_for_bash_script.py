@@ -21,10 +21,15 @@ def main():
         n_jobs = -1
         opt_type = OptimizationRandom_200
     else:
+        indices = [2]
+
         opt_type = OptimizationRandom_5
         n_jobs = 2
-        indices = [0]
         param_name_to_values = {'niterations': [2, 4], 'ncycles_per_iteration': [2, 4]}
+
+        n_jobs = 1
+        opt_type = OptimizationRandom_200
+        param_name_to_values = ParamNameToValues.DEFAULT_CENTRED
 
     print(f'Run with indices={indices}')
     # Load dataset
@@ -41,6 +46,7 @@ def main():
              dataset.X_variable_names, dataset.X_units, dataset.y_units,
              dataset.X_test, dataset.y_test)
     log_info(f'{metric_to_str[top_emulator.metric_]} test for top emulator = {rmse_test}')
+    plot_diagnosis(top_emulator, dataset)
 
     # run_nested_cv(dataset, opt)
 if __name__ == '__main__':

@@ -30,12 +30,13 @@ def plot_diagnosis(emulator: Emulator, dataset:Dataset, show: Optional[bool] = F
         plot_decomposition, # plot a decomposition for the selected equation
         plot_selected_features,  #  plot related to the selected equation
     ]
-    # Special plot for gaussian fit
-    if emulator.gaussian_fit:
-        plot_functions.append(plot_uncertainty_vs_error)
-    #  Special plot for gaussian fit
+    #  Special plot for emulator with search
     if isinstance(emulator, EmulatorWithSearch):
         plot_functions.append(plot_diagnosis_search)
+    # Special plot for gaussian fit
+    if emulator.gaussian_fit:
+        plot_functions = plot_functions[:-3] # the last three plots do not work
+        plot_functions.append(plot_uncertainty_vs_error)
     # Run several plot functions
     for plot_function in plot_functions:
         plot_function(emulator, dataset, show)
