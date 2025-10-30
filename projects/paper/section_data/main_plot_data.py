@@ -27,16 +27,18 @@ def main_plot_data(show=False):
 
 
 
-def main_plot_all_features(show=False):
+def main_plot_some_features(show=False):
     # Load axis and dataset
     dataset =  get_dataset()
-    variable_names = ['SSH_DJF', 'SSS_MAM', 'Shortwave_DJF', 'MerWindStr_MAM']
+    print(dataset.X_variable_names)
+    variable_names = ['SSS_AnnSea', 'SSS_JJA', 'SSS_SON', 'SST_DJF', 'SST_MAM']
     for variable_name in variable_names:
         ax = plt.gca()
-        plot_values_feature(ax, dataset, dataset.X_variable_names.index(variable_name))
+        plot_values_feature(ax, dataset, dataset.X_variable_names.index(variable_name),
+                            False, False, False)
         show_or_save_plot(f'data_{variable_name}', show)
 
 
 if __name__ == '__main__':
-    main_plot_data(show=True)
-    # main_plot_all_features(show=False)
+    # main_plot_data(show=True)
+    main_plot_some_features(show=False)
