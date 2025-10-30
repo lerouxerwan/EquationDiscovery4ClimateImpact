@@ -12,9 +12,11 @@ class UncertaintyInterval(StrEnum):
     ninety_percent = '90%'
 
 def get_loss_str_gaussian_fit(y_variable_name: str):
+    # return f'log(sigma_value) + (({y_variable_name} - mu_value) / sigma_value) + exp(- (({y_variable_name} - mu_value) / sigma_value)) '
     return f'log(sigma_value) + ({y_variable_name} - mu_value)^2 / (2 * sigma_value^2)'
 
 def _compute_loss_gaussian_fit(y_value: float, mu_value: float, sigma_value: float):
+    # return log(sigma_value) + ((y_value - mu_value) / sigma_value) + exp(-((y_value - mu_value) / sigma_value))
     return log(sigma_value) + (y_value - mu_value)**2 / (2 * sigma_value ** 2)
 
 def compute_loss_gaussian_fit(y: ndarray, mu: ndarray, sigma: ndarray):
