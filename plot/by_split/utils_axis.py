@@ -33,7 +33,8 @@ def set_log_y_axis(ax: Axes, loss_list: list[float], target_label: str, metric: 
 
 
 def set_ylabel_with_metric(ax, metric, target_label):
-    ax.set_ylabel(f'{metric_to_label[metric]} {get_unit(target_label)}')
+    unit = '(-)' if metric is Metric.NLL else get_unit(target_label)
+    ax.set_ylabel(f'{metric_to_label[metric]} {unit}')
 
 
 def functions_for_yaxis(threshold: float) -> tuple[Callable, Callable]:

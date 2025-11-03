@@ -1,24 +1,20 @@
-import re
-from collections import Counter
-from typing import Any
-
 import numpy as np
 from sympy import Expr, Number
 
 from utils.utils_date import get_short_month_names, get_season_short_names
 
 
-def get_equation(expr: Expr) -> str:
-    equation_str = str(round_expr(expr))
-    # Replace the month or the season
-    for short_name in get_short_month_names() + get_season_short_names():
-        equation_str = equation_str.replace(f'_{short_name}', '_{' + short_name + '}')
+def postprocessing_for_equation(equation: str) -> str:
+    # Enhance display for the month, the season, or the annual
+    for short_name in get_short_month_names() + get_season_short_names() + ['AnnSea']:
+        equation = equation.replace(f'_{short_name}', '_{' + short_name + '}')
+    # Replace AnnSea with something more clear
+    equation = equation.replace('AnnSea', 'Annual')
     # Remove the "_" after "Max", "Min" and "Mean"
     for s in ["Max", "Min", "Mean"]:
-        equation_str = equation_str.replace(f'{s}_', s)
+        equation = equation.replace(f'{s}_', s)
     # Split the equation on 2 lines if it is too long
-    # return text_on_two_lines_if_too_long(equation_str)
-    return equation_str
+    return '$' + text_on_two_lines_if_too_long(equation) + '$'
 
 def replace_julia_square_by_python_power(equation: str):
     """Replace 'square(0.5 * x - y) by (0.5*x-y)**2 everywhere in the string"""
@@ -48,11 +44,17 @@ def replace_julia_square_by_python_power(equation: str):
 
 
 
-def get_bold_equation(equation_str: str) -> str:
-    return '$\\mathbf{' + equation_str + '}$'
+def get_bold_equation(equation: str) -> str:
+    # Handle the case where the equation is on two lines
+    equation = equation.replace('$\n', '}$\n')
+    equation = equation.replace('\n$', '}\n$\\mathbf{')
+    # Handle the general case of replacing the outer variables
+    assert (equation[0] == '$') and (equation[-1] == '$')
+    return '$\\mathbf{' + equation[1:-1] + '}$'
 
 
-def round_expr(expr: Expr) -> Expr:
+
+def get_rounded_equation(expr: Expr) -> str:
     numbers = expr.atoms(Number)
     for number in numbers:
         for num_digits in range(5):
@@ -61,15 +63,19 @@ def round_expr(expr: Expr) -> Expr:
             if len(new_expr.atoms(Number)) == len(numbers):
                 expr = new_expr
                 break
-    return expr
+    return str(expr)
 
 
 def text_on_two_lines_if_too_long(text: str) -> str:
+    characters = ['+', '-', '*']
     if len(text) <= 100:
         return text
-    else:
-        characters = ['+', '-', '*']
-        if any([character in text for character in characters]):
+    elif (';' in text) or any([character in text for character in characters]):
+        # Define the first_part and second_part and join them
+        if ';' in text:
+            index_semi_colon = text.index(';')
+            first_part, second_part = text[:index_semi_colon], text[index_semi_colon+1:]
+        else:
             index_plus_and_minus = [i for i, character in enumerate(text) if character in characters]
             # Remove some plus and minus indexes that may be between parenthesis (we do not want to cut there)
             index_with_left_parenthesis = [i for i, character in enumerate(text) if character in ['(']]
@@ -90,10 +96,7 @@ def text_on_two_lines_if_too_long(text: str) -> str:
                 distance_to_middle_index = [abs(i - middle_index) for i in index_plus_and_minus]
                 index_minimize_distance = index_plus_and_minus[np.argmin(distance_to_middle_index)]
                 first_part, second_part = text[:index_minimize_distance], text[index_minimize_distance:]
-                separator = '$\n$'
-                counter_first_part = Counter(first_part)
-                if counter_first_part['{'] > counter_first_part['}']:
-                    separator = '}' + separator + '\\mathbf{'
-                return first_part + separator + second_part
-        else:
-            return text
+        separator = '$\n$'
+        return first_part + separator + second_part
+    else:
+        return text

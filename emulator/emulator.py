@@ -18,7 +18,8 @@ from data.utils_run.run import Run
 from data.utils_run.utils_run import get_output_directory, get_run_id, get_non_default_params
 from emulator.utils_gaussian_fit import get_X_for_gaussian_fit, get_lambda_function_list, get_loss_str_gaussian_fit, \
     compute_loss_gaussian_fit, UncertaintyInterval
-from plot.by_split.utils_equation_str import get_equation, replace_julia_square_by_python_power
+from plot.by_split.utils_equation_str import replace_julia_square_by_python_power, \
+    postprocessing_for_equation, get_rounded_equation
 from plot.utils_metric.metric import Metric, compute_loss
 from utils.utils_log import log_info
 from utils.utils_run import random_seed
@@ -214,12 +215,6 @@ class Emulator(PySRRegressor):
         #  Some checks
         self.some_checks(X, y, validation_mask)
 
-        # Avoid some Julia crashes
-        if self.population_size <= self.tournament_selection_n:
-            self.tournament_selection_n = self.population_size - 1
-            warnings.warn(f'Set tournament_selection_n={self.tournament_selection_n} to avoid Julia crash '
-                          f'(because tournament_selection_n must be less than population_size={self.population_size})')
-
         #  Set output_directory based on X,y and validation_mask.
         self.output_directory_ = self.output_directory = get_output_directory(X, y, validation_mask)
 
@@ -232,11 +227,17 @@ class Emulator(PySRRegressor):
         # Fit with a specific run
         return self.fit_with_run(X, y, validation_mask, variable_names, X_units, y_units, self.run_)
 
-    def some_checks(self, X: ndarray, y: ndarray, validation_mask: Optional[ndarray] = None):
+    def some_checks(self, X: ndarray, y: ndarray, validation_mask: Optional[ndarray] = None) -> None:
+        # Some checks on X, y and validation_mask
         assert isinstance(X, ndarray) and isinstance(y, ndarray)
         assert isinstance(validation_mask, ndarray) or validation_mask is None
         if validation_mask is not None:
             assert all([isinstance(value, np.bool) for value in validation_mask])
+        # Avoid some Julia crashes
+        if self.population_size <= self.tournament_selection_n:
+            self.tournament_selection_n = self.population_size - 1
+            warnings.warn(f'Set tournament_selection_n={self.tournament_selection_n} to avoid Julia crash '
+                          f'(because tournament_selection_n must be less than population_size={self.population_size})')
 
     @classmethod
     def get_run_id(cls, params: dict) -> str:
@@ -320,7 +321,10 @@ class Emulator(PySRRegressor):
             self.equations_['sympy_format_sigma'] = self.equations_['equation'].apply(get_expr_function(1))
         else:
             # Add 'equation' column
-            self.equations_['equation'] = self.equations_['sympy_format'].apply(get_equation)
+            self.equations_['equation'] = self.equations_['sympy_format'].apply(get_rounded_equation)
+
+        # Some postprocessing on the 'equation' column
+        self.equations_['equation'] = self.equations_['equation'].apply(postprocessing_for_equation)
 
         # Update 'loss' column if needed
         if self.metric_ is Metric.RMSE:
