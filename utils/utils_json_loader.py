@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Any
 
 import numpy as np
@@ -17,6 +18,12 @@ class JsonLoader(object):
             if isinstance(v, str):
                 if v in map:
                     d[k] = map[v]
+        # Convert list as tuple for the constraints parameter
+        if ('constraints' in d) and (isinstance(d['constraints'], dict)):
+            for key in d['constraints'].keys():
+                value = d['constraints'][key]
+                if isinstance(value, list):
+                    d['constraints'][key] = tuple(value)
         return d
 
     @classmethod
@@ -28,6 +35,8 @@ class JsonLoader(object):
             dict_string = dict_string.replace(str_symbol, f'"{str_symbol}"')
             # When the boolean is a parameter of an object, we revert the previous operation
             dict_string = dict_string.replace(f'="{str_symbol}"', f'={str_symbol}')
+        # Convert tuple as list (because json does not handle tuples)
+        dict_string = re.sub(r'\(([^)]+)\)', r'[\1]', dict_string)
         return dict_string
 
 

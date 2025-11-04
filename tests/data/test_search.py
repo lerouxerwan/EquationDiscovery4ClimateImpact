@@ -22,6 +22,16 @@ def test_json_loader():
     d = string_to_dict(dict_string)
     assert d['a1'] == 6.877829196166807e-05
 
+def test_json_loader_v2():
+    dict_string = "{'constraints': {'*': (3, 1), '/': (1, 3), 'square': 1, 'sqrt': 1}}"
+    d = string_to_dict(dict_string)
+    assert isinstance(d['constraints'], dict)
+    assert isinstance(d['constraints']['*'], tuple)
+    assert isinstance(d['constraints']['/'], tuple)
+    assert isinstance(d['constraints']['square'], int)
+    assert isinstance(d['constraints']['sqrt'], int)
+
+
 
 
 
