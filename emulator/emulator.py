@@ -246,7 +246,8 @@ class Emulator(PySRRegressor):
         if self.interpretable_mode:
             self.unary_operators = ['square', 'sqrt']
             self.binary_operators = ["+", "-", "*", "/"]
-            self.constraints = {'*': (3, 1), '/': (1, 3), 'square': 1, 'sqrt': 1}
+            self.constraints = {'*': (2, 1), '/': (1, 2), 'square': 2, 'sqrt': 2}
+            self.complexity_of_variables = 2
 
 
     @classmethod

@@ -7,7 +7,7 @@ from sympy.utilities.misc import func_name
 def is_interpretable(expr: Expr) -> bool:
     expanded_expr = expand(expr)
     if 'Add' in [func_name(a) for a in expanded_expr.atoms(Basic)]:
-        return all([_is_interpretable(sub_expr)] for sub_expr in expanded_expr.args)
+        return all([_is_interpretable(sub_expr) for sub_expr in expanded_expr.args])
     else:
         return _is_interpretable(expanded_expr)
 
