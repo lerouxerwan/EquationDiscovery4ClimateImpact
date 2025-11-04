@@ -20,6 +20,8 @@ class Optimization(ABC):
     n_jobs: int = 1
     timeout_in_seconds: float | None = None
     gaussian_fit: bool = False
+    interpretable_mode: bool = False
+
 
     def get_params_emulator(self, variable_names: Optional[list[str]] = None):
         params_emulator = {'model_selection': self.model_selection, 'timeout_in_seconds': self.timeout_in_seconds}
@@ -27,6 +29,8 @@ class Optimization(ABC):
             params_emulator['gaussian_fit'] = True
             params_emulator['X_variable_names_for_gaussian_fit'] = variable_names
             params_emulator['y_variable_name_for_gaussian_fit'] = 'Target'
+        if self.interpretable_mode:
+            params_emulator['interpretable_mode'] = self.interpretable_mode
         return params_emulator
 
     def __post_init__(self):
@@ -60,6 +64,8 @@ class Optimization(ABC):
             opt_id += f'_{self.timeout_in_seconds}'
         if self.gaussian_fit:
             opt_id += '_g'
+        if self.interpretable_mode:
+            opt_id += '_im'
         return opt_id
 
     @property

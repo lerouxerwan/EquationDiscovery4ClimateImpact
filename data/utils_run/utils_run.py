@@ -41,7 +41,7 @@ def get_hash_params(params: dict[str, Any]) -> list[tuple[Any] | Any]:
     for k, v in sorted(list(params_loop.items()), key=itemgetter(0)):
         if isinstance(v ,(float, int)):
             hash_params = (k, v)
-        elif isinstance(v, (list, str)):
+        elif isinstance(v, (list, str, tuple)):
             hash_params = tuple([k]) + tuple(v)
         elif isinstance(v, dict):
             hash_params =  tuple([k])  + tuple(get_hash_params(v))

@@ -90,6 +90,7 @@ class EmulatorWithSearch(Emulator):
                  gaussian_fit: bool = False,
                  X_variable_names_for_gaussian_fit: Optional[list[str]] = None,
                  y_variable_name_for_gaussian_fit: Optional[str] = None,
+                 interpretable_mode: bool = False,
                  # Additional parameters
                  search_style: Optional[str] = None,
                  n_iter: int = 10,
@@ -139,6 +140,7 @@ class EmulatorWithSearch(Emulator):
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          gaussian_fit=gaussian_fit, X_variable_names_for_gaussian_fit=X_variable_names_for_gaussian_fit,
                          y_variable_name_for_gaussian_fit=y_variable_name_for_gaussian_fit,
+                         interpretable_mode=interpretable_mode,
                          **kwargs)
         self.search_style = 'random' if search_style is None else search_style
         self.n_iter = n_iter

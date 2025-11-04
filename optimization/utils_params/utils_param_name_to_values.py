@@ -5,18 +5,23 @@ from optimization.utils_params.utils_default_centred_values import get_param_nam
 
 class ParamNameToValues(StrEnum):
     DEFAULT_CENTRED = 'default_centred'
+    DEFAULT_CENTRED_WO_OPERATORS = 'default_centred_wo_operators'
 
 def get_param_name_to_values(param_name_to_values: ParamNameToValues) -> Optional[dict[str, list[Any]]]:
-    if param_name_to_values is ParamNameToValues.DEFAULT_CENTRED:
-        param_name_to_values = get_param_name_to_default_centred_values()
+    if param_name_to_values in [ParamNameToValues.DEFAULT_CENTRED, ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS]:
+        d = get_param_name_to_default_centred_values()
     else:
         raise ValueError(param_name_to_values)
-    if isinstance(param_name_to_values, dict):
-        param_names_defined = set(param_name_to_values.keys())
+    if isinstance(d, dict):
+        param_names_defined = set(d.keys())
         param_names_expected = set(param_names)
         assert param_names_defined == param_names_expected, \
             f'Undefined values for {param_names_expected - param_names_defined}'
-    return param_name_to_values
+    if param_name_to_values is ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS:
+        for param_name in ['unary_operators', 'binary_operators']:
+            if param_name in d:
+                d.pop(param_name)
+    return d
 
 param_names = ['maxsize', 'warmup_maxsize_by', 'unary_operators', 'populations', 'population_size', 'ncycles_per_iteration',
      'topn', 'optimizer_f_calls_limit', 'optimize_probability', 'tournament_selection_p', 'tournament_selection_n',

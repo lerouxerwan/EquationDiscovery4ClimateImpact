@@ -16,6 +16,7 @@ from sympy import Expr, Symbol, sympify, symbols
 from data.utils_dataset.utils_validation import get_X_and_y
 from data.utils_run.run import Run
 from data.utils_run.utils_run import get_output_directory, get_run_id, get_non_default_params
+from emulator.is_interpretable import is_interpretable
 from emulator.utils_gaussian_fit import get_X_for_gaussian_fit, get_lambda_function_list, get_loss_str_gaussian_fit, \
     compute_loss_gaussian_fit, UncertaintyInterval
 from plot.by_split.utils_equation_str import replace_julia_square_by_python_power, \
@@ -99,6 +100,7 @@ class Emulator(PySRRegressor):
                  gaussian_fit: bool = False,
                  X_variable_names_for_gaussian_fit: Optional[list[str]] = None,
                  y_variable_name_for_gaussian_fit: Optional[str] = None,
+                 interpretable_mode: bool = False,
                  **kwargs):
         # Randomness is fixed (thus parallelism is deactivated, see PySR documentation for more details)
         if random_state is None:
@@ -131,6 +133,7 @@ class Emulator(PySRRegressor):
             else:
                 if isinstance(expression_spec, TemplateExpressionSpec):
                     assert expression_spec.expressions == expressions
+
         super().__init__(model_selection, binary_operators=binary_operators, unary_operators=unary_operators,
                          expression_spec=expression_spec, niterations=niterations, populations=populations,
                          population_size=population_size, max_evals=max_evals, maxsize=maxsize, maxdepth=maxdepth,
@@ -174,6 +177,7 @@ class Emulator(PySRRegressor):
                          extra_jax_mappings=extra_jax_mappings, denoise=denoise, select_k_features=select_k_features,
                          **kwargs)
         # Add parameter
+        self.interpretable_mode = interpretable_mode
         self.gaussian_fit = gaussian_fit
         self.X_variable_names_for_gaussian_fit = X_variable_names_for_gaussian_fit
         self.y_variable_name_for_gaussian_fit = y_variable_name_for_gaussian_fit
@@ -238,6 +242,12 @@ class Emulator(PySRRegressor):
             self.tournament_selection_n = self.population_size - 1
             warnings.warn(f'Set tournament_selection_n={self.tournament_selection_n} to avoid Julia crash '
                           f'(because tournament_selection_n must be less than population_size={self.population_size})')
+        # Activate interpretable mode
+        if self.interpretable_mode:
+            self.unary_operators = ['square', 'sqrt']
+            self.binary_operators = ["+", "-", "*", "/"]
+            self.constraints = {'*': (3, 1), '/': (1, 3), 'square': 1, 'sqrt': 1}
+
 
     @classmethod
     def get_run_id(cls, params: dict) -> str:
@@ -320,6 +330,10 @@ class Emulator(PySRRegressor):
             self.equations_['sympy_format_mu'] = self.equations_['equation'].apply(get_expr_function(0))
             self.equations_['sympy_format_sigma'] = self.equations_['equation'].apply(get_expr_function(1))
         else:
+            # Some checks for the interpretable_mode
+            if self.interpretable_mode:
+                for expr in self.equations_['sympy_format']:
+                    assert is_interpretable(expr), expr
             # Add 'equation' column
             self.equations_['equation'] = self.equations_['sympy_format'].apply(get_equation_from_expr)
 
