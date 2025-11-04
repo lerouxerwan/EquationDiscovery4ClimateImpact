@@ -27,5 +27,5 @@ def get_unit(label: str) -> str:
 
 
 def add_equation(equation: str):
-    plt.suptitle(f'Rounded equation: {equation}')
+    plt.suptitle(f'Equation: {equation}')
 

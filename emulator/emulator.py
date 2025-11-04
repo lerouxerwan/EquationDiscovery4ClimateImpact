@@ -19,7 +19,7 @@ from data.utils_run.utils_run import get_output_directory, get_run_id, get_non_d
 from emulator.utils_gaussian_fit import get_X_for_gaussian_fit, get_lambda_function_list, get_loss_str_gaussian_fit, \
     compute_loss_gaussian_fit, UncertaintyInterval
 from plot.by_split.utils_equation_str import replace_julia_square_by_python_power, \
-    postprocessing_for_equation, get_rounded_equation
+    postprocessing_for_equation, get_equation_from_expr
 from plot.utils_metric.metric import Metric, compute_loss
 from utils.utils_log import log_info
 from utils.utils_run import random_seed
@@ -321,7 +321,7 @@ class Emulator(PySRRegressor):
             self.equations_['sympy_format_sigma'] = self.equations_['equation'].apply(get_expr_function(1))
         else:
             # Add 'equation' column
-            self.equations_['equation'] = self.equations_['sympy_format'].apply(get_rounded_equation)
+            self.equations_['equation'] = self.equations_['sympy_format'].apply(get_equation_from_expr)
 
         # Some postprocessing on the 'equation' column
         self.equations_['equation'] = self.equations_['equation'].apply(postprocessing_for_equation)
@@ -485,7 +485,7 @@ class Emulator(PySRRegressor):
 
     @property
     def selected_equation(self) -> str:
-        """Equation as a string (potentially rounded to reduce the length)"""
+        """Equation as a string"""
         return self.selected_row['equation']
 
     @property

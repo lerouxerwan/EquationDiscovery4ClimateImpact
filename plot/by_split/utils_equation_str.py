@@ -10,6 +10,8 @@ def postprocessing_for_equation(equation: str) -> str:
         equation = equation.replace(f'_{short_name}', '_{' + short_name + '}')
     # Replace AnnSea with something more clear
     equation = equation.replace('AnnSea', 'Annual')
+    # Replace square operation with latex operation
+    equation = equation.replace('**2', '^2')
     # Remove the "_" after "Max", "Min" and "Mean"
     for s in ["Max", "Min", "Mean"]:
         equation = equation.replace(f'{s}_', s)
@@ -47,17 +49,18 @@ def replace_julia_square_by_python_power(equation: str):
 def get_bold_equation(equation: str) -> str:
     # Handle the case where the equation is on two lines
     equation = equation.replace('$\n', '}$\n')
-    equation = equation.replace('\n$', '}\n$\\mathbf{')
+    equation = equation.replace('\n$', '\n$\\mathbf{')
     # Handle the general case of replacing the outer variables
     assert (equation[0] == '$') and (equation[-1] == '$')
     return '$\\mathbf{' + equation[1:-1] + '}$'
 
 
 
-def get_rounded_equation(expr: Expr) -> str:
+def get_equation_from_expr(expr: Expr, max_num_digits=5) -> str:
+    return str(expr)
     numbers = expr.atoms(Number)
     for number in numbers:
-        for num_digits in range(5):
+        for num_digits in range(max_num_digits):
             round_number = round(number, num_digits)
             new_expr = expr.subs(number, round_number)
             if len(new_expr.atoms(Number)) == len(numbers):

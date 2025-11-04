@@ -17,7 +17,7 @@ def plot_pareto_front_example(emulator: Emulator, show: bool = False) -> None:
     width, coordinate_list = load_bar_attributes(nb_bars=2, complexity_list=complexity_list)
     ax.bar(coordinate_list[0], emulator.loss_list, width=width, color='red')
     ax.set_xlabel('Equation f')
-    # Add rounded equations on the lower X axis
+    # Add equations on the lower X axis
     x_ticks = complexity_list
     set_x_axis_example(ax, x_ticks)
     ax.set_xticks(x_ticks)

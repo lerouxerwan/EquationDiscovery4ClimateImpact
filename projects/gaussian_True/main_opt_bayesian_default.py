@@ -8,7 +8,7 @@ if __name__ == '__main__':
     params_emulator = {'timeout_in_seconds': 60*60, 'gaussian_fit': True,
                        'X_variable_names_for_gaussian_fit': dataset.X_variable_names,
                        'y_variable_name_for_gaussian_fit': dataset.y_variable_names[0],
-                       'model_selection': 'validated', 'niterations': 2}
+                       'model_selection': 'validated'}
     emulator = Emulator(**params_emulator)
     emulator.fit(dataset.X_train, dataset.y_train, dataset.validation_mask, dataset.X_variable_names)
     plot_diagnosis(emulator, dataset)

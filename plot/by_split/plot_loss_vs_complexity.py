@@ -9,7 +9,7 @@ from plot.by_split.utils_axis import set_log_y_axis, set_x_axis
 from plot.by_split.utils_equation_str import get_bold_equation
 from plot.by_split.utils_plot_by_split import load_split_name_to_X_and_y
 from plot.by_split.utils_plot_split_name import SPLIT_NAMES, split_name_to_color, \
-    get_label_split_name
+    get_label_split_name, split_name_to_hatch
 from plot.utils_metric.metric import Metric
 from utils.utils_plot import show_or_save_plot
 
@@ -39,13 +39,15 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
         # Filter values where the loss is equal np.nan
         coordinates, loss_list = list(zip(*[(coordinate, loss) for coordinate, loss in zip(coordinates, loss_list) if not np.isnan(loss)]))
         barplot = ax.bar(coordinates, loss_list, width=width, label=get_label_split_name(split_name, dataset),
-               color=split_name_to_color[split_name])
+               # color=split_name_to_color[split_name],
+                         facecolor='w', edgecolor='k',
+                         hatch=split_name_to_hatch[split_name])
         loss_list_labels = [str(round(loss, 2)) for loss in loss_list]
         ax.bar_label(barplot, labels=loss_list_labels, label_type='edge', padding=1, rotation=90)
         all_loss_list.extend(loss_list)
 
-    # Add rounded equations on the lower X axis
-    ax.set_xlabel('Equations with rounded coefficients')
+    # Add equations on the lower X axis
+    ax.set_xlabel('Equations')
     x_ticks = complexity_list
     set_x_axis(ax, x_ticks)
     ax.set_xticks(x_ticks)

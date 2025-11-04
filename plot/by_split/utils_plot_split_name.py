@@ -36,3 +36,9 @@ split_name_to_color = {
     "validation": "orange",
       "test": "tab:purple",
 }
+
+split_name_to_hatch = {
+    "train": None,
+    "validation": "///",
+      "test": ".",
+}

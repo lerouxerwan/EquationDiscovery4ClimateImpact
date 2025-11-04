@@ -69,6 +69,8 @@ def plot_compare_split(opt_type: type, validation_splits: list[ValidationSplit],
     ax.set_xlabel('Variable names')
     ax.set_ylabel('Frequency (%)')
     ax.set_xticks(x_values)
+    labels = [label.replace('AnnSea', 'Annual') for label in labels]
+    labels = ['$' + label.replace('_', '_{') + '}$' for label in labels]
     ax.set_xticklabels(labels, rotation=45, ha='right', rotation_mode='anchor')
     # ax.tick_params(axis='x', which='major', labelsize=8, labelrotation=45)
     ax.grid(axis='y')
