@@ -11,7 +11,8 @@ from pysr import TensorBoardLoggerSpec, TemplateExpressionSpec
 from data.utils_run.utils_run import CSV_FILENAME, \
     JSON_FILENAME, params_that_do_not_impact_the_fit_results, remove_parameters_not_json_serializable
 from emulator.utils_hyperparameter_search.utils_column_names import PARAMS_EMULATOR_COLUMN_NAME, \
-    RMSE_VALIDATION_COLUMN_NAME, PARAMS_COLUMN_NAME, RMSE_TRAIN_COLUMN_NAME, NLL_VALIDATION_COLUMN_NAME
+    RMSE_VALIDATION_COLUMN_NAME, PARAMS_COLUMN_NAME, RMSE_TRAIN_COLUMN_NAME, NLL_VALIDATION_COLUMN_NAME, \
+    VARIABLE_NAMES_COLUMN_NAME
 from utils.utils_json_loader import string_to_dict
 from utils.utils_log import log_info
 
@@ -136,6 +137,8 @@ class Run(object):
         #  Cast some columns to their original type
         for column_name in [PARAMS_COLUMN_NAME, PARAMS_EMULATOR_COLUMN_NAME]:
             df_cv_results[column_name] = df_cv_results[column_name].apply(string_to_dict)
+        string_to_list = lambda s: s[2:-2].replace("'", '').split(', ')
+        df_cv_results[VARIABLE_NAMES_COLUMN_NAME] = df_cv_results[VARIABLE_NAMES_COLUMN_NAME].apply(string_to_list)
         return df_cv_results
 
     def save_search_results(self, df_cv_results: pd.DataFrame, non_default_params: dict[str, Any]) -> None:

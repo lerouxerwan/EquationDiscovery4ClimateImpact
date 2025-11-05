@@ -28,7 +28,7 @@ def plot_selection_rate_features_top_equations(emulator: EmulatorWithSearch, dat
         ax.set_xticks(x_values)
         xticklabels = [dataset.X_variable_names[feature_index] for feature_index in feature_indexes]
         xticklabels = ['$' + label.replace('_', '_{') + '}$' for label in xticklabels]
-        for selected_feature_index in all_feature_indexes[0]:
+        for selected_feature_index in get_selected_feature_indexes(df[VARIABLE_NAMES_COLUMN_NAME].iloc[0], dataset.X_variable_names):
             i = feature_indexes.index(selected_feature_index)
             xticklabels[i] =  '$\\mathbf{' + xticklabels[i][1:-1] + '}$'
         ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
