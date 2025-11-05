@@ -328,15 +328,17 @@ class Emulator(PySRRegressor):
                     syms = symbols(' '.join(variable_names)) if len(variable_names) > 1 else symbols(variable_names)
                     return sympify(sub_equation, locals={name: syms[i] for i, name in enumerate(variable_names)})
                 return get_expr
-            self.equations_['sympy_format_mu'] = self.equations_['equation'].apply(get_expr_function(0))
-            self.equations_['sympy_format_sigma'] = self.equations_['equation'].apply(get_expr_function(1))
+            for sub_equation_number, expression_column_name in enumerate(self.expression_column_names):
+                self.equations_[expression_column_name] = self.equations_['equation'].apply(get_expr_function(sub_equation_number))
         else:
-            # Some checks for the interpretable_mode
-            if self.interpretable_mode:
-                for expr in self.equations_['sympy_format']:
-                    assert is_interpretable(expr), expr
             # Add 'equation' column
             self.equations_['equation'] = self.equations_['sympy_format'].apply(get_equation_from_expr)
+
+        #  Some checks for the interpretable_mode
+        if self.interpretable_mode:
+            for expression_column_name in self.expression_column_names:
+                for expr in self.equations_[expression_column_name]:
+                    assert is_interpretable(expr), expr
 
         # Some postprocessing on the 'equation' column
         self.equations_['equation'] = self.equations_['equation'].apply(postprocessing_for_equation)
@@ -493,10 +495,11 @@ class Emulator(PySRRegressor):
     def selected_expressions(self) -> list[Expr]:
         """Sympy expressions for the selected equation,
         It returns a list of Expr because with 'gaussian_fit=True' we have two Expr in the selected equation"""
-        if self.gaussian_fit:
-            return [self.selected_row['sympy_format_mu'], self.selected_row['sympy_format_sigma']]
-        else:
-            return [self.selected_row['sympy_format']]
+        return [self.selected_row[expression_column_name] for expression_column_name in self.expression_column_names]
+
+    @property
+    def expression_column_names(self) -> list[str]:
+        return ['sympy_format_mu', 'sympy_format_sigma'] if self.gaussian_fit else ['sympy_format' ]
 
     @property
     def selected_equation(self) -> str:

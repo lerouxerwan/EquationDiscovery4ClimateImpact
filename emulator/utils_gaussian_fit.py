@@ -25,9 +25,6 @@ def compute_loss_gaussian_fit(y: ndarray, mu: ndarray, sigma: ndarray):
 def get_X_for_gaussian_fit(X: ndarray, y: ndarray) -> ndarray:
     return np.concat([X, np.expand_dims(y, axis=1)], axis=1)
 
-def get_lambda_function_kwargs(s: str) -> Callable:
-    return lambda **kwargs: eval(s, {}, kwargs)
-
 def get_lambda_function_list(s: str, variable_names: list[str], add_exponential: bool = False) -> Callable:
     return partial(lambda_function, s=s, variable_names=variable_names, add_exponential=add_exponential)
 
@@ -37,4 +34,5 @@ def lambda_function(x: list, s: str, variable_names: list[str], add_exponential:
         return exp(eval(s, {}, dict(zip(variable_names, x))))
     else:
         return eval(s, {}, dict(zip(variable_names, x)))
+
 
