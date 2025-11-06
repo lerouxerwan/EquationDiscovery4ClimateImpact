@@ -20,7 +20,7 @@ class SbatchInterpretable(Sbatch):
         return f'--nodelist=sl-mee-br-{self.server_number}'
 
 
-def main_validation_size():
+def main_marginal():
     index1 = 0
     for index2 in [0, 1, 2][:]:
         for index3 in [0, 1, 2][:]:
@@ -29,5 +29,12 @@ def main_validation_size():
             sbatch.run()
 
 
+def main_random():
+    index1 = 1
+    for index2 in [0, 1, 2][:]:
+        SbatchInterpretable([index1, index2, 1], 12, 113).run()
+        for index3 in [0, 2]:
+            SbatchInterpretable([index1, index2, index3], 6, 111).run()
+
 if __name__ == '__main__':
-    main_validation_size()
+    main_random()
