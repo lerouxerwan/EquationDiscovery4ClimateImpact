@@ -244,6 +244,8 @@ class Emulator(PySRRegressor):
                           f'(because tournament_selection_n must be less than population_size={self.population_size})')
         # Activate interpretable mode
         if self.interpretable_mode:
+            if self.gaussian_fit:
+                raise NotImplementedError('Constraints do not seem to be respected with template')
             self.unary_operators = ['square', 'sqrt']
             self.binary_operators = ["+", "-", "*", "/"]
             self.constraints = {'*': (2, 1), '/': (1, 2), 'square': 2, 'sqrt': 2}
