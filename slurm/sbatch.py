@@ -15,6 +15,7 @@ CURRENT_PATH = os.getcwd()
 class Sbatch(ABC):
     """Call sbatch command for a specific python filepath that is called with some indices as arguments"""
     indices: list[int]
+    nb_cores: int = 4
 
     def __post_init__(self):
         self.root = '/Odyssey/private/e23lerou/Documents/EquationDiscovery4ClimateImpact'
@@ -28,11 +29,6 @@ class Sbatch(ABC):
     @abstractmethod
     def sbatch_name(self) -> str:
         raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def nb_cores(self) -> int:
-        raise
 
     @property
     def setting_name(self) -> str:

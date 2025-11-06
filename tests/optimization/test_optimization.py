@@ -1,9 +1,12 @@
 import pytest
 
 from data.utils_dataset.npp_season_v1 import get_dataset
-from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import optimization_types_500
+from optimization.optimization_marginal.optimization_marginal import OptimizationMarginal
+from optimization.optimization_random.optimization_random_zoo import OptimizationRandom_200_5, OptimizationRandom_500
+from optimization.optmization_pipeline.optimization_pipeline_factory import optimization_pipeline_factory
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
 
+optimization_types_500 = [OptimizationRandom_500, optimization_pipeline_factory([OptimizationMarginal, OptimizationRandom_200_5])]
 
 @pytest.mark.parametrize("optimization_type", optimization_types_500)
 def test_budget(optimization_type: type):
