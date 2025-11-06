@@ -183,8 +183,8 @@ class EmulatorWithSearch(Emulator):
         """Run hyperparameter search and save the results as a csv"""
         log_info(f'Start hyperparameter search with {self.nb_combinations} combinations, with param grid = {self.param_grid}')
         # Run a simple/fast regressor fit, just to load julia before using multiprocessing
-        if self.n_jobs is not None:
-            PySRRegressor(niterations=1, verbosity=0).fit(X, y)
+        # if self.n_jobs is not None:
+        #     PySRRegressor(niterations=1, verbosity=0).fit(X, y)
         # Some check
         assert validation_mask is not None
         # Run hyperparameter search with respect to self.param_grid
@@ -193,6 +193,7 @@ class EmulatorWithSearch(Emulator):
                                    scoring=self.scoring,
                                    cv=get_cv(validation_mask), refit=False, return_train_score=True,
                                    n_jobs=self.n_jobs,
+                                   # error_score='raise',
                                    **get_search_cv_kwargs(search_cv_type, self.param_grid, self.n_iter))
         search_cv.fit(X, y, validation_mask=validation_mask, variable_names=variable_names,
                       X_units=X_units, y_units=y_units)
