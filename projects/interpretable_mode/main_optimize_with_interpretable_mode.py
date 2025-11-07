@@ -11,5 +11,5 @@ opt = OptimizationMarginal('best', ParamNameToValues.DEFAULT_CENTRED_WO_OPERATOR
 dataset = get_dataset(validation_size=0.25, validation_split=ValidationSplit.QUANTILE_WITH_BINNING)
 emulator = opt.get_top_emulator(dataset.X_train, dataset.y_train, dataset.validation_mask,
                                 dataset.X_variable_names, dataset.X_units, dataset.y_units)
-# plot_diagnosis(emulator, dataset)
-plot_selection_rate_features_top_equations(emulator, dataset, show=True)
+plot_diagnosis(emulator, dataset)
+# plot_selection_rate_features_top_equations(emulator, dataset, show=True)

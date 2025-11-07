@@ -244,15 +244,17 @@ class Emulator(PySRRegressor):
                           f'(because tournament_selection_n must be less than population_size={self.population_size})')
         # Activate interpretable mode
         if self.interpretable_mode:
-            if self.gaussian_fit:
-                raise NotImplementedError('Constraints do not seem to be respected with template')
-            self.unary_operators = ['square', 'sqrt', "inv(x) = 1/x",]
-            self.binary_operators = ["+", "-", "*"]
-            self.constraints = {'*': (2, 1), 'square': 2, 'sqrt': 2, 'inv': 2}
-            self.complexity_of_variables = 2
-            self.set_params(extra_sympy_mappings={'inv': lambda x: 1 / x})
-            self.set_params(constraints={'*': (2, 1), 'square': 2, 'sqrt': 2, 'inv': 2})
+            self.activate_interpretable_mode()
 
+    def activate_interpretable_mode(self):
+        if self.gaussian_fit:
+            raise NotImplementedError('Constraints do not seem to be respected with template')
+        self.unary_operators = ['square', 'sqrt', "inv(x) = 1/x", ]
+        self.binary_operators = ["+", "-", "*"]
+        self.constraints = {'*': (2, 1), 'square': 2, 'sqrt': 2, 'inv': 2}
+        self.complexity_of_variables = 2
+        self.set_params(extra_sympy_mappings={'inv': lambda x: 1 / x})
+        self.set_params(constraints={'*': (2, 1), 'square': 2, 'sqrt': 2, 'inv': 2})
 
     @classmethod
     def get_run_id(cls, params: dict) -> str:
@@ -291,6 +293,9 @@ class Emulator(PySRRegressor):
             self.feature_names_in_ = emulator_from_file.feature_names_in_
             self.equations_ = emulator_from_file.equations_
             self.julia_state_stream_ = emulator_from_file.julia_state_stream_
+            #  Activate interpretable mode (because `extra_sympy_mappings` must be redefined at runtime=
+            if self.interpretable_mode:
+                self.activate_interpretable_mode()
         else:
             log_info(f'Fit with {self.non_default_params}')
             #  Fit with logging and compute its duration

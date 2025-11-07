@@ -7,7 +7,7 @@ if __name__ == '__main__':
     dataset = get_dataset(validation_size=0.2, validation_split=ValidationSplit.QUANTILE_WITH_BINNING)
     params_emulator = {'timeout_in_seconds': 60*60,
                        'interpretable_mode': True,
-                       'niterations': 1}
+                       'niterations': 10}
     emulator = Emulator(**params_emulator)
     emulator.fit(dataset.X_train, dataset.y_train, dataset.validation_mask, dataset.X_variable_names)
     plot_diagnosis(emulator, dataset)
