@@ -20,9 +20,9 @@ def main():
         param_name_to_values = ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS
         n_jobs = -1
     else:
-        indices = [0, 0, 0]
+        indices = [1, 2, 1]
         n_jobs = 1
-        param_name_to_values = ParamNameToValues.DEFAULT_CENTRED
+        param_name_to_values = ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS
 
     print(f'Run with indices={indices}')
     # Load dataset

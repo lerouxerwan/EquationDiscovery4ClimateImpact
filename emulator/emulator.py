@@ -340,7 +340,9 @@ class Emulator(PySRRegressor):
         if self.interpretable_mode:
             for expression_column_name in self.expression_column_names:
                 for expr in self.equations_[expression_column_name]:
-                    assert is_interpretable(expr), expr
+                    error_message = (f'{expr} is not interpretable,\n'
+                                     f'this expression was obtained with {self.non_default_params}')
+                    assert is_interpretable(expr), error_message
 
         # Some postprocessing on the 'equation' column
         self.equations_['equation'] = self.equations_['equation'].apply(postprocessing_for_equation)
