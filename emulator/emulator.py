@@ -246,10 +246,12 @@ class Emulator(PySRRegressor):
         if self.interpretable_mode:
             if self.gaussian_fit:
                 raise NotImplementedError('Constraints do not seem to be respected with template')
-            self.unary_operators = ['square', 'sqrt']
-            self.binary_operators = ["+", "-", "*", "/"]
-            self.constraints = {'*': (2, 1), '/': (1, 2), 'square': 2, 'sqrt': 2}
+            self.unary_operators = ['square', 'sqrt', "inv(x) = 1/x",]
+            self.binary_operators = ["+", "-", "*"]
+            self.constraints = {'*': (2, 1), 'square': 2, 'sqrt': 2, 'inv': 2}
             self.complexity_of_variables = 2
+            self.set_params(extra_sympy_mappings={'inv': lambda x: 1 / x})
+            self.set_params(constraints={'*': (2, 1), 'square': 2, 'sqrt': 2, 'inv': 2})
 
 
     @classmethod
@@ -342,6 +344,8 @@ class Emulator(PySRRegressor):
                 for expr in self.equations_[expression_column_name]:
                     error_message = (f'{expr} is not interpretable,\n'
                                      f'this expression was obtained with {self.non_default_params}')
+                    if not is_interpretable(expr):
+                        pass
                     assert is_interpretable(expr), error_message
 
         # Some postprocessing on the 'equation' column
