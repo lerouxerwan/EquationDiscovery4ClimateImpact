@@ -40,13 +40,12 @@ def main_marginal_and_random():
 
 def main_random():
     index1 = 1
-
     for index2 in [0, 1, 2][:]:
-        SbatchInterpretable([index1, index2, 1], 8, 113).run()
-
-        # for index3 in [0, 2]:
-        #     SbatchInterpretable([index1, index2, index3], 6, 111).run()
+        for index3 in [0, 1, 2][:]:
+            server_number = 113 if index2 in [0, 1] else 111
+            SbatchInterpretable([index1, index2, index3], server_number=server_number).run()
 
 if __name__ == '__main__':
-    # main_random()
-    main_marginal_and_random()
+    main_marginal()
+    main_random()
+    # main_marginal_and_random()
