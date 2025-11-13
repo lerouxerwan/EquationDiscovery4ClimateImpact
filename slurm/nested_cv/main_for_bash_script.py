@@ -20,7 +20,7 @@ def main():
         param_name_to_values = ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS
         n_jobs = -1
     else:
-        indices = [1, 2, 1]
+        indices = [2, 0, 2]
         n_jobs = 1
         param_name_to_values = ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS
 

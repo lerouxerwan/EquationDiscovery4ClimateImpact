@@ -189,7 +189,7 @@ class EmulatorWithSearch(Emulator):
                                    scoring=self.scoring,
                                    cv=get_cv(validation_mask), refit=False, return_train_score=True,
                                    n_jobs=self.n_jobs,
-                                   error_score='raise',
+                                   # error_score='raise',
                                    **get_search_cv_kwargs(search_cv_type, self.param_grid, self.n_iter))
         search_cv.fit(X, y, validation_mask=validation_mask, variable_names=variable_names,
                       X_units=X_units, y_units=y_units)
