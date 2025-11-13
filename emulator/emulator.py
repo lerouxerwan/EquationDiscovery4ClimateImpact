@@ -51,7 +51,7 @@ class Emulator(PySRRegressor):
     run_: Optional[Run]
 
 
-    def __init__(self, model_selection: Literal["best", "accuracy", "score", "validated", "multiply"] = "best", *,
+    def __init__(self, model_selection: Literal["best", "accuracy", "score", "validated"] = "best", *,
                  binary_operators: list[str] | None = None, unary_operators: list[str] | None = None,
                  expression_spec: AbstractExpressionSpec | None = None, niterations: int = 100, populations: int = 31,
                  population_size: int = 27, max_evals: int | None = None, maxsize: int = 30,
@@ -181,13 +181,8 @@ class Emulator(PySRRegressor):
         self.gaussian_fit = gaussian_fit
         self.X_variable_names_for_gaussian_fit = X_variable_names_for_gaussian_fit
         self.y_variable_name_for_gaussian_fit = y_variable_name_for_gaussian_fit
-        # Change default dimensional_constraint_penalty
-        if self.dimensional_constraint_penalty is None:
-            self.dimensional_constraint_penalty = 10 ** 8
         # Create attributes
-        self.metric_ = Metric.NLL if self.gaussian_fit else Metric.RMSE
         self.index_for_validated_model_selection_ = None
-        self.index_for_multiply_model_selection_ = None
         self.run_ = None
 
     def fit(self, X: ndarray, y: ndarray, validation_mask: Optional[ndarray] = None,
@@ -237,9 +232,12 @@ class Emulator(PySRRegressor):
         assert isinstance(validation_mask, ndarray) or validation_mask is None
         if validation_mask is not None:
             assert all([isinstance(value, np.bool) for value in validation_mask])
+        # Change default dimensional_constraint_penalty
+        if self.dimensional_constraint_penalty is None:
+            self.set_params(dimensional_constraint_penalty=10 ** 8)
         # Avoid some Julia crashes
         if self.population_size <= self.tournament_selection_n:
-            self.tournament_selection_n = self.population_size - 1
+            self.set_params(tournament_selection_n=self.population_size - 1)
             warnings.warn(f'Set tournament_selection_n={self.tournament_selection_n} to avoid Julia crash '
                           f'(because tournament_selection_n must be less than population_size={self.population_size})')
         # Activate interpretable mode
@@ -249,12 +247,11 @@ class Emulator(PySRRegressor):
     def activate_interpretable_mode(self):
         if self.gaussian_fit:
             raise NotImplementedError('Constraints do not seem to be respected with template')
-        self.unary_operators = ['square', 'sqrt', "inv(x) = 1/x", ]
-        self.binary_operators = ["+", "-", "*"]
-        self.constraints = {'*': (2, 1), 'square': 2, 'sqrt': 2, 'inv': 2}
-        self.complexity_of_variables = 2
-        self.set_params(extra_sympy_mappings={'inv': lambda x: 1 / x})
-        self.set_params(constraints={'*': (2, 1), 'square': 2, 'sqrt': 2, 'inv': 2})
+        self.set_params(unary_operators = ['square', 'sqrt', "inv(x) = 1/x", ],
+                        binary_operators=["+", "-", "*"],
+                        complexity_of_variables=2,
+                        extra_sympy_mappings={'inv': lambda x: 1 / x},
+                        constraints={'*': (2, 1), 'square': 2, 'sqrt': 2, 'inv': 2})
 
     @classmethod
     def get_run_id(cls, params: dict) -> str:
@@ -367,8 +364,6 @@ class Emulator(PySRRegressor):
             self.equations_['validation_loss'] = self.compute_loss_list(X_validation, y_validation)
             #  Set the index for the 'validated' model selection using the validation set
             self.index_for_validated_model_selection_ = np.nanargmin(self.validation_loss_list)
-            #  Set the index for the 'multiply' model selection using the validation set
-            self.index_for_multiply_model_selection_ = np.nanargmin(np.multiply(self.loss_list, self.validation_loss_list))
 
         return self
 
@@ -412,7 +407,7 @@ class Emulator(PySRRegressor):
         return equation
 
     def predict(self, X, index: int | list[int] | None = None, *, category: ndarray | None = None) -> ndarray:
-        if self.metric_ is Metric.NLL:
+        if self.gaussian_fit:
             assert category is None
             return self.get_distri_param(X, 'mu', index)
         else:
@@ -423,7 +418,7 @@ class Emulator(PySRRegressor):
         """Compute uncertainty intervals, i.e. a 2D array with the same length as X and with 2 columns
         The 1st column correspond to the lower error (it is negative) and the 2nd to the upper error.
         Note that uncertainty interval are only available for certain fit configurations."""
-        if self.metric_ is Metric.NLL:
+        if self.gaussian_fit:
             sigma_values = self.get_distri_param(X, 'sigma', index)
             if uncertainty_interval is UncertaintyInterval.plus_and_minus_std:
                 return np.array([(- sigma, sigma) for sigma in sigma_values])
@@ -447,7 +442,7 @@ class Emulator(PySRRegressor):
 
     def compute_loss(self, X: ndarray, y: ndarray, index: int | list[int] | None) -> float:
         """Compute loss for the equation at some specific index"""
-        if self.metric_ is Metric.NLL:
+        if self.gaussian_fit:
             row = self.get_best() if index is None else self.equations_.iloc[index]
             mu, sigma = [np.array([row[k](x) for x in X]) for k in ['mu', 'sigma']]
             return compute_loss_gaussian_fit(y, mu, sigma)
@@ -466,13 +461,10 @@ class Emulator(PySRRegressor):
         """Compute a Series (or list of Series) representing the selected equations (complexity, loss, ...)
          If index=None, then the equation is selected using self.model_selection"""
         if index is None:
-            assert self.model_selection in ['best', 'validated', 'multiply']
+            assert self.model_selection in ['best', 'validated']
             if self.model_selection == 'validated':
                 assert self.index_for_validated_model_selection_ is not None
                 index = self.index_for_validated_model_selection_
-            elif self.model_selection == 'multiply':
-                assert self.index_for_multiply_model_selection_ is not None
-                index = self.index_for_multiply_model_selection_
             elif self.model_selection == 'best':
                 if self.metric_ is Metric.RMSE:
                     threshold = np.sqrt(1.5) * self.equations_["loss"].min()
@@ -552,6 +544,10 @@ class Emulator(PySRRegressor):
         return self.equations_['equation'].to_list()
 
     """Other methods/properties"""
+
+    @property
+    def metric_(self) -> Metric:
+        return Metric.NLL if self.gaussian_fit else Metric.RMSE
 
     @property
     def params(self):
