@@ -68,5 +68,5 @@ def remove_parameters_not_json_serializable(params):
             params.pop(param_name)
     return params
             
-param_names_not_handled_by_json = ['expression_spec']
+param_names_not_handled_by_json = ['expression_spec', 'extra_sympy_mappings']
 

@@ -8,21 +8,22 @@ from optimization.optimization_random.optimization_random_zoo import Optimizatio
 from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import OptimizationPipelineRandom, \
     OptimizationPipelineMarginalRandom
 from optimization.utils_optimization import get_loss
-from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
+from optimization.utils_params.utils_param_name_to_values import ParamNameToValues, get_param_name_to_values
 from plot.plot_diagnosis import plot_diagnosis
 from plot.utils_metric.metric import metric_to_str
 from utils.utils_log import log_info
 
 
-def main():
+def main(index2=0, index3=0):
     if len(sys.argv) > 1:
         indices = [int(sys.argv[i]) for i in range(1, 4)]
         param_name_to_values = ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS
         n_jobs = -1
     else:
-        indices = [2, 0, 2]
-        n_jobs = 1
+        indices = [0, index2, index3]
+        n_jobs = -1
         param_name_to_values = ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS
+
 
     print(f'Run with indices={indices}')
     # Load dataset
@@ -39,8 +40,9 @@ def main():
              dataset.X_variable_names, dataset.X_units, dataset.y_units,
              dataset.X_test, dataset.y_test)
     log_info(f'{metric_to_str[top_emulator.metric_]} test for top emulator = {rmse_test}')
-    plot_diagnosis(top_emulator, dataset)
+    # plot_diagnosis(top_emulator, dataset)
 
-    # run_nested_cv(dataset, opt)
 if __name__ == '__main__':
-    main()
+    for index2 in [0, 1, 2][:]:
+        for index3 in [0, 1, 2][:]:
+            main(index2, index3)

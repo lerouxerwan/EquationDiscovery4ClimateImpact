@@ -37,6 +37,8 @@ class JsonLoader(object):
             dict_string = dict_string.replace(f'="{str_symbol}"', f'={str_symbol}')
         # Convert tuple as list (because json does not handle tuples)
         dict_string = re.sub(r'\(([^)]+)\)', r'[\1]', dict_string)
+        # However convert '[x]' to '(x)', to respect the format for function argument
+        dict_string = re.sub('\[x\]', '(x)', dict_string)
         return dict_string
 
 
