@@ -34,7 +34,13 @@ def main_marginal_and_random():
     for index2 in [0, 1, 2][:]:
         for index3 in [0, 1, 2][:]:
             indices = [index1, index2, index3]
-            sbatch = SbatchInterpretable(indices, server_number=111)
+            server_number = 113
+            if index2 == 0:
+                if index3 == 0:
+                    server_number = 111
+                if index3 == 1:
+                    server_number = 112
+            sbatch = SbatchInterpretable(indices, server_number=server_number)
             sbatch.run()
 
 
@@ -46,5 +52,5 @@ def main_random():
 
 if __name__ == '__main__':
     # main_marginal()
-    main_random()
-    # main_marginal_and_random()
+    # main_random()
+    main_marginal_and_random()
