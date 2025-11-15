@@ -20,7 +20,7 @@ def main(index2=0, index3=0):
         param_name_to_values = ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS
         n_jobs = -1
     else:
-        indices = [0, index2, index3]
+        indices = [2, index2, index3]
         n_jobs = -1
         param_name_to_values = ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS
 
@@ -43,6 +43,7 @@ def main(index2=0, index3=0):
     # plot_diagnosis(top_emulator, dataset)
 
 if __name__ == '__main__':
-    for index2 in [0, 1, 2][:]:
-        for index3 in [0, 1, 2][:]:
+    # for index2 in [0, 1, 2][:]:
+    #     for index3 in [0, 1, 2][:]:
+    for index2, index3 in  [(1, 2), (0, 2), (2, 2), (2, 0), (2, 1)]:
             main(index2, index3)

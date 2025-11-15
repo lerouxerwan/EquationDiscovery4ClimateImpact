@@ -46,9 +46,11 @@ def main_marginal_and_random():
 
 def main_random():
     index1 = 1
-    for index2 in [0, 1, 2][:]:
-        for index3 in [0, 1, 2][:]:
-            SbatchInterpretable([index1, index2, index3]).run()
+    for index2, index3 in     [(0, 1), (0, 0), (1, 0), (1, 1)]:
+        SbatchInterpretable([index1, index2, index3], nb_cores=10).run()
+        # for index2 in [0, 1, 2][:]:
+    #     for index3 in [0, 1, 2][:]:
+    #         SbatchInterpretable([index1, index2, index3]).run()
 
 if __name__ == '__main__':
     # main_marginal()
