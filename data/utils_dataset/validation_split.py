@@ -49,13 +49,14 @@ def get_validation_label(rcp_name_train: str, rcp_name_test: str, validation_spl
     elif validation_split is ValidationSplit.EXTREME:
         return f'{percent} that are low and high values for the historical period + {rcp_name_train}'
     elif validation_split is ValidationSplit.RANDOM:
-        return f'{percent} randomly in the historical period + {rcp_name_train}'
+        return f'{percent} randomly sampled in the historical period + {rcp_name_train}'
+        # return f'{percent} randomly sampled'
     elif validation_split is ValidationSplit.NONE:
         raise ValueError('This function should not have been called')
     elif validation_split is ValidationSplit.PRELIMINARY_TEST:
         return rcp_name_test
     elif validation_split is ValidationSplit.QUANTILE_WITH_BINNING:
-        return f'{percent} selected by quantile binning'
+        return f'{percent} selected by quantile binning in the historical period + {rcp_name_train}'
     else:
         raise NotImplementedError
 

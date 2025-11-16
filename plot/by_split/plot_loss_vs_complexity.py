@@ -23,7 +23,7 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
     complexity_list = emulator.complexity_list
     # Detailed plot adds one bar for PySR score
     nb_bars = len(split_name_to_x_and_y)
-    width, coordinate_list = load_bar_attributes(nb_bars=nb_bars, complexity_list=complexity_list)
+    width, coordinate_list = load_bar_attributes(nb_bars=nb_bars, x_values_list=complexity_list)
     # One bar plot for each split
     all_loss_list = []
     sorted_split_names = [split_name for split_name in SPLIT_NAMES if split_name in split_name_to_x_and_y]
@@ -62,10 +62,10 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
     ax.legend(loc='upper right')
     show_or_save_plot('loss_vs_complexity', show)
 
-def load_bar_attributes(nb_bars: int, complexity_list: list[int]):
+def load_bar_attributes(nb_bars: int, x_values_list: list[int]):
     # assert all([c % 2 == 1 for c in complexity_list]), 'A case with pair complexity must be implemented'
     width = (2 if nb_bars == 2 else 1) / (1 + nb_bars) # add one for the blank bar
-    coordinates_list = [[c  + width * (bar_id - nb_bars / 2 + 0.5) for c in complexity_list] for bar_id in range(nb_bars)]
+    coordinates_list = [[c + width * (bar_id - nb_bars / 2 + 0.5) for c in x_values_list] for bar_id in range(nb_bars)]
     return width, coordinates_list
 
 

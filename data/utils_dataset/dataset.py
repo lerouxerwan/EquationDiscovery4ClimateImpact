@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from data.utils_dataset.utils_dataset_values import load_dataset_values
-from data.utils_dataset.validation_split import ValidationSplit
+from data.utils_dataset.validation_split import ValidationSplit, get_validation_label
 from utils.utils_hash import get_hash_str
 from utils.utils_log import log_info
 
@@ -40,3 +40,7 @@ class Dataset(object):
     @property
     def hash(self) -> str:
         return get_hash_str(self.X_train, self.y_train, self.validation_mask, self.X_test, self.y_test)
+
+    @property
+    def validation_label(self):
+        return get_validation_label(self.rcp_name_train, self.rcp_name_test, self.validation_split, self.validation_size)

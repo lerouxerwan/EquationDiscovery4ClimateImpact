@@ -63,7 +63,7 @@ class OptimizationMarginal(Optimization):
 
     @property
     def _label(self):
-        return f"marginal '"
+        return f"marginal"
 
     @classmethod
     def color(cls):
