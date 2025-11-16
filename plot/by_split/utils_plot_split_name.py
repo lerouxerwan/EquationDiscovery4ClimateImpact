@@ -40,5 +40,5 @@ split_name_to_color = {
 split_name_to_hatch = {
     "train": None,
     "validation": "///",
-      "test": ".",
+      "test": "\\\\\\",
 }

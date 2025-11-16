@@ -9,6 +9,7 @@ from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import Opti
     OptimizationPipelineMarginalRandom
 from optimization.utils_optimization import get_loss
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues, get_param_name_to_values
+from plot.by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
 from plot.plot_diagnosis import plot_diagnosis
 from plot.utils_metric.metric import metric_to_str
 from utils.utils_log import log_info
@@ -40,6 +41,7 @@ def main(index2=0, index3=0):
              dataset.X_variable_names, dataset.X_units, dataset.y_units,
              dataset.X_test, dataset.y_test)
     log_info(f'{metric_to_str[top_emulator.metric_]} test for top emulator = {rmse_test}')
+    # plot_loss_vs_complexity(top_emulator, dataset, show=True)
     # plot_diagnosis(top_emulator, dataset)
 
 if __name__ == '__main__':

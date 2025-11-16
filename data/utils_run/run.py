@@ -119,6 +119,12 @@ class Run(object):
         """Series that corresponds to the top set of hyperparameters minimizing performance on validation set"""
         return self.df_cv_results.iloc[0]
 
+    @property
+    def ind_crashes(self) -> pd.Series:
+        """A pandas series with boolean, where True indicates a crash"""
+        return self.df_cv_results[RMSE_VALIDATION_COLUMN_NAME].isnull()
+
+
     @cached_property
     def df_cv_results(self) -> pd.DataFrame:
         """Dataframe with search results. it is ordered based on the validation RMSE"""
