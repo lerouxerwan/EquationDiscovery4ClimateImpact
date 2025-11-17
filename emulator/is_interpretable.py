@@ -1,15 +1,21 @@
-from typing import Any, Optional
+from typing import Any, Optional, Callable, TypeVar
 
 from sympy import symbols, Expr, expand, Symbol, Basic, Add, Pow, Function, exp, log, sqrt
 from sympy.utilities.misc import func_name
 
+T = TypeVar('T')
 
-def is_interpretable(expr: Expr) -> bool:
+def apply_func_on_sub_expressions(expr: Expr, func: Callable[[Expr], T]) -> T:
     expanded_expr = expand(expr)
     if 'Add' in [func_name(a) for a in expanded_expr.atoms(Basic)]:
-        return all([_is_interpretable(sub_expr) for sub_expr in expanded_expr.args])
+        return [func(sub_expr) for sub_expr in expanded_expr.args]
     else:
-        return _is_interpretable(expanded_expr)
+        return func(expanded_expr)
+
+def is_interpretable(expr: Expr) -> bool:
+    result = apply_func_on_sub_expressions(expr, _is_interpretable)
+    assert isinstance(result, (bool, list)), result
+    return all(result) if isinstance(result, list) else result
 
 def _is_interpretable(sub_expr: Expr):
     # Sub expression with more than one variable is deemed non-interpretable
@@ -24,7 +30,7 @@ def _is_interpretable(sub_expr: Expr):
         return True
     else:
         exponent = pow.args[1]
-        return -2 <= exponent <= 2
+        return bool(-2 <= exponent <= 2)
 
 def get_pow(sub_expr: Expr) -> Optional[Expr]:
     f_name = func_name(sub_expr)
@@ -36,10 +42,3 @@ def get_pow(sub_expr: Expr) -> Optional[Expr]:
                 return arg
     # By default, we return None
     return None
-
-if __name__ == '__main__':
-    x, y = symbols('x y')
-    expr = 1 + 2 * x + 3 * y + 4 * (x ** 2) + 5 / y
-    # print(is_interpretable(expr))
-    expr = sqrt(y)
-    print(is_interpretable(expr))

@@ -19,6 +19,7 @@ from data.utils_run.utils_run import get_output_directory, get_run_id, get_non_d
 from emulator.is_interpretable import is_interpretable
 from emulator.utils_gaussian_fit import get_X_for_gaussian_fit, get_lambda_function_list, get_loss_str_gaussian_fit, \
     compute_loss_gaussian_fit, UncertaintyInterval
+from emulator.utils_variable_names import get_variable_names, get_variable_signed_names
 from plot.by_split.utils_equation_str import replace_julia_square_by_python_power, \
     postprocessing_for_equation, get_equation_from_expr
 from plot.utils_metric.metric import Metric, compute_loss
@@ -514,9 +515,18 @@ class Emulator(PySRRegressor):
 
     @property
     def selected_variable_names(self) -> list[str]:
-        """List of variables names in the selected equation"""
-        list_of_variable_names = [list(set([str(s) for s in expr.atoms(Symbol)])) for expr in self.selected_expressions]
+        """List of variables names in the selected expression(s)
+        In the case where there is two selected expressions (mu and sigma) we still return a single list of str"""
+        list_of_variable_names = [get_variable_names(expr) for expr in self.selected_expressions]
         return list(chain.from_iterable(list_of_variable_names))
+
+    @property
+    def selected_variable_signed_names(self) -> list[str]:
+        """List of variables signed names in the selected expression(s)
+        In the case where there is two selected expressions (mu and sigma) we still return a single list of str"""
+        list_of_variable_names = [get_variable_signed_names(expr) for expr in self.selected_expressions]
+        return list(chain.from_iterable(list_of_variable_names))
+
 
     """Properties/method for every equation of the Pareto optimal set of equations"""
 
