@@ -1,6 +1,7 @@
 from typing import OrderedDict, Counter
 
 import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt
 
 from data.utils_dataset.npp_season_v1 import get_dataset
@@ -13,6 +14,7 @@ from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import Opti
     OptimizationPipelineRandom
 from optimization.utils_optimization import get_loss
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
+from utils.utils_latex import print_df_latex
 from utils.utils_log import log_info
 from utils.utils_plot import show_or_save_plot
 
@@ -86,14 +88,13 @@ def plot_frequency_variable_name(opt_type: type, validation_splits: list[Validat
     show_or_save_plot(plot_name, show)
 
 
-
-
-
-
-if __name__ == '__main__':
-    fast = False
+def main_plot_frequency_variable():
     validation_splits = [ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.MIDDLE, ValidationSplit.RANDOM][:]
     for opt_type in [OptimizationPipelineRandom, OptimizationPipelineMarginalRandom][:]:
         for signed_name in [True, False]:
             plot_frequency_variable_name(opt_type, validation_splits, show=False, signed_name=signed_name)
+
+if __name__ == '__main__':
+    main_plot_frequency_variable()
+
 

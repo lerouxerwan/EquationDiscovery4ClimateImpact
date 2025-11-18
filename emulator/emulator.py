@@ -354,6 +354,8 @@ class Emulator(PySRRegressor):
 
         # Some postprocessing on the 'equation' column
         self.equations_['equation'] = self.equations_['equation'].apply(postprocessing_for_equation)
+        if self.interpretable_mode:
+            self.equations_['equation'] = self.equations_['equation'].apply(lambda s: s.replace('*', ''))
 
         # Update 'loss' column if needed
         if self.metric_ is Metric.RMSE:

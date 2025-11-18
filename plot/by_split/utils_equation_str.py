@@ -10,6 +10,11 @@ def postprocessing_for_equation(equation: str) -> str:
         equation = equation.replace(f'_{short_name}', '_{' + short_name + '}')
     # Replace AnnSea with something more clear
     equation = equation.replace('AnnSea', 'Annual')
+    # Replace some long variable names with something shorter
+    equation = equation.replace('SeaSurfaceStericHeight', 'SSSH')
+    equation = equation.replace('MerWindStr', 'MWS')
+    equation = equation.replace('SurfacePressure', 'SP')
+    equation = equation.replace('TotalHeat', 'TH')
     # Replace square operation with latex operation
     equation = equation.replace('**2', '^2')
     # Remove the "_" after "Max", "Min" and "Mean"
@@ -57,7 +62,7 @@ def get_bold_equation(equation: str) -> str:
 
 
 def get_equation_from_expr(expr: Expr, max_num_digits=5) -> str:
-    return str(expr)
+    # return str(expr)
     numbers = expr.atoms(Number)
     for number in numbers:
         for num_digits in range(max_num_digits):
