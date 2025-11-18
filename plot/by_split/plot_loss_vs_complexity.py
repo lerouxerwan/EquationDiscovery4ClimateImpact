@@ -65,6 +65,7 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
 def load_bar_attributes(nb_bars: int, x_values_list: list[int]):
     # assert all([c % 2 == 1 for c in complexity_list]), 'A case with pair complexity must be implemented'
     width = (2 if nb_bars == 2 else 1) / (1 + nb_bars) # add one for the blank bar
+    width = 1 / (1 + nb_bars) # add one for the blank bar
     coordinates_list = [[c + width * (bar_id - nb_bars / 2 + 0.5) for c in x_values_list] for bar_id in range(nb_bars)]
     return width, coordinates_list
 

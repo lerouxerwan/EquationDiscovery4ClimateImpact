@@ -442,7 +442,7 @@ class Emulator(PySRRegressor):
 
     """Method to compute the loss"""
 
-    def compute_loss(self, X: ndarray, y: ndarray, index: int | list[int] | None) -> float:
+    def compute_loss(self, X: ndarray, y: ndarray, index: int | list[int] | None = None) -> float:
         """Compute loss for the equation at some specific index"""
         if self.metric_ is Metric.NLL:
             row = self.get_best() if index is None else self.equations_.iloc[index]

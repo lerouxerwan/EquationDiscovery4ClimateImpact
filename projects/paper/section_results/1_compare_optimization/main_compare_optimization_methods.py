@@ -1,10 +1,13 @@
 from itertools import product
 
+import numpy as np
 from matplotlib import pyplot as plt
 
 from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit, get_validation_label
+from emulator.emulator import Emulator
 from optimization.optimization_marginal.optimization_marginal import OptimizationMarginal
+from optimization.optimization_random.optimization_random_zoo import OptimizationRandom_500
 from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import OptimizationPipelineRandom, \
     OptimizationPipelineMarginalRandom
 from optimization.utils_optimization import get_loss
@@ -30,6 +33,14 @@ from utils.utils_log import log_info
 from utils.utils_plot import show_or_save_plot
 
 
+def get_baseline_rmse_test():
+    dataset = get_dataset(validation_size=0., validation_split=ValidationSplit.NONE)
+    emulator = Emulator('best', timeout_in_seconds=60 * 60, interpretable_mode=True)
+    emulator.fit(dataset.X_train, dataset.y_train, validation_mask=dataset.validation_mask,
+                 variable_names=dataset.X_variable_names, X_units=dataset.X_units, y_units=dataset.y_units)
+    return emulator.compute_loss(dataset.X_test, dataset.y_test)
+
+
 def main_compare_optimization_methods(fast: bool, show: bool):
     ax = plt.gca()
     validation_sizes = [0.2, 0.25, 0.3]
@@ -38,9 +49,11 @@ def main_compare_optimization_methods(fast: bool, show: bool):
         validation_sizes, validation_splits = validation_sizes[:2], validation_splits[:1]
     datasets = [get_dataset(validation_size=validation_size, validation_split=validation_split)
         for validation_split, validation_size in product(validation_splits, validation_sizes)]
-    opt_types = [OptimizationMarginal, OptimizationPipelineRandom, OptimizationPipelineMarginalRandom]
-    labels = ['Marginal optimization (290 samples)', 'Random optimization (500 samples)',
-              'Marginal optimization (290 samples)\nfollowed by random optimization (210 samples)']
+    opt_types = [OptimizationRandom_500, OptimizationPipelineMarginalRandom][:1]
+    labels = ['Random optimization (500 samples)',
+              'Marginal optimization (290 samples)\n'
+              'followed by a random optimization (210 samples)\n'
+              'on the 5 hyperparameters with best marginal '][:1]
     # Three bars for each dataset, we plot the first bar for all datasets, then the second barn then third bar
     width, coordinates_list = load_bar_attributes(nb_bars=len(opt_types), x_values_list=list(range(len(datasets))))
     all_loss_list = []
@@ -55,12 +68,19 @@ def main_compare_optimization_methods(fast: bool, show: bool):
         loss_list_labels = [str(round(loss, 2)) for loss in loss_list]
         ax.bar_label(barplot, labels=loss_list_labels, label_type='edge', padding=1, rotation=90)
         all_loss_list.extend(loss_list)
+
+    # Add line for the baseline with the default hyperparameter
+    x_min, x_max = ax.get_xlim()
+    y = get_baseline_rmse_test()
+    ax.hlines(y, x_min, x_max, label='Baseline with default hyperparameters and no validation set', color='k', linestyle='dashed')
+
     # Hide labels on xaxis
     ax.axes.xaxis.set_ticklabels([])
     # Set name of the dataset on the middle bar
-    ax.set_xticks(coordinates_list[1])
-    xticklabels = [dataset.validation_label.replace(' the historical', '\nthe historical') for dataset in datasets]
-    ax.set_xlabel('Validation set')
+    ax.set_xticks(np.mean(np.array(coordinates_list), axis=0))
+    # xticklabels = [dataset.validation_label.replace(' the historical', '\nthe historical') for dataset in datasets]
+    xticklabels = [dataset.validation_label.split(' in the')[0].split(' of the')[0] for dataset in datasets]
+    ax.set_xlabel('Extraction procedure to build the validation set ')
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
 
     #  Add y-axis with special scaling
@@ -70,4 +90,5 @@ def main_compare_optimization_methods(fast: bool, show: bool):
     show_or_save_plot('compare_optimization_method', show)
 
 if __name__ == '__main__':
-    main_compare_optimization_methods(False, True)
+    main_compare_optimization_methods(False, False)
+    # print(get_baseline_rmse_test())
