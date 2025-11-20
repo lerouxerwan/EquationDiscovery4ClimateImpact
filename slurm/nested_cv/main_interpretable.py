@@ -52,7 +52,17 @@ def main_random():
     #     for index3 in [0, 1, 2][:]:
     #         SbatchInterpretable([index1, index2, index3]).run()
 
+def main_bayesian():
+    for index1 in [3, 4]:
+        for index2 in [0, 1, 2][:]:
+            for index3 in [0, 1, 2][:]:
+                indices = [index1, index2, index3]
+                sbatch = SbatchInterpretable(indices, nb_cores=2, server_number=112)
+                sbatch.run()
+
+
 if __name__ == '__main__':
     # main_marginal()
     # main_random()
-    main_marginal_and_random()
+    # main_marginal_and_random()
+    main_bayesian()

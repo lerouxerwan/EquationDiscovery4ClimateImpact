@@ -2,5 +2,6 @@ from optimization.optimization_bayesian.opitmization_bayesian_factory import opt
 
 
 OptimizationBayesian_500 = optimization_bayesian_factory(500)
+OptimizationBayesian_210_5 = optimization_bayesian_factory(210, 5)
 OptimizationBayesian_200_5 = optimization_bayesian_factory(200, 5)
 OptimizationBayesian_100_5 = optimization_bayesian_factory(100, 5)

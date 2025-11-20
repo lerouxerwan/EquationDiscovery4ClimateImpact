@@ -3,10 +3,11 @@ import sys
 
 from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit
+from optimization.optimization_bayesian.optimization_bayesian_zoo import OptimizationBayesian_500
 from optimization.optimization_marginal.optimization_marginal import OptimizationMarginal
 from optimization.optimization_random.optimization_random_zoo import OptimizationRandom_200, OptimizationRandom_5
 from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import OptimizationPipelineRandom, \
-    OptimizationPipelineMarginalRandom
+    OptimizationPipelineMarginalRandom, OptimizationPipelineMarginalBayesian
 from optimization.utils_optimization import get_loss
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues, get_param_name_to_values
 from plot.by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
@@ -19,16 +20,17 @@ def main(index2=0, index3=0):
     if len(sys.argv) > 1:
         indices = [int(sys.argv[i]) for i in range(1, 4)]
         param_name_to_values = ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS
-        n_jobs = -1
+        n_jobs = 1
     else:
-        indices = [1, index2, index3]
-        n_jobs = -1
+        indices = [4, index2, index3]
+        n_jobs = 1
         param_name_to_values = ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS
 
 
     print(f'Run with indices={indices}')
     # Load dataset
-    opt_type = [OptimizationMarginal, OptimizationPipelineRandom, OptimizationPipelineMarginalRandom][indices[0]]
+    opt_type = [OptimizationMarginal, OptimizationPipelineRandom, OptimizationPipelineMarginalRandom,
+                OptimizationPipelineMarginalBayesian, OptimizationBayesian_500][indices[0]]
     validation_size = [0.2, 0.25, 0.3][indices[1]]
     validation_split = [ValidationSplit.RANDOM, ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.MIDDLE][indices[2]]
     dataset = get_dataset(validation_size=validation_size, validation_split=validation_split)
@@ -48,8 +50,3 @@ if __name__ == '__main__':
     for index2 in [0, 1, 2][:]:
         for index3 in [0, 1, 2][:]:
             main(index2, index3)
-
-    # for index2, index3 in     [(0, 1), (0, 0), (1, 0), (1, 1)]:
-
-    # for index2, index3 in  [(1, 2), (0, 2), (2, 2), (2, 0), (2, 1)]:
-    #         main(index2, index3)
