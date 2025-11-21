@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass
 from typing import Optional, Any, OrderedDict
 
@@ -40,9 +41,13 @@ def optimization_bayesian_factory(n_iter: int, nb_top_hyperparameters: Optional[
             log_info(f'Run {self.name}')
 
             def objective(trial):
-                emulator = Emulator(**self.get_params(trial, variable_names))
-                emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
-                return emulator.selected_loss_validation
+                objective_emulator = Emulator(**self.get_params(trial, variable_names))
+                try:
+                    objective_emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
+                    return objective_emulator.selected_loss_validation
+                except Exception as e:
+                    log_info(f"Exception catch : {e}")
+                    return math.inf
 
             study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=random_seed))
             study.optimize(objective, n_trials=self.n_iter, n_jobs=self.n_jobs)
