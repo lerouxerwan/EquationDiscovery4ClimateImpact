@@ -9,7 +9,7 @@ from emulator.emulator import Emulator
 from optimization.optimization_marginal.optimization_marginal import OptimizationMarginal
 from optimization.optimization_random.optimization_random_zoo import OptimizationRandom_500
 from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import OptimizationPipelineRandom, \
-    OptimizationPipelineMarginalRandom
+    OptimizationPipelineMarginalRandom, OptimizationPipelineMarginalBayesian
 from optimization.utils_optimization import get_loss
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
 from plot.by_split.plot_loss_vs_complexity import load_bar_attributes
@@ -49,11 +49,15 @@ def main_compare_optimization_methods(fast: bool, show: bool):
         validation_sizes, validation_splits = validation_sizes[:2], validation_splits[:1]
     datasets = [get_dataset(validation_size=validation_size, validation_split=validation_split)
         for validation_split, validation_size in product(validation_splits, validation_sizes)]
-    opt_types = [OptimizationRandom_500, OptimizationPipelineMarginalRandom][:1]
+    opt_types = [OptimizationRandom_500, OptimizationPipelineMarginalRandom,
+                 OptimizationPipelineMarginalBayesian][:1]
     labels = ['Random optimization (500 samples)',
               'Marginal optimization (290 samples)\n'
               'followed by a random optimization (210 samples)\n'
-              'on the 5 hyperparameters with best marginal '][:1]
+              'on the 5 hyperparameters with best marginal',
+            'Marginal optimization (290 samples)\n'
+            'followed by a bayesian optimization (210 samples)\n'
+            'on the 5 hyperparameters with best marginal'][:1]
     # Three bars for each dataset, we plot the first bar for all datasets, then the second barn then third bar
     width, coordinates_list = load_bar_attributes(nb_bars=len(opt_types), x_values_list=list(range(len(datasets))))
     all_loss_list = []

@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from emulator.emulator import Emulator
-from projects.paper.section_methodology.plot_pareto_front_example import plot_pareto_front_example
+from projects.paper.section_appendix.plot_pareto_front_example import plot_pareto_front_example
 from utils.utils_plot import show_or_save_plot
 
 n = 100

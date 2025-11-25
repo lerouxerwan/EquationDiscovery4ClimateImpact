@@ -10,7 +10,7 @@ rsync -avz -e ssh  e23lerou@sl-mee-br-101:~/shared_space/Documents/EquationDisco
 """
 
 def main_jobs_status():
-    prefixes = ['xp_int_3', 'xp_int_4'][:]
+    prefixes = ['xp_int_3', 'xp_int_4'][1:]
     for prefix in prefixes:
         job_folders = [job_folder for job_folder in os.listdir(bash_folder) if job_folder.startswith(prefix)]
         for job_folder in job_folders[:]:

@@ -1,5 +1,5 @@
 from projects.paper.section_data.main_plot_data import main_plot_data
-from projects.paper.section_methodology.main_pareto_front_example import main_example_1d
+from projects.paper.section_appendix.main_pareto_front_example import main_example_1d
 
 
 def main_paper(show: bool):
