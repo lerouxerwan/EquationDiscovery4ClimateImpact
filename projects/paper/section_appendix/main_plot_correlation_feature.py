@@ -9,7 +9,7 @@ from data.utils_dataset.validation_split import ValidationSplit
 from utils.utils_plot import show_or_save_plot
 
 
-def main_plot_correlation_matrix(show: bool = False):
+def main_plot_correlation_feature(show: bool = False):
     dataset = get_dataset(validation_size=0., validation_split=ValidationSplit.NONE)
     d = OrderedDict()
     for variable_name in sorted(dataset.X_variable_names):
@@ -42,4 +42,4 @@ def main_plot_correlation_matrix(show: bool = False):
 
 
 if __name__ == '__main__':
-    main_plot_correlation_matrix(show=False)
+    main_plot_correlation_feature(show=False)
