@@ -3,6 +3,7 @@ import warnings
 import numpy as np
 from numpy import ndarray
 from scipy.stats import pearsonr, ConstantInputWarning
+from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
 
@@ -36,6 +37,18 @@ def correlation(y_true: ndarray, y_pred: ndarray) -> float:
         res = -1
     warnings.resetwarnings()
     return res
+
+def correlation_detrended(y_true: ndarray, y_pred: ndarray) -> float:
+    return correlation(_get_residuals(y_true), _get_residuals(y_pred))
+
+def _get_residuals(y: ndarray) -> ndarray:
+    model = LinearRegression()
+    x = np.expand_dims(np.arange(len(y)), axis=1).as
+    model.fit(x, y)
+    residual = y - model.predict(x)
+    return residual
+
+    raise NotImplementedError
 
 def mean_relative_error(value_true: float, predict_value: float) -> float:
     assert isinstance(value_true, float) and isinstance(predict_value, float)

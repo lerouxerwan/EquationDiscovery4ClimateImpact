@@ -14,7 +14,7 @@ from utils.utils_latex import print_df_latex
 def plot_diagnosis_search(emulator: Emulator, dataset: Dataset, show: Optional[bool] = False):
     assert isinstance(emulator, EmulatorWithSearch)
     plot_selection_rate_features_top_equations(emulator, dataset)
-    plot_diagnosis_search_1d(emulator, dataset, show)
+    # plot_diagnosis_search_1d(emulator, dataset, show)
     plot_summary_run(emulator)
 
 def plot_summary_run(emulator: EmulatorWithSearch) -> None:

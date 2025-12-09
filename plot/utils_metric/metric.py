@@ -6,7 +6,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 from plot.utils_metric.utils_metric_function import correlation, \
     root_mean_squared_error, mean_relative_absolute_error, \
-    median_absolute_error, spread_ratio
+    median_absolute_error, spread_ratio, correlation_detrended
 
 
 class Metric(Enum):
@@ -18,6 +18,7 @@ class Metric(Enum):
     MEDAE = 5
     SPREADRATIO = 6
     NLL = 7
+    COR_DETRENDED = 8
 
 def compute_loss(y_true: ndarray, y_predicted: ndarray, metric: Metric) -> float:
     """Compute loss for a given metric, if the computation raises a ValueError we return np.nan as result"""
@@ -35,6 +36,7 @@ metric_to_function = {
     Metric.RMSE: root_mean_squared_error,
     Metric.MEDAE: median_absolute_error,
     Metric.SPREADRATIO: spread_ratio,
+    Metric.COR_DETRENDED: correlation_detrended,
 }
 
 
@@ -47,6 +49,7 @@ metric_to_label = {
     Metric.MEDAE: 'Median absolute error',
     Metric.SPREADRATIO: 'Spread ratio',
     Metric.NLL: 'Negative log likelihood',
+    Metric.COR_DETRENDED: 'Correlation detrended',
 }
 
 metric_to_str = {
@@ -58,6 +61,7 @@ metric_to_str = {
     Metric.MEDAE: 'MEDAE',
     Metric.SPREADRATIO: 'SR',
     Metric.NLL: 'NLL',
+    Metric.COR_DETRENDED: 'COR',
 }
 
 str_to_metric = {v: k for k, v in metric_to_str.items()}

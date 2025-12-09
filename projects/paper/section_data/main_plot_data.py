@@ -40,5 +40,5 @@ def main_plot_some_features(show=False):
 
 
 if __name__ == '__main__':
-    # main_plot_data(show=True)
-    main_plot_some_features(show=False)
+    main_plot_data(show=True)
+    # main_plot_some_features(show=False)

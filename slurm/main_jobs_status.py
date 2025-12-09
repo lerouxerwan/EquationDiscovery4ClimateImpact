@@ -26,5 +26,31 @@ def main_jobs_status():
             print(job_folder, f'{int(percent)}%')
 
 
+"""
+xp_int_4_1_2 49%
+xp_int_4_1_0 49%
+xp_int_4_0_1 41%
+xp_int_4_0_2 43%
+xp_int_4_2_1 39%
+xp_int_4_2_2 57%
+xp_int_4_2_0 45%
+xp_int_4_1_1 44%
+xp_int_4_0_0 44%
+"""
+
+"""
+Le 9 Decembre
+xp_int_4_1_2 91%
+xp_int_4_1_0 100%
+xp_int_4_0_1 85%
+xp_int_4_0_2 91%
+xp_int_4_2_1 100%
+xp_int_4_2_2 100%
+xp_int_4_2_0 91%
+xp_int_4_1_1 89%
+xp_int_4_0_0 87%
+"""
+
+
 if __name__ == '__main__':
     main_jobs_status()
