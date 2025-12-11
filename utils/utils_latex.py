@@ -5,6 +5,10 @@ from utils.utils_plot import show_or_save_plot
 
 
 def print_df_latex(df: pd.DataFrame, column_format=None, index: bool =False):
+    print(str_df_latex(column_format, df, index))
+
+
+def str_df_latex(df: pd.DataFrame, column_format=None, index: bool =False) -> str:
     if column_format is None:
         column_format = ''.join(['c' for _ in df.columns])
     if index:
@@ -14,7 +18,8 @@ def print_df_latex(df: pd.DataFrame, column_format=None, index: bool =False):
     s_latex = s_latex.replace(s, s + ' \\hline ')
     for s in ['\\midrule', '\\toprule']:
         s_latex = s_latex.replace(s, '\\hline \\hline ' + s)
-    print('\n\n', s_latex, '\n\n')
+    return s_latex
+
 
 def plot_df_latex(df_latex: pd.DataFrame, show: bool = False, fontsize=16):
     fix, ax = plt.subplots()

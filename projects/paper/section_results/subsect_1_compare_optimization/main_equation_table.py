@@ -14,7 +14,7 @@ from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import Opti
     OptimizationPipelineRandom
 from optimization.utils_optimization import get_loss
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
-from utils.utils_latex import print_df_latex
+from utils.utils_latex import print_df_latex, str_df_latex
 from utils.utils_log import log_info
 from utils.utils_plot import show_or_save_plot
 
@@ -35,12 +35,22 @@ def plot_equation_table(opt_type: type, validation_splits: list[ValidationSplit]
             dataset = get_dataset(validation_size=validation_size, validation_split=validation_split)
             emulator = opt.get_top_emulator(dataset.X_train, dataset.y_train, dataset.validation_mask,
                                             dataset.X_variable_names, dataset.X_units, dataset.y_units)
-            key = f'{validation_size * 100}% of {str(validation_split)}'
+            key = f'{int(validation_size * 100)}\% of {str(validation_split).replace('_', ' ')}'
             validation_name_to_equation[key] = [emulator.selected_equation]
 
     #  Third graph that correspond to an array
     df_equation = pd.DataFrame.from_dict(validation_name_to_equation).transpose()
-    print_df_latex(df_equation)
+    df_equation.reset_index(inplace=True)
+    df_equation.rename(columns={0: 'Best equation', 'index': 'Validation split'}, inplace=True)
+    # print('\\begin{center}')
+    # print('\\scriptsize')
+    equation_str = str_df_latex(df_equation, column_format='ll', index=False)
+    equation_str = equation_str.replace('& $', '& {\\tiny $')
+    equation_str = equation_str.replace('$ \\', '$ } \\')
+    print(equation_str)
+
+    # print('\\end{center}')
+
 
 if __name__ == '__main__':
     main_equation_table()
