@@ -22,17 +22,19 @@ def main(index2=0, index3=0):
         param_name_to_values = ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS
         n_jobs = 1
     else:
-        indices = [4, index2, index3]
+        indices = [0, 1, 1]
         n_jobs = 1
         param_name_to_values = ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS
 
 
     print(f'Run with indices={indices}')
     # Load dataset
-    opt_type = [OptimizationMarginal, OptimizationPipelineRandom, OptimizationPipelineMarginalRandom,
-                OptimizationPipelineMarginalBayesian, OptimizationBayesian_500][indices[0]]
+    # opt_type = [OptimizationMarginal, OptimizationPipelineRandom, OptimizationPipelineMarginalRandom,
+    #             OptimizationPipelineMarginalBayesian, OptimizationBayesian_500][indices[0]]
+    opt_type = OptimizationPipelineRandom
     validation_size = [0.2, 0.25, 0.3][indices[1]]
     validation_split = [ValidationSplit.RANDOM, ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.MIDDLE][indices[2]]
+    validation_split = [ValidationSplit.START, ValidationSplit.END][indices[2]]
     dataset = get_dataset(validation_size=validation_size, validation_split=validation_split)
 
     # Run optimization
@@ -47,6 +49,6 @@ def main(index2=0, index3=0):
     # plot_diagnosis(top_emulator, dataset)
 
 if __name__ == '__main__':
-    for index2 in [0, 1, 2][:]:
-        for index3 in [0, 1, 2][:]:
-            main(index2, index3)
+    # for index2 in [0, 1, 2][:]:
+    #     for index3 in [0, 1, 2][:]:
+    main(0, 0)

@@ -1,11 +1,16 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from slurm.sbatch import Sbatch
 
 
 @dataclass
 class SbatchInterpretable(Sbatch):
-    server_number: int = 112
+    server_numbers: Optional[list[int]] = None
+
+    def __post_init__(self):
+        if self.server_numbers is None:
+            self.server_numbers = [112]
 
     @property
     def sbatch_name(self) -> str:
@@ -17,52 +22,17 @@ class SbatchInterpretable(Sbatch):
 
     @property
     def server_name(self) -> str:
-        return f'--nodelist=sl-mee-br-{self.server_number}'
-
-
-def main_marginal():
-    index1 = 0
-    for index2 in [0, 1, 2][:]:
-        for index3 in [0, 1, 2][:]:
-            indices = [index1, index2, index3]
-            sbatch = SbatchInterpretable(indices)
-            sbatch.run()
-
-
-def main_marginal_and_random():
-    index1 = 2
-    for index2 in [0, 1, 2][:]:
-        for index3 in [0, 1, 2][:]:
-            indices = [index1, index2, index3]
-            server_number = 113
-            if index2 == 0:
-                if index3 == 0:
-                    server_number = 111
-                if index3 == 1:
-                    server_number = 112
-            sbatch = SbatchInterpretable(indices, server_number=server_number)
-            sbatch.run()
+        server_numbers_as_str = ','.join([f'sl-mee-br-{server_number}' for server_number in self.server_numbers])
+        return f'--nodelist={server_numbers_as_str}'
 
 
 def main_random():
-    index1 = 1
-    for index2, index3 in     [(0, 1), (0, 0), (1, 0), (1, 1)]:
-        SbatchInterpretable([index1, index2, index3], nb_cores=10).run()
-        # for index2 in [0, 1, 2][:]:
-    #     for index3 in [0, 1, 2][:]:
-    #         SbatchInterpretable([index1, index2, index3]).run()
+    index1 = 0
+    for index2 in [0, 1, 2][:]:
+        for index3 in [0, 1, 2][:]:
+            SbatchInterpretable([index1, index2, index3], server_numbers=[111, 112, 113], nb_cores=16).run()
 
-def main_bayesian():
-    for index1 in [3, 4]:
-        for index2 in [0, 1, 2][:]:
-            for index3 in [0, 1, 2][:]:
-                indices = [index1, index2, index3]
-                sbatch = SbatchInterpretable(indices, nb_cores=2, server_number=112)
-                sbatch.run()
 
 
 if __name__ == '__main__':
-    # main_marginal()
-    # main_random()
-    # main_marginal_and_random()
-    main_bayesian()
+    main_random()
