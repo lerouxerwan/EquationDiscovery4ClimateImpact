@@ -9,6 +9,7 @@ class SbatchInterpretable(Sbatch):
     server_numbers: Optional[list[int]] = None
 
     def __post_init__(self):
+        super().__post_init__()
         if self.server_numbers is None:
             self.server_numbers = [112]
 
