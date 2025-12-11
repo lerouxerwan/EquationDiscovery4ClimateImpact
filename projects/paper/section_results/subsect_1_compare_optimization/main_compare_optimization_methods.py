@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit, get_validation_label
 from emulator.emulator import Emulator
+from optimization.optimization_bayesian.optimization_bayesian_zoo import OptimizationBayesian_400
 from optimization.optimization_marginal.optimization_marginal import OptimizationMarginal
 from optimization.optimization_random.optimization_random_zoo import OptimizationRandom_500
 from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import OptimizationPipelineRandom, \
@@ -41,7 +42,7 @@ def get_baseline_rmse_test():
     return emulator.compute_loss(dataset.X_test, dataset.y_test)
 
 
-def main_compare_optimization_methods(fast: bool, show: bool):
+def main_compare_optimization_methods(show: bool, fast: bool = False):
     ax = plt.gca()
     validation_sizes = [0.2, 0.25, 0.3]
     validation_splits = [ValidationSplit.RANDOM, ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.MIDDLE]
@@ -49,9 +50,10 @@ def main_compare_optimization_methods(fast: bool, show: bool):
         validation_sizes, validation_splits = validation_sizes[:2], validation_splits[:1]
     datasets = [get_dataset(validation_size=validation_size, validation_split=validation_split)
         for validation_split, validation_size in product(validation_splits, validation_sizes)]
-    opt_types = [OptimizationRandom_500, OptimizationPipelineMarginalRandom,
+    opt_types = [OptimizationRandom_500, OptimizationBayesian_400, OptimizationPipelineMarginalRandom,
                  OptimizationPipelineMarginalBayesian][:1]
     labels = ['Random optimization (500 samples)',
+              'Bayesian optimization (400 samples)',
               'Marginal optimization (290 samples)\n'
               'followed by a random optimization (210 samples)\n'
               'on the 5 hyperparameters with best marginal',

@@ -19,6 +19,13 @@ from utils.utils_log import log_info
 from utils.utils_plot import show_or_save_plot
 
 
+def main_plot_frequency_variable(show: bool):
+    validation_splits = [ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.MIDDLE, ValidationSplit.RANDOM][:]
+    for opt_type in [OptimizationPipelineRandom, OptimizationPipelineMarginalRandom][:1]:
+        for signed_name in [True, False][:1]:
+            plot_frequency_variable_name(opt_type, validation_splits, show=show, signed_name=signed_name)
+
+
 def plot_frequency_variable_name(opt_type: type, validation_splits: list[ValidationSplit], show: bool,
                                  signed_name: bool = False):
     title = f'Compare split for optimization {opt_type.__name__} with signed_name = {signed_name}'
@@ -88,11 +95,6 @@ def plot_frequency_variable_name(opt_type: type, validation_splits: list[Validat
     show_or_save_plot(plot_name, show)
 
 
-def main_plot_frequency_variable():
-    validation_splits = [ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.MIDDLE, ValidationSplit.RANDOM][:]
-    for opt_type in [OptimizationPipelineRandom, OptimizationPipelineMarginalRandom][:]:
-        for signed_name in [True, False]:
-            plot_frequency_variable_name(opt_type, validation_splits, show=False, signed_name=signed_name)
 
 if __name__ == '__main__':
     main_plot_frequency_variable()

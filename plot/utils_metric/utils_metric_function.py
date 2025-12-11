@@ -43,7 +43,7 @@ def correlation_detrended(y_true: ndarray, y_pred: ndarray) -> float:
 
 def _get_residuals(y: ndarray) -> ndarray:
     model = LinearRegression()
-    x = np.expand_dims(np.arange(len(y)), axis=1).as
+    x = np.expand_dims(np.arange(len(y)), axis=1)
     model.fit(x, y)
     residual = y - model.predict(x)
     return residual

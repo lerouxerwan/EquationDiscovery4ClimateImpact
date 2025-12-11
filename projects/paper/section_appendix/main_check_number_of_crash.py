@@ -38,7 +38,7 @@ def main_check_number_of_crashes(fast: bool, show: bool):
         validation_sizes, validation_splits = validation_sizes[:2], validation_splits[:1]
     datasets = [get_dataset(validation_size=validation_size, validation_split=validation_split)
         for validation_split, validation_size in product(validation_splits, validation_sizes)]
-    opt_types = [OptimizationPipelineRandom, OptimizationPipelineMarginalRandom][:]
+    opt_types = [OptimizationPipelineRandom][:]
     opt_name_to_list_percentage_of_crash = OrderedDict()
     for opt_type in opt_types:
         opt = opt_type('best', ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS, n_jobs=1, timeout_in_seconds=60 * 60, interpretable_mode=True)

@@ -21,6 +21,11 @@ from utils.utils_plot import show_or_save_plot
 
 
 
+def main_equation_table(show: bool = False):
+    validation_splits = [ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.MIDDLE, ValidationSplit.RANDOM][:]
+    for opt_type in [OptimizationPipelineRandom][:]:
+        plot_equation_table(opt_type, validation_splits)
+
 def plot_equation_table(opt_type: type, validation_splits: list[ValidationSplit]):
     validation_name_to_equation = OrderedDict()
     for validation_size in [0.2, 0.25, 0.3][:]:
@@ -36,11 +41,6 @@ def plot_equation_table(opt_type: type, validation_splits: list[ValidationSplit]
     #  Third graph that correspond to an array
     df_equation = pd.DataFrame.from_dict(validation_name_to_equation).transpose()
     print_df_latex(df_equation)
-
-def main_equation_table():
-    validation_splits = [ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.MIDDLE, ValidationSplit.RANDOM][:]
-    for opt_type in [OptimizationPipelineRandom, OptimizationPipelineMarginalRandom][:1]:
-        plot_equation_table(opt_type, validation_splits)
 
 if __name__ == '__main__':
     main_equation_table()
