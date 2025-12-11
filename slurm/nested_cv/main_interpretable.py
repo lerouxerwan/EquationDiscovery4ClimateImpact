@@ -30,7 +30,7 @@ class SbatchInterpretable(Sbatch):
 def main_random():
     for index2, server_number in zip([0, 1, 2], [111, 112, 113]):
         for index3 in [0, 1][:]:
-            SbatchInterpretable([0, 0, index3], server_numbers=[server_number], nb_cores=20).run()
+            SbatchInterpretable([0, index2, index3], server_numbers=[server_number], nb_cores=16).run()
 
 
 if __name__ == '__main__':
