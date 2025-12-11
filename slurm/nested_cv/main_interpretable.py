@@ -28,11 +28,9 @@ class SbatchInterpretable(Sbatch):
 
 
 def main_random():
-    index1 = 0
-    for index2 in [0, 1, 2][:]:
-        for index3 in [0, 1, 2][:]:
-            SbatchInterpretable([index1, index2, index3], server_numbers=[111, 112, 113], nb_cores=16).run()
-
+    for index2, server_number in zip([0, 1, 2], [111, 112, 113]):
+        for index3 in [0, 1][:]:
+            SbatchInterpretable([0, 0, index3], server_numbers=[server_number], nb_cores=20).run()
 
 
 if __name__ == '__main__':
