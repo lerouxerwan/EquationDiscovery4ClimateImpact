@@ -89,12 +89,12 @@ def main_compare_optimization_methods(show: bool, fast: bool = False):
     ax.set_xlabel('Extraction procedure to build the validation set ')
     ax.set_xticklabels(xticklabels, rotation=45, ha='right', rotation_mode='anchor')
 
-    #  Add y-axis with special scaling
-    set_log_y_axis(ax, all_loss_list, datasets[0].target_label, Metric.RMSE)
     #  General settings for the plot
     ax.legend(loc='upper right')
+    ax.set_ylim(0, 3)
+    ax.set_ylabel(f'Root mean square error\non the test set RCP4.5 (gC year$^{-1}$)')
     show_or_save_plot('compare_optimization_method', show)
 
 if __name__ == '__main__':
-    main_compare_optimization_methods(False, False)
+    main_compare_optimization_methods(True, False)
     # print(get_baseline_rmse_test())

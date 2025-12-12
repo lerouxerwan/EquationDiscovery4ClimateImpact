@@ -4,6 +4,8 @@ from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import Opti
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
 from plot.by_rcp.plot_climato_side_by_side import plot_climato_side_by_side
 from plot.by_split.plot_scatter import plot_scatter_side_by_side
+from plot.by_split.plot_time_series import plot_time_series
+from plot.by_split.plot_time_series_side_by_side import plot_time_series_side_by_side
 from plot.plot_diagnosis import plot_diagnosis
 
 
@@ -14,7 +16,8 @@ def main_diagnosis_best_equation(show: bool = False):
     top_emulator, _  = opt.run(dataset.X_train, dataset.y_train, dataset.validation_mask,
              dataset.X_variable_names, dataset.X_units, dataset.y_units)
     plot_scatter_side_by_side(top_emulator, dataset, show=show)
-    plot_climato_side_by_side(top_emulator, dataset, show=show)
+    plot_time_series_side_by_side(top_emulator, dataset, show=show)
+    # plot_climato_side_by_side(top_emulator, dataset, show=show)
 
 if __name__ == '__main__':
-    main_diagnosis_best_equation()
+    main_diagnosis_best_equation(show=False)
