@@ -14,6 +14,7 @@ from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import Opti
     OptimizationPipelineRandom
 from optimization.utils_optimization import get_loss
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
+from projects.paper.utils_paper import validation_splits
 from utils.utils_latex import print_df_latex, str_df_latex
 from utils.utils_log import log_info
 from utils.utils_plot import show_or_save_plot
@@ -22,11 +23,10 @@ from utils.utils_plot import show_or_save_plot
 
 
 def main_equation_table(show: bool = False):
-    validation_splits = [ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.MIDDLE, ValidationSplit.RANDOM][:]
     for opt_type in [OptimizationPipelineRandom][:]:
-        plot_equation_table(opt_type, validation_splits)
+        plot_equation_table(opt_type)
 
-def plot_equation_table(opt_type: type, validation_splits: list[ValidationSplit]):
+def plot_equation_table(opt_type: type):
     validation_name_to_equation = OrderedDict()
     for validation_size in [0.2, 0.25, 0.3][:]:
         opt = opt_type('best', ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS, n_jobs=-1, timeout_in_seconds=60 * 60,

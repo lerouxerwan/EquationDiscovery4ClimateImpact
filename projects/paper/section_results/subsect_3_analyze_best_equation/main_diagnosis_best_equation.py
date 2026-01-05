@@ -2,11 +2,8 @@ from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import OptimizationPipelineRandom
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
-from plot.by_rcp.plot_climato_side_by_side import plot_climato_side_by_side
 from plot.by_split.plot_scatter import plot_scatter_side_by_side
-from plot.by_split.plot_time_series import plot_time_series
 from plot.by_split.plot_time_series_side_by_side import plot_time_series_side_by_side
-from plot.plot_diagnosis import plot_diagnosis
 
 
 def main_diagnosis_best_equation(show: bool = False):

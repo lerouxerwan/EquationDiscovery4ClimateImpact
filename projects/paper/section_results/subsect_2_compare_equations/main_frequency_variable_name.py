@@ -14,20 +14,14 @@ from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import Opti
     OptimizationPipelineRandom
 from optimization.utils_optimization import get_loss
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
+from projects.paper.utils_paper import validation_sizes, opt_type, validation_splits
 from utils.utils_latex import print_df_latex
 from utils.utils_log import log_info
 from utils.utils_plot import show_or_save_plot
 
 
-def main_plot_frequency_variable(show: bool):
-    validation_splits = [ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.MIDDLE, ValidationSplit.RANDOM][:]
-    for opt_type in [OptimizationPipelineRandom, OptimizationPipelineMarginalRandom][:1]:
-        for signed_name in [True, False][:1]:
-            plot_frequency_variable_name(opt_type, validation_splits, show=show, signed_name=signed_name)
-
-
-def plot_frequency_variable_name(opt_type: type, validation_splits: list[ValidationSplit], show: bool,
-                                 signed_name: bool = False):
+def main_plot_frequency_variable(show: bool = False,
+                                 signed_name: bool = True):
     title = f'Compare split for optimization {opt_type.__name__} with signed_name = {signed_name}'
     counter_variable_names = Counter()
     nb_loop = 0
@@ -36,7 +30,7 @@ def plot_frequency_variable_name(opt_type: type, validation_splits: list[Validat
     ax = plt.gca()
     validation_split_to_variable_names_for_selected_equation = OrderedDict()
     validation_split_to_min_RMSE = {validation_split: np.inf for validation_split in validation_splits}
-    for validation_size, color in zip([0.2, 0.25, 0.3], ['yellow', 'orange', 'red']):
+    for validation_size, color in zip(validation_sizes, ['yellow', 'orange', 'red']):
         opt = opt_type('best', ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS, n_jobs=-1, timeout_in_seconds=60 * 60, interpretable_mode=True)
         validation_split_to_rmse_test_for_selected_equation = OrderedDict()
         for validation_split in validation_splits:
