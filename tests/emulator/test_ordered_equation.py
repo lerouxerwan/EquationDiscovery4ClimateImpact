@@ -1,7 +1,7 @@
 import numpy as np
 from sympy import symbols
 
-from emulator.equation import OrderedEquation
+from emulator.ordered_equation import OrderedEquation
 
 
 def test_ordered_equation():

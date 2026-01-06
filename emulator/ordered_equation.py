@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 
 import numpy as np
-from sympy import Expr, expand, symbols
+from sympy import Expr, expand
+
+from emulator.utils_variable_names import get_variable_signed_names_for_term
 
 
 @dataclass
 class OrderedEquation(object):
-    """Equation where terms are ordered by their relative importance"""
+    """Equation where terms are ordered by their relative importance for the data X"""
     expr: Expr
     X: np.ndarray
     variable_names: list[str]
@@ -39,6 +41,15 @@ class OrderedEquation(object):
     @property
     def sorted_weight_and_term(self) -> list[tuple[float, Expr]]:
         return list(sorted(zip(self.average_weights, self.terms), reverse=True))
+
+    @property
+    def variable_signed_name_to_weight(self) -> dict[str, float]:
+        variable_signed_name_to_weight = dict()
+        for weight, term in self.sorted_weight_and_term:
+            variable_signed_names = get_variable_signed_names_for_term(term)
+            if len(variable_signed_names) == 1:
+                variable_signed_name_to_weight[variable_signed_names[0]] = weight
+        return variable_signed_name_to_weight
 
     @property
     def average_weights(self) -> list[float]:

@@ -15,7 +15,7 @@ def get_variable_signed_names(expr: Expr) -> list[str]:
     if not is_interpretable(expr):
         raise NotImplementedError
     # Apply function '_get_variable_signed_names' on sub expressions
-    variable_signed_names = apply_func_on_sub_expressions(expr, _get_variable_signed_names)
+    variable_signed_names = apply_func_on_sub_expressions(expr, get_variable_signed_names_for_term)
     assert isinstance(variable_signed_names, list)
     if len(variable_signed_names) == 0:
         return []
@@ -26,14 +26,14 @@ def get_variable_signed_names(expr: Expr) -> list[str]:
         else:
             return list(chain.from_iterable(variable_signed_names))
 
-def _get_variable_signed_names(sub_expr: Expr) -> list[str]:
-    variable_names = get_variable_names(sub_expr)
+def get_variable_signed_names_for_term(term: Expr) -> list[str]:
+    variable_names = get_variable_names(term)
     if len(variable_names) == 0:
         return []
     else:
         assert len(variable_names) == 1
         variable_name = variable_names[0]
-        decomposition = list(postorder_traversal(sub_expr))
+        decomposition = list(postorder_traversal(term))
         sign_list = [get_sign(node) for node in decomposition]
         sign = reduce(operator.mul, sign_list, 1)
         signed_variable_name = ('+' if sign > 0 else '-') + variable_name
