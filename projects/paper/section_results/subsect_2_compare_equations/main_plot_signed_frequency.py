@@ -3,7 +3,7 @@ from typing import OrderedDict, Counter
 import matplotlib
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt, patches
 from matplotlib.cm import ScalarMappable
 from matplotlib.colors import LinearSegmentedColormap
 
@@ -56,46 +56,51 @@ def main_plot_signed_frequency(show: bool = False):
     assert all([0 <= weight <= 1 for weight in sorted_average_weight])
     cmap_original = plt.get_cmap('Greens')
     cmap_new = LinearSegmentedColormap.from_list(
-        'Greens_up',
-        cmap_original(np.linspace(0.2, 1, 256))
-    )
+        'Greens_centered',
+        cmap_original(np.linspace(0.2, 0.8, 256))
+    ) # remove extremum colored values
     colors = cmap_new(sorted_average_weight)
     sm = ScalarMappable(cmap=cmap_new, norm=plt.Normalize(vmin=0, vmax=1))
     bars = ax.bar(x_values, y_values, color=colors)
     ax.set_xlabel('Variable names')
-    ax.set_ylabel('Frequency (%)')
     ax.set_xticks(x_values)
+    ax.set_ylabel('Contribution to the predicted value')
+    ymin, ymax = ax.get_ylim()
+    y_tick = max(-ymin, ymax) / 2
+    ax.set_yticks([-y_tick, y_tick])
+    ax.set_yticklabels(['negative', 'positive'], rotation=90, rotation_mode='anchor', ha='center')
     labels = [label.replace('AnnSea', 'Annual') for label in labels]
     labels = ['$' + label.replace('_', '_{') + '}$' for label in labels]
     ax.set_xticklabels(labels, rotation=45, ha='right', rotation_mode='anchor')
     plot_name = 'main_signed_frequency'
 
-
-    # Add personalized legend for the size of the rectangle
-    common_width = bars[0].get_width()
-    sorted_heights = sorted(list(set([abs(bar.get_height()) for bar in bars])))
-    # print(ax._get_aspect_ratio())
-    # legend_rectangles = [mpatches.Rectangle((sorted_heights[-1] - height, 0), height, common_width) for height in sorted_heights]
-    # ax.legend(
-    #     handles=legend_rectangles,
-    #     labels=[f'{int(height)}%' for height in sorted_heights],
-    #     loc='lower right',
-    # )
+    # Ajout des labels sur chaque barre
+    for variable_signed_name, bar in zip(sorted_variable_signed_name, bars):
+        text = f'{variable_signed_name_to_number[variable_signed_name]}/{nb_loop}'
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,  # Position x (centre de la barre)
+            bar.get_height() / 2,  # Position y (hauteur de la barre)
+            text,  # Texte à afficher (valeur de la barre)
+            ha='center',  # Alignement horizontal
+            va='center',  # Alignement vertical
+            fontsize=8
+        )
 
     # Add horizontal line at 0
     x_min, x_max = ax.get_xlim()
     ax.hlines(0, x_min, x_max, color='k')
 
     # Add colorbar
-    fig.colorbar(sm, ax=ax, orientation='vertical', fraction=0.046, pad=0.04)
+    cbar = fig.colorbar(sm, ax=ax, orientation='vertical', fraction=0.046, pad=0.04)
+    cbar.ax.get_yaxis().labelpad = 15
+    cbar.ax.set_ylabel('Average relative contribution (%)', rotation=270)
+    cbar.set_ticks([0, 0.5, 1])
+    cbar.set_ticklabels(['0%', '50%', '100%'])
 
     show_or_save_plot(plot_name, show)
 
 
 if __name__ == '__main__':
-    # x =[0.385995396446103, 0.354459224712141, 0.337806656992642, 0.217546569145686, 0.00228250945259560, 0.00127876649658226, 0.00113468731616975, 0.000340485790682647, 0.000204625950327110, 0.00537614070678762, 0.00402031528038180, 0.00276905755093206]
-    # colors = plt.get_cmap('Greens')(x)
-    # print(colors)
-    main_plot_signed_frequency(show=True)
+    main_plot_signed_frequency(show=False)
 
 

@@ -39,7 +39,7 @@ def main_compare_optimization_methods(show: bool):
     # print(y_validation)
 
 
-    barplot = ax.bar(coordinates_list[0], loss_list, width=width, label=opt_label, color=opt.color())
+    barplot = ax.bar(coordinates_list[0], loss_list, width=width, label=opt_label, facecolor="white", edgecolor='black')
     loss_list_labels = [str(round(loss, 2)) for loss in loss_list]
     ax.bar_label(barplot, labels=loss_list_labels, label_type='edge', padding=1, rotation=90)
 
