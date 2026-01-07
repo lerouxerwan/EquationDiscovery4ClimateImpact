@@ -62,7 +62,7 @@ def main_plot_signed_frequency(show: bool = False):
     colors = cmap_new(sorted_average_weight)
     sm = ScalarMappable(cmap=cmap_new, norm=plt.Normalize(vmin=0, vmax=1))
     bars = ax.bar(x_values, y_values, color=colors)
-    ax.set_xlabel('Variable names')
+    ax.set_xlabel('Climate indicators')
     ax.set_xticks(x_values)
     ax.set_ylabel('Contribution to the predicted value')
     ymin, ymax = ax.get_ylim()
@@ -70,21 +70,14 @@ def main_plot_signed_frequency(show: bool = False):
     ax.set_yticks([-y_tick, y_tick])
     ax.set_yticklabels(['negative', 'positive'], rotation=90, rotation_mode='anchor', ha='center')
     labels = [label.replace('AnnSea', 'Annual') for label in labels]
-    labels = ['$' + label.replace('_', '_{') + '}$' for label in labels]
+    labels = ['$' + label.replace('_', '_{')[1:] + '}$' for label in labels]
     ax.set_xticklabels(labels, rotation=45, ha='right', rotation_mode='anchor')
     plot_name = 'main_signed_frequency'
 
     # Ajout des labels sur chaque barre
     for variable_signed_name, bar in zip(sorted_variable_signed_name, bars):
         text = f'{variable_signed_name_to_number[variable_signed_name]}/{nb_loop}'
-        ax.text(
-            bar.get_x() + bar.get_width() / 2,  # Position x (centre de la barre)
-            bar.get_height() / 2,  # Position y (hauteur de la barre)
-            text,  # Texte à afficher (valeur de la barre)
-            ha='center',  # Alignement horizontal
-            va='center',  # Alignement vertical
-            fontsize=8
-        )
+        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() / 2, text, ha='center', va='center', fontsize=8)
 
     # Add horizontal line at 0
     x_min, x_max = ax.get_xlim()
@@ -92,10 +85,12 @@ def main_plot_signed_frequency(show: bool = False):
 
     # Add colorbar
     cbar = fig.colorbar(sm, ax=ax, orientation='vertical', fraction=0.046, pad=0.04)
-    cbar.ax.get_yaxis().labelpad = 15
-    cbar.ax.set_ylabel('Average relative contribution (%)', rotation=270)
-    cbar.set_ticks([0, 0.5, 1])
-    cbar.set_ticklabels(['0%', '50%', '100%'])
+    cbar.ax.get_yaxis().labelpad = 20
+    cbar.ax.set_ylabel(ylabel=
+                       'Average relative contribution for the\n'
+                       'historical period and scenario RCP8.5 (%)', rotation=270)
+    cbar.set_ticks([0, 0.25, 0.5, 0.75, 1])
+    cbar.set_ticklabels(['0%', '25%', '50%', '75%', '100%'])
 
     show_or_save_plot(plot_name, show)
 
