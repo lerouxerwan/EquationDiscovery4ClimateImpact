@@ -16,12 +16,12 @@ period_to_label = dict(zip(periods, period_labels))
 
 
 def main_plot_seasonal_repartition_three_pies(show: bool = True):
-    fig, axs = get_subplots(1, 3)
-    for ax, period in zip(axs, periods):
-        plot_seasonal_repartition_one_pie(ax, period)
+    fig, axs = get_subplots(1, 3, wspace=-0.5, hspace=0)
+    for j, (ax, period) in enumerate(zip(axs, periods)):
+        plot_seasonal_repartition_one_pie(ax, period, j)
     show_or_save_plot('seasonal_repartition', show)
 
-def plot_seasonal_repartition_one_pie(ax: Axes, period: str):
+def plot_seasonal_repartition_one_pie(ax: Axes, period: str, j: int):
     filepath = op.join(DATA_PATH, folder, f'{folder}_GOL4_allDepths_{period}_mean.csv')
     labels = ['winter', 'spring', 'summer', 'autumn']
     abbreviations = ['DJF', 'MAM', 'JJA', 'SON']
@@ -32,8 +32,10 @@ def plot_seasonal_repartition_one_pie(ax: Axes, period: str):
     values = df.sum().values
     values *= 100 / sum(values)
     ax.set_title(period_to_label[period])
+    ax.pie(values, labels=None, colors=colors, autopct='%1.1f%%')
+    if j == 1:
+        ax.legend(labels, ncol=4, loc='lower center')
 
-    ax.pie(values, labels=labels, colors=colors, autopct='%1.1f%%')
 
 if __name__ == '__main__':
     main_plot_seasonal_repartition_three_pies(show=False)
