@@ -26,7 +26,7 @@ def plot_scatter(emulator: Emulator, dataset: Dataset, show: Optional[bool] = Fa
 
 
 def _plot_scatter(ax, dataset, emulator, fig, split_name, X, y, y_predicted, years, ymax, ymin,
-                  add_colorbar: bool = True, cmap = None, vmin_and_vmax = None):
+                  add_colorbar: bool = True, cmap = None, vmin_and_vmax = None, letter=None):
     if cmap is None:
         cmap = matplotlib.cm.viridis
     c = years
@@ -76,6 +76,10 @@ def _plot_scatter(ax, dataset, emulator, fig, split_name, X, y, y_predicted, yea
     ax.set_xlim((ymin, ymax))
     ax.set_ylim((ymin, ymax))
 
+    if letter is not None:
+        assert isinstance(letter, str)
+        ax.text(0.8, 0.92, f'({letter})', weight="bold", fontsize=10, transform=ax.transAxes)
+
 
 def compute_delta(y_historical, y_future) -> float:
     mean_historical, mean_future = np.mean(y_historical), np.mean(y_future)
@@ -121,11 +125,11 @@ def plot_scatter_side_by_side(emulator: Emulator, dataset: Dataset, show: Option
 
     # Plot first axis
     _plot_scatter(axs[0], dataset, emulator, fig, "Train + Validation", X, y, y_predicted, years, ymax, ymin,
-                  add_colorbar=False, cmap=cmap, vmin_and_vmax=vmin_and_vmax)
+                  add_colorbar=False, cmap=cmap, vmin_and_vmax=vmin_and_vmax, letter='a')
 
     # Plot second axis
     _plot_scatter(axs[1], dataset, emulator, fig, 'test', X_test, y_test, y_predicted_test, years_test, ymax, ymin,
-                  add_colorbar=False, cmap=cmap, vmin_and_vmax=vmin_and_vmax)
+                  add_colorbar=False, cmap=cmap, vmin_and_vmax=vmin_and_vmax, letter='b')
 
     norm = matplotlib.colors.BoundaryNorm(all_years, cmap.N)
     fig.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=axs, orientation='horizontal', label='Years',

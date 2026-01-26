@@ -28,7 +28,9 @@ def plot_time_series_side_by_side(emulator: Emulator, dataset: Dataset, show: Op
     }
     rcp_name_to_list_of_years_and_y_and_color_and_label = load_rcp_name_to_list_of_years_and_y_and_color_and_label(dataset.y_train, dataset.y_test, dataset.years_train, dataset.years_test, dataset.rcp_name_train, dataset.rcp_name_test, dataset.nb_historical_years)
 
-    for ax, (split_name, rcp_name) in zip(axs, split_name_to_rcp_name.items()):
+
+    for j, (ax, (split_name, rcp_name)) in enumerate(zip(axs, split_name_to_rcp_name.items())):
+
         list_of_years_and_y_and_color_and_label = rcp_name_to_list_of_years_and_y_and_color_and_label[rcp_name]
         if rcp_name == 'RCP45':
             list_of_years_and_y_and_color_and_label = list_of_years_and_y_and_color_and_label[1:]
@@ -87,6 +89,8 @@ def plot_time_series_side_by_side(emulator: Emulator, dataset: Dataset, show: Op
 
         ]
         ax.legend(legend_handles, legend_labels, loc='upper right', ncol=2)
+        letter = 'ab'[j]
+        ax.text(0.1, 0.92, f'({letter})', weight="bold", fontsize=10, transform=ax.transAxes)
         #  Add a second legend for the color only if needed
     add_equation(emulator.selected_equation)
 
