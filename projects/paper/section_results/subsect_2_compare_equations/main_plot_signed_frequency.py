@@ -53,6 +53,7 @@ def main_plot_signed_frequency(show: bool = False):
     x_values = np.arange(len(labels))
     y_values = [variable_signed_name_to_signed_percentage[variable_signed_name] for variable_signed_name in sorted_variable_signed_name]
     sorted_average_weight = [float(np.mean(variable_signed_name_to_weights[variable_signed_name])) for variable_signed_name in sorted_variable_signed_name]
+    print('sorted average weight', sorted_average_weight)
     assert all([0 <= weight <= 1 for weight in sorted_average_weight])
     cmap_original = plt.get_cmap('Greens')
     cmap_new = LinearSegmentedColormap.from_list(
