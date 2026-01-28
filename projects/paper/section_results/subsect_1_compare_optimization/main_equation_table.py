@@ -15,6 +15,7 @@ from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import Opti
 from optimization.utils_optimization import get_loss
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
 from projects.paper.utils_paper import validation_splits
+from utils.utils_date import get_season_short_names
 from utils.utils_latex import print_df_latex, str_df_latex
 from utils.utils_log import log_info
 from utils.utils_plot import show_or_save_plot
@@ -42,12 +43,25 @@ def plot_equation_table(opt_type: type):
     df_equation = pd.DataFrame.from_dict(validation_name_to_equation).transpose()
     df_equation.reset_index(inplace=True)
     df_equation.rename(columns={0: 'Best equation', 'index': 'Validation split'}, inplace=True)
-    # print('\\begin{center}')
-    # print('\\scriptsize')
+
     equation_str = str_df_latex(df_equation, column_format='ll', index=False)
-    equation_str = equation_str.replace('& $', '& {\\tiny $')
+    equation_str = equation_str.replace('& $', '& {\\small $')
+    equation_str = equation_str.replace('.0', '')
     equation_str = equation_str.replace('$ \\', '$ } \\')
+    # Add textrm everywhere
+    for X_variable_name in dataset.X_variable_names:
+        variable_name = X_variable_name.split('_')[0]
+        old = f'{variable_name}_'
+        new = '\\textrm{' + variable_name + '}_'
+        equation_str = equation_str.replace(old, new)
+    for season_short_name in get_season_short_names() + ['Annual']:
+        old = '_{' + season_short_name + '}'
+        new = '_{\\textrm{' + season_short_name + '}}'
+        equation_str = equation_str.replace(old, new)
+
     print(equation_str)
+
+
 
     # print('\\end{center}')
 
