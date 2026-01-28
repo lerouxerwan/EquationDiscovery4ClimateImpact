@@ -8,10 +8,10 @@ def get_true_label_and_predicted_label(label: str, remove_units=False) -> list[s
     return [get_label(f"{prefix} of\n{uncapitalize(label)}", remove_units) for prefix in get_true_and_predicted_prefix()]
 
 def get_true_and_predicted_prefix():
-    return "Ground truth values", "Predicted values"
+    return "Reference values", "Predicted values"
 
 def get_true_and_predicted_label():
-    return "Ground truth", "Prediction"
+    return "Reference", "Prediction"
 
 def uncapitalize(s):
     return s[:1].lower() + s[1:]
@@ -27,5 +27,5 @@ def get_unit(label: str) -> str:
 
 
 def add_equation(equation: str):
-    plt.suptitle(f'Equation: {equation}')
+    plt.suptitle(f'Diagnosis of the equation: {equation}')
 

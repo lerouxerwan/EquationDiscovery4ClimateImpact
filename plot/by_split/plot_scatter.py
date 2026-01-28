@@ -27,6 +27,7 @@ def plot_scatter(emulator: Emulator, dataset: Dataset, show: Optional[bool] = Fa
 
 def _plot_scatter(ax, dataset, emulator, fig, split_name, X, y, y_predicted, years, ymax, ymin,
                   add_colorbar: bool = True, cmap = None, vmin_and_vmax = None, letter=None):
+    print(f"Count values below 26 for {split_name}:", sum([v <= 26 for v in y]))
     if cmap is None:
         cmap = matplotlib.cm.viridis
     c = years
@@ -49,7 +50,7 @@ def _plot_scatter(ax, dataset, emulator, fig, split_name, X, y, y_predicted, yea
     ax.grid()
     ax.plot([ymin, ymax], [ymin, ymax], color='grey', linestyle='--')
     # Annotate equation and metric box
-    add_equation(emulator.selected_equation)
+    # add_equation(emulator.selected_equation)
     add_metric_box(ax, y, y_predicted, dataset.target_label, split_name)
     # Add second metric box
     nb_years = dataset.nb_historical_years

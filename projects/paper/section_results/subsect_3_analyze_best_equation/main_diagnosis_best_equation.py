@@ -3,6 +3,7 @@ from data.utils_dataset.validation_split import ValidationSplit
 from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import OptimizationPipelineRandom
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
 from plot.by_split.plot_scatter import plot_scatter_side_by_side
+from plot.by_split.plot_scatter_and_time_series import plot_scatter_and_time_series
 from plot.by_split.plot_time_series_side_by_side import plot_time_series_side_by_side
 
 
@@ -14,6 +15,7 @@ def main_diagnosis_best_equation(show: bool = False):
              dataset.X_variable_names, dataset.X_units, dataset.y_units)
     plot_scatter_side_by_side(top_emulator, dataset, show=show)
     plot_time_series_side_by_side(top_emulator, dataset, show=show)
+    plot_scatter_and_time_series(top_emulator, dataset, show=show)
     # plot_climato_side_by_side(top_emulator, dataset, show=show)
 
 if __name__ == '__main__':
