@@ -1,19 +1,17 @@
-from typing import Optional, Any
+from typing import Optional
 
 import matplotlib
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib.cm import ScalarMappable
 
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from emulator.emulator import Emulator
 from plot.by_rcp.utils_plot_by_rcp import load_rcp_name_to_list_of_years_and_y_and_color_and_label
 from plot.by_split.plot_scatter import _plot_scatter
-from plot.utils_metric.utlis_metric_box import add_metric_box
 from plot.by_split.utils_plot_by_split import load_split_name_to_X_and_y_and_y_predicted_and_years, get_ymin_and_ymax
-from plot.by_split.utlis_plot_selected_equation import get_true_label_and_predicted_label, add_equation, \
-    get_true_and_predicted_label, get_label
+from plot.by_split.utlis_plot_selected_equation import get_true_and_predicted_label, get_label
+from plot.utils_metric.utlis_metric_box import add_metric_box
 from utils.utils_plot import show_or_save_plot, get_subplots
 
 
@@ -21,6 +19,7 @@ def plot_scatter_and_time_series(emulator: Emulator, dataset: Dataset, show: Opt
     """Plot a 2x2 plot"""
 
     fig, all_axs = get_subplots(2, 2)
+
 
 
 
@@ -160,6 +159,8 @@ def plot_scatter_and_time_series(emulator: Emulator, dataset: Dataset, show: Opt
     fig.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=axs, orientation='horizontal', label='Years',
                  pad=-0.4, fraction=0.065)
 
+    print(emulator.selected_equation)
+    all_axs[0, 0].set_title(f"Diagnosis of the linear equation: {emulator.selected_equation}", loc='left', pad=20)
     show_or_save_plot(f'plot_scatter_and_time_series', show)
 
 

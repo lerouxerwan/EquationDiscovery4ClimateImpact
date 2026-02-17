@@ -12,9 +12,9 @@ def main_diagnosis_baseline_equation_with_four_selection_features(show: bool = F
     variable_indexes = [dataset.X_variable_names.index(variable_name) for variable_name in variable_names]
     emulator = EmulatorLinear(variable_names=variable_names, features_indexes=variable_indexes)
     emulator.fit(dataset.X_train, dataset.y_train)
-    print(emulator.selected_expr)
-    plot_scatter_side_by_side(emulator, dataset, show=show)
-    plot_time_series_side_by_side(emulator, dataset, show=show)
+    # print(emulator.selected_expr)
+    # plot_scatter_side_by_side(emulator, dataset, show=show)
+    # plot_time_series_side_by_side(emulator, dataset, show=show)
     plot_scatter_and_time_series(emulator, dataset, show=show)
     # plot_climato_side_by_side(top_emulator, dataset, show=show)
 

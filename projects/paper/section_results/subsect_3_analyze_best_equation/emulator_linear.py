@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from sympy import Expr, symbols, Symbol
 
-from plot.by_split.utils_equation_str import get_equation_from_expr
+from plot.by_split.utils_equation_str import get_equation_from_expr, postprocessing_for_equation
 
 
 class EmulatorLinear(LinearRegression):
@@ -44,8 +44,10 @@ class EmulatorLinear(LinearRegression):
 
     @property
     def selected_equation(self):
-        return get_equation_from_expr(self.selected_expr)
-
+        selected_equation = postprocessing_for_equation(get_equation_from_expr(self.selected_expr))
+        assert selected_equation == '$6.0*SSS_{MAM} - 0.e-1*SST_{DJF} - 1.0*SST_{MAM} + 0.1*Shortwave_{DJF} + 106.0$'
+        # 6.2398322706731*SSS_MAM - 0.0855016821575876*SST_DJF - 1.02756017634541*SST_MAM + 0.111858974953818*Shortwave_DJF + 106.367959478915
+        return '$6.2*SSS_{MAM} - 0.086*SST_{DJF} - 1.03*SST_{MAM} + 0.11*Shortwave_{DJF} + 106$'
 
     @property
     def lambda_function(self) -> Callable:
