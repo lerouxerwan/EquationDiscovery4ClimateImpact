@@ -1,5 +1,6 @@
 from itertools import product
 
+import numpy as np
 from sympy import symbols, parse_expr, Expr
 
 from data.utils_dataset.npp_season_v1 import get_dataset
@@ -21,8 +22,10 @@ def main_check_equations(show: bool):
                                                  dataset.X_variable_names, dataset.X_units, dataset.y_units)
         assert isinstance(emulator, EmulatorWithSearch)
         count_linear = 0
+        complexity_list_for_non_linear_equations = []
+        complexity_list_for_linear_equations = []
         df = emulator.run_.df_cv_results
-        for equation, variable_names in zip(df['expr'], df['variable_names']):
+        for equation, variable_names, complexity in zip(df['expr'], df['variable_names'], df['complexity']):
             if (len(variable_names) == 1) and (variable_names[0] == ''):
                 pass
             else:
@@ -34,7 +37,17 @@ def main_check_equations(show: bool):
             if is_interpretable(expr):
                 if is_linear(expr):
                     count_linear += 1
+                    complexity_list_for_linear_equations.append(complexity)
+                else:
+                    print(expr)
+                    complexity_list_for_non_linear_equations.append(complexity)
+
         print('Ratio of linear equations', 100 * count_linear / len(df))
+        print('Average complexity for non linear equations:', np.mean(complexity_list_for_non_linear_equations))
+        print('Average complexity for linear equations:', np.mean(complexity_list_for_linear_equations))
+
+        """une idée plus avancée serait de verifier qu'il y a bien au moins une equation 
+        non linear pour chaque pareto front quand la complexité augmente"""
 
 if __name__ == '__main__':
     main_check_equations(False)
