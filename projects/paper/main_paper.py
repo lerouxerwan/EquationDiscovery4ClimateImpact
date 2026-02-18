@@ -6,7 +6,7 @@ from projects.paper.section_results.subsect_1_compare_optimization.main_equation
 from projects.paper.section_results.subsect_2_compare_equations.main_four_features import main_four_features
 from projects.paper.section_results.subsect_2_compare_equations.main_frequency_variable_name import \
     main_plot_frequency_variable
-from projects.paper.section_results.subsect_3_analyze_best_equation.main_diagnosis_basline_equation_with_four_features import \
+from projects.paper.section_results.subsect_3_analyze_best_equation.main_diagnosis_baseline_equation_with_four_features import \
     main_diagnosis_baseline_equation_with_four_selection_features
 from projects.paper.section_results.subsect_3_analyze_best_equation.main_diagnosis_best_equation import \
     main_diagnosis_best_equation
