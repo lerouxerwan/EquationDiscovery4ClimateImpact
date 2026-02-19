@@ -2,6 +2,8 @@ from projects.paper.section_data.main_plot_data import main_plot_data
 from projects.paper.section_appendix.main_pareto_front_example import main_example_1d
 from projects.paper.section_results.subsect_1_compare_optimization.main_compare_optimization_methods import \
     main_compare_optimization_methods
+from projects.paper.section_results.subsect_1_compare_optimization.main_compare_optimization_methods_v2 import \
+    main_compare_optimization_methods_v2
 from projects.paper.section_results.subsect_1_compare_optimization.main_equation_table import main_equation_table
 from projects.paper.section_results.subsect_2_compare_equations.main_four_features import main_four_features
 from projects.paper.section_results.subsect_2_compare_equations.main_frequency_variable_name import \
@@ -19,7 +21,7 @@ def main_paper(show: bool):
         # Appendix
         main_example_1d,
         # Results
-        main_compare_optimization_methods,
+        main_compare_optimization_methods_v2,
         main_plot_frequency_variable,
         main_four_features,
         # Diagnosis of equation for the last section
