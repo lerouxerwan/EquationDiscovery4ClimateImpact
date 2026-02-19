@@ -64,7 +64,7 @@ def main_compare_optimization_methods_v2(show: bool):
     ax_twin.set_xticks([])
     legend_handles = [patches.Patch(facecolor='white', edgecolor='k'),       plt.Line2D([0], [0], marker='o', linestyle='', color='k'),]
     # legend_labels = ['Random optimization (500 sets of hyperparameter)', 'Baseline (default set of hyperparameters)']
-    legend_labels = ['Optimized', 'Baseline']
+    legend_labels = ['Validated', 'Baseline']
     ax_twin.legend(legend_handles, legend_labels, loc='upper left', ncol=2)
 
     # Hide labels on xaxis

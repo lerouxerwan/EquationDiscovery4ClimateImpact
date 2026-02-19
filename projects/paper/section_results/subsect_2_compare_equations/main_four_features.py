@@ -31,7 +31,10 @@ def main_four_features(show: Optional[bool] = False) -> None:
                 selected_feature_index = selected_feature_indexes[i * ncols + j]
                 plot_values_feature(ax, dataset, selected_feature_index)
                 letter = 'abcd'[i * 2 + j]
-                ax.text(0.5, 0.96, f'({letter})', weight="bold", fontsize=10, transform=ax.transAxes)
+                fontsize = 15
+                ax.text(0.5, 0.9, f'({letter})', weight="bold", fontsize=fontsize, transform=ax.transAxes)
+
+
     show_or_save_plot(f'four_features', show)
 
 
