@@ -18,7 +18,8 @@ def add_metric_box(ax, y, y_predicted, target_label:str, split_name: str, x_and_
             if '(' in target_label:
                 text += ' (' + target_label.split('(')[-1]
         summary.append(text)
-    text_to_annotate = f'{split_name.capitalize()} metrics\n'
+    # text_to_annotate = f'{split_name.capitalize()} metrics\n'
+    text_to_annotate = f''
     text_to_annotate += '\n'.join(summary)
     coef = 0.95
     ax.annotate(text_to_annotate, xy=x_and_y_location, xycoords='axes fraction', textcoords='offset points',

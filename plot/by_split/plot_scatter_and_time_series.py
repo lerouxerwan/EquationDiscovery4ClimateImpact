@@ -159,8 +159,18 @@ def plot_scatter_and_time_series(emulator: Emulator, dataset: Dataset, show: Opt
     fig.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=axs, orientation='horizontal', label='Years',
                  pad=-0.4, fraction=0.065)
 
+    # COmpute max absolute errors
+    for z, z_predicted in [(y, y_predicted), (y_test, y_predicted_test)]:
+        absolute_errors = np.abs(z_predicted - z)
+        absolute_relative_errors = 100 * absolute_errors / z
+        print('Max absolute error test ', max(absolute_errors))
+        print('Max absolute relative error test', max(absolute_relative_errors), '%')
+
     print(emulator.selected_equation)
-    all_axs[0, 0].set_title(f"Diagnosis of the linear equation: {emulator.selected_equation}", loc='left', pad=20)
+    # title = f"Diagnosis of the linear equation: {emulator.selected_equation}"
+    # title += '\n' * 2
+    title = ' ' * 15 + 'Historical period and scenario RCP8.5' + ' ' * 80 + 'Scenario RCP4.5'
+    all_axs[0, 0].set_title(title, loc='left', pad=20)
     show_or_save_plot(f'plot_scatter_and_time_series', show)
 
 

@@ -48,7 +48,9 @@ def main_compare_optimization_methods_v2(show: bool):
         ax.bar_label(barplot, labels=loss_list_labels, label_type='center', rotation=90)
 
     # Add cross for the baseline with the default hyperparameter
-    for j, loss_list in enumerate(zip(*[get_baseline_losses(dataset) for dataset in datasets])):
+    losses = [get_baseline_losses(dataset) for dataset in datasets]
+    print(losses)
+    for j, loss_list in enumerate(zip(*losses)):
         coordinates = coordinates_list[j]
         ax.plot(coordinates, loss_list, linestyle='', marker='o', color='black')
 
