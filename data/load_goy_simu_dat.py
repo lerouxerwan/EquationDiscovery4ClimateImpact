@@ -58,9 +58,11 @@ def load_goy_simu_dat(nb_variables: int, simu_id: int) -> pd.DataFrame:
     df.insert(0, f'd{i}', temporal_difference_i)
     assert df.shape == (1_000_000, nb_variables + 1)
 
-    # Remove the column xi  the first 100_000 values (because the numerical simulation is not stabilized yet)
+    # Remove the column xi  the first 99_999 values (because the numerical simulation is not stabilized yet)
+    # Remove also the last values for which the target cannot be computed.
+    # In total we remove 100_000 values, and we are left with 900_000 values
     df.drop(columns=f'x{i}', inplace=True)
-    df = df.iloc[100_000:, :]
+    df = df.iloc[99_999:-1, :]
     assert df.shape == (900_000, nb_variables)
 
 

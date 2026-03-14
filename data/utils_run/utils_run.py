@@ -12,6 +12,14 @@ JSON_FILENAME = 'params_emulator.json'
 
 def get_output_directory(X: ndarray, y: ndarray, validation_mask: Optional[ndarray]):
     """Directory, containing subdirectories with results, for a dataset and a validation size"""
+    # When the length is too large, like hundreds of datapoints, computing the hash takes too much time
+    max_length = 500
+    if len(X) > max_length:
+        X = X.copy()[:max_length]
+        y = y.copy()[:max_length]
+        if validation_mask is not None:
+            validation_mask = validation_mask.copy()[:max_length]
+
     if validation_mask is None:
         dataset_folder = get_hash_str(X, y)
     else:

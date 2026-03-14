@@ -13,7 +13,6 @@ def get_goy_dataset_without_validation(nb_variables: int) -> Dataset:
                       rcp_name_train=simu_id_to_index_name[1].upper(),
                       rcp_name_test=simu_id_to_index_name[3].upper(),
                       validation_split=ValidationSplit.NONE)
-    print(str(dataset))
     return dataset
 
 if __name__ == '__main__':

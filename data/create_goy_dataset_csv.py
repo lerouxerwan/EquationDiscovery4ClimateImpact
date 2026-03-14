@@ -1,6 +1,7 @@
 import os.path as op
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from data.load_goy_simu_dat import load_goy_simu_dat
@@ -23,6 +24,10 @@ def main_create_goy_dataset(nb_variables: int, with_validation: bool = False):
         simu_ids = [1, 2, 3] if with_validation else [1, 3]
         df_list = [load_goy_simu_dat(nb_variables, simu_id) for simu_id in simu_ids]
         df = pd.concat(df_list, axis=0)
+        # Add label
+        data = np.array([[c] for c in df.columns]).transpose
+        df_label = pd.DataFrame(index=['LABEL'], columns=df.columns, data=data())
+        df = pd.concat([df_label, df], axis=0)
         print(df.shape)
         print(df.head())
         df.to_csv(filepath_dataset_csv)
