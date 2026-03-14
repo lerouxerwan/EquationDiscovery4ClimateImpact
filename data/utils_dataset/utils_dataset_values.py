@@ -45,7 +45,7 @@ def load_dataset_values(csv_filename: str, rcp_name_train: str, rcp_name_test: O
     prefix_set = set(list(prefixes))
     found_rcp_scenarios = set([prefix for prefix in prefix_set if prefix.startswith('RCP')])
     expected_rcp_scenarios = {rcp_name_train} if rcp_name_test is None else {rcp_name_train, rcp_name_test}
-    assert found_rcp_scenarios == expected_rcp_scenarios
+    assert found_rcp_scenarios == expected_rcp_scenarios, f'{found_rcp_scenarios} != {expected_rcp_scenarios}'
     assert (prefix_set - found_rcp_scenarios).issubset({'HIST'})
     # Load values (X, y, years) for the train set and test set
     X, y = df.iloc[:, 1:], df.iloc[:, 0]

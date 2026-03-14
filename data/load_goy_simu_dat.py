@@ -6,9 +6,9 @@ import pandas as pd
 from utils.utils_path import DATA_PATH
 
 simu_id_to_index_name = {
-    1: 'Train',
-    2: 'Val',
-    3: 'Test',
+    1: 'RCPTrainGoy',
+    2: 'RCPValGoy',
+    3: 'RCPTestGoy',
 }
 
 def load_goy_simu_dat(nb_variables: int, simu_id: int) -> pd.DataFrame:
