@@ -31,7 +31,7 @@ def load_dataset_values(csv_filename: str, rcp_name_train: str, rcp_name_test: O
             See https://symbolicml.org/DynamicQuantities.jl/dev/units/ for a list of accepted units"""
     # Load csv file
     assert csv_filename.endswith('.csv')
-    df = pd.read_csv(op.join(DATASET_CSV_PATH, csv_filename), index_col=0)
+    df = pd.read_csv(op.join(DATASET_CSV_PATH, csv_filename), index_col=0, dtype=str)
     # Extract values for the target y & features X. Drop potential additional rows ('UNIT' and 'LABEL') in the DataFrame
     df, X_units, y_units = load_additional_row(df, 'UNIT')
     df, X_labels, y_labels = load_additional_row(df, 'LABEL')
