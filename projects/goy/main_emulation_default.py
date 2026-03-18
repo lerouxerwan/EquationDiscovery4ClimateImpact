@@ -8,7 +8,8 @@ from utils.utils_log import log_info
 
 def main_emulation_default(nb_variables: int):
     dataset = get_goy_dataset_without_validation(nb_variables)
-    emulator = Emulator(batching=True, niterations=5)
+    # Par default le batchsize est de 50, mais je test aussi 100 (et niterations =100 ou 200 ou 1000)
+    emulator = Emulator(batching=True, niterations=200, batch_size=50)
     emulator.fit(dataset.X_train, dataset.y_train, variable_names=dataset.X_variable_names)
     plot_diagnosis(emulator, dataset, show=False)
 
