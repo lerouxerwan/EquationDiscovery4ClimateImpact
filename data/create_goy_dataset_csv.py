@@ -34,6 +34,6 @@ def main_create_goy_dataset(nb_variables: int, with_validation: bool = False):
 
 
 if __name__ == '__main__':
-    for with_validation in [False]:
+    for with_validation in [True]:
             for nb_variables in [10, 22][:]:
                 main_create_goy_dataset(nb_variables, with_validation)

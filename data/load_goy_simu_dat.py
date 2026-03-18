@@ -7,7 +7,7 @@ from utils.utils_path import DATA_PATH
 
 simu_id_to_index_name = {
     1: 'RCPTrainGoy',
-    2: 'RCPValGoy',
+    2: 'HIST',
     3: 'RCPTestGoy',
 }
 
