@@ -38,7 +38,8 @@ class Dataset(object):
     def __str__(self):
         return (f"Dataset to predict {self.y_variable_names[0]} with {self.X_train.shape[1]} features, "
                 f"{self.X_train.shape[0]} train datapoints, {self.X_test.shape[0]} test datapoints, "
-                f"{str(self.validation_split)} validation split")
+                f"{str(self.validation_split)} validation split"  +
+                ('' if self.validation_mask is None else f' with {sum(self.validation_mask)} validation datapoints'))
 
     @property
     def target_label(self) -> str:

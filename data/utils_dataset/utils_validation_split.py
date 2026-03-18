@@ -20,6 +20,9 @@ def get_validation_mask(y_train: ndarray, validation_size: float = 0.3,
     # Set some indices of validation_mask to True (depending on the validation_split considered)
     if validation_split is ValidationSplit.NONE:
         return None
+    elif validation_split is ValidationSplit.HIST:
+        assert validation_size == 0.3, 'validation size cannot be specified with the validation split HIST'
+        return np.array([prefix_train == 'HIST' for prefix_train in prefixes_train])
     elif validation_split is ValidationSplit.RANDOM:
         indices = list(range(length_mask))
         indices_validation_set = set(train_test_split(np.array(indices), test_size=validation_size, random_state=random_seed)[1])

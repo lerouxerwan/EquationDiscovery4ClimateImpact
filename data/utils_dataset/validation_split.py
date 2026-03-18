@@ -14,6 +14,7 @@ class ValidationSplit(StrEnum):
     NONE = 'no validation set'
     PRELIMINARY_TEST = 'preliminary test'
     QUANTILE_WITH_BINNING = 'quantile_with_binning'
+    HIST = 'hist'
 
 def get_train_label(rcp_name_train: str, validation_split: ValidationSplit, validation_size: float) -> str:
     percent = f'{int(100 * (1 - validation_size))}%'
@@ -36,6 +37,8 @@ def get_train_label(rcp_name_train: str, validation_split: ValidationSplit, vali
         return f'historical period + {rcp_name_train}'
     elif validation_split is ValidationSplit.QUANTILE_WITH_BINNING:
         return f'{percent} selected by quantile binning'
+    elif validation_split is ValidationSplit.HIST:
+        return "Simulation #1"
     else:
         raise NotImplementedError
 
@@ -57,6 +60,8 @@ def get_validation_label(rcp_name_train: str, rcp_name_test: str, validation_spl
         return rcp_name_test
     elif validation_split is ValidationSplit.QUANTILE_WITH_BINNING:
         return f'{percent} selected by quantile binning in the historical period + {rcp_name_train}'
+    elif validation_split is ValidationSplit.HIST:
+        return "Simulation #2"
     else:
         raise NotImplementedError
 
