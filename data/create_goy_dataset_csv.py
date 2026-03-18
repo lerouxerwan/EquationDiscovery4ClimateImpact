@@ -25,7 +25,7 @@ def main_create_goy_dataset(nb_variables: int, with_validation: bool = False):
         df_list = [load_goy_simu_dat(nb_variables, simu_id) for simu_id in simu_ids]
         df = pd.concat(df_list, axis=0)
         # Add label
-        data = np.array([[c] for c in df.columns]).transpose
+        data = np.array([[f'{c} (-)'] for c in df.columns]).transpose
         df_label = pd.DataFrame(index=['LABEL'], columns=df.columns, data=data())
         df = pd.concat([df_label, df], axis=0)
         print(df.shape)
@@ -34,6 +34,6 @@ def main_create_goy_dataset(nb_variables: int, with_validation: bool = False):
 
 
 if __name__ == '__main__':
-    for with_validation in [True]:
+    for with_validation in [True, False]:
             for nb_variables in [10, 22][:]:
                 main_create_goy_dataset(nb_variables, with_validation)

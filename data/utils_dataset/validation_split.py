@@ -1,5 +1,7 @@
 from enum import StrEnum
 
+from data.load_goy_simu_dat import split_name_to_goy_label_name
+
 
 class ValidationSplit(StrEnum):
     RANDOM = 'random'
@@ -38,7 +40,7 @@ def get_train_label(rcp_name_train: str, validation_split: ValidationSplit, vali
     elif validation_split is ValidationSplit.QUANTILE_WITH_BINNING:
         return f'{percent} selected by quantile binning'
     elif validation_split is ValidationSplit.HIST:
-        return "Simulation #1"
+        return split_name_to_goy_label_name['train']
     else:
         raise NotImplementedError
 
@@ -61,7 +63,7 @@ def get_validation_label(rcp_name_train: str, rcp_name_test: str, validation_spl
     elif validation_split is ValidationSplit.QUANTILE_WITH_BINNING:
         return f'{percent} selected by quantile binning in the historical period + {rcp_name_train}'
     elif validation_split is ValidationSplit.HIST:
-        return "Simulation #2"
+        return split_name_to_goy_label_name['validation']
     else:
         raise NotImplementedError
 

@@ -1,3 +1,4 @@
+import math
 from typing import Optional
 
 import matplotlib.pyplot as plt
@@ -42,7 +43,8 @@ def plot_loss_vs_complexity(emulator: Emulator, dataset:Dataset, show: Optional[
                # color=split_name_to_color[split_name],
                          facecolor='w', edgecolor='k',
                          hatch=split_name_to_hatch[split_name])
-        loss_list_labels = [str(round(loss, 2)) for loss in loss_list]
+        round_between_0_and_1 = lambda v: round(v, abs(math.floor(math.log10(v))) + 2)
+        loss_list_labels = [str(round(loss, 2)) if loss > 1 else round_between_0_and_1(loss) for loss in loss_list]
         ax.bar_label(barplot, labels=loss_list_labels, label_type='edge', padding=1, rotation=90)
         all_loss_list.extend(loss_list)
 

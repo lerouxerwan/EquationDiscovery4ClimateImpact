@@ -5,11 +5,19 @@ import pandas as pd
 
 from utils.utils_path import DATA_PATH
 
-simu_id_to_index_name = {
-    1: 'RCPTrainGoy',
+simu_id_to_rcp_name = {
+    1: 'RCPTRAINGOY',
     2: 'HIST',
-    3: 'RCPTestGoy',
+    3: 'RCPTESTGOY',
 }
+
+
+split_name_to_goy_label_name = {
+    'train': 'Simulation #1',
+    'validation': 'Simulation #2',
+    'test': 'Simulation #3',
+}
+
 
 def load_goy_simu_dat(nb_variables: int, simu_id: int) -> pd.DataFrame:
     """Returns a Dataframe with X rows containing nb_variables values
@@ -41,7 +49,7 @@ def load_goy_simu_dat(nb_variables: int, simu_id: int) -> pd.DataFrame:
             #  Keep only even columns that correspond to the real part (the odd columns are the imaginary part)
             row = [float(v) for v in s.split()[::2]]
             data.append(row)
-    index_name = simu_id_to_index_name[simu_id].upper()
+    index_name = simu_id_to_rcp_name[simu_id]
     index = [f'{index_name}_{i}' for i in range(len(data))]
     df = pd.DataFrame(data, index=index, columns=[f'x{i}' for i in range(len(row))])
     assert df.shape == (1_000_000, nb_variables)
