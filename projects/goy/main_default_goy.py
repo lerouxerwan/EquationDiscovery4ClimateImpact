@@ -7,8 +7,8 @@ from utils.utils_log import log_info
 def main_emulation_default(nb_variables: int):
     dataset = get_goy_dataset(nb_variables, with_validation=False)
     # Par default le batchsize est de 50, mais je test aussi 100 (et niterations =100 ou 200 ou 1000)
-    niterations = [50, 100, 200][2]
-    batch_size = [50, 100, 200][0]
+    niterations = [50, 100, 200, 1000][-1]
+    batch_size = [50, 100, 200][2]
     log_info(f"Run with {niterations} iterations and {batch_size} batches")
     emulator = Emulator(batching=True, niterations=niterations, batch_size=batch_size)
     emulator.fit(dataset.X_train, dataset.y_train, validation_mask=dataset.validation_mask,
@@ -39,5 +39,5 @@ def main_emulation_default_with_gaussian_fit(nb_variables: int):
 
 
 if __name__ == '__main__':
-    # main_emulation_default(nb_variables=10)
-    main_emulation_default_with_gaussian_fit(nb_variables=10)
+    main_emulation_default(nb_variables=10)
+    # main_emulation_default_with_gaussian_fit(nb_variables=10)

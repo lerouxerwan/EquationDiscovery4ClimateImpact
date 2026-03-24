@@ -4,17 +4,24 @@ from data.utils_dataset.dataset import Dataset
 from emulator.emulator import Emulator
 from plot.plot_diagnosis import plot_diagnosis
 from projects.goy.utils_goy import get_goy_dataset
+from utils.utils_latex import str_df_latex
 from utils.utils_log import log_info
 
 def main_compare_score_default(nb_variables: int, with_validation: bool):
     dataset = get_goy_dataset(nb_variables, with_validation)
 
     d = {}
+    niterations_list = [50, 100, 200, 1000]
     for batch_size in [50, 100, 200]:
-        values = [get_score(dataset, batch_size, niterations) for niterations in [50, 100, 200][:]]
+        values = [get_score(dataset, batch_size, niterations) for niterations in niterations_list[:]]
         d[batch_size] = values
     df = pd.DataFrame.from_dict(d)
+    df.rename(columns={c: f'Batch size = {c}' for c in df.columns}, inplace=True)
+    df.index.name = 'Iterations'
+    df.reset_index(inplace=True)
+    df.index = niterations_list
     print(df.head())
+    print(str_df_latex(df, number_decimal=7))
 
 def get_score(dataset: Dataset, batch_size: int, niterations: int) -> float:
     emulator = Emulator(batching=True, niterations=niterations, batch_size=batch_size)
