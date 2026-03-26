@@ -24,7 +24,7 @@ def main_paper(show: bool):
         # Appendix
         main_example_1d,
         # Results
-        # main_compare_optimization_methods_v2,
+        main_compare_optimization_methods_v2,
         # main_plot_frequency_variable,
         main_plot_signed_frequency,
         main_four_features,
