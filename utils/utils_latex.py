@@ -13,7 +13,7 @@ def str_df_latex(df: pd.DataFrame, column_format=None, index: bool =False, numbe
         column_format = ''.join(['c' for _ in df.columns])
     if index:
         column_format += 'c'
-    s_latex = df.to_latex(index=index, column_format=column_format, float_format=f"%.{2}f")
+    s_latex = df.to_latex(index=index, column_format=column_format, float_format=f"%.{number_decimal}f")
     s = ') \\\\'
     s_latex = s_latex.replace(s, s + ' \\hline ')
     for s in ['\\midrule', '\\toprule']:

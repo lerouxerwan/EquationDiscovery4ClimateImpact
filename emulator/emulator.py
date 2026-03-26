@@ -277,7 +277,7 @@ class Emulator(PySRRegressor):
         if run.has_been_saved:
             try:
                 emulator_from_file = self.from_file(run_directory=run.run_directory)
-            except (RuntimeError, EmptyDataError) as e:
+            except (RuntimeError, EmptyDataError, TypeError) as e:
                 log_info(f'Catch the following error: {e.__repr__()}')
                 emulator_from_file = None
         else:
