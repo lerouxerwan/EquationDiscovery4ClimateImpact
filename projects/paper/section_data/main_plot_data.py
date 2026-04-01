@@ -11,7 +11,7 @@ def main_plot_data(show=False):
     dataset =  get_dataset()
 
     # Add two plots
-    column_index = dataset.X_variable_names.index('SST_JJA')
+    column_index = dataset.X_variable_names.index('SST_MAM')
     sst_train = dataset.X_train[:, column_index] - 273.15
     sst_test = dataset.X_test[:, column_index] - 273.15
     label_sst = dataset.X_labels[column_index].replace('(K)', '($^o$C)')
@@ -40,5 +40,5 @@ def main_plot_some_features(show=False):
 
 
 if __name__ == '__main__':
-    main_plot_data(show=True)
+    main_plot_data(show=False)
     # main_plot_some_features(show=False)
