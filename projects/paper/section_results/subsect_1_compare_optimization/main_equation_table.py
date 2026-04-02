@@ -14,6 +14,7 @@ from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import Opti
     OptimizationPipelineRandom
 from optimization.utils_optimization import get_loss
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
+from plot.by_split.utils_equation_str import str_to_new_str
 from projects.paper.utils_paper import validation_splits
 from utils.utils_date import get_season_short_names
 from utils.utils_latex import print_df_latex, str_df_latex
@@ -42,15 +43,19 @@ def plot_equation_table(opt_type: type):
     #  Third graph that correspond to an array
     df_equation = pd.DataFrame.from_dict(validation_name_to_equation).transpose()
     df_equation.reset_index(inplace=True)
-    df_equation.rename(columns={0: 'Best equation', 'index': 'Validation split'}, inplace=True)
+    df_equation.rename(columns={0: 'Validated equation, i.e. Equation selected by the validation scheme', 'index': 'Validation set'}, inplace=True)
 
     equation_str = str_df_latex(df_equation, column_format='ll', index=False)
     equation_str = equation_str.replace('& $', '& {\\small $')
     equation_str = equation_str.replace('.0', '')
+    equation_str = equation_str.replace('-04', '-4')
+    equation_str = equation_str.replace('-1SS', '-SS')
     equation_str = equation_str.replace('$ \\', '$ } \\')
     # Add textrm everywhere
     for X_variable_name in dataset.X_variable_names:
         variable_name = X_variable_name.split('_')[0]
+        if variable_name in str_to_new_str:
+            variable_name = str_to_new_str[variable_name]
         old = f'{variable_name}_'
         new = '\\textrm{' + variable_name + '}_'
         equation_str = equation_str.replace(old, new)

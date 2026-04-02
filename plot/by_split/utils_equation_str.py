@@ -4,17 +4,24 @@ from sympy import Expr, Number
 from utils.utils_date import get_short_month_names, get_season_short_names
 
 
+str_to_new_str = {
+    'AnnSea': 'Annual',
+    'MerWindStr': 'MWS',
+    'TotalHeat': 'TH',
+    'SeaSurfaceStericHeight': 'SSSH',
+    'SurfacePressure': 'SP',
+    'NetSurfaceHeatFlux': 'NSHF',
+
+}
+
+
 def postprocessing_for_equation(equation: str) -> str:
     # Enhance display for the month, the season, or the annual
     for short_name in get_short_month_names() + get_season_short_names() + ['AnnSea']:
         equation = equation.replace(f'_{short_name}', '_{' + short_name + '}')
-    # Replace AnnSea with something more clear
-    equation = equation.replace('AnnSea', 'Annual')
-    # Replace some long variable names with something shorter
-    equation = equation.replace('SeaSurfaceStericHeight', 'SSSH')
-    equation = equation.replace('MerWindStr', 'MWS')
-    equation = equation.replace('SurfacePressure', 'SP')
-    equation = equation.replace('TotalHeat', 'TH')
+    # Replace some variable name with something shorter or clearer
+    for s, new_s in str_to_new_str.items():
+        equation = equation.replace(s, new_s)
     # Replace square operation with latex operation
     equation = equation.replace('**2', '^2')
     # Remove the "_" after "Max", "Min" and "Mean"

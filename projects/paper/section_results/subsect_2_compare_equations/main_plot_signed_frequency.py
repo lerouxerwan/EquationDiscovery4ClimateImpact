@@ -18,6 +18,7 @@ from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import Opti
     OptimizationPipelineRandom
 from optimization.utils_optimization import get_loss
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
+from plot.by_split.utils_equation_str import str_to_new_str
 from projects.paper.utils_paper import validation_sizes, opt_type, validation_splits, opt
 from utils.utils_latex import print_df_latex
 from utils.utils_log import log_info
@@ -70,7 +71,8 @@ def main_plot_signed_frequency(show: bool = False):
     y_tick = max(-ymin, ymax) / 2
     ax.set_yticks([-y_tick, y_tick])
     ax.set_yticklabels(['negative', 'positive'], rotation=90, rotation_mode='anchor', ha='center')
-    labels = [label.replace('AnnSea', 'Annual') for label in labels]
+    for s, new_s in str_to_new_str.items():
+        labels = [label.replace(s, new_s) for label in labels]
     labels = ['$' + label.replace('_', '_{')[1:] + '}$' for label in labels]
     ax.set_xticklabels(labels, rotation=45, ha='right', rotation_mode='anchor')
     plot_name = 'main_signed_frequency'
