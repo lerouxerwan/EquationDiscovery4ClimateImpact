@@ -7,7 +7,7 @@ import pandas as pd
 from data.load_goy_simu_dat import load_goy_simu_dat
 from utils.utils_path import DATA_PATH
 
-VERSION_GOY_DATASET = 1
+VERSION_GOY_DATASET = 2
 
 def get_filepath_dataset_csv(nb_variables: int, with_validation: bool):
     filepath = Path(DATA_PATH) / 'dataset' / f'GOY_N{nb_variables}_v{VERSION_GOY_DATASET}'

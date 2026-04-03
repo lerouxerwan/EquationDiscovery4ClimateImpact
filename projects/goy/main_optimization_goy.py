@@ -12,7 +12,7 @@ def main_optimization_goy(nb_variables: int):
     assert isinstance(param_name_to_values, dict)
     param_name_to_values['batching'] = [True]
     param_name_to_values['batch_size'] = [100]
-    opt = OptimizationPipelineRandom('best', param_name_to_values, n_jobs=6, timeout_in_seconds=60 * 60)
+    opt = OptimizationPipelineRandom('best', param_name_to_values, n_jobs=4, timeout_in_seconds=60 * 60)
     emulator = opt.get_top_emulator(dataset.X_train, dataset.y_train, validation_mask=dataset.validation_mask,
                  variable_names=dataset.X_variable_names)
     plot_diagnosis(emulator, dataset, show=True)
