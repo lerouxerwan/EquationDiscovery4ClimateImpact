@@ -6,6 +6,8 @@ from scipy.stats import pearsonr, ConstantInputWarning
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
+from utils.utils_log import log_info
+
 
 def mean_relative_absolute_error(y_true: ndarray, y_pred: ndarray) -> float:
     biases_percentage = [np.abs((pred - true) / true) * 100 if true != 0 else 0 for true, pred in
@@ -49,6 +51,21 @@ def _get_residuals(y: ndarray) -> ndarray:
     return residual
 
     raise NotImplementedError
+
+
+def correlation_year_by_year_relative_error(y_true: ndarray, y_pred: ndarray) -> float:
+    correlation_true = _get_correlation_year_by_year(y_true)
+    correlation_pred = _get_correlation_year_by_year(y_pred)
+    log_info(f'Correlation true={correlation_true}, Correlation pred: {correlation_pred}')
+    return mean_relative_error(correlation_true, correlation_pred)
+
+def _get_correlation_year_by_year(y: ndarray) -> float:
+    return correlation(y[:-1], y[1:])
+
+    raise NotImplementedError
+
+
+
 
 def mean_relative_error(value_true: float, predict_value: float) -> float:
     assert isinstance(value_true, float) and isinstance(predict_value, float)

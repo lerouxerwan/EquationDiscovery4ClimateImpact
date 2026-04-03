@@ -6,7 +6,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 from plot.utils_metric.utils_metric_function import correlation, \
     root_mean_squared_error, mean_relative_absolute_error, \
-    median_absolute_error, spread_ratio, correlation_detrended
+    median_absolute_error, spread_ratio, correlation_detrended, correlation_year_by_year_relative_error
 
 
 class Metric(Enum):
@@ -19,6 +19,7 @@ class Metric(Enum):
     SPREADRATIO = 6
     NLL = 7
     COR_DETRENDED = 8
+    COR_YBY_RE = 9
 
 def compute_loss(y_true: ndarray, y_predicted: ndarray, metric: Metric) -> float:
     """Compute loss for a given metric, if the computation raises a ValueError we return np.nan as result"""
@@ -37,6 +38,7 @@ metric_to_function = {
     Metric.MEDAE: median_absolute_error,
     Metric.SPREADRATIO: spread_ratio,
     Metric.COR_DETRENDED: correlation_detrended,
+    Metric.COR_YBY_RE: correlation_year_by_year_relative_error,
 }
 
 
@@ -50,6 +52,7 @@ metric_to_label = {
     Metric.SPREADRATIO: 'Spread ratio',
     Metric.NLL: 'Negative log likelihood',
     Metric.COR_DETRENDED: 'Correlation detrended',
+    Metric.COR_YBY_RE: 'Correlation year by year relative error',
 }
 
 metric_to_str = {
@@ -62,12 +65,13 @@ metric_to_str = {
     Metric.SPREADRATIO: 'SR',
     Metric.NLL: 'NLL',
     Metric.COR_DETRENDED: 'COR',
+    Metric.COR_YBY_RE: 'COR_YBY_RE',
 }
 
 str_to_metric = {v: k for k, v in metric_to_str.items()}
 
 def is_metric_with_percentage(metric: Metric) -> bool:
-    return metric in [Metric.MRAE]
+    return metric in [Metric.MRAE, Metric.COR_YBY_RE]
 
 def is_metric_with_target_unit(metric: Metric) -> bool:
     return metric in {Metric.RMSE, Metric.MAE, Metric.MEDAE}
