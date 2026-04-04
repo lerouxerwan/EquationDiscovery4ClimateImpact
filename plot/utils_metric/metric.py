@@ -65,7 +65,7 @@ metric_to_str = {
     Metric.SPREADRATIO: 'SR',
     Metric.NLL: 'NLL',
     Metric.COR_DETRENDED: 'COR',
-    Metric.COR_YBY_RE: 'COR_YBY_RE',
+    Metric.COR_YBY_RE: 'YCRE',
 }
 
 str_to_metric = {v: k for k, v in metric_to_str.items()}

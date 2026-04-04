@@ -8,7 +8,8 @@ def add_metric_box(ax, y, y_predicted, target_label:str, split_name: str, x_and_
     if x_and_y_location is None:
         x_and_y_location = (0.65, 0.05)
     metrics = [Metric.MRAE, Metric.RMSE, Metric.MEDAE, Metric.COR, Metric.SPREADRATIO]
-    metrics = [Metric.RMSE, Metric.MRAE, Metric.COR_DETRENDED, Metric.COR_YBY_RE]
+    metrics = [Metric.RMSE, Metric.MRAE, Metric.COR_DETRENDED]
+    # metrics = [Metric.RMSE, Metric.MRAE, Metric.COR_YBY_RE]
     summary = []
     for metric in metrics:
         text = f'{metric_to_str[metric]}: {round(metric_to_function[metric](y, y_predicted), 2)}'
