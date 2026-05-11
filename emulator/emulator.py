@@ -391,8 +391,9 @@ class Emulator(PySRRegressor):
             X_fit = get_X_for_gaussian_fit(X_fit, y_fit)
             y_fit = np.zeros(len(X_fit))
             variable_names = self.X_variable_names_for_gaussian_fit + [self.y_variable_name_for_gaussian_fit]
+        # Run fit from PySR which saves checkpoint
         super().fit(X_fit, y_fit, variable_names=variable_names, X_units=X_units, y_units=y_units)
-        #  Save checkpoint without the 2 columns containing julia objects, including dynamical equations
+        #  For gaussian fit, 2 columns of equations_ are drop (containing julia objects including dynamical equations)
         if self.gaussian_fit and (not self.temp_equation_file):
             self.equations_.drop(columns=['julia_expression', 'lambda_format'], inplace=True)
             self.equations_['equation'] = self.equations_['equation'].apply(self.improve_equation_str)
