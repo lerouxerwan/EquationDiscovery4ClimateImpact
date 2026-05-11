@@ -69,6 +69,7 @@ def plot_two_curves(X_for_plot, emulator: Emulator, x_for_plot):
     plt.show()
 
 
+
 if __name__ == '__main__':
     main_plot_toy_model()
 
