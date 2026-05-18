@@ -10,7 +10,8 @@ from numpy import ndarray
 from pandas.errors import EmptyDataError
 from pysr import PySRRegressor, AbstractExpressionSpec, AbstractLoggerSpec, TemplateExpressionSpec
 from pysr.utils import ArrayLike
-from scipy.stats import norm
+from scipy.signal import detrend
+from scipy.stats import norm, shapiro
 from sympy import Expr, Symbol, sympify, symbols
 
 from data.utils_dataset.utils_validation import get_X_and_y
@@ -381,6 +382,16 @@ class Emulator(PySRRegressor):
             X_fit, y_fit = get_X_and_y(X, y, validation_mask, validation_set=False)
         # Modify X_fit and y_fit for Gaussian fit
         if self.gaussian_fit:
+            # Log results of tests for Gaussian of the target
+            # We apply Shapiro-Wilk test which is more suited for small to medium datasets
+            # See: https://koshurai.medium.com/testing-for-normality-in-python-a-complete-guide-for-data-scientists-1d999bc93715
+            for remove_trend in [False, True]:
+                data_for_test = detrend(y) if remove_trend else y
+                _,  p = shapiro(data_for_test)
+                log_info('Shapiro-Wilk test' + (' with trend removed' if remove_trend else ''))
+                log_info('Pvalue: {}'.format(p))
+                log_info('Target is likely normal' if p > 0.05 else "Target is not normal")
+            # Add warnings for units
             if (X_units is not None) or (y_units is not None):
                 # warn if some units were specified
                 warnings.warn('Units are not accounted for in a gaussian fit, '
