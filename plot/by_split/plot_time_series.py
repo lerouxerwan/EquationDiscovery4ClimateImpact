@@ -22,8 +22,13 @@ def plot_time_series(emulator: Emulator, dataset: Dataset, show: Optional[bool] 
         ax.yaxis.grid()
         y_true_label, y_predicted_label = get_true_and_predicted_label()
         common_kwargs = {'marker': 'o', 'linestyle': ''}
-        ax.plot(years, y, label=y_true_label, **common_kwargs)
-        ax.plot(years, y_predicted, label=y_predicted_label, **common_kwargs)
+        ax.plot(years, y, label=y_true_label, color='blue', **common_kwargs)
+        ax.plot(years, y_predicted, label=y_predicted_label, color='orange', **common_kwargs)
+        # Add uncertainty if we are doing a gaussian prediction
+        if emulator.gaussian_fit:
+            uncertainty_intervals = emulator.predict_uncertainty_interval(X)
+            ax.fill_between(years, y_predicted + uncertainty_intervals[:, 0], y_predicted + uncertainty_intervals[:, 1],
+                            color='orange', alpha=0.4, label='90% uncertainty interval')
         # Annotate equation and metric box
         add_equation(emulator.selected_equation)
         add_metric_box(ax, y, y_predicted, dataset.target_label, split_name, x_and_y_location=(0.05, 0.05))
