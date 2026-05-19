@@ -52,14 +52,12 @@ class GaussianToyModel:
         if subplot in [1, 3]:
             mu_values = np.array([self.get_mu(x) for x in x_for_plot])
             sigma_values = np.array([self.get_sigma(x) for x in x_for_plot])
-            label = 'Ground Truth: $\\mu = {}; log(\\sigma) = {}$'.format(self.get_mu_str(), self.get_log_sigma_str())
-            self._plot_gaussian_curve(ax, x_for_plot, mu_values, sigma_values, 'r', label)
+            self._plot_gaussian_curve(ax, x_for_plot, mu_values, sigma_values, 'r', self.get_label_ground_truth())
         # Plot estimated values
         if subplot in [2, 3]:
             mu_values = self.emulator.get_distri_param(X_for_plot, 'mu')
             sigma_values = self.emulator.get_distri_param(X_for_plot, 'sigma')
-            label = 'Discovered: {}'.format(self.emulator.selected_equation)
-            self._plot_gaussian_curve(ax, x_for_plot, mu_values, sigma_values, 'blue', label)
+            self._plot_gaussian_curve(ax, x_for_plot, mu_values, sigma_values, 'blue', self.get_label_discovered())
         # Postprocessing
         if subplot in [1, 2, 3]:
             ax.legend(loc='upper left')
@@ -82,6 +80,13 @@ class GaussianToyModel:
         ax_twin.legend(legend_handles, legend_labels, loc='lower left', ncol=3)
         plot_name = "toy_model_{}_{}_{}_{}".format(self.mu_degree, self.sigma_degree, self.nb_samples, subplot)
         show_or_save_plot(plot_name=plot_name, show=show)
+
+    def get_label_discovered(self) -> str:
+        return 'Discovered: {}'.format(self.emulator.selected_equation)
+
+    def get_label_ground_truth(self) -> str:
+        label = 'Ground Truth: $\\mu = {}; log(\\sigma) = {}$'.format(self.get_mu_str(), self.get_log_sigma_str())
+        return label
 
     @staticmethod
     def _plot_gaussian_curve(ax: Axes, x_values, mu_values, sigma_values, color, label):
