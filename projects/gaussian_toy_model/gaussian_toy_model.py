@@ -31,41 +31,57 @@ class GaussianToyModel:
 
     #####   PLOT     ######
 
-    def plot(self, show: bool = True):
+    def plot(self, show: bool = True, subplot=3):
+        """
+        Subplot is a number that characterizes the plot that must be shown
+        3 means the three plots
+        0 means just the samples
+        1 means just the ground truth distribution
+        2 means just the discovered distribution
+        """
         ax = plt.gca()
         # Preprocessing
         nb_samples_for_plot = 20
         x_for_plot = np.linspace(0, self.stop_sampling, num=nb_samples_for_plot)
         X_for_plot = np.expand_dims(x_for_plot, axis=1)
-        # Plot samples
-        X, y = self.X_and_y
-        ax.plot(X[:, 0], y, color='red', linestyle='', marker='o', markersize=1)
+        #  Plot samples
+        if subplot in [0, 3]:
+            X, y = self.X_and_y
+            ax.plot(X[:, 0], y, color='red', linestyle='', marker='o', markersize=1)
         # Plot ground truth values
-        mu_values = np.array([self.get_mu(x) for x in x_for_plot])
-        sigma_values = np.array([self.get_sigma(x) for x in x_for_plot])
-        label = 'Ground Truth: $\\mu = {}; log(\\sigma) = {}$'.format(self.get_mu_str(), self.get_log_sigma_str())
-        self._plot_gaussian_curve(ax, x_for_plot, mu_values, sigma_values, 'r', label)
+        if subplot in [1, 3]:
+            mu_values = np.array([self.get_mu(x) for x in x_for_plot])
+            sigma_values = np.array([self.get_sigma(x) for x in x_for_plot])
+            label = 'Ground Truth: $\\mu = {}; log(\\sigma) = {}$'.format(self.get_mu_str(), self.get_log_sigma_str())
+            self._plot_gaussian_curve(ax, x_for_plot, mu_values, sigma_values, 'r', label)
         # Plot estimated values
-        mu_values = self.emulator.get_distri_param(X_for_plot, 'mu')
-        sigma_values = self.emulator.get_distri_param(X_for_plot, 'sigma')
-        label = 'Discovered: {}'.format(self.emulator.selected_equation)
-        self._plot_gaussian_curve(ax, x_for_plot, mu_values, sigma_values, 'blue', label)
+        if subplot in [2, 3]:
+            mu_values = self.emulator.get_distri_param(X_for_plot, 'mu')
+            sigma_values = self.emulator.get_distri_param(X_for_plot, 'sigma')
+            label = 'Discovered: {}'.format(self.emulator.selected_equation)
+            self._plot_gaussian_curve(ax, x_for_plot, mu_values, sigma_values, 'blue', label)
         # Postprocessing
-        ax.legend(loc='upper left')
+        if subplot in [1, 2, 3]:
+            ax.legend(loc='upper left')
         ax.set_xlabel('x')
         ax.set_ylabel('y')
         # Add second legend
         ax_twin = ax.twinx()
         ax_twin.set_xlim(ax.get_xlim())
         ax_twin.set_yticks([])
-        legend_handles = [
-            plt.Line2D([0], [0], marker='', linestyle='-', color='k'),
-            patches.Patch(facecolor='white', edgecolor='k'),
-            plt.Line2D([0], [0], marker='o', linestyle='', color='k'),
-                          ]
-        legend_labels = ['Average $\\mu$(x)', 'Spread +/- $\\sigma$', 'Training samples']
+        legend_handles, legend_labels = [], []
+        if subplot in [1, 2, 3]:
+            legend_handles += [
+                plt.Line2D([0], [0], marker='', linestyle='-', color='k'),
+                patches.Patch(facecolor='white', edgecolor='k')]
+            legend_labels += ['Average $\\mu$(x)', 'Spread +/- $\\sigma$']
+        if subplot in [0, 3]:
+            legend_handles += [plt.Line2D([0], [0], marker='o', linestyle='', color='k')]
+            legend_labels += ['Training samples']
+
         ax_twin.legend(legend_handles, legend_labels, loc='lower left', ncol=3)
-        show_or_save_plot(plot_name="gaussian_toy_model_{}_{}_{}".format(self.mu_degree, self.sigma_degree, self.nb_samples), show=show)
+        plot_name = "toy_model_{}_{}_{}_{}".format(self.mu_degree, self.sigma_degree, self.nb_samples, subplot)
+        show_or_save_plot(plot_name=plot_name, show=show)
 
     @staticmethod
     def _plot_gaussian_curve(ax: Axes, x_values, mu_values, sigma_values, color, label):
@@ -115,7 +131,7 @@ class GaussianToyModel:
             mu += " + x^2"
         if self.mu_degree > 2:
             raise NotImplementedError
-        return "${}$".format(mu)
+        return mu
 
 
     def get_sigma(self, x):
