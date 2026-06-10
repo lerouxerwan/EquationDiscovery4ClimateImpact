@@ -35,6 +35,6 @@ def main_sensitivity_analysis_nb_datapoints(fast: bool, show: bool):
 
 
 if __name__ == '__main__':
-    # main_gaussian_toy_model_all_plots(fast=False, show=False)
-    main_gaussian_toy_model_1_three_detailed_plot(fast=False, show=False)
+    main_gaussian_toy_model_all_plots(fast=False, show=True)
+    # main_gaussian_toy_model_1_three_detailed_plot(fast=False)
     # main_sensitivity_analysis_nb_datapoints(fast=False)
