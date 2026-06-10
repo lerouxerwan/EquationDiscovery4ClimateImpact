@@ -61,7 +61,7 @@ class GaussianToyModel:
         # Postprocessing
         if subplot in [1, 2, 3]:
             ax.legend(loc='upper left')
-        ax.set_xlabel('x')
+        ax.set_xlabel('t')
         ax.set_ylabel('y')
         # Add second legend
         ax_twin = ax.twinx()
@@ -72,7 +72,7 @@ class GaussianToyModel:
             legend_handles += [
                 plt.Line2D([0], [0], marker='', linestyle='-', color='k'),
                 patches.Patch(facecolor='white', edgecolor='k')]
-            legend_labels += ['Average $\\mu$(x)', 'Spread +/- $\\sigma$']
+            legend_labels += ['Average $\\mu$(t)', 'Spread +/- $\\sigma(t)$']
         if subplot in [0, 3]:
             legend_handles += [plt.Line2D([0], [0], marker='o', linestyle='', color='k')]
             legend_labels += ['Training samples']
@@ -82,10 +82,13 @@ class GaussianToyModel:
         show_or_save_plot(plot_name=plot_name, show=show)
 
     def get_label_discovered(self) -> str:
-        return 'Discovered: {}'.format(self.emulator.selected_equation)
+        label_discovered = 'Discovered: {}'.format(self.emulator.selected_equation)
+        label_discovered = label_discovered.replace('mu', 'mu(t)')
+        label_discovered = label_discovered.replace('sigma', 'sigma(t)')
+        return label_discovered
 
     def get_label_ground_truth(self) -> str:
-        label = 'Ground Truth: $\\mu = {}; log(\\sigma) = {}$'.format(self.get_mu_str(), self.get_log_sigma_str())
+        label = 'Ground Truth: $\\mu(t) = {}; log(\\sigma(t)) = {}$'.format(self.get_mu_str(), self.get_log_sigma_str())
         return label
 
     @staticmethod
