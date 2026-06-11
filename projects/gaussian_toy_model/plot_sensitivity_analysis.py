@@ -4,7 +4,7 @@ from projects.gaussian_toy_model.gaussian_toy_model import GaussianToyModel
 from utils.utils_plot import show_or_save_plot
 
 
-def plot_sensitivity_analysis(mu_degree: int, sigma_degree: int, nb_samples_list: list[int], niterations: int):
+def plot_sensitivity_analysis(mu_degree: int, sigma_degree: int, nb_samples_list: list[int], niterations: int, show: bool):
     """
     Plot how the log likelihood changes with respect to the number of samples.
     To have a fair comparison, we compute the log likelihood on the same set of samples (nb_samples_list[-1])
@@ -38,4 +38,4 @@ def plot_sensitivity_analysis(mu_degree: int, sigma_degree: int, nb_samples_list
     ax.set_ylabel('Log likelihood for the discovered equation')
     nb_samples_list_str = "_".join([str(i) for i in nb_samples_list])
     plot_name = "sensitivity_analysis_{}_{}_{}".format(mu_degree, sigma_degree, nb_samples_list_str)
-    show_or_save_plot(plot_name=plot_name, show=False)
+    show_or_save_plot(plot_name=plot_name, show=show)
