@@ -23,7 +23,7 @@ def compute_weights():
     return weights
 
 
-def get_df(scenario: str, weights: xr.DataArray, variable: str, extract_winter: bool):
+def _get_df(scenario: str, weights: xr.DataArray, variable: str, extract_winter: bool):
     """ If extract_winter is True, we extract winter, otherwise we extract spring"""
     folder_path = RCSM6B_PATH / scenario
     assert folder_path.exists()
@@ -32,7 +32,7 @@ def get_df(scenario: str, weights: xr.DataArray, variable: str, extract_winter: 
     sorted_variable_files = sorted(variable_files, key=lambda x: variable_file_to_second_year[x])
     # Loop to extract variable for the area of interest
     time_series_list = []
-    for f in sorted_variable_files[:3]:
+    for f in sorted_variable_files:
         # second_year = variable_file_to_second_year[f]
         ds = xr.open_dataset(f)
         da = ds[variable].weighted(weights)
@@ -70,12 +70,7 @@ def get_df(scenario: str, weights: xr.DataArray, variable: str, extract_winter: 
     df.index.name = 'year'
     return df
 
-
-
-
-
-def get_df_with_npp(warmer_scenario: bool):
-    scenario = 'SSP585' if warmer_scenario else 'SSP370'
+def get_df_ssp(scenario: str):
     couples = [
         ('tos', True),
         ('tos', False),
@@ -83,12 +78,12 @@ def get_df_with_npp(warmer_scenario: bool):
         ('rsntds', True),
     ]
     weights = compute_weights()
-    df = pd.concat([get_df(scenario, weights, v, b) for (v, b) in couples], axis=1)
+    df = pd.concat([_get_df(scenario, weights, v, b) for (v, b) in couples], axis=1)
     df['NPP'] = 106 + 6.2 * df['SSS_MAM'] - 0.086 * df['SST_DJF'] - 1.03 * df['SST_MAM'] + 0.11 * df['Shortwave_DJF']
     return df
 
 
 if __name__ == '__main__':
-    for warmer_scenario in [False, True][:]:
-        df = get_df_with_npp(warmer_scenario)
+    for s in ['SSP585', 'SSP370'][:]:
+        df = get_df_ssp(s)
         print(df.head())
