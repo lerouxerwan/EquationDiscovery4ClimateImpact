@@ -47,7 +47,7 @@ def main_plot_rcp_and_ssp(variable_name: str, show: bool = False):
     window_size = 30
     ax = plt.gca()
     model_to_scenarios = {
-        'RCSM4': ['RCP45', 'RCP85'],
+        'RCSM4': ['HIST', 'RCP45', 'RCP85'],
         'RCSM6B': ['SSP370', 'SSP585'],
     }
     for model, scenarios in model_to_scenarios.items():
