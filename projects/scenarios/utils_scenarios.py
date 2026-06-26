@@ -4,7 +4,7 @@ import pandas as pd
 from plot.by_rcp.utils_rcp import get_rcp_label
 from plot.by_rcp.utils_ssp import get_ssp_label
 from projects.scenarios.get_df_rcsm4 import get_df_rcsm4
-from projects.scenarios.get_df_rcsm6b import get_df_rcsm6b
+from projects.scenarios.get_df_rcsm6 import get_df_rcsm6
 
 
 def get_scenario_label(scenario: str) -> str:
@@ -41,14 +41,13 @@ def get_color(model: str, scenario: str) -> str:
     return model_and_scenario_to_color[(model, scenario)]
 
 
-
 def get_df(model: str, scenario: str) -> pd.DataFrame:
     if model == 'RCSM4':
         return get_df_rcsm4(scenario)
     elif model == 'RCSM6':
         raise NotImplementedError
     elif model == 'RCSM6B':
-        return get_df_rcsm6b(scenario)
+        return get_df_rcsm6(model, scenario)
     else:
         raise ValueError(f"Model {model} not supported")
 

@@ -24,8 +24,8 @@ def main_plot_rcp_and_ssp(variable_name: str, plot_anomaly: bool = True, plot_st
     # Combinations to show
     model_to_scenarios = OrderedDict()
     model_to_scenarios['RCSM4'] = ['RCP45', 'RCP85']
-        # 'RCSM6B': ['SSP370', 'SSP585'],
-    # }
+    # model_to_scenarios['RCSM6B'] = ['SSP370', 'SSP585']
+    # model_to_scenarios['RCSM6'] = ['SSP585']
 
     for model, scenarios in model_to_scenarios.items():
 
