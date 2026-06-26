@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
+import plot
 from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from plot.by_rcp.utils_plot_by_rcp import plot_average_value
@@ -43,7 +44,7 @@ def _get_df(model: str, scenario: str) -> pd.DataFrame:
         raise ValueError(f"Model {model} not supported")
 
 
-def main_plot_rcp_and_ssp(variable_name: str, show: bool = False):
+def main_plot_rcp_and_ssp(variable_name: str, plot_std: bool = True, show: bool = False):
     window_size = 30
     ax = plt.gca()
     model_to_scenarios = {
@@ -55,8 +56,8 @@ def main_plot_rcp_and_ssp(variable_name: str, show: bool = False):
             df, color, label = _get_df(model, scenario), _get_color(model, scenario), _get_label(model, scenario)
             values = np.array(df[variable_name].values)
             years = df.index.values
-            ax.plot(years, values, label=label, color=color, linestyle='', marker='o', markersize=5)
-            plot_average_value(ax, color, values, years, window_size)
+            ax.plot(years, values, label=label, color=color, linestyle='', marker='o', markersize=2)
+            plot_average_value(ax, color, values, years, window_size, plot_std=plot_std)
 
     # Axes labels
     ax.set_xlabel('Year')
@@ -76,6 +77,9 @@ def main_plot_rcp_and_ssp(variable_name: str, show: bool = False):
         plt.Line2D([0], [0], marker='s', linestyle='', color='k', markerfacecolor='k', markersize=10,
                    alpha=0.5),
     ]
+    if not plot_std:
+        legend_handles = legend_handles[:2]
+        legend_labels = legend_labels[:2]
     ax_twin = ax.twinx()
     ax_twin.set_yticks([])
     loc = 'upper center' if variable_name in ['SST_MAM', 'SST_DJF'] else 'lower center'
@@ -89,4 +93,4 @@ def main_plot_rcp_and_ssp(variable_name: str, show: bool = False):
 
 if __name__ == '__main__':
     for name in ['NPP', 'SSS_MAM', 'SST_MAM', 'SST_DJF', 'Shortwave_DJF']:
-        main_plot_rcp_and_ssp(name, show=True)
+        main_plot_rcp_and_ssp(name, plot_std=False, show=True)
