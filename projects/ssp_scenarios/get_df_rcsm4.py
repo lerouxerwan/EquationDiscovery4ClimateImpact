@@ -8,7 +8,7 @@ from projects.paper.section_results.subsect_3_analyze_best_equation.emulator_lin
 
 
 
-def get_df_rcp(scenario: str) -> pd.DataFrame:
+def get_df_rcsm4(scenario: str) -> pd.DataFrame:
     dataset = get_dataset(validation_split=ValidationSplit.NONE)
     variable_names = ['SSS_MAM', 'SST_MAM', 'SST_DJF', 'Shortwave_DJF']
     variable_indexes = [dataset.X_variable_names.index(variable_name) for variable_name in variable_names]
@@ -38,4 +38,4 @@ def get_df_rcp(scenario: str) -> pd.DataFrame:
 
 if __name__ == '__main__':
     for scenario in ['RCP45', 'RCP85']:
-        print(get_df_rcp(scenario))
+        print(get_df_rcsm4(scenario))

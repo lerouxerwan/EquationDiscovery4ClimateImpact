@@ -70,7 +70,7 @@ def _get_df(scenario: str, weights: xr.DataArray, variable: str, extract_winter:
     df.index.name = 'year'
     return df
 
-def get_df_ssp(scenario: str):
+def get_df_rcsm6b(scenario: str):
     couples = [
         ('tos', True),
         ('tos', False),
@@ -85,5 +85,5 @@ def get_df_ssp(scenario: str):
 
 if __name__ == '__main__':
     for s in ['SSP585', 'SSP370'][:]:
-        df = get_df_ssp(s)
+        df = get_df_rcsm6b(s)
         print(df.head())
