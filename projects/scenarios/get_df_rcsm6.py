@@ -1,3 +1,4 @@
+import xarray as xr
 from datetime import datetime
 from pathlib import Path
 
@@ -53,7 +54,19 @@ def get_df(model: str, scenario: str, variable: str, extract_winter: bool):
                 variable_file_to_datetime = {variable_file:  get_datetime(variable_file)
                                              for variable_file in variable_files}
                 sorted_variable_files = sorted(variable_files, key=lambda x: variable_file_to_datetime[x])
-                return extract_function(variable, extract_winter, weights, sorted_variable_files)
+                #  Loop to extract variable for the area of interest
+                time_series_list = []
+                for f in sorted_variable_files:
+                    ds = xr.open_dataset(f)
+                    da = ds[variable].weighted(weights)
+                    time_series = da.mean(dim='x').mean(dim='y')
+                    time_series_list.append(time_series.copy())
+                #  Concatenate time series together
+                da = xr.concat(time_series_list, dim='time')
+                df = extract_function(da, extract_winter)
+                df.rename(columns={variable: f'{variable}_{extract_winter}'}, inplace=True)
+                df.index.name = 'year'
+                return df
     raise ValueError('No file available for extraction')
 
 def get_datetime(variable_file: str) -> datetime:

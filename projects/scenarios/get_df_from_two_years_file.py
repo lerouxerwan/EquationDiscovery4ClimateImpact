@@ -1,18 +1,10 @@
+import pandas as pd
 import xarray as xr
 
 
-def get_df_from_two_years_file(variable: str, extract_winter: bool, weights: xr.DataArray, sorted_variable_files: list[str]):
+def get_df_from_two_years_file(da: xr.DataArray, extract_winter: bool) -> pd.DataFrame:
     """ If extract_winter is True, we extract winter, otherwise we extract spring"""
-    # Loop to extract variable for the area of interest
-    time_series_list = []
-    for f in sorted_variable_files:
-        # second_year = variable_file_to_second_year[f]
-        ds = xr.open_dataset(f)
-        da = ds[variable].weighted(weights)
-        time_series = da.mean(dim='x').mean(dim='y')
-        time_series_list.append(time_series.copy())
-    # Combine time series together
-    da = xr.concat(time_series_list, dim='time')
+    # Remove the first eleven months and the last month of December
     da = da[11:-1]
     # Extract the winter mean or spring mean
     if extract_winter:
@@ -27,7 +19,4 @@ def get_df_from_two_years_file(variable: str, extract_winter: bool, weights: xr.
     else:
         spring_data = da.where(da.time.dt.month.isin([3, 4, 5]))
         means = spring_data.groupby("time.year").mean()[1:]
-    df = means.to_dataframe()
-    df.rename(columns={variable: f'{variable}_{extract_winter}'}, inplace=True)
-    df.index.name = 'year'
-    return df
+    return means.to_dataframe()
