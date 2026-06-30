@@ -1,4 +1,5 @@
+import pandas as pd
 import xarray as xr
 
-def get_df_from_month_file(variable: str, extract_winter: bool, weights: xr.DataArray, variable_files: list[str]):
+def get_df_from_month_file(da: xr.DataArray, extract_winter: bool) -> pd.DataFrame:
     raise NotImplementedError

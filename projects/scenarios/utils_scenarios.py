@@ -36,7 +36,8 @@ def get_color(model: str, scenario: str) -> str:
         ('RCSM4', 'RCP45'): 'tab:purple',
         ('RCSM4', 'RCP85'): 'r',
         ('RCSM6B', 'SSP370'): 'gold',
-        ('RCSM6B', 'SSP585'): 'darkred',
+        ('RCSM6B', 'SSP585'): 'r',
+        ('RCSM6', 'SSP585'): 'r',
     }
     return model_and_scenario_to_color[(model, scenario)]
 
@@ -45,7 +46,7 @@ def get_df(model: str, scenario: str) -> pd.DataFrame:
     if model == 'RCSM4':
         return get_df_rcsm4(scenario)
     elif model == 'RCSM6':
-        raise NotImplementedError
+        return get_df_rcsm6(model, scenario)
     elif model == 'RCSM6B':
         return get_df_rcsm6(model, scenario)
     else:

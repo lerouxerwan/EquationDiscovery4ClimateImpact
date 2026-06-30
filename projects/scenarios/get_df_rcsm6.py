@@ -12,8 +12,10 @@ from utils.utils_path import DATA_PATH
 
 folder_name_to_extraction_function = {
     'two_years': get_df_from_two_years_file,
-    'month': get_df_from_month_file,
-    'decade': get_df_from_decade_file,
+    'month': get_df_from_two_years_file,
+    'decade': get_df_from_two_years_file,
+    # 'month': get_df_from_month_file,
+    # 'decade': get_df_from_decade_file,
 }
 
 def get_df_rcsm6(model: str, scenario: str):
@@ -77,12 +79,5 @@ def get_datetime(variable_file: str) -> datetime:
 
 
 if __name__ == '__main__':
-    df = get_df_rcsm6('RCSM6B', 'SSP585')
+    df = get_df_rcsm6('RCSM6', 'HIST')
     print(df.head())
-
-    # df = get_df('RCSM6B', 'HIST', 'sos', True)
-    # print(df.head())
-    # df = get_df('RCSM6B', 'HIST', 'tos', True)
-    # print(df.head())
-    # df = get_df_rcsm6('RCSM6B', 'HIST')
-    # print(df.head())
