@@ -67,8 +67,12 @@ def main_plot_rcp_and_ssp(variable_name: str, plot_anomaly: bool = True, plot_st
     # Axes labels
     ax.set_xlabel('Year')
     dataset = get_dataset(validation_split=ValidationSplit.NONE)
-    if variable_name == 'NPP':
+    if variable_name in ['NPP', 'NPP_without_shortwave_term', 'NPP_from_shortwave_term']:
         y_label = get_label(dataset.target_label)
+        if variable_name == 'NPP_without_shortwave_term':
+            y_label = y_label.replace('Annual net primary production', 'Annual net primary production wo shortwave term')
+        elif variable_name == 'NPP_from_shortwave_term':
+            y_label = y_label.replace('Annual net primary production', 'Annual net primary production from shortwave term')
     else:
         y_label = dataset.X_labels[dataset.X_variable_names.index(variable_name)]
     if plot_anomaly:
@@ -128,6 +132,7 @@ def main_plot_rcp_and_ssp(variable_name: str, plot_anomaly: bool = True, plot_st
 
 
 if __name__ == '__main__':
-    for name in ['NPP', 'SSS_MAM', 'SST_MAM', 'SST_DJF', 'Shortwave_DJF']:
+    # for name in ['NPP', 'SSS_MAM', 'SST_MAM', 'SST_DJF', 'Shortwave_DJF']:
+    for name in ['NPP', 'NPP_without_shortwave_term', 'NPP_from_shortwave_term']:
         for plot_anomaly in [True, False]:
             main_plot_rcp_and_ssp(name, plot_std=False, show=False, plot_anomaly=plot_anomaly)

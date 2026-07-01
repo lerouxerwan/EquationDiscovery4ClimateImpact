@@ -67,9 +67,11 @@ def get_df(model: str, scenario: str) -> pd.DataFrame:
 
 def get_years_and_values(model: str, scenario: str, variable_name: str) -> tuple[np.ndarray, np.ndarray]:
     df = get_df(model, scenario)
-    years = df.index.values
-    values = np.array(df[variable_name].values)
-    return years, values
+    if variable_name not in df.columns:
+        assert variable_name in ['NPP_without_shortwave_term', 'NPP_from_shortwave_term']
+        df['NPP_without_shortwave_term'] = 106 + 6.2 * df['SSS_MAM'] - 0.086 * df['SST_DJF'] - 1.03 * df['SST_MAM']
+        df['NPP_from_shortwave_term'] = df['NPP'] - df['NPP_without_shortwave_term']
+    return df.index.values, np.array(df[variable_name].values)
 
 if __name__ == '__main__':
     df = get_df('RCSM6B', 'SSP370')
