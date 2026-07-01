@@ -1,22 +1,13 @@
-import xarray as xr
 from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
+import xarray as xr
 
-from projects.scenarios.get_df_from_decade_file import get_df_from_decade_file
-from projects.scenarios.get_df_from_month_file import get_df_from_month_file
-from projects.scenarios.get_df_from_two_years_file import get_df_from_two_years_file
+from projects.scenarios.get_df_for_a_season import get_df_for_a_season
 from projects.scenarios.utils_get_df_rcsm6 import compute_weights
 from utils.utils_path import DATA_PATH
 
-folder_name_to_extraction_function = {
-    'two_years': get_df_from_two_years_file,
-    'month': get_df_from_two_years_file,
-    'decade': get_df_from_two_years_file,
-    # 'month': get_df_from_month_file,
-    # 'decade': get_df_from_decade_file,
-}
 
 def get_df_rcsm6(model: str, scenario: str):
     variable_name_and_extract_winter = [('tos', True), ('tos', False), ('sos', False), ('rsntds', True)]
@@ -48,7 +39,7 @@ def get_new_column_name(column_name: str):
 
 def get_df(model: str, scenario: str, variable: str, extract_winter: bool):
     weights = compute_weights()
-    for folder_name, extract_function in folder_name_to_extraction_function.items():
+    for folder_name in ['month', 'two_years', 'decade']:
         folder_path = Path(DATA_PATH) / model / scenario / folder_name
         if folder_path.exists():
             variable_files = [str(f) for f in folder_path.iterdir() if f.name.startswith(variable)]
@@ -65,7 +56,7 @@ def get_df(model: str, scenario: str, variable: str, extract_winter: bool):
                     time_series_list.append(time_series.copy())
                 #  Concatenate time series together
                 da = xr.concat(time_series_list, dim='time')
-                df = extract_function(da, extract_winter)
+                df = get_df_for_a_season(da, extract_winter)
                 df.rename(columns={variable: f'{variable}_{extract_winter}'}, inplace=True)
                 df.index.name = 'year'
                 return df
@@ -79,5 +70,9 @@ def get_datetime(variable_file: str) -> datetime:
 
 
 if __name__ == '__main__':
-    df = get_df_rcsm6('RCSM6', 'HIST')
-    print(df.head())
+    # df = get_df_rcsm6('RCSM6B', 'HIST')
+    # df = get_df('RCSM6B', 'HIST', 'tos', True)
+    # print(df.head())
+    # df = get_df_rcsm6('RCSM6B', 'SSP370')
+    # print(df.head())
+    pass

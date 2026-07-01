@@ -2,7 +2,7 @@ import pandas as pd
 import xarray as xr
 
 
-def get_df_from_two_years_file(da: xr.DataArray, extract_winter: bool) -> pd.DataFrame:
+def get_df_for_a_season(da: xr.DataArray, extract_winter: bool) -> pd.DataFrame:
     """ If extract_winter is True, we extract winter, otherwise we extract spring"""
     # Remove the first eleven months and the last month of December
     da = da[11:-1]

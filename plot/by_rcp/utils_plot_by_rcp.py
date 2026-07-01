@@ -47,7 +47,7 @@ def plot_average_value(ax: Axes, color: str, values: ndarray, dates: ndarray, wi
         window_values_list = [values[i - shift: i + shift] for i in range(shift, len(dates) - shift)]
         averaged_values = [np.mean(window_values) for window_values in window_values_list]
         years_average = dates[shift:-shift]
-        ax.plot(years_average, averaged_values, color=color, linewidth=linewidth, marker=marker, markevery=20, markersize=markersize)
+        ax.plot(years_average, averaged_values, color=color, linewidth=linewidth, marker=marker, markevery=150, markersize=markersize)
         if plot_std:
             # By default, we consider the default std, i.e. the biased one with ddof = 0
             half_std_values = [np.std(window_values, ddof=1) / 2 for window_values in window_values_list]
