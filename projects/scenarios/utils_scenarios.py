@@ -9,6 +9,9 @@ from projects.scenarios.get_df_rcsm4 import get_df_rcsm4
 from projects.scenarios.get_df_rcsm6 import get_df_rcsm6
 from utils.utils_path import DATA_PATH
 
+START_REFERENCE_YEAR = 1986
+END_REFERENCE_YEAR = 2014
+
 
 def get_scenario_label(scenario: str) -> str:
     return get_rcp_label(scenario) if scenario.startswith('RCP') else get_ssp_label(scenario)

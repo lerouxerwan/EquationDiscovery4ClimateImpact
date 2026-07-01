@@ -8,9 +8,14 @@ from data.utils_dataset.validation_split import ValidationSplit
 from plot.by_rcp.utils_plot_by_rcp import plot_average_value
 from plot.by_split.utlis_plot_selected_equation import get_label
 from projects.scenarios.utils_scenarios import get_color, get_marker, get_years_and_values, \
-    get_color_universal, get_scenario_label
+    get_color_universal, get_scenario_label, START_REFERENCE_YEAR, END_REFERENCE_YEAR
 from utils.utils_plot import show_or_save_plot
 
+def get_average_reference_value(historical_years: np.ndarray, historical_values: np.ndarray):
+    historical_year_to_value = dict(zip(historical_years, historical_values))
+    reference_years = range(START_REFERENCE_YEAR, END_REFERENCE_YEAR)
+    reference_values = [historical_year_to_value[year] for year in reference_years]
+    return np.mean(reference_values)
 
 def main_plot_rcp_and_ssp(variable_name: str, plot_anomaly: bool = True, plot_std: bool = True, show: bool = False):
     # Display parameters
@@ -19,8 +24,6 @@ def main_plot_rcp_and_ssp(variable_name: str, plot_anomaly: bool = True, plot_st
     markersize = 2
     markersize_increase_factor = 6
     linewidth = 4
-    start_reference_year = 1986
-    end_reference_year = 2014
 
     # Combinations to show
     model_to_scenarios = OrderedDict()
@@ -33,12 +36,11 @@ def main_plot_rcp_and_ssp(variable_name: str, plot_anomaly: bool = True, plot_st
         # Model attributes
         marker_model = get_marker(model)
 
-        # Extract the average reference value for the model
+        # Extract historical years and values
         historical_years, historical_values = get_years_and_values(model, 'HIST', variable_name)
-        historical_year_to_value = dict(zip(historical_years, historical_values))
-        reference_years = range(start_reference_year, end_reference_year)
-        reference_values = [historical_year_to_value[year] for year in reference_years]
-        average_reference_value = np.mean(reference_values)
+
+        # Extract the average reference value
+        average_reference_value = get_average_reference_value(historical_years, historical_values)
 
         # Plot the historical anomalies
         historical_plot_values = historical_values - average_reference_value if plot_anomaly else historical_values
@@ -79,7 +81,7 @@ def main_plot_rcp_and_ssp(variable_name: str, plot_anomaly: bool = True, plot_st
         y_label = y_label[0].lower() + y_label[1:]
         y_label, unit = y_label.split(' (')
         y_label = (f'Anomaly of {y_label}\n'
-                   f'with respect to the reference period {start_reference_year}-{end_reference_year} ({unit}')
+                   f'with respect to the reference period {START_REFERENCE_YEAR}-{END_REFERENCE_YEAR} ({unit}')
 
     ax.set_ylabel(y_label)
 
