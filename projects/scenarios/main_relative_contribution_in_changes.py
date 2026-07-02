@@ -12,23 +12,29 @@ from projects.scenarios.utils_scenarios import get_color, get_marker, get_years_
     get_color_universal, get_scenario_label, START_REFERENCE_YEAR, END_REFERENCE_YEAR
 from utils.utils_plot import show_or_save_plot
 
-def get_all_years_and_all_anomalies(model: str, scenario: str, variable_name: str) -> tuple[np.ndarray, np.ndarray]:
+def get_all_years_and_all_absolute_anomalies(model: str, scenario: str, variable_name: str) -> tuple[np.ndarray, np.ndarray]:
     assert scenario != "HIST"
     historical_years, historical_values = get_years_and_values(model, "HIST", variable_name)
     scenario_years, scenario_values = get_years_and_values(model, scenario, variable_name)
     average_reference_value = get_average_reference_value(historical_years, historical_values)
     all_years = np.concatenate([historical_years, scenario_years])
     all_anomalies = np.concatenate([historical_values, scenario_values]) - average_reference_value
-    return all_years, all_anomalies
-
-def get_years_and_ratios_for_anomalies(model: str, scenario: str):
-    years, npp_anomalies = get_all_years_and_all_anomalies(model, scenario, 'NPP')
-    _, npp_anomalies_from_shortwave_term = get_all_years_and_all_anomalies(model, scenario, "NPP_from_shortwave_term")
-    ratio_of_anomalies = 100 * (npp_anomalies_from_shortwave_term / npp_anomalies)
-    return years, ratio_of_anomalies
+    return all_years, np.absolute(all_anomalies)
 
 
-def main_ratio_anomalies(show: bool = False):
+
+def get_relative_contribution_in_changes_of_npp_from_shortwave_term(model: str, scenario: str):
+    years, absolute_anomaly_in_shortwave = get_all_years_and_all_absolute_anomalies(model, scenario, "Shortwave_DJF")
+    _, absolute_anomaly_in_sss_mam = get_all_years_and_all_absolute_anomalies(model, scenario, "SSS_MAM")
+    _, absolute_anomaly_in_sst_mam = get_all_years_and_all_absolute_anomalies(model, scenario, "SST_MAM")
+    _, absolute_anomaly_in_sst_djf = get_all_years_and_all_absolute_anomalies(model, scenario, "SST_DJF")
+    values = 100 * (0.11 + absolute_anomaly_in_shortwave)
+    values /= (106 + 6.2 * absolute_anomaly_in_sss_mam + 0.086 * absolute_anomaly_in_sst_djf + 1.03 * absolute_anomaly_in_sst_mam + 0.11 * absolute_anomaly_in_shortwave)
+    return years, values
+
+
+
+def main_relative_contribution_of_change(show: bool = False):
     # Display parameters
     ax = plt.gca()
     window_size = 30
@@ -51,29 +57,27 @@ def main_ratio_anomalies(show: bool = False):
             color = get_color(model, scenario)
 
             #  Extract the years and values for the ratio
-            years, ratios_for_anomalies = get_years_and_ratios_for_anomalies(model, scenario)
+            years, values = get_relative_contribution_in_changes_of_npp_from_shortwave_term(model, scenario)
 
-            # Plot historical ratios
+            # Plot historical relative contribution of change
             index_start_scenario = list(years).index(2016)
             if j == 0:
-                ax.plot(years[:index_start_scenario], ratios_for_anomalies[:index_start_scenario], label=None,
+                ax.plot(years[:index_start_scenario], values[:index_start_scenario], label=None,
                         color='k', linestyle='', marker=marker_model, markersize=markersize)
             # Plot scenario ratios
-            ax.plot(years[index_start_scenario:], ratios_for_anomalies[index_start_scenario:], label=None, color=color,
+            ax.plot(years[index_start_scenario:], values[index_start_scenario:], label=None, color=color,
                     linestyle='', marker=marker_model, markersize=markersize)
 
             # Plot average anomaly
             first_year_for_average_value = 1986
             first_index_for_average_value = list(years).index(first_year_for_average_value)
-            plot_average_value(ax, color, ratios_for_anomalies[first_index_for_average_value:][::-1],
+            plot_average_value(ax, color, values[first_index_for_average_value:][::-1],
                                years[first_index_for_average_value:][::-1], window_size, False,
                                linewidth, marker_model, markersize_increase_factor * markersize)
 
     # Axes labels
     ax.set_xlabel('Year')
-    ax.set_ylabel('Anomaly of the Shortwave term of NPP divided by\nthe anomaly for the entire NPP equation (%)')
-    lim = 200
-    ax.set_ylim(-lim, lim)
+    ax.set_ylabel('Relative contribution in changes from the Shortwave term (%)')
 
     # Three legends
     markersize_legend = 10
@@ -87,7 +91,7 @@ def main_ratio_anomalies(show: bool = False):
     first_legend_labels =  list(label_to_color.keys())
     first_legend_handles = [plt.Line2D([0], [0], marker='s', linestyle='',
                                        color=color, markerfacecolor=color, markersize=markersize_legend) for color in label_to_color.values()]
-    loc = 'lower left'
+    loc = 'upper left'
     ax.legend(first_legend_handles, first_legend_labels, loc=loc)
 
     # Second legend
@@ -101,7 +105,7 @@ def main_ratio_anomalies(show: bool = False):
     second_legend_labels = second_legend_labels[:2]
     ax_twin = ax.twinx()
     ax_twin.set_yticks([])
-    loc = 'lower right'
+    loc = 'upper right'
     ax_twin.legend(second_legend_handles[1:], second_legend_labels[1:], loc=loc)
     ax.yaxis.grid()
 
@@ -113,11 +117,11 @@ def main_ratio_anomalies(show: bool = False):
 
     ax_twin = ax.twinx()
     ax_twin.set_yticks([])
-    loc = 'lower center'
+    loc = 'upper center'
     ax_twin.legend(third_legend_handles, third_legend_labels, loc=loc)
 
-    plot_name = 'ratio_of_anomalies'
+    plot_name = 'relative_contribution_in_changes'
     show_or_save_plot(plot_name, show=show)
 
 if __name__ == '__main__':
-    main_ratio_anomalies(show=True)
+    main_relative_contribution_of_change(show=False)
