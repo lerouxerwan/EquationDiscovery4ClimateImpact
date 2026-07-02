@@ -70,6 +70,7 @@ def main_relative_contribution_of_change(show: bool = False):
 
             # Plot average anomaly
             first_year_for_average_value = 1986
+            first_year_for_average_value = years[0]
             first_index_for_average_value = list(years).index(first_year_for_average_value)
             plot_average_value(ax, color, values[first_index_for_average_value:][::-1],
                                years[first_index_for_average_value:][::-1], window_size, False,

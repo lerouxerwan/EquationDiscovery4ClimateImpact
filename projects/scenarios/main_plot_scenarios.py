@@ -59,6 +59,7 @@ def main_plot_rcp_and_ssp(variable_name: str, plot_anomaly: bool = True, plot_st
 
             # Plot average anomaly
             first_year_for_average_value = 1986
+            first_year_for_average_value = historical_years[0]
             assert historical_years[0] <= first_year_for_average_value
             first_index_for_average_value = list(historical_years).index(first_year_for_average_value)
             all_years = np.concatenate([historical_years[first_index_for_average_value:], scenario_years])
