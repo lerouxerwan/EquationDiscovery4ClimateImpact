@@ -1,7 +1,6 @@
-![Static Badge](https://img.shields.io/badge/3.12-python-yellow) [![CI](https://github.com/lerouxerwan/EquationDiscovery4ClimateImpact/actions/workflows/tests.yml/badge.svg)](https://github.com/lerouxerwan/EquationDiscovery4ClimateImpact/actions/workflows/tests.yml)
-
-
 ![](utils/utils_README/banner.png)
+
+![Static Badge](https://img.shields.io/badge/3.12-python-yellow) [![test](https://github.com/lerouxerwan/EquationDiscovery4ClimateImpact/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/lerouxerwan/EquationDiscovery4ClimateImpact/actions/workflows/test.yml)
 
 ## Installation
 
