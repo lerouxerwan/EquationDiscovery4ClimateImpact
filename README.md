@@ -19,7 +19,7 @@
 
 - "docs" folder contains some documentation, i.e. code examples and generated figures
 
-- "emulator" folder contains the ML models for the emulation
+- "emulator" folder contains the machine learning models for the emulation
 
 - "optimization" folder contains classes for hyperparameter optimization
 
