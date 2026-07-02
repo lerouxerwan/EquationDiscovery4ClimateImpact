@@ -5,6 +5,7 @@ on:
     branches:
       - 'main'
       - 'ssp_scenarios'
+      - 'doc'
 
 jobs:
   build:
