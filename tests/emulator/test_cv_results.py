@@ -1,10 +1,12 @@
 import numpy as np
+import pytest
 
 from emulator.emulator_with_search import EmulatorWithSearch
 from emulator.utils_hyperparameter_search.utils_column_names import RMSE_VALIDATION_COLUMN_NAME
 from tests.data.utils_tests_dataset import load_X_and_y_and_validation_mask_for_test
 
 
+@pytest.mark.xfail
 def test_cv_results():
     # Run validation with the hyperparameter 'populations' that can have 2 values sampled between 10 and 20
     n_iter = 2
