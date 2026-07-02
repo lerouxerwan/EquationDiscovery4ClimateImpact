@@ -23,18 +23,34 @@ def get_all_years_and_all_absolute_anomalies(model: str, scenario: str, variable
 
 
 
-def get_relative_contribution_in_changes_of_npp_from_shortwave_term(model: str, scenario: str):
-    years, absolute_anomaly_in_shortwave = get_all_years_and_all_absolute_anomalies(model, scenario, "Shortwave_DJF")
+def get_relative_contribution_in_changes_of_npp_from_shortwave_term(model: str, scenario: str, variable_name: str):
+    # Compute absolute anomalies
+    years, absolute_anomaly_in_shortwave_djf = get_all_years_and_all_absolute_anomalies(model, scenario, "Shortwave_DJF")
     _, absolute_anomaly_in_sss_mam = get_all_years_and_all_absolute_anomalies(model, scenario, "SSS_MAM")
     _, absolute_anomaly_in_sst_mam = get_all_years_and_all_absolute_anomalies(model, scenario, "SST_MAM")
     _, absolute_anomaly_in_sst_djf = get_all_years_and_all_absolute_anomalies(model, scenario, "SST_DJF")
-    values = 100 * (0.11 + absolute_anomaly_in_shortwave)
-    values /= (106 + 6.2 * absolute_anomaly_in_sss_mam + 0.086 * absolute_anomaly_in_sst_djf + 1.03 * absolute_anomaly_in_sst_mam + 0.11 * absolute_anomaly_in_shortwave)
+    # Compute contribution of each term
+    contribution_term_sst_mam = 1.03 * absolute_anomaly_in_sst_mam
+    contribution_term_sst_djf = 0.086 * absolute_anomaly_in_sst_djf
+    contribution_term_sss_mam = 6.2 * absolute_anomaly_in_sss_mam
+    contribution_term_shortwave_djf = 0.11 * absolute_anomaly_in_shortwave_djf
+    # Compute relative contribution
+    if variable_name == 'Shortwave_DJF':
+        values = contribution_term_shortwave_djf
+    elif variable_name == "SSS_MAM":
+        values = contribution_term_sss_mam
+    elif variable_name == "SST_MAM":
+       values = contribution_term_sst_mam
+    elif variable_name == 'SST_DJF':
+        values = contribution_term_sst_djf
+    else:
+        raise ValueError(variable_name)
+    values *= 100 / (contribution_term_sss_mam + contribution_term_sst_djf + contribution_term_sst_mam + contribution_term_shortwave_djf)
     return years, values
 
 
 
-def main_relative_contribution_of_change(show: bool = False):
+def main_relative_contribution_of_change(variable_name: str, show: bool = False):
     # Display parameters
     ax = plt.gca()
     window_size = 30
@@ -57,7 +73,7 @@ def main_relative_contribution_of_change(show: bool = False):
             color = get_color(model, scenario)
 
             #  Extract the years and values for the ratio
-            years, values = get_relative_contribution_in_changes_of_npp_from_shortwave_term(model, scenario)
+            years, values = get_relative_contribution_in_changes_of_npp_from_shortwave_term(model, scenario, variable_name)
 
             # Plot historical relative contribution of change
             index_start_scenario = list(years).index(2016)
@@ -78,7 +94,7 @@ def main_relative_contribution_of_change(show: bool = False):
 
     # Axes labels
     ax.set_xlabel('Year')
-    ax.set_ylabel('Relative contribution in changes from the Shortwave term (%)')
+    ax.set_ylabel(f'Relative contribution in changes from {variable_name} term (%)')
 
     # Three legends
     markersize_legend = 10
@@ -121,8 +137,9 @@ def main_relative_contribution_of_change(show: bool = False):
     loc = 'upper center'
     ax_twin.legend(third_legend_handles, third_legend_labels, loc=loc)
 
-    plot_name = 'relative_contribution_in_changes'
+    plot_name = f'relative_contribution_in_changes_for_{variable_name}'
     show_or_save_plot(plot_name, show=show)
 
 if __name__ == '__main__':
-    main_relative_contribution_of_change(show=False)
+    for variable_name in ["Shortwave_DJF", "SSS_MAM", "SST_MAM", "SST_DJF"]:
+        main_relative_contribution_of_change(variable_name, show=False)
