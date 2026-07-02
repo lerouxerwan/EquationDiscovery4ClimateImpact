@@ -3,14 +3,12 @@ from collections import OrderedDict
 import numpy as np
 from matplotlib import pyplot as plt
 
-from data.utils_dataset.npp_season_v1 import get_dataset
-from data.utils_dataset.validation_split import ValidationSplit
 from plot.by_rcp.utils_plot_by_rcp import plot_average_value
-from plot.by_split.utlis_plot_selected_equation import get_label
 from projects.scenarios.main_plot_scenarios import get_average_reference_value
 from projects.scenarios.utils_scenarios import get_color, get_marker, get_years_and_values, \
-    get_color_universal, get_scenario_label, START_REFERENCE_YEAR, END_REFERENCE_YEAR
+    get_color_universal, get_scenario_label
 from utils.utils_plot import show_or_save_plot
+
 
 def get_all_years_and_all_absolute_anomalies(model: str, scenario: str, variable_name: str) -> tuple[np.ndarray, np.ndarray]:
     assert scenario != "HIST"
@@ -61,7 +59,7 @@ def main_relative_contribution_of_change(variable_name: str, show: bool = False)
     model_to_scenarios = OrderedDict()
     model_to_scenarios['RCSM4'] = ['RCP45', 'RCP85']
     model_to_scenarios['RCSM6'] = ['SSP585']
-    model_to_scenarios['RCSM6B'] = ['SSP370', 'SSP585']
+    model_to_scenarios['RCSM6B'] = ['SSP370', 'SSP585'][:]
 
     for model, scenarios in model_to_scenarios.items():
 
@@ -76,7 +74,7 @@ def main_relative_contribution_of_change(variable_name: str, show: bool = False)
             years, values = get_relative_contribution_in_changes_of_npp_from_shortwave_term(model, scenario, variable_name)
 
             # Plot historical relative contribution of change
-            index_start_scenario = list(years).index(2016)
+            index_start_scenario = list(years).index(2015)
             if j == 0:
                 ax.plot(years[:index_start_scenario], values[:index_start_scenario], label=None,
                         color='k', linestyle='', marker=marker_model, markersize=markersize)
@@ -142,4 +140,4 @@ def main_relative_contribution_of_change(variable_name: str, show: bool = False)
 
 if __name__ == '__main__':
     for variable_name in ["Shortwave_DJF", "SSS_MAM", "SST_MAM", "SST_DJF"]:
-        main_relative_contribution_of_change(variable_name, show=False)
+        main_relative_contribution_of_change(variable_name, show=True)

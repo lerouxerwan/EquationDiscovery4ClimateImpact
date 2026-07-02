@@ -4,8 +4,8 @@ import xarray as xr
 
 def get_df_for_a_season(da: xr.DataArray, extract_winter: bool) -> pd.DataFrame:
     """ If extract_winter is True, we extract winter, otherwise we extract spring"""
-    # Remove the first eleven months and the last month of December
-    da = da[11:-1]
+    # Remove the last month of December
+    da = da[:-1]
     # Extract the winter mean or spring mean
     if extract_winter:
         winter_data = da.where(da.time.dt.month.isin([12, 1, 2]))

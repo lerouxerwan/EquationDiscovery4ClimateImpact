@@ -137,8 +137,8 @@ def main_plot_rcp_and_ssp(variable_name: str, plot_anomaly: bool = True, plot_st
 
 
 if __name__ == '__main__':
-    # for name in ['NPP', 'SSS_MAM', 'SST_MAM', 'SST_DJF', 'Shortwave_DJF']:
+    for name in ['NPP', 'SSS_MAM', 'SST_MAM', 'SST_DJF', 'Shortwave_DJF']:
     # for name in ['NPP', 'NPP_without_shortwave_term', 'NPP_from_shortwave_term']:
-    for name in ['relative_contribution_NPP_for_shortwave_term']:
-        for plot_anomaly in [False, True]:
-            main_plot_rcp_and_ssp(name, plot_std=False, show=False, plot_anomaly=plot_anomaly)
+    # for name in ['relative_contribution_NPP_for_shortwave_term']:
+        for plot_anomaly in [True, False]:
+            main_plot_rcp_and_ssp(name, plot_std=False, show=True, plot_anomaly=plot_anomaly)
