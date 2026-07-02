@@ -1,4 +1,5 @@
-[![CI](https://github.com/lerouxerwan/EquationDiscovery4ClimateImpact/actions/workflows/tests.yml/badge.svg)](https://github.com/lerouxerwan/EquationDiscovery4ClimateImpact/actions/workflows/tests.yml)
+![Static Badge](https://img.shields.io/badge/3.12-python-yellow) [![CI](https://github.com/lerouxerwan/EquationDiscovery4ClimateImpact/actions/workflows/tests.yml/badge.svg)](https://github.com/lerouxerwan/EquationDiscovery4ClimateImpact/actions/workflows/tests.yml)
+
 
 ![](utils/utils_README/banner.png)
 
