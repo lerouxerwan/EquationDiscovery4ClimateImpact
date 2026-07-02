@@ -31,7 +31,7 @@
 
 - "tests" folder contain all tests 
 
-- "utils" folder contains transverse classes/functions that are used in all other folders.
+- "utils" folder contains transverse classes/functions used in all other folders.
 
 ## Code convention
 
