@@ -19,7 +19,13 @@
 
 - "docs" folder contains some documentation, i.e. code examples and generated figures
 
-- "projects" folder contains folders to generate results/plots using the 
+- "emulator" folder contains the ML models for the emulation
+
+- "optimization" folder contains classes for hyperparameter optimization
+
+- "plot" folder contains functions to create diagnosis plots for emulators
+
+- "projects" folder contains folders that generate results/plots  
 
 - "results" folder will contain the generated plots
 
