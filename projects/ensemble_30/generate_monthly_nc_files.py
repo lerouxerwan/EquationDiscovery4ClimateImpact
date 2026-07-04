@@ -1,11 +1,11 @@
 import xarray as xr
 from pathlib import Path
 
-from projects.ensemble_30.download_nc_files import get_nc_files_directory, get_filename, get_raw_nc_filepath
+from projects.ensemble_30.download_raw_nc_files import get_raw_nc_files_directory, get_filename, get_raw_nc_filepath
 
 
 def get_monthly_nc_files_directory(variable_name: str) -> Path:
-    return Path(str(get_nc_files_directory(variable_name)).replace('raw', 'csv'))
+    return Path(str(get_raw_nc_files_directory(variable_name)).replace('raw', 'csv'))
 
 def get_monthly_nc_filepath(variable_name, ensemble_id) -> Path:
     return get_monthly_nc_files_directory(variable_name) / get_filename(variable_name, ensemble_id)
