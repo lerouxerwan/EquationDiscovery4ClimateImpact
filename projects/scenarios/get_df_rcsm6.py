@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +17,8 @@ def get_df_rcsm6(model: str, scenario: str):
     variable_name_and_extract_winter = [('tos', True), ('tos', False), ('sos', False), ('rsntds', True)]
     df_list = [get_df(model, scenario, variable_name, extract_winter)
                for (variable_name, extract_winter) in variable_name_and_extract_winter]
+    lengths = [len(df) for df in df_list]
+    assert len(set(lengths)) == 1, f"lengths={lengths} for model={model} and scenario={scenario}"
     df = pd.concat(df_list, axis=1)
     # Convert to the correct unit
     for i, column_name in enumerate(df.columns):
@@ -47,27 +49,41 @@ def get_df(model: str, scenario: str, variable: str, extract_winter: bool):
     sorted_variable_files = get_sorted_variable_files(model, scenario, variable)
     time_series_list = [get_time_series(variable_file, variable, weights) for variable_file in sorted_variable_files]
     # For scenarios that are not historical, we must add the last month of December from the historical
-    if scenario != 'HIST':
+    if (scenario != 'HIST') and extract_winter:
         last_variable_file = get_sorted_variable_files(model, 'HIST', variable)[-1]
         last_time_series = get_time_series(last_variable_file, variable, weights)
         assert last_time_series.interval_write == "1 month"
         last_time_series = last_time_series[-1:]
-        datetime_for_last_time_series = to_datetime(last_time_series[-1:].time.values[0])
+        datetime_for_last_time_series = to_datetime(last_time_series.time.values[0])
         assert datetime_for_last_time_series.year == 2014
         assert datetime_for_last_time_series.month == 12
         time_series_list = [last_time_series] + time_series_list
     #  Concatenate time series together
     da = xr.concat(time_series_list, dim='time')
+    # Always remove the last month of December, to avoid extracting an additional year
+    da = da[:-1]
+    if (scenario == 'HIST') and (not extract_winter):
+        # Remove the first 11 months of the year, when extract spring indicators
+        # This removal is only done for HIST scenario because for future scenario,
+        # a month of December is added at the start, and thus we can extract both winter and spring for the first year
+        da = da[11:]
+    # Extract dataframe for a season
     df = get_df_for_a_season(da, extract_winter)
+    if scenario == "HIST":
+        last_year_for_historical_scenario = df.index.values[-1]
+        assert last_year_for_historical_scenario == 2014
+    else:
+        first_year_for_future_scenario = df.index.values[0]
+        assert first_year_for_future_scenario == 2015
     df.rename(columns={variable: f'{variable}_{extract_winter}'}, inplace=True)
     df.index.name = 'year'
     return df
 
-def to_datetime(date):
+def to_datetime(date: np.datetime64):
     """Converts a numpy datetime64 object to a python datetime object"""
     timestamp = ((date - np.datetime64('1970-01-01T00:00:00'))
                  / np.timedelta64(1, 's'))
-    return datetime.utcfromtimestamp(timestamp)
+    return datetime.fromtimestamp(timestamp, UTC)
 
 def get_sorted_variable_files(model: str, scenario: str, variable: str) -> list[str]:
     for folder_name in ['month', 'two_years', 'decade']:
@@ -80,15 +96,6 @@ def get_sorted_variable_files(model: str, scenario: str, variable: str) -> list[
                 sorted_variable_files = sorted(variable_files, key=lambda x: variable_file_to_datetime[x])
                 return sorted_variable_files
     raise ValueError(f'No file available for extraction for model={model} scenario={scenario} variable={variable}')
-
-
-def get_time_series_list(sorted_variable_files: list[str], variable: str, weights: DataArray) -> list[Any]:
-    #  Loop to extract variable for the area of interest
-    for variable_file in sorted_variable_files:
-        time_series = get_time_series(variable_file, variable, weights)
-        time_series_list.append(time_series.copy())
-    return time_series_list
-
 
 def get_time_series(variable_file: str, variable: str, weights: DataArray) -> DataArray:
     ds = xr.open_dataset(variable_file)
@@ -105,9 +112,5 @@ def get_datetime(variable_file: str) -> datetime:
 
 
 if __name__ == '__main__':
-    # df = get_df_rcsm6('RCSM6B', 'HIST')
-    # df = get_df('RCSM6B', 'HIST', 'tos', True)
-    # print(df.head())
-    # df = get_df_rcsm6('RCSM6B', 'SSP370')
-    # print(df.head())
-    pass
+    # df = get_df_rcsm6('RCSM6', 'HIST')
+    df = get_df_rcsm6('RCSM6', 'SSP585')
