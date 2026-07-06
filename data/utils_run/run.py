@@ -41,6 +41,10 @@ class Run(object):
         return op.join(self.run_directory, 'duration.txt')
 
     @property
+    def filepath_best_params_for_optuna(self) -> str:
+        return op.join(self.run_directory, 'best_params_for_optuna.pkl')
+
+    @property
     def filepath_tensorboard_command(self) -> str:
         return op.join(self.run_directory, 'tensorboard_command.txt')
 
