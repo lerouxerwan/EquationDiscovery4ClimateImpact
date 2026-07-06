@@ -1,29 +1,14 @@
-from typing import OrderedDict, Counter
-
-import matplotlib
 import numpy as np
-import pandas as pd
-from matplotlib import pyplot as plt, patches
+from matplotlib import pyplot as plt
 from matplotlib.cm import ScalarMappable
 from matplotlib.colors import LinearSegmentedColormap
 
 from data.utils_dataset.npp_season_v1 import get_dataset
-from data.utils_dataset.validation_split import ValidationSplit
 from emulator.ordered_equation import OrderedEquation
-from emulator.utils_variable_names import get_variable_signed_names
-from optimization.optimization_marginal.optimization_marginal import OptimizationMarginal
-from optimization.optimization_random.optimization_random_zoo import OptimizationRandom_200, OptimizationRandom_4, \
-    OptimizationRandom_500
-from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import OptimizationPipelineMarginalRandom, \
-    OptimizationPipelineRandom
-from optimization.utils_optimization import get_loss
-from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
 from plot.by_split.utils_equation_str import str_to_new_str
-from projects.paper.utils_paper import validation_sizes, opt_type, validation_splits, opt
-from utils.utils_latex import print_df_latex
-from utils.utils_log import log_info
+from projects.paper.utils_paper import validation_sizes, validation_splits, get_opt
 from utils.utils_plot import show_or_save_plot
-import matplotlib.patches as mpatches
+
 
 def main_plot_signed_frequency(show: bool = False):
     # Build the dictionary with the weights
@@ -32,6 +17,7 @@ def main_plot_signed_frequency(show: bool = False):
     for validation_size in validation_sizes:
         for validation_split in validation_splits:
                 dataset = get_dataset(validation_size=validation_size, validation_split=validation_split)
+                opt = get_opt()
                 emulator = opt.get_top_emulator(dataset.X_train, dataset.y_train, dataset.validation_mask,
                                      dataset.X_variable_names, dataset.X_units, dataset.y_units)
                 ordered_equation = OrderedEquation(emulator.selected_expressions[0], dataset.X_train, dataset.X_variable_names)

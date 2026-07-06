@@ -6,12 +6,10 @@ from matplotlib import pyplot as plt, patches
 from data.utils_dataset.dataset import Dataset
 from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.utils_validation import get_X_and_y
-from data.utils_dataset.validation_split import ValidationSplit
 from emulator.emulator import Emulator
 from optimization.utils_optimization import get_loss
-from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
 from plot.by_split.plot_loss_vs_complexity import load_bar_attributes
-from projects.paper.utils_paper import validation_sizes, validation_splits, opt_type, opt_label
+from projects.paper.utils_paper import validation_sizes, validation_splits, get_opt
 from utils.utils_plot import show_or_save_plot
 
 
@@ -29,7 +27,7 @@ def main_compare_optimization_methods_v2(show: bool):
         for validation_split, validation_size in product(validation_splits, validation_sizes)]
     # Three bars for each dataset, we plot the first bar for all datasets, then the second barn then third bar
     width, coordinates_list = load_bar_attributes(nb_bars=2, x_values_list=list(range(len(datasets))))
-    opt = opt_type('best', ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS, n_jobs=1, timeout_in_seconds=60 * 60, interpretable_mode=True)
+    opt = get_opt()
 
     validation_loss_list = [get_loss(opt, dataset.X_train, dataset.y_train, dataset.validation_mask,
                          dataset.X_variable_names, dataset.X_units, dataset.y_units) for dataset in datasets]

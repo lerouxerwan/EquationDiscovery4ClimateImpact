@@ -1,28 +1,18 @@
 from typing import OrderedDict, Counter
 
 import numpy as np
-import pandas as pd
 from matplotlib import pyplot as plt
 
 from data.utils_dataset.npp_season_v1 import get_dataset
-from data.utils_dataset.validation_split import ValidationSplit
-from emulator.utils_variable_names import get_variable_signed_names
-from optimization.optimization_marginal.optimization_marginal import OptimizationMarginal
-from optimization.optimization_random.optimization_random_zoo import OptimizationRandom_200, OptimizationRandom_4, \
-    OptimizationRandom_500
-from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import OptimizationPipelineMarginalRandom, \
-    OptimizationPipelineRandom
 from optimization.utils_optimization import get_loss
-from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
-from projects.paper.utils_paper import validation_sizes, opt_type, validation_splits
-from utils.utils_latex import print_df_latex
+from projects.paper.utils_paper import validation_sizes, validation_splits, get_opt
 from utils.utils_log import log_info
 from utils.utils_plot import show_or_save_plot
 
 
 def main_plot_frequency_variable(show: bool = False,
                                  signed_name: bool = True):
-    title = f'Compare split for optimization {opt_type.__name__} with signed_name = {signed_name}'
+    title = f'Compare split with signed_name = {signed_name}'
     counter_variable_names = Counter()
     nb_loop = 0
 
@@ -31,7 +21,7 @@ def main_plot_frequency_variable(show: bool = False,
     validation_split_to_variable_names_for_selected_equation = OrderedDict()
     validation_split_to_min_RMSE = {validation_split: np.inf for validation_split in validation_splits}
     for validation_size, color in zip(validation_sizes, ['yellow', 'orange', 'red']):
-        opt = opt_type('best', ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS, n_jobs=-1, timeout_in_seconds=60 * 60, interpretable_mode=True)
+        opt = get_opt()
         validation_split_to_rmse_test_for_selected_equation = OrderedDict()
         for validation_split in validation_splits:
                 dataset = get_dataset(validation_size=validation_size, validation_split=validation_split)
@@ -85,7 +75,7 @@ def main_plot_frequency_variable(show: bool = False,
     # ax.tick_params(axis='x', which='major', labelsize=8, labelrotation=45)
     ax.grid(axis='y')
     plot_name = 'frequency_variable_signed_names' if signed_name else 'frequency_variable_names'
-    plot_name += f' for {opt_type.__name__}'
+    plot_name += f' for {type(opt).__name__}'
     show_or_save_plot(plot_name, show)
 
 

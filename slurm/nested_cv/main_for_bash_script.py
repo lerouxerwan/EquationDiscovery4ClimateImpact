@@ -3,16 +3,10 @@ import sys
 
 from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit
-from optimization.optimization_bayesian.optimization_bayesian_zoo import OptimizationBayesian_500
-from optimization.optimization_marginal.optimization_marginal import OptimizationMarginal
-from optimization.optimization_random.optimization_random_zoo import OptimizationRandom_200, OptimizationRandom_5
-from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import OptimizationPipelineRandom, \
-    OptimizationPipelineMarginalRandom, OptimizationPipelineMarginalBayesian
 from optimization.utils_optimization import get_loss
-from optimization.utils_params.utils_param_name_to_values import ParamNameToValues, get_param_name_to_values
-from plot.by_split.plot_loss_vs_complexity import plot_loss_vs_complexity
-from plot.plot_diagnosis import plot_diagnosis
+from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
 from plot.utils_metric.metric import metric_to_str
+from projects.paper.utils_paper import get_opt
 from utils.utils_log import log_info
 
 
@@ -31,14 +25,13 @@ def main(index2=0, index3=0):
     # Load dataset
     # opt_type = [OptimizationMarginal, OptimizationPipelineRandom, OptimizationPipelineMarginalRandom,
     #             OptimizationPipelineMarginalBayesian, OptimizationBayesian_500][indices[0]]
-    opt_type = OptimizationPipelineRandom
     validation_size = [0.2, 0.25, 0.3][indices[1]]
     validation_split = [ValidationSplit.RANDOM, ValidationSplit.QUANTILE_WITH_BINNING, ValidationSplit.MIDDLE][indices[2]]
     validation_split = [ValidationSplit.START, ValidationSplit.END][indices[2]]
     dataset = get_dataset(validation_size=validation_size, validation_split=validation_split)
 
     # Run optimization
-    opt = opt_type('best', param_name_to_values, n_jobs=n_jobs, timeout_in_seconds=60*60, interpretable_mode=True)
+    opt = get_opt()
     top_emulator, _  = opt.run(dataset.X_train, dataset.y_train, dataset.validation_mask,
              dataset.X_variable_names, dataset.X_units, dataset.y_units)
     rmse_test = get_loss(opt, dataset.X_train, dataset.y_train, dataset.validation_mask,

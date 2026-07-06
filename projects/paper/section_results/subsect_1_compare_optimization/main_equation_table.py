@@ -1,38 +1,21 @@
-from typing import OrderedDict, Counter
+from typing import OrderedDict
 
-import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
 
 from data.utils_dataset.npp_season_v1 import get_dataset
-from data.utils_dataset.validation_split import ValidationSplit
-from emulator.utils_variable_names import get_variable_signed_names
-from optimization.optimization_marginal.optimization_marginal import OptimizationMarginal
-from optimization.optimization_random.optimization_random_zoo import OptimizationRandom_200, OptimizationRandom_4, \
-    OptimizationRandom_500
-from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import OptimizationPipelineMarginalRandom, \
-    OptimizationPipelineRandom
-from optimization.utils_optimization import get_loss
-from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
 from plot.by_split.utils_equation_str import str_to_new_str
-from projects.paper.utils_paper import validation_splits
+from projects.paper.utils_paper import validation_splits, get_opt
 from utils.utils_date import get_season_short_names
-from utils.utils_latex import print_df_latex, str_df_latex
-from utils.utils_log import log_info
-from utils.utils_plot import show_or_save_plot
-
-
+from utils.utils_latex import str_df_latex
 
 
 def main_equation_table(show: bool = False):
-    for opt_type in [OptimizationPipelineRandom][:]:
-        plot_equation_table(opt_type)
+    plot_equation_table()
 
-def plot_equation_table(opt_type: type):
+def plot_equation_table():
     validation_name_to_equation = OrderedDict()
     for validation_size in [0.2, 0.25, 0.3][:]:
-        opt = opt_type('best', ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS, n_jobs=-1, timeout_in_seconds=60 * 60,
-                       interpretable_mode=True)
+        opt = get_opt()
         for validation_split in validation_splits:
             dataset = get_dataset(validation_size=validation_size, validation_split=validation_split)
             emulator = opt.get_top_emulator(dataset.X_train, dataset.y_train, dataset.validation_mask,

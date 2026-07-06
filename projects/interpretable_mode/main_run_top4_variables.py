@@ -1,18 +1,15 @@
 from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit
-from optimization.optmization_pipeline.optimization_pipeline_zoo_500 import OptimizationPipelineRandom
-from optimization.utils_optimization import get_loss
 from optimization.utils_params.utils_param_name_to_values import ParamNameToValues
 from plot.plot_diagnosis import plot_diagnosis
-from utils.utils_log import log_info
+from projects.paper.utils_paper import get_opt
 
 if __name__ == '__main__':
 
     n_jobs = -1
     param_name_to_values = ParamNameToValues.DEFAULT_CENTRED_WO_OPERATORS
-    opt_type = OptimizationPipelineRandom
     validation_split = ValidationSplit.QUANTILE_WITH_BINNING
-    opt = opt_type('best', param_name_to_values, n_jobs=n_jobs, timeout_in_seconds=60 * 60, interpretable_mode=True)
+    opt = get_opt()
 
     # Load the good dataset with the top4 features
     dataset = get_dataset(validation_size=0.2, validation_split=validation_split)
