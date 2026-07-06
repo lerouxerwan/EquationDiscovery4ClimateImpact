@@ -296,7 +296,7 @@ class Emulator(PySRRegressor):
             if self.interpretable_mode:
                 self.activate_interpretable_mode()
         else:
-            log_info(f'Fit with {self.non_default_params}')
+            log_info(f'Start fit with {self.non_default_params}')
             #  Fit with logging and compute its duration
             start_time = time.monotonic()
             # By default, we log with tensorboard the progress for each iteration of the run
@@ -313,6 +313,7 @@ class Emulator(PySRRegressor):
             # Save duration and tensorboard command to file
             log_info(f'Save fit to file')
             run.save_fit(duration, verbose=False)
+            log_info(f'End fit with {self.non_default_params}')
 
         # Post-processing for Gaussian fit,
         if self.gaussian_fit:

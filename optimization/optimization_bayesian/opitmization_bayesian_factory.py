@@ -4,12 +4,14 @@ from typing import Optional, Any, OrderedDict
 
 import optuna
 from numpy import ndarray
+from optuna.samplers import TPESampler
 from pysr.utils import ArrayLike
 
 from emulator.emulator import Emulator
 from optimization.optimization import Optimization
 from utils.utils_log import log_info
 from utils.utils_run import random_seed
+# import timeout_decorator
 
 
 def optimization_bayesian_factory(n_iter: int, nb_top_hyperparameters: Optional[int] =  None):
@@ -40,6 +42,7 @@ def optimization_bayesian_factory(n_iter: int, nb_top_hyperparameters: Optional[
                              y_units: Optional[ArrayLike[str]] = None) -> Emulator:
             log_info(f'Run {self.name}')
 
+            # @timeout_decorator.timeout(60, timeout_exception=optuna.TrialPruned, use_signals=True)
             def objective(trial):
                 objective_emulator = Emulator(**self.get_params(trial, variable_names))
                 try:
@@ -49,7 +52,14 @@ def optimization_bayesian_factory(n_iter: int, nb_top_hyperparameters: Optional[
                     log_info(f"Exception catch : {e}")
                     return math.inf
 
-            study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=random_seed))
+            # TPESampler is the default sampler used by optuna, when sampler argument is None. For further explanations:
+            # https://medium.com/@becaye-balde/bayesian-sorcery-for-hyperparameter-optimization-using-optuna-1ee4517e89a
+            # Note that TPESampler is indeed a Bayesian optimization method
+            # study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=random_seed))
+            # study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=random_seed))
+
+            sampler = TPESampler(seed=random_seed)
+            study = optuna.create_study(direction="minimize", sampler=sampler)
             study.optimize(objective, n_trials=self.n_iter, n_jobs=self.n_jobs)
             emulator = Emulator(**study.best_params)
             emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
