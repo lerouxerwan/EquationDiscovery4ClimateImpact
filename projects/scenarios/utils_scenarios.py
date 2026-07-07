@@ -5,6 +5,7 @@ import pandas as pd
 
 from plot.by_rcp.utils_rcp import get_rcp_label
 from plot.by_rcp.utils_ssp import get_ssp_label
+from projects.ensemble_30.df_for_ensemble_30 import get_mean_df_for_ensemble_30
 from projects.scenarios.get_df_rcsm4 import get_df_rcsm4
 from projects.scenarios.get_df_rcsm6 import get_df_rcsm6
 from utils.utils_path import DATA_PATH
@@ -14,7 +15,10 @@ END_REFERENCE_YEAR = 2014
 
 
 def get_scenario_label(scenario: str) -> str:
-    return get_rcp_label(scenario) if scenario.startswith('RCP') else get_ssp_label(scenario)
+    if scenario == "ENSEMBLE_AVERAGE":
+        return "Ensemble average"
+    else:
+        return get_rcp_label(scenario) if scenario.startswith('RCP') else get_ssp_label(scenario)
 
 def get_marker(model: str) -> str:
     if model == 'RCSM4':
@@ -23,6 +27,8 @@ def get_marker(model: str) -> str:
         return 'v'
     elif model == 'RCSM6B':
         return '^'
+    elif model == "MEOM":
+        return '*'
     else:
          raise NotImplementedError
 
@@ -34,6 +40,7 @@ def get_color_universal(scenario: str):
 
         'SSP370': 'gold',
         'SSP585': 'darkred',
+        'ENSEMBLE_AVERAGE': 'green',
     }
     return scenario_to_color[scenario]
 
@@ -44,6 +51,7 @@ def get_color(model: str, scenario: str) -> str:
         ('RCSM6B', 'SSP370'): 'gold',
         ('RCSM6B', 'SSP585'): 'darkred',
         ('RCSM6', 'SSP585'): 'darkred',
+        ('MEOM', 'ENSEMBLE_AVERAGE'): 'green',
     }
     return model_and_scenario_to_color[(model, scenario)]
 
@@ -59,13 +67,19 @@ def _get_df(model: str, scenario: str) -> pd.DataFrame:
         raise ValueError(f"Model {model} not supported")
 
 def get_df(model: str, scenario: str) -> pd.DataFrame:
-    filepath = Path(DATA_PATH) / model / scenario / "cache.csv"
-    if filepath.exists():
-        df = pd.read_csv(filepath, index_col=0)
+    if model == "MEOM":
+        assert scenario in ['HIST', 'ENSEMBLE_AVERAGE']
+        df = get_mean_df_for_ensemble_30()
+        df = df.loc[:END_REFERENCE_YEAR] if scenario == 'HIST' else df.loc[END_REFERENCE_YEAR+1:]
+        return df
     else:
-        df = _get_df(model, scenario)
-        df.to_csv(filepath)
-    return df
+        filepath = Path(DATA_PATH) / model / scenario / "cache.csv"
+        if filepath.exists():
+            df = pd.read_csv(filepath, index_col=0)
+        else:
+            df = _get_df(model, scenario)
+            df.to_csv(filepath)
+        return df
 
 
 def get_years_and_values(model: str, scenario: str, variable_name: str) -> tuple[np.ndarray, np.ndarray]:

@@ -20,7 +20,7 @@ def get_average_reference_value(historical_years: np.ndarray, historical_values:
 def main_plot_rcp_and_ssp(variable_name: str, plot_anomaly: bool = True, plot_std: bool = True, show: bool = False):
     # Display parameters
     ax = plt.gca()
-    window_size = 30
+    window_size = 20
     markersize = 2
     markersize_increase_factor = 6
     linewidth = 4
@@ -30,6 +30,7 @@ def main_plot_rcp_and_ssp(variable_name: str, plot_anomaly: bool = True, plot_st
     model_to_scenarios['RCSM4'] = ['RCP45', 'RCP85']
     model_to_scenarios['RCSM6'] = ['SSP585']
     model_to_scenarios['RCSM6B'] = ['SSP370', 'SSP585']
+    model_to_scenarios['MEOM'] = ['ENSEMBLE_AVERAGE']
 
     for model, scenarios in model_to_scenarios.items():
 
@@ -141,4 +142,4 @@ if __name__ == '__main__':
     # for name in ['NPP', 'NPP_without_shortwave_term', 'NPP_from_shortwave_term']:
     # for name in ['relative_contribution_NPP_for_shortwave_term']:
         for plot_anomaly in [True, False]:
-            main_plot_rcp_and_ssp(name, plot_std=False, show=True, plot_anomaly=plot_anomaly)
+            main_plot_rcp_and_ssp(name, plot_std=False, show=False, plot_anomaly=plot_anomaly)
