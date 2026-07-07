@@ -7,7 +7,7 @@ from projects.scenarios.utils_get_df_rcsm6 import compute_weights
 
 
 def get_df_seasonal(ensemble_id: int, variable_name: str, extract_winter: bool) -> pd.DataFrame:
-    da_month = get_da_month(variable_name, ensemble_id).rename({'time_counter': 'time'})
+    da_month = get_da_month(variable_name, ensemble_id)
     da_month = da_month.weighted(compute_weights())
     da_month_time_series = da_month.mean(dim='x').mean(dim='y')
     if not extract_winter:

@@ -3,15 +3,14 @@ from pathlib import Path
 
 import xarray as xr
 
-from projects.ensemble_30.utils_ensemble_30 import ENSEMBLE_30_PATH
+from projects.ensemble_30.utils_ensemble_30 import ENSEMBLE_30_PATH, RAW_PATH, WEBPATH
 from utils.utils_bash_call import bash_call
 
-WEBPATH = "https://ige-meom-opendap.univ-grenoble-alpes.fr/thredds/fileServer/meomopendap/extract/MEOM/DATA_NEMOMED12"
+
 
 def get_raw_nc_files_directory(variable_name: str) -> Path:
-    # ensemble_30_path = Path(r'/media/e23lerou/LaCie/Mediation/30_members_ensemble')
-    ensemble_30_path = ENSEMBLE_30_PATH
-    return ensemble_30_path / 'raw' / variable_name
+    # return Path(r'/media/e23lerou/LaCie/Mediation/30_members_ensemble/raw')
+    return RAW_PATH / variable_name
 
 def get_raw_filename(variable_name: str, ensemble_id: int) -> str:
     return f'{"{:03d}".format(ensemble_id)}ENS04_1d_19790627_20201227_{variable_name}.nc'

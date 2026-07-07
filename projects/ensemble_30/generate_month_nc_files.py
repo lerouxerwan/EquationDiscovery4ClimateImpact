@@ -3,11 +3,22 @@ from pathlib import Path
 import xarray as xr
 
 from projects.ensemble_30.download_raw_nc_files import get_raw_da
+from projects.ensemble_30.download_raw_shortwave_nc_files import get_raw_shortwave_da
 from projects.ensemble_30.utils_ensemble_30 import ENSEMBLE_30_PATH
 
+def get_da_shortwave_month():
+    years = list(range(1980, 2017))
+    da_list = [get_raw_shortwave_da(year) for year in years]
+    raise NotImplementedError
 
 def get_da_month(variable_name: str, ensemble_id: int) -> xr.DataArray:
-    return xr.open_dataset(get_month_nc_filepath(variable_name, ensemble_id))[variable_name]
+    if variable_name in ['sosstss', 'sosaline']:
+        da_month = xr.open_dataset(get_month_nc_filepath(variable_name, ensemble_id))[variable_name]
+        return da_month.rename({'time_counter': 'time'})
+    elif variable_name == 'rsntds':
+        raise get_da_shortwave_month()
+    else:
+        raise ValueError(f'variable_name={variable_name}')
 
 def get_month_nc_files_directory(variable_name: str) -> Path:
     return ENSEMBLE_30_PATH / 'month' / variable_name
@@ -40,4 +51,6 @@ def main():
             create_month_nc_files(variable_name, ensemble_id)
 
 if __name__ == '__main__':
-    main()
+    # main()
+    da = get_da_shortwave_month()
+    print(da)
