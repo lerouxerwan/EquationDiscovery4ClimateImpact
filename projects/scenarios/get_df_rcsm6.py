@@ -59,24 +59,22 @@ def get_df(model: str, scenario: str, variable: str, extract_winter: bool):
         assert datetime_for_last_time_series.month == 12
         time_series_list = [last_time_series] + time_series_list
     #  Concatenate time series together
-    da = xr.concat(time_series_list, dim='time')
+    da_month_time_series = xr.concat(time_series_list, dim='time')
     # Always remove the last month of December, to avoid extracting an additional year
-    da = da[:-1]
+    da_month_time_series = da_month_time_series[:-1]
     if (scenario == 'HIST') and (not extract_winter):
         # Remove the first 11 months of the year, when extract spring indicators
         # This removal is only done for HIST scenario because for future scenario,
         # a month of December is added at the start, and thus we can extract both winter and spring for the first year
-        da = da[11:]
+        da_month_time_series = da_month_time_series[11:]
     # Extract dataframe for a season
-    df = get_df_for_a_season(da, extract_winter)
+    df = get_df_for_a_season(da_month_time_series, extract_winter, variable)
     if scenario == "HIST":
         last_year_for_historical_scenario = df.index.values[-1]
         assert last_year_for_historical_scenario == 2014
     else:
         first_year_for_future_scenario = df.index.values[0]
         assert first_year_for_future_scenario == 2015
-    df.rename(columns={variable: f'{variable}_{extract_winter}'}, inplace=True)
-    df.index.name = 'year'
     return df
 
 def to_datetime(date: np.datetime64):
