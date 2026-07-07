@@ -66,7 +66,8 @@ def get_df_for_ensemble_30(ensemble_id: int) -> pd.DataFrame:
     return df
 
 def get_mean_df_for_ensemble_30() -> pd.DataFrame:
-    pass
+    df_list = [get_df_for_ensemble_30(ensemble_id) for ensemble_id in range(1, 31)]
+    return sum(df_list) / len(df_list)
 
 
 
