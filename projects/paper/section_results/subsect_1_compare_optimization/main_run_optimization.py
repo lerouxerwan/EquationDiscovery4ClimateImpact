@@ -17,8 +17,8 @@ def main(validation_size_index: int, validation_split_index: int):
 
 if __name__ == '__main__':
     i = 0
-    for j in [0, 1, 2][-1:]:
-        log_info(f'i={i}, j={j}')
-        main(i,j)
+    j = 2
+    log_info(f'i={i}, j={j}')
+    main(i,j)
 
 
