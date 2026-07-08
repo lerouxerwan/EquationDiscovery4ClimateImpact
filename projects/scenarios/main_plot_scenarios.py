@@ -7,8 +7,8 @@ from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit
 from plot.by_rcp.utils_plot_by_rcp import plot_average_value
 from plot.by_split.utlis_plot_selected_equation import get_label
-from projects.scenarios.utils_scenarios import get_color, get_marker, get_years_and_values, \
-    get_color_universal, get_scenario_label, START_REFERENCE_YEAR, END_REFERENCE_YEAR
+from projects.scenarios.utils_scenarios import get_marker, get_years_and_values, \
+    get_color, get_scenario_label, START_REFERENCE_YEAR, END_REFERENCE_YEAR
 from utils.utils_plot import show_or_save_plot
 
 def get_average_reference_value(historical_years: np.ndarray, historical_values: np.ndarray):
@@ -30,7 +30,9 @@ def main_plot_rcp_and_ssp(variable_name: str, plot_anomaly: bool = True, plot_st
     model_to_scenarios['RCSM4'] = ['RCP45', 'RCP85']
     model_to_scenarios['RCSM6'] = ['SSP585']
     model_to_scenarios['RCSM6B'] = ['SSP370', 'SSP585']
-    model_to_scenarios['MEOM'] = ['ENSEMBLE_AVERAGE']
+    model_to_scenarios['MEOM_MEAN'] = ['ENS04-MED']
+    model_to_scenarios['MEOM_MIN'] = ['ENS04-MED']
+    model_to_scenarios['MEOM_MAX'] = ['ENS04-MED']
 
     for model, scenarios in model_to_scenarios.items():
 
@@ -50,7 +52,7 @@ def main_plot_rcp_and_ssp(variable_name: str, plot_anomaly: bool = True, plot_st
 
         for scenario in scenarios:
             # Scenario attributes
-            color = get_color(model, scenario)
+            color = get_color(scenario)
 
             # Plot scenario anomalies
             scenario_years, scenario_values = get_years_and_values(model, scenario, variable_name)
@@ -97,7 +99,7 @@ def main_plot_rcp_and_ssp(variable_name: str, plot_anomaly: bool = True, plot_st
     label_to_color['Historical'] = 'k'
     for scenarios in model_to_scenarios.values():
         for scenario in scenarios:
-            label_to_color[get_scenario_label(scenario)] = get_color_universal(scenario)
+            label_to_color[get_scenario_label(scenario)] = get_color(scenario)
     first_legend_labels =  list(label_to_color.keys())
     first_legend_handles = [plt.Line2D([0], [0], marker='s', linestyle='',
                                        color=color, markerfacecolor=color, markersize=markersize_legend) for color in label_to_color.values()]
@@ -141,5 +143,5 @@ if __name__ == '__main__':
     for name in ['NPP', 'SSS_MAM', 'SST_MAM', 'SST_DJF', 'Shortwave_DJF']:
     # for name in ['NPP', 'NPP_without_shortwave_term', 'NPP_from_shortwave_term']:
     # for name in ['relative_contribution_NPP_for_shortwave_term']:
-        for plot_anomaly in [True, False]:
-            main_plot_rcp_and_ssp(name, plot_std=False, show=False, plot_anomaly=plot_anomaly)
+        for plot_anomaly in [True, False][1:]:
+            main_plot_rcp_and_ssp(name, plot_std=False, show=True, plot_anomaly=plot_anomaly)

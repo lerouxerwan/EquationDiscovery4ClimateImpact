@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from projects.ensemble_30.generate_month_nc_files import get_da_month
@@ -65,11 +66,42 @@ def get_df_for_ensemble_30(ensemble_id: int) -> pd.DataFrame:
         df.to_csv(filepath)
     return df
 
+"""Aggregate dataframes of ensemble members (minimum, average, or maximum)"""
+
+def get_special_df_for_ensemble_30(model: str):
+    if model.endswith("MEAN"):
+        return get_mean_df_for_ensemble_30()
+    elif model.endswith("MIN"):
+        return get_min_df_for_ensemble_30()
+    elif model.endswith("MAX"):
+        return get_max_df_for_ensemble_30()
+    else:
+        raise ValueError(f'model={model}')
+
+def get_df_list_for_ensemble_30() -> list[pd.DataFrame]:
+    return [get_df_for_ensemble_30(ensemble_id) for ensemble_id in range(1, 31)]
+
 def get_mean_df_for_ensemble_30() -> pd.DataFrame:
-    df_list = [get_df_for_ensemble_30(ensemble_id) for ensemble_id in range(1, 31)]
-    return sum(df_list) / len(df_list)
+    df_list = get_df_list_for_ensemble_30()
+    df_average = sum(df_list) / len(df_list)
+    assert isinstance(df_average, pd.DataFrame)
+    return df_average
 
+def get_min_df_for_ensemble_30() -> pd.DataFrame:
+    df_list = get_df_list_for_ensemble_30()
+    df_min = df_list[0]
+    for other_df in df_list[1:]:
+        df_min = np.minimum(df_min, other_df)
+    assert isinstance(df_min, pd.DataFrame)
+    return df_min
 
+def get_max_df_for_ensemble_30() -> pd.DataFrame:
+    df_list = get_df_list_for_ensemble_30()
+    df_max = df_list[0]
+    for other_df in df_list[1:]:
+        df_max = np.maximum(df_max, other_df)
+    assert isinstance(df_max, pd.DataFrame)
+    return df_max
 
 
 if __name__ == '__main__':

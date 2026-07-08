@@ -5,8 +5,8 @@ from matplotlib import pyplot as plt
 
 from plot.by_rcp.utils_plot_by_rcp import plot_average_value
 from projects.scenarios.main_plot_scenarios import get_average_reference_value
-from projects.scenarios.utils_scenarios import get_color, get_marker, get_years_and_values, \
-    get_color_universal, get_scenario_label
+from projects.scenarios.utils_scenarios import get_marker, get_years_and_values, \
+    get_color, get_scenario_label
 from utils.utils_plot import show_or_save_plot
 
 
@@ -68,7 +68,7 @@ def main_relative_contribution_of_change(variable_name: str, show: bool = False)
 
         for j, scenario in enumerate(scenarios):
             # Scenario attributes
-            color = get_color(model, scenario)
+            color = get_color(scenario)
 
             #  Extract the years and values for the ratio
             years, values = get_relative_contribution_in_changes_of_npp_from_shortwave_term(model, scenario, variable_name)
@@ -102,7 +102,7 @@ def main_relative_contribution_of_change(variable_name: str, show: bool = False)
     label_to_color['Historical'] = 'k'
     for scenarios in model_to_scenarios.values():
         for scenario in scenarios:
-            label_to_color[get_scenario_label(scenario)] = get_color_universal(scenario)
+            label_to_color[get_scenario_label(scenario)] = get_color(scenario)
     first_legend_labels =  list(label_to_color.keys())
     first_legend_handles = [plt.Line2D([0], [0], marker='s', linestyle='',
                                        color=color, markerfacecolor=color, markersize=markersize_legend) for color in label_to_color.values()]
