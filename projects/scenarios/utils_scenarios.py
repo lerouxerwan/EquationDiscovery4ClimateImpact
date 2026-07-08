@@ -13,10 +13,17 @@ from utils.utils_path import DATA_PATH
 START_REFERENCE_YEAR = 1986
 END_REFERENCE_YEAR = 2014
 
+def get_linewidth(model: str) -> float:
+    default_linewidth = 4
+    if model in ['MEOM_MIN', 'MEOM_MAX']:
+        return default_linewidth / 2
+    else:
+        return default_linewidth
+
 
 def get_scenario_label(scenario: str) -> str:
-    if scenario == "ENS04-MED":
-        return "ENS04-MED"
+    if scenario == "ENS04":
+        return "ENS04"
     else:
         return get_rcp_label(scenario) if scenario.startswith('RCP') else get_ssp_label(scenario)
 
@@ -44,13 +51,13 @@ def get_color(scenario: str):
 
         'SSP370': 'gold',
         'SSP585': 'darkred',
-        'ENS04-MED': 'green',
+        'ENS04': 'green',
     }
     return scenario_to_color[scenario]
 
 def get_df(model: str, scenario: str) -> pd.DataFrame:
     if model.startswith("MEOM"):
-        assert scenario in ['HIST', 'ENS04-MED']
+        assert scenario in ['HIST', 'ENS04']
         df = get_special_df_for_ensemble_30(model)
         df = df.loc[:END_REFERENCE_YEAR] if scenario == 'HIST' else df.loc[END_REFERENCE_YEAR+1:]
         return df

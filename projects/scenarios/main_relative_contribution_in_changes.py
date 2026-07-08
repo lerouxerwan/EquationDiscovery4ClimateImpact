@@ -14,7 +14,7 @@ def get_all_years_and_all_absolute_anomalies(model: str, scenario: str, variable
     assert scenario != "HIST"
     historical_years, historical_values = get_years_and_values(model, "HIST", variable_name)
     scenario_years, scenario_values = get_years_and_values(model, scenario, variable_name)
-    average_reference_value = get_average_reference_value(historical_years, historical_values)
+    average_reference_value = get_average_reference_value(model, variable_name)
     all_years = np.concatenate([historical_years, scenario_years])
     all_anomalies = np.concatenate([historical_values, scenario_values]) - average_reference_value
     return all_years, np.absolute(all_anomalies)
