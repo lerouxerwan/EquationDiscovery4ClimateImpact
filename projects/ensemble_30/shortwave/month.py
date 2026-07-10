@@ -1,9 +1,12 @@
+from functools import lru_cache
 import os
 from configparser import Interpolation
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
 import xarray as xr
+from xarray import DataArray, Dataset
 
 from projects.ensemble_30.shortwave.raw import get_da, get_filename
 from projects.ensemble_30.utils_ensemble_30 import ENSEMBLE_30_PATH, WEBPATH
@@ -62,16 +65,27 @@ def extract_interpolated_da(year: int) -> xr.DataArray:
 
 """Load/save da_month_shortwave_med12"""
 
-def get_da_raw_shortwave_med12(year: int):
+def get_da_raw_shortwave_med12(year: int) -> xr.DataArray:
     filename = get_filename(year).replace('3hr', 'month')
     filepath = ENSEMBLE_30_PATH / 'month' / 'qsr' / filename
     if filepath.exists():
-        return xr.open_dataset(filepath)
+        ds = xr.open_dataset(filepath)
+        ds = ds.rename_vars({'__xarray_dataarray_variable__': 'qsr'})
+        da_raw_shortwave_med12 = ds['qsr']
     else:
         da_raw_shortwave_med12 = extract_interpolated_da(year)
         filepath.parent.mkdir(parents=True, exist_ok=True)
         da_raw_shortwave_med12.to_netcdf(filepath)
-        return da_raw_shortwave_med12
+    assert isinstance(da_raw_shortwave_med12, xr.DataArray)
+    return da_raw_shortwave_med12
+
+
+def get_month_shortwave_da():
+    month_shortwave_das = [get_da_raw_shortwave_med12(year) for year in range(1980, 2018)]
+    month_shortwave_da = xr.concat(month_shortwave_das, dim='time')
+    month_shortwave_da = month_shortwave_da.rename({"lat": 'y', "lon": 'x'})
+    return month_shortwave_da[11:-7, :, :]
+
 
 if __name__ == '__main__':
     # get_da_month_shortwave_med12()

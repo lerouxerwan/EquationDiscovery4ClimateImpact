@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
+from projects.ensemble_30.shortwave.month import get_month_shortwave_da
 from projects.ensemble_30.shortwave.raw import get_da
 from projects.ensemble_30.sss_and_sst.month import get_month_nc_filepath, get_month_nc_files_directory
 from projects.ensemble_30.utils_ensemble_30 import ENSEMBLE_30_PATH
@@ -13,24 +14,19 @@ def get_da_month(variable_name: str, ensemble_id: int) -> xr.DataArray:
         da_month = xr.open_dataset(get_month_nc_filepath(variable_name, ensemble_id))[variable_name]
         return da_month.rename({'time_counter': 'time'})
     elif variable_name == 'qsr':
-        return get_da_shortwave_month()
+        return get_month_shortwave_da()
     else:
         raise ValueError(f'variable_name={variable_name}')
 
 
 def get_df_seasonal(ensemble_id: int, variable_name: str, extract_winter: bool) -> pd.DataFrame:
     da_month = get_da_month(variable_name, ensemble_id)
-    if variable_name in ['sosstsst', 'sosaline']:
-        da_month = da_month.weighted(compute_weights())
-        da_month_time_series = da_month.mean(dim='x').mean(dim='y')
-        if not extract_winter:
-            # Remove the first month (December of the previous), when extract spring indicators
-            # Otherwise it creates a spring indicator equal to Nan for the previous year
-            da_month_time_series = da_month_time_series[1:]
-    elif variable_name == 'qsr':
-        da_month_time_series = da_month.mean(dim='x').mean(dim='y')
-    else:
-        raise ValueError(f'variable_name={variable_name}')
+    da_month = da_month.weighted(compute_weights())
+    da_month_time_series = da_month.mean(dim='x').mean(dim='y')
+    if not extract_winter:
+        # Remove the first month (December of the previous), when extract spring indicators
+        # Otherwise it creates a spring indicator equal to Nan for the previous year
+        da_month_time_series = da_month_time_series[1:]
     df = get_df_for_a_season(da_month_time_series, extract_winter, variable_name)
     assert len(df) == 37, len(df)
     return df
@@ -51,8 +47,8 @@ def get_new_column_name(column_name: str):
 
 def _get_df(ensemble_id: int):
     print(f"Run _get_df for ensemble_id={ensemble_id}")
-    variable_name_and_extract_winter = [('sosstsst', True), ('sosstsst', False), ('sosaline', False)]
-    variable_name_and_extract_winter += [('qsr', True)]
+    variable_name_and_extract_winter = [('qsr', True)]
+    variable_name_and_extract_winter += [('sosstsst', True), ('sosstsst', False), ('sosaline', False)]
     df_list = [get_df_seasonal(ensemble_id, variable_name, extract_winter)
                for (variable_name, extract_winter) in variable_name_and_extract_winter]
     df = pd.concat(df_list, axis=1)
@@ -114,24 +110,7 @@ def get_max_df_for_ensemble_30() -> pd.DataFrame:
     assert isinstance(df_max, pd.DataFrame)
     return df_max
 
-def get_da_shortwave_month() -> xr.DataArray:
-    first_year, last_year = 1980, 2017
-    years = list(range(first_year, last_year+1))
-    month_nc_filepath = get_month_nc_files_directory("qsr") / f'{first_year}_{last_year}.nc'
-    month_nc_filepath.parent.mkdir(parents=True, exist_ok=True)
-    if month_nc_filepath.exists():
-        return  xr.open_dataset(month_nc_filepath)["qsr"]
-    else:
-        da_month_list = []
-        for year in years:
-            da_month_list.append(get_da(year).resample(time='1MS').mean(dim='time'))
-        month_da = xr.concat(da_month_list, dim='time')
-        month_da = month_da[11:-7, :, :]
-        month_da.to_netcdf(month_nc_filepath)
-        return month_da
-
-
 if __name__ == '__main__':
-    for ensemble_id in list(range(1, 31))[:1]:
+    for ensemble_id in list(range(1, 31))[:]:
         df = get_df_for_ensemble_30(ensemble_id)
         print(df.head())

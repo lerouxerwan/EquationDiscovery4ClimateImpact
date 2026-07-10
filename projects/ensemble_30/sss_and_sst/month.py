@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from projects.ensemble_30.shortwave.month import get_da_shortwave_month
 from projects.ensemble_30.sss_and_sst.raw import get_raw_da
 from projects.ensemble_30.utils_ensemble_30 import ENSEMBLE_30_PATH
 
@@ -32,8 +31,7 @@ def create_month_nc_files(variable_name: str, ensemble_id: int):
 
 
 if __name__ == '__main__':
+    pass
     # for ensemble_id in list(range(1, 31)):
     #     for variable_name in ['sosstsst', 'sosaline'][:]:
     #         create_month_nc_files(variable_name, ensemble_id)
-    da = get_da_shortwave_month()
-    print(da.time.values)
