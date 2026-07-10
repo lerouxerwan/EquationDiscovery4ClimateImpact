@@ -1,10 +1,21 @@
 import numpy as np
 import pandas as pd
+import xarray as xr
 
-from projects.ensemble_30.generate_month_nc_files import get_da_month
+from projects.ensemble_30.shortwave.raw import get_da
+from projects.ensemble_30.sss_and_sst.month import get_month_nc_filepath, get_month_nc_files_directory
 from projects.ensemble_30.utils_ensemble_30 import ENSEMBLE_30_PATH
 from projects.scenarios.get_df_for_a_season import get_df_for_a_season
 from projects.scenarios.utils_get_df_rcsm6 import compute_weights
+
+def get_da_month(variable_name: str, ensemble_id: int) -> xr.DataArray:
+    if variable_name in ['sosstsst', 'sosaline']:
+        da_month = xr.open_dataset(get_month_nc_filepath(variable_name, ensemble_id))[variable_name]
+        return da_month.rename({'time_counter': 'time'})
+    elif variable_name == 'qsr':
+        return get_da_shortwave_month()
+    else:
+        raise ValueError(f'variable_name={variable_name}')
 
 
 def get_df_seasonal(ensemble_id: int, variable_name: str, extract_winter: bool) -> pd.DataFrame:
@@ -102,6 +113,22 @@ def get_max_df_for_ensemble_30() -> pd.DataFrame:
         df_max = np.maximum(df_max, other_df)
     assert isinstance(df_max, pd.DataFrame)
     return df_max
+
+def get_da_shortwave_month() -> xr.DataArray:
+    first_year, last_year = 1980, 2017
+    years = list(range(first_year, last_year+1))
+    month_nc_filepath = get_month_nc_files_directory("qsr") / f'{first_year}_{last_year}.nc'
+    month_nc_filepath.parent.mkdir(parents=True, exist_ok=True)
+    if month_nc_filepath.exists():
+        return  xr.open_dataset(month_nc_filepath)["qsr"]
+    else:
+        da_month_list = []
+        for year in years:
+            da_month_list.append(get_da(year).resample(time='1MS').mean(dim='time'))
+        month_da = xr.concat(da_month_list, dim='time')
+        month_da = month_da[11:-7, :, :]
+        month_da.to_netcdf(month_nc_filepath)
+        return month_da
 
 
 if __name__ == '__main__':
