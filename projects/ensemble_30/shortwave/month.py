@@ -24,7 +24,13 @@ def download() -> None:
     bash_call(f'wget -P {ENSEMBLE_30_PATH}/ {filepath}')
 
 
-"""Apply bilinear interpolation"""
+"""Apply bilinear interpolation
+Pour chaque point (i,j) de weights_bilinear qui est défini sur une grille MED12. Et bien on a 8 valeurs: 
+	-Les poids d'interpolation sont: wgt01, wgt02, wgt03, wgt04.
+	-Les indices des 4 points d'interpolation sont les variables: src01, src02, src03, src04. 
+	Chaque indicice src0N correspond à un indice iN,jN dans la grille du Shortwave (on balaie la grille selon j d'abord puis selon i)
+Et au final on calcule: ValeurInterpolée(i,j) = wgt01 x Shortwave(i1,j1)  +  wgt02 x Shortwave(i2,j2) +  wgt03 x Shortwave(i3,j3) +  wgt04 x Shortwave(i4,j4) 
+"""
 
 def extract_interpolated_da(year: int) -> xr.DataArray:
     """For a given year, interpolate shortwave to a MED12 grid
