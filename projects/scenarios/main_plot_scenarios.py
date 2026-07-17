@@ -5,11 +5,12 @@ from matplotlib import pyplot as plt
 
 from data.utils_dataset.npp_season_v1 import get_dataset
 from data.utils_dataset.validation_split import ValidationSplit
-from plot.by_rcp.utils_plot_by_rcp import plot_average_value
 from plot.by_split.utlis_plot_selected_equation import get_label
+from projects.scenarios.utils_anomaly import START_REFERENCE_YEAR, END_REFERENCE_YEAR
 from projects.scenarios.utils_scenarios import get_marker, get_years_and_values, \
-    get_color, get_scenario_label, START_REFERENCE_YEAR, END_REFERENCE_YEAR, get_linewidth
+    get_color, get_scenario_label, get_linewidth
 from utils.utils_plot import show_or_save_plot
+
 
 def get_average_reference_value(model: str, variable_name: str):
     model_of_reference = 'MEOM_MEAN' if model.startswith('MEOM') else model

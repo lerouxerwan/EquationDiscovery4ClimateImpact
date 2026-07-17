@@ -10,10 +10,9 @@ from projects.ensemble_30.df_for_ensemble_30 import get_mean_df_for_ensemble_30,
     get_df_for_ensemble_30_only_averages
 from projects.scenarios.get_df_rcsm4 import get_df_rcsm4
 from projects.scenarios.get_df_rcsm6 import get_df_rcsm6
+from projects.scenarios.utils_anomaly import END_REFERENCE_YEAR
 from utils.utils_path import DATA_PATH
 
-START_REFERENCE_YEAR = 1986
-END_REFERENCE_YEAR = 2014
 
 def get_linewidth(model: str) -> float:
     default_linewidth = 4
@@ -57,13 +56,13 @@ def get_color(scenario: str):
     }
     return scenario_to_color[scenario]
 
-def get_df(model: str, scenario: str, window_size_if_only_average: Optional[int] = None) -> pd.DataFrame:
+def get_df(model: str, scenario: str, window_size_if_only_average: Optional[int] = None, compute_anomaly: bool = False) -> pd.DataFrame:
     if model.startswith("MEOM"):
         assert scenario in ['HIST', 'ENS04']
         if window_size_if_only_average is None:
             df = get_special_df_for_ensemble_30(model)
         else:
-            df = get_df_for_ensemble_30_only_averages(model, window_size_if_only_average)
+            df = get_df_for_ensemble_30_only_averages(model, window_size_if_only_average, compute_anomaly)
         df = df.loc[:END_REFERENCE_YEAR] if scenario == 'HIST' else df.loc[END_REFERENCE_YEAR+1:]
         return df
     else:
@@ -81,8 +80,10 @@ def get_df(model: str, scenario: str, window_size_if_only_average: Optional[int]
         return df
 
 
-def get_years_and_values(model: str, scenario: str, variable_name: str, window_size_if_only_average: Optional[int] = None) -> tuple[np.ndarray, np.ndarray]:
-    df = get_df(model, scenario, window_size_if_only_average)
+def get_years_and_values(model: str, scenario: str, variable_name: str,
+                         window_size_if_only_average: Optional[int] = None,
+                         compute_anomaly: bool = False) -> tuple[np.ndarray, np.ndarray]:
+    df = get_df(model, scenario, window_size_if_only_average, compute_anomaly)
     if variable_name not in df.columns:
         assert variable_name in ['NPP_without_shortwave_term', 'NPP_from_shortwave_term', 'relative_contribution_NPP_for_shortwave_term']
         df['NPP_without_shortwave_term'] = 106 + 6.2 * df['SSS_MAM'] - 0.086 * df['SST_DJF'] - 1.03 * df['SST_MAM']
