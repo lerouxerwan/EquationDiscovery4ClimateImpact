@@ -1,11 +1,13 @@
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 
 from plot.by_rcp.utils_rcp import get_rcp_label
 from plot.by_rcp.utils_ssp import get_ssp_label
-from projects.ensemble_30.df_for_ensemble_30 import get_mean_df_for_ensemble_30, get_special_df_for_ensemble_30
+from projects.ensemble_30.df_for_ensemble_30 import get_mean_df_for_ensemble_30, get_special_df_for_ensemble_30, \
+    get_df_for_ensemble_30_only_averages
 from projects.scenarios.get_df_rcsm4 import get_df_rcsm4
 from projects.scenarios.get_df_rcsm6 import get_df_rcsm6
 from utils.utils_path import DATA_PATH
@@ -55,10 +57,13 @@ def get_color(scenario: str):
     }
     return scenario_to_color[scenario]
 
-def get_df(model: str, scenario: str) -> pd.DataFrame:
+def get_df(model: str, scenario: str, window_size_if_only_average: Optional[int] = None) -> pd.DataFrame:
     if model.startswith("MEOM"):
         assert scenario in ['HIST', 'ENS04']
-        df = get_special_df_for_ensemble_30(model)
+        if window_size_if_only_average is None:
+            df = get_special_df_for_ensemble_30(model)
+        else:
+            df = get_df_for_ensemble_30_only_averages(model, window_size_if_only_average)
         df = df.loc[:END_REFERENCE_YEAR] if scenario == 'HIST' else df.loc[END_REFERENCE_YEAR+1:]
         return df
     else:
@@ -76,8 +81,8 @@ def get_df(model: str, scenario: str) -> pd.DataFrame:
         return df
 
 
-def get_years_and_values(model: str, scenario: str, variable_name: str) -> tuple[np.ndarray, np.ndarray]:
-    df = get_df(model, scenario)
+def get_years_and_values(model: str, scenario: str, variable_name: str, window_size_if_only_average: Optional[int] = None) -> tuple[np.ndarray, np.ndarray]:
+    df = get_df(model, scenario, window_size_if_only_average)
     if variable_name not in df.columns:
         assert variable_name in ['NPP_without_shortwave_term', 'NPP_from_shortwave_term', 'relative_contribution_NPP_for_shortwave_term']
         df['NPP_without_shortwave_term'] = 106 + 6.2 * df['SSS_MAM'] - 0.086 * df['SST_DJF'] - 1.03 * df['SST_MAM']

@@ -1,6 +1,9 @@
+from typing import Optional
+
 import numpy as np
 import pandas as pd
 import xarray as xr
+from pandas import DataFrame
 
 from projects.ensemble_30.shortwave.month import get_month_shortwave_da
 from projects.ensemble_30.shortwave.raw import get_da
@@ -75,6 +78,29 @@ def get_df_for_ensemble_30(ensemble_id: int) -> pd.DataFrame:
 
 """Aggregate dataframes of ensemble members (minimum, average, or maximum)"""
 
+def get_df_for_ensemble_30_only_averages(model: str, window_size_if_only_average: Optional[int] = None):
+    assert window_size_if_only_average is not None
+    assert isinstance(window_size_if_only_average, int)
+    assert window_size_if_only_average in [20, 30]
+    # Compute averages for each member
+    df_list = []
+    for df in get_df_list_for_ensemble_30():
+        df.reset_index(inplace=True)
+        df_average = df.rolling(window=window_size_if_only_average, center=True).mean()
+        df_average = df_average.iloc[10: -9]
+        df_average['year'] = (df_average['year'] - 0.5).astype(int)
+        df_average.set_index('year', inplace=True)
+        df_list.append(df_average)
+    if model.endswith("MEAN"):
+        return _get_mean_df(df_list)
+    elif model.endswith("MIN"):
+        return _get_min_df(df_list)
+    elif model.endswith("MAX"):
+        return _get_max_df(df_list)
+    else:
+        raise ValueError(f'model={model}')
+
+
 def get_special_df_for_ensemble_30(model: str):
     if model.endswith("MEAN"):
         return get_mean_df_for_ensemble_30()
@@ -89,13 +115,17 @@ def get_df_list_for_ensemble_30() -> list[pd.DataFrame]:
     return [get_df_for_ensemble_30(ensemble_id) for ensemble_id in range(1, 31)]
 
 def get_mean_df_for_ensemble_30() -> pd.DataFrame:
-    df_list = get_df_list_for_ensemble_30()
+    return _get_mean_df(get_df_list_for_ensemble_30())
+
+def _get_mean_df(df_list: list[pd.DataFrame]) -> pd.DataFrame:
     df_average = sum(df_list) / len(df_list)
     assert isinstance(df_average, pd.DataFrame)
     return df_average
 
 def get_min_df_for_ensemble_30() -> pd.DataFrame:
-    df_list = get_df_list_for_ensemble_30()
+    return _get_min_df(get_df_list_for_ensemble_30())
+
+def _get_min_df(df_list: list[pd.DataFrame]) -> pd.DataFrame:
     df_min = df_list[0]
     for other_df in df_list[1:]:
         df_min = np.minimum(df_min, other_df)
@@ -103,7 +133,9 @@ def get_min_df_for_ensemble_30() -> pd.DataFrame:
     return df_min
 
 def get_max_df_for_ensemble_30() -> pd.DataFrame:
-    df_list = get_df_list_for_ensemble_30()
+    return _get_max_df(get_df_list_for_ensemble_30())
+
+def _get_max_df(df_list: list[pd.DataFrame]) -> pd.DataFrame:
     df_max = df_list[0]
     for other_df in df_list[1:]:
         df_max = np.maximum(df_max, other_df)
