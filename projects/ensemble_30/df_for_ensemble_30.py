@@ -7,7 +7,7 @@ import xarray as xr
 from projects.ensemble_30.shortwave.month import get_month_shortwave_da
 from projects.ensemble_30.sss_and_sst.month import get_month_nc_filepath
 from projects.ensemble_30.utils_ensemble_30 import ENSEMBLE_30_PATH
-from projects.scenarios.get_df_for_a_season import get_df_for_a_season
+from projects.scenarios.get_df_for_a_season import get_df_for_a_season, get_da_seasonal_mean
 from projects.scenarios.utils_anomaly import START_REFERENCE_YEAR, END_REFERENCE_YEAR
 from projects.scenarios.utils_get_df_rcsm6 import compute_weights
 
@@ -20,6 +20,12 @@ def get_da_month(variable_name: str, ensemble_id: int) -> xr.DataArray:
         return get_month_shortwave_da()
     else:
         raise ValueError(f'variable_name={variable_name}')
+
+def get_da_seasonal(variable_name: str, ensemble_id: int, extract_winter: bool):
+    da_month = get_da_month(variable_name, ensemble_id)
+    if variable_name.startswith('sosstsst'):
+        da_month += 273.15
+    return get_da_seasonal_mean(da_month, extract_winter)
 
 
 def get_df_seasonal(ensemble_id: int, variable_name: str, extract_winter: bool) -> pd.DataFrame:

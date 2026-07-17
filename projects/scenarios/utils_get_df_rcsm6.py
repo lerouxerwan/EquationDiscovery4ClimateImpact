@@ -20,7 +20,8 @@ def compute_weights(mask_name: str='LION4') -> xr.DataArray:
     return weights
 
 def compute_mask(mask_name: str='LION4') -> xr.DataArray:
-    return xr.open_dataset(MASK_PATH / "subbasins_dev_MED12.nc")[mask_name].fillna(False)
+    ds = xr.open_dataset(MASK_PATH / "subbasins_dev_MED12.nc")
+    return ds[mask_name].fillna(False)
 
 if __name__ == '__main__':
     weights = compute_weights()
