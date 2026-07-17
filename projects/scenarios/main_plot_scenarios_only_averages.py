@@ -32,7 +32,7 @@ def main_plot_rcp_and_ssp_only_averages(variable_name: str, compute_anomaly: boo
     max_year_for_scenario = None
     min_year_for_historical = None
     min_year_for_historical = 1981
-    max_year_for_scenario = 2017
+    # max_year_for_scenario = 2017
 
     # Combinations to show
     model_to_scenarios = OrderedDict()
@@ -174,7 +174,6 @@ def main_plot_rcp_and_ssp_only_averages(variable_name: str, compute_anomaly: boo
     ax_twin.legend(third_legend_handles, third_legend_labels, loc=loc, ncol=ncol)
 
 
-    ax.set_xticks([1990 + 2 * i for i in range(9)])
     ylim_min, ylim_max = ax.get_ylim()
     ax.set_ylim(ylim_min * rescaling_ylim_min_factor, ylim_max * rescaling_ylim_max_factor)
 

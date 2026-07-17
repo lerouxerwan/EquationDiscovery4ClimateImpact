@@ -38,22 +38,26 @@ def get_da_map_mean(variable_name: str, ensemble_id: int):
         da_seasonal = _get_da_seasonal(variable_name, ensemble_id)
     return da_seasonal.mean(dim='month')
 
-
-def main_plot_map_gol(variable_name: str, ensemble_ids: list[int], show: bool):
-    da_list = [get_da_map_mean(variable_name, ensemble_id) for ensemble_id in ensemble_ids]
-    da_map = xr.concat(da_list, dim='ensemble').mean('ensemble')
+def get_ylabel(variable_name: str):
     if variable_name == 'NPP':
+        # Choose long name
         dataset = get_dataset(validation_split=ValidationSplit.NONE)
         y_label = get_label(dataset.target_label)
-        y_label = y_label.replace(' (', '\n(averaged on all years and ensemble members')
+        return y_label.replace(' (', 'averaged on all\nyears and ensemble members (')
+    else:
+        return variable_name
 
-        da_map.name = 'ANPP averaged on all years and ensemble members'
+
+def main_plot_map_gol(variable_name: str, ensemble_ids: list[int], show: bool):
+    # Averaged over all ensemble members
+    da_list = [get_da_map_mean(variable_name, ensemble_id) for ensemble_id in ensemble_ids]
+    da_map = xr.concat(da_list, dim='ensemble').mean('ensemble')
     # Zoom on the GOL
     weights = compute_weights(mask_name='MEDNW')
     da_map = da_map.where(weights > 0)
     # Show map
     ax = plt.gca()
-    da_map.plot(ax=ax)
+    da_map.plot(ax=ax,     cbar_kwargs = {'label': get_ylabel(variable_name)})
     plot_name = f'{variable_name}'
     show_or_save_plot(plot_name, show=show)
 
@@ -61,5 +65,5 @@ def main_plot_map_gol(variable_name: str, ensemble_ids: list[int], show: bool):
 if __name__ == '__main__':
     # ensemble_ids =  [1]
     ensemble_ids =  list(range(1, 31))
-    for name in ['NPP', 'SSS_MAM', 'SST_MAM', 'SST_DJF', 'Shortwave_DJF'][:1]:
-        main_plot_map_gol(name, ensemble_ids, show=True)
+    for name in ['NPP', 'SSS_MAM', 'SST_MAM', 'SST_DJF', 'Shortwave_DJF'][:]:
+        main_plot_map_gol(name, ensemble_ids, show=False)
