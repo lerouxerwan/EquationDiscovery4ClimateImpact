@@ -89,7 +89,7 @@ def optimization_bayesian_factory(n_iter: int, nb_top_hyperparameters: Optional[
                     pickle.dump(best_params, f)
 
             # Fit with best params
-            emulator = Emulator(**best_params)
+            emulator = Emulator(**self.get_params_emulator(), **best_params)
             emulator.fit(X, y, validation_mask, variable_names, X_units, y_units)
             return emulator
 

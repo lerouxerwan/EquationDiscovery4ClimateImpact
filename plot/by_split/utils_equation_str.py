@@ -7,8 +7,10 @@ from utils.utils_date import get_short_month_names, get_season_short_names
 str_to_new_str = {
     'AnnSea': 'Annual',
     'MerWindStr': 'MWS',
+    'ZonWindStr': 'ZWS',
     'TotalHeat': 'TH',
     'SeaSurfaceStericHeight': 'SSSH',
+    'SeaSurfaceThermostericHeight': 'SSTH',
     'SurfacePressure': 'SP',
     'NetSurfaceHeatFlux': 'NSHF',
 
