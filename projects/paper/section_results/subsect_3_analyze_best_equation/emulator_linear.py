@@ -27,6 +27,12 @@ class EmulatorLinear(LinearRegression):
         else:
             return super().predict(X[:, self.features_indexes])
 
+    def predict_uncertainty_interval_without_gaussian_fit(self, X):
+        assert self.features_indexes is not None
+        uncertainty_intervals = np.ones(shape=(X.shape[0], 2))
+        uncertainty_intervals[:, 0] *= -1
+        return uncertainty_intervals
+
     @property
     def intercept(self) -> float:
         return self.intercept_

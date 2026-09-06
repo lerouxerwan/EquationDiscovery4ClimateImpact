@@ -65,6 +65,14 @@ def plot_scatter_and_time_series(emulator: Emulator, dataset: Dataset, show: Opt
             common_kwargs = {'linestyle': '', 'color': color}
             ax.plot(years, y, marker='o', **common_kwargs)
             ax.plot(years, y_predicted, marker='*', **common_kwargs)
+
+            if emulator.gaussian_fit or hasattr(emulator, "predict_uncertainty_interval_without_gaussian_fit"):
+                if emulator.gaussian_fit:
+                    uncertainty_intervals = emulator.predict_uncertainty_interval(X)
+                else:
+                    uncertainty_intervals = emulator.predict_uncertainty_interval_without_gaussian_fit(X)
+                ax.fill_between(years, y_predicted + uncertainty_intervals[:, 0], y_predicted + uncertainty_intervals[:, 1],
+                                color='grey', alpha=0.2, label='90% uncertainty interval')
             # Annotate equation and metric box
             #  Add legend and labels
             ax.set_xlabel('Years')

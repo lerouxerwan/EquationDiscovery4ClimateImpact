@@ -38,9 +38,13 @@ def _plot_scatter(ax, dataset, emulator, fig, split_name, X, y, y_predicted, yea
         ax.scatter(y, y_predicted, c=c, cmap=cmap, vmin=vmin, vmax=vmax)
 
     # Add error bar
-    if emulator.gaussian_fit:
-        yerr = np.abs(emulator.predict_uncertainty_interval(X).transpose())
-        ax.errorbar(y, y_predicted, xerr=None, yerr=yerr, fmt='none', ls='none', ecolor='k', capsize=1.)
+    if emulator.gaussian_fit or hasattr(emulator, "predict_uncertainty_interval_without_gaussian_fit"):
+        if emulator.gaussian_fit:
+            uncertainty_intervals = emulator.predict_uncertainty_interval(X)
+        else:
+            uncertainty_intervals = emulator.predict_uncertainty_interval_without_gaussian_fit(X)
+        yerr = np.abs(uncertainty_intervals.transpose())
+        ax.errorbar(y, y_predicted, xerr=None, yerr=yerr, fmt='none', ls='none', ecolor='grey', capsize=1.)
 
     if add_colorbar:
         norm = matplotlib.colors.BoundaryNorm(c, cmap.N)
