@@ -13,6 +13,7 @@ from data.utils_dataset.validation_split import ValidationSplit
 from plot.utils_metric.metric import Metric, compute_loss, metric_to_str
 from projects.paper.section_results.subsect_3_analyze_best_equation.emulator_linear import EmulatorLinear
 from utils.utils_latex import print_df_latex
+from utils.utils_run import random_seed
 
 
 def get_scores(emulator, metrics: list[Metric]):
@@ -42,14 +43,16 @@ def get_scores(emulator, metrics: list[Metric]):
 
 def compare_emulators():
     metrics = [Metric.RMSE, Metric.MRAE, Metric.COR]
-    emulators = [EmulatorLinear(), Lasso(), ElasticNet(), RandomForestRegressor(), MLPRegressor() ,XGBRegressor()]
-    names = ['Linear regression', 'Lasso', "ElasticNet", "RandomForest", "MLP", "XGBoost"]
+    units = [' (gC year^{-1})', ' (\\%)', '']
+    emulators = [EmulatorLinear(), Lasso(), ElasticNet(),
+                 RandomForestRegressor(random_state=random_seed), MLPRegressor(random_state=random_seed) ,XGBRegressor()]
+    names = ['Linear regression', 'Lasso', "Elastic Net", "Random Forest", "MLP", "XGBoost"]
     emulator_name_to_scores = OrderedDict()
     for name, emulator in zip(names, emulators):
         print(f'Compute scores for {name}')
         emulator_name_to_scores[name] = get_scores(emulator, metrics)
     print(emulator_name_to_scores)
-    index = [metric_to_str[metric] for metric in metrics]
+    index = [metric_to_str[metric] + unit for metric, unit in zip(metrics, units)]
     df = pd.DataFrame(emulator_name_to_scores, index=index).transpose()
     print(df.head())
     print_df_latex(df, index=True)
