@@ -4,13 +4,15 @@ from plot.by_split.plot_scatter import plot_scatter_side_by_side
 from plot.by_split.plot_scatter_and_time_series import plot_scatter_and_time_series
 from plot.by_split.plot_time_series_side_by_side import plot_time_series_side_by_side
 from projects.paper.section_results.subsect_3_analyze_best_equation.emulator_linear import EmulatorLinear
+from projects.paper.section_results.subsect_3_analyze_best_equation.emulator_linear_with_uncertainty import \
+    EmulatorLinearWithUncertainty
 
 
 def main_diagnosis_baseline_equation_with_four_selection_features(show: bool = False):
     dataset = get_dataset(validation_split=ValidationSplit.NONE)
     variable_names = ['SSS_MAM', 'SST_MAM', 'SST_DJF', 'Shortwave_DJF']
     variable_indexes = [dataset.X_variable_names.index(variable_name) for variable_name in variable_names]
-    emulator = EmulatorLinear(variable_names=variable_names, features_indexes=variable_indexes)
+    emulator = EmulatorLinearWithUncertainty(variable_names=variable_names, features_indexes=variable_indexes)
     assert emulator.variable_names is not None
     assert emulator.features_indexes is not None
     emulator.fit(dataset.X_train, dataset.y_train)
