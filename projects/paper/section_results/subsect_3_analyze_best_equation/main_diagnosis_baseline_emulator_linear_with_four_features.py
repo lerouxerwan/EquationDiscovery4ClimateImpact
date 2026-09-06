@@ -11,6 +11,8 @@ def main_diagnosis_baseline_equation_with_four_selection_features(show: bool = F
     variable_names = ['SSS_MAM', 'SST_MAM', 'SST_DJF', 'Shortwave_DJF']
     variable_indexes = [dataset.X_variable_names.index(variable_name) for variable_name in variable_names]
     emulator = EmulatorLinear(variable_names=variable_names, features_indexes=variable_indexes)
+    assert emulator.variable_names is not None
+    assert emulator.features_indexes is not None
     emulator.fit(dataset.X_train, dataset.y_train)
     # print(emulator.selected_expr)
     # plot_scatter_side_by_side(emulator, dataset, show=show)

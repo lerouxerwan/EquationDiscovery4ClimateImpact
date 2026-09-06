@@ -5,7 +5,7 @@ from utils.utils_plot import show_or_save_plot
 
 
 def print_df_latex(df: pd.DataFrame, column_format=None, index: bool =False):
-    print(str_df_latex(column_format, df, index))
+    print(str_df_latex(df, column_format, index))
 
 
 def str_df_latex(df: pd.DataFrame, column_format=None, index: bool =False) -> str:

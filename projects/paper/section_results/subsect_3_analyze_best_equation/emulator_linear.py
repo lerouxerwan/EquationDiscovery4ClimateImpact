@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, Optional
 
 import numpy as np
 from sklearn.linear_model import LinearRegression
@@ -10,18 +10,22 @@ from plot.by_split.utils_equation_str import get_equation_from_expr, postprocess
 
 class EmulatorLinear(LinearRegression):
     def __init__(self, *, fit_intercept=True, copy_X=True, n_jobs=None, positive=False,
-                 variable_names: list[str]=None, features_indexes: list[int]=None):
+                 variable_names: Optional[list[str]]=None, features_indexes: Optional[list[int]]=None):
         super().__init__(fit_intercept=fit_intercept, copy_X=copy_X, n_jobs=n_jobs, positive=positive)
-        assert variable_names is not None
-        assert features_indexes is not None
         self.variable_names = variable_names
         self.features_indexes = features_indexes
 
     def fit(self, X, y, sample_weight=None):
-        return super().fit(X[:, self.features_indexes], y, sample_weight)
+        if self.features_indexes is None:
+            return super().fit(X, y, sample_weight)
+        else:
+            return super().fit(X[:, self.features_indexes], y, sample_weight)
 
     def predict(self, X):
-        return super().predict(X[:, self.features_indexes])
+        if self.features_indexes is None:
+            return super().predict(X)
+        else:
+            return super().predict(X[:, self.features_indexes])
 
     @property
     def intercept(self) -> float:
