@@ -10,7 +10,7 @@ from emulator.is_linear import is_linear
 from projects.paper.utils_paper import validation_sizes, validation_splits, get_opt
 
 
-def main_check_equations(show: bool):
+def main_check_non_linear_equations(show: bool):
     datasets = [get_dataset(validation_size=validation_size, validation_split=validation_split)
         for validation_split, validation_size in product(validation_splits, validation_sizes)]
     opt = get_opt()
@@ -51,4 +51,4 @@ def main_check_equations(show: bool):
 
 
 if __name__ == '__main__':
-    main_check_equations(False)
+    main_check_non_linear_equations(False)
