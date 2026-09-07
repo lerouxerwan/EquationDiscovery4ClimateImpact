@@ -46,6 +46,10 @@ def plot_scatter_and_time_series(emulator: Emulator, dataset: Dataset, show: Opt
         y_list = []
         y_predicted_list = []
         years_list = []
+
+        uncertainty_years = []
+        uncertainty_upper = []
+        uncertainty_lower = []
         for years, y, color, label in list_of_years_and_y_and_color_and_label:
             years = [int(year) for year in years]
             if rcp_name == 'RCP85':
@@ -71,14 +75,18 @@ def plot_scatter_and_time_series(emulator: Emulator, dataset: Dataset, show: Opt
                     uncertainty_intervals = emulator.predict_uncertainty_interval(X)
                 else:
                     uncertainty_intervals = emulator.predict_uncertainty_interval_without_gaussian_fit(X)
-                ax.fill_between(years, y_predicted + uncertainty_intervals[:, 0], y_predicted + uncertainty_intervals[:, 1],
-                                color='grey', alpha=0.2, label='90% uncertainty interval')
+                uncertainty_years.append(years)
+                uncertainty_lower.append(y_predicted + uncertainty_intervals[:, 0])
+                uncertainty_upper.append(y_predicted + uncertainty_intervals[:, 1])
             # Annotate equation and metric box
             #  Add legend and labels
             ax.set_xlabel('Years')
             ax.set_ylabel(get_label(dataset.target_label))
             ax.legend(loc='upper right')
             ax.set_ylim((ymin, ymax))
+        # Plot uncertainty in shaded
+        ax.fill_between(np.concatenate(uncertainty_years), np.concatenate(uncertainty_lower), np.concatenate(uncertainty_upper),
+                        color='grey', alpha=0.2, label='90% uncertainty interval')
         # Plot average
         window_size = 30
         shift = window_size // 2
