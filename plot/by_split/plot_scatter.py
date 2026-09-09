@@ -27,16 +27,7 @@ def plot_scatter(emulator: Emulator, dataset: Dataset, show: Optional[bool] = Fa
 
 def _plot_scatter(ax, dataset, emulator, fig, split_name, X, y, y_predicted, years, ymax, ymin,
                   add_colorbar: bool = True, cmap = None, vmin_and_vmax = None, letter=None):
-    print(f"Count values below 26 for {split_name}:", sum([v <= 26 for v in y]))
-    if cmap is None:
-        cmap = matplotlib.cm.viridis
-    c = years
-    if vmin_and_vmax is None:
-        ax.scatter(y, y_predicted, c=c, cmap=cmap)
-    else:
-        vmin, vmax = vmin_and_vmax
-        ax.scatter(y, y_predicted, c=c, cmap=cmap, vmin=vmin, vmax=vmax)
-
+    # print(f"Count values below 26 for {split_name}:", sum([v <= 26 for v in y]))
     # Add error bar
     if emulator.gaussian_fit or hasattr(emulator, "predict_uncertainty_interval_without_gaussian_fit"):
         if emulator.gaussian_fit:
@@ -44,7 +35,18 @@ def _plot_scatter(ax, dataset, emulator, fig, split_name, X, y, y_predicted, yea
         else:
             uncertainty_intervals = emulator.predict_uncertainty_interval_without_gaussian_fit(X)
         yerr = np.abs(uncertainty_intervals.transpose())
-        ax.errorbar(y, y_predicted, xerr=None, yerr=yerr, fmt='none', ls='none', ecolor='grey', capsize=1.)
+        ax.errorbar(y, y_predicted, xerr=None, yerr=yerr, fmt='none', ls='none', ecolor='lightgrey', capsize=1.)
+
+    if cmap is None:
+        cmap = matplotlib.cm.viridis
+    c = years
+    if vmin_and_vmax is None:
+        ax.scatter(y, y_predicted, c=c, cmap=cmap, zorder=10)
+    else:
+        vmin, vmax = vmin_and_vmax
+        ax.scatter(y, y_predicted, c=c, cmap=cmap, vmin=vmin, vmax=vmax, zorder=10)
+
+
 
     if add_colorbar:
         norm = matplotlib.colors.BoundaryNorm(c, cmap.N)
