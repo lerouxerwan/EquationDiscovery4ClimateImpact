@@ -16,7 +16,7 @@ def load_dataset_values(csv_filename: str, rcp_name_train: str, rcp_name_test: O
         -> tuple[
             ndarray, ndarray, Optional[ndarray], Optional[ndarray], ndarray, Optional[ndarray],
             Optional[list[str]], Optional[list[str]], Optional[list[str]], Optional[list[str]], list[str], list[str],
-            ndarray[bool]
+            ndarray[bool], int
         ]:
     """Load dataset values from a csv filename.
         -Values for each set (train and test) including X an array, y an array, years an array of int.
