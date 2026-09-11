@@ -11,12 +11,12 @@ from sklearn.metrics import make_scorer, root_mean_squared_error
 from sklearn.model_selection import RandomizedSearchCV
 
 from emulator.utils_hyperparameter_search.utils_params_distribution import get_param_distributions
+from plot.utils_metric.metric import compute_loss
 from projects.paper.section_results.review_cross_validation_baselines.model.model import Model
 from utils.utils_log import log_info
 from utils.utils_path import DATA_PATH
 from utils.utils_run import random_seed
 
-ERROR_FUNCTION = root_mean_squared_error
 
 @dataclass
 class CrossValidator(object):
@@ -30,7 +30,7 @@ class CrossValidator(object):
             estimator=self.model.estimator_type(),
             param_distributions=get_param_distributions(self.model.param_grid),
             cv=self.cv,
-            scoring={'RMSE': make_scorer(ERROR_FUNCTION, greater_is_better=False)},
+            scoring={'RMSE': make_scorer(root_mean_squared_error, greater_is_better=False)},
             refit='RMSE',
             return_train_score=True,
             n_jobs=self.n_jobs,
@@ -40,7 +40,7 @@ class CrossValidator(object):
         self.best_estimator = None
 
 
-    def fit(self, X, y):
+    def fit_estimator(self, X, y):
         """Fit best estimator with the data"""
         filename = f'{self.model.estimator_type.__name__}_{len(self.cv)}cv_{X.shape[1]}features.pkl'
         filepath = Path(DATA_PATH) / 'cross_validation' / filename
@@ -56,7 +56,7 @@ class CrossValidator(object):
             pickle.dump(self.best_estimator, open(filepath, "wb"))
         assert self.best_estimator is not None
 
-    def error(self, X, y):
+    def compute_loss(self, X, y, metric):
         """Predict with best estimator"""
         y_predict = self.best_estimator.predict(X)
-        return ERROR_FUNCTION(y, y_predict)
+        return compute_loss(y, y_predict, metric)

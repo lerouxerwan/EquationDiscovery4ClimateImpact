@@ -15,5 +15,9 @@ class Model(ABC):
     def param_grid(self) -> dict[str, list[Any]]:
         raise NotImplementedError
 
+    @property
+    def name(self):
+        return self.estimator_type.__name__
+
 
 
