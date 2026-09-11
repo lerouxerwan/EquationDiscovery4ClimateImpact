@@ -13,4 +13,8 @@ class ModelRandomForest(Model):
 
     @property
     def param_grid(self) -> dict[str, list[Any]]:
-        return {'n_estimators': [5, 10]}
+        return {
+            'n_estimators': [10, 1000],
+            "criterion" :["squared_error", "absolute_error", "friedman_mse", "poisson"],
+            "max_features": ["sqrt", "log2", None],
+        }
