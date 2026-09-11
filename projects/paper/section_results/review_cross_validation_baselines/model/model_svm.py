@@ -11,9 +11,6 @@ class ModelSVM(Model):
     def estimator_type(self) -> type:
         return SVR
 
-    def get_estimator(self):
-        return SVR()
-
     @property
     def param_grid(self) -> dict[str, list[Any]]:
         return {'C': [1.0, 10.0]}
