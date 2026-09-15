@@ -24,6 +24,16 @@ def median_absolute_error(y_true: ndarray, y_pred: ndarray) -> float:
 def spread_ratio(y_true: ndarray, y_pred: ndarray) -> float:
     return np.std(y_pred) / np.std(y_true)
 
+def spread_relative_absolute_error(y_true: ndarray, y_pred: ndarray) -> float:
+    spread_predicted = np.std(y_pred)
+    spread_true = np.std(y_true)
+    return float(100 * (spread_predicted - spread_true) / spread_true)
+
+
+def standard_deviation_relative_error_detrended(y_true: ndarray, y_pred: ndarray) -> float:
+    return spread_relative_absolute_error(_get_residuals(y_true), _get_residuals(y_pred))
+
+
 def correlation(y_true: ndarray, y_pred: ndarray) -> float:
     assert (1 <= y_true.ndim <= 2)
     if y_true.ndim == 2:
@@ -42,6 +52,11 @@ def correlation(y_true: ndarray, y_pred: ndarray) -> float:
 
 def correlation_detrended(y_true: ndarray, y_pred: ndarray) -> float:
     return correlation(_get_residuals(y_true), _get_residuals(y_pred))
+
+
+def correlation_detrended(y_true: ndarray, y_pred: ndarray) -> float:
+    return correlation(_get_residuals(y_true), _get_residuals(y_pred))
+
 
 def _get_residuals(y: ndarray) -> ndarray:
     model = LinearRegression()

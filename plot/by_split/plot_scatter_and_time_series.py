@@ -85,8 +85,9 @@ def plot_scatter_and_time_series(emulator: Emulator, dataset: Dataset, show: Opt
             ax.legend(loc='upper right')
             ax.set_ylim((ymin, ymax))
         # Plot uncertainty in shaded
-        ax.fill_between(np.concatenate(uncertainty_years), np.concatenate(uncertainty_lower), np.concatenate(uncertainty_upper),
-                        color='grey', alpha=0.2, label='90% uncertainty interval')
+        if len(uncertainty_years) > 0:
+            ax.fill_between(np.concatenate(uncertainty_years), np.concatenate(uncertainty_lower), np.concatenate(uncertainty_upper),
+                            color='grey', alpha=0.2, label='90% uncertainty interval')
         # Plot average
         window_size = 30
         shift = window_size // 2
