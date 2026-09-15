@@ -22,7 +22,18 @@ class Model(ABC):
 
     @property
     def name(self):
-        return self.estimator_type.__name__
+        name = self.estimator_type.__name__
+        name = name.replace('Regressor', '')
+        return self.CamelSplitMethod(name)
 
+    @staticmethod
+    def CamelSplitMethod(string_value):
+        result = [string_value[0]]
+        for char in string_value[1:]:
+            if char.isupper():
+                result.extend([' ', char])
+            else:
+                result.append(char)
+        return ''.join(result)
 
 

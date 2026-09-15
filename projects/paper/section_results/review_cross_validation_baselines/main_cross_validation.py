@@ -38,7 +38,7 @@ def get_scores(model: Model, metrics: list[Metric], fast: bool):
 def main_cross_validation(fast: bool):
     metrics = [Metric.RMSE, Metric.MRAE, Metric.COR]
     units = [' (gC year^{-1})', ' (\\%)', '']
-    models = [ModelXGB(), ModelRandomForest(), ModelElasticNet(), ModelLasso()]
+    models = [ModelXGB(), ModelRandomForest(), ModelElasticNet(), ModelLasso()][::-1]
     model_name_to_scores = OrderedDict()
     for model in models:
         name = model.name
@@ -46,7 +46,15 @@ def main_cross_validation(fast: bool):
         model_name_to_scores[name] = get_scores(model, metrics, fast)
     print(model_name_to_scores)
     index = [metric_to_str[metric] + unit for metric, unit in zip(metrics, units)]
-    df = pd.DataFrame(model_name_to_scores, index=index).transpose()
+    df = pd.DataFrame(model_name_to_scores, index=index)
+    # Add the result from the manuscript
+    our_approach_name = 'Proposed approach'
+    df[our_approach_name] = ['1.68 \\& 1.67', '4.39 \\& 4.32', '0.65 \\& 0.61']
+    # Print transposed df
+    df = df.transpose()
+    cross_validation_column_name = 'Objective of cross validation is to identify the'
+    df[cross_validation_column_name] = 'set of hyperparameters for the final model'
+    df.loc[our_approach_name, cross_validation_column_name] = 'form and features for the final equation'
     print(df.head())
     print_df_latex(df, index=True)
 

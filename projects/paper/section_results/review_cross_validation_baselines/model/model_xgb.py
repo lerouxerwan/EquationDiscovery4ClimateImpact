@@ -18,3 +18,8 @@ class ModelXGB(Model):
             "learning_rate" :[1e-2, 1],
             "max_depth": [4, 8],
         }
+
+    @property
+    def name(self):
+        return 'XGBoost'
+
