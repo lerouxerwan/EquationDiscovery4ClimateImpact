@@ -14,8 +14,9 @@ from projects.paper.section_results.review_cross_validation_baselines.model.mode
 from projects.paper.section_results.review_cross_validation_baselines.utils_cross_validation import get_cv
 from utils.utils_latex import print_df_latex
 
+CROSS_VALIDATION_METRICS = [Metric.RMSE, Metric.MRAE, Metric.COR]
 
-def get_scores(model: Model, metrics: list[Metric], fast: bool):
+def get_scores(model: Model, fast: bool):
     niter = 2 if fast else 500
     n_jobs = 1 if fast else cpu_count() - 1
     # Load train/test datasets, and cross_validation setting (cv)
@@ -28,7 +29,7 @@ def get_scores(model: Model, metrics: list[Metric], fast: bool):
     cross_validator.fit_estimator(X_train, y_train)
     # Compute scores
     scores = []
-    for metric in metrics:
+    for metric in CROSS_VALIDATION_METRICS:
         train_loss=cross_validator.compute_loss(X_train, y_train, metric)
         test_loss=cross_validator.compute_loss(X_test, y_test, metric)
         scores.append(f'{round(train_loss, 2)} \\& {round(test_loss, 2)}')
@@ -36,17 +37,18 @@ def get_scores(model: Model, metrics: list[Metric], fast: bool):
 
 
 def main_cross_validation(fast: bool):
-    metrics = [Metric.RMSE, Metric.MRAE, Metric.COR]
     units = [' (gC year^{-1})', ' (\\%)', '']
     models = [ModelXGB(), ModelRandomForest(), ModelElasticNet(), ModelLasso()][::-1]
     model_name_to_scores = OrderedDict()
     for model in models:
         name = model.name
         print(f'Compute scores for {name}')
-        model_name_to_scores[name] = get_scores(model, metrics, fast)
+        model_name_to_scores[name] = get_scores(model, fast)
     print(model_name_to_scores)
-    index = [metric_to_str[metric] + unit for metric, unit in zip(metrics, units)]
+    index = [metric_to_str[metric] + unit for metric, unit in zip(CROSS_VALIDATION_METRICS, units)]
     df = pd.DataFrame(model_name_to_scores, index=index)
+    # Add the results for PySR interpretable
+    df['Interpretable symbolic regression'] = ['2.08 \\& 1.95', '5.47 \\& 4.95', '0.59 \\& 0.55']
     # Add the result from the manuscript
     our_approach_name = 'Proposed approach'
     df[our_approach_name] = ['1.68 \\& 1.67', '4.39 \\& 4.32', '0.65 \\& 0.61']
