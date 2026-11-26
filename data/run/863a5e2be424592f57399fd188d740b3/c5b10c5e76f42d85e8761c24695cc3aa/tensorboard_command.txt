@@ -1,0 +1,1 @@
+tensorboard --logdir /home/e23lerou/Documents/EquationDiscovery4ClimateImpact/data/run/863a5e2be424592f57399fd188d740b3/c5b10c5e76f42d85e8761c24695cc3aa/logs

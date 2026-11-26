@@ -1,0 +1,1 @@
+tensorboard --logdir /Odyssey/private/e23lerou/Documents/EquationDiscovery4ClimateImpact/data/run/db9b31faa113d737d46789c933b91da6/98793c19f538e48376cf0964a67d1275/logs

@@ -12,6 +12,13 @@
 
 &nbsp;&nbsp;&nbsp;&nbsp; Install this virtual environment from the requirements.txt files
 
+
+## Generate figures of the article
+
+Run the script main_paper.py which is located in the "projects/paper" folder 
+
+This will generate plots (pdf and png) in the "results" folder
+
 ## Folders
 
 

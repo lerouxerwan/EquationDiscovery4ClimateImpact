@@ -1,0 +1,12 @@
+Complexity,Loss,Equation
+1,6.8703938,"30.655582"
+4,6.3415656,"SSS_MAM * 0.8110637"
+6,3.59056,"(SSS_MAM * 9.636298) + -333.6644"
+9,3.1557176,"(SSS_MAM * 6.6687775) + (SST_SON * -0.75490075)"
+11,3.1553044,"((SSS_MAM * 6.712971) - (SST_SON * 0.74751097)) - 3.8388596"
+16,3.0676644,"(BaroclinicDynamicHeight_SON * -7.61897) - (((MerWindStr_MAM * 23.931414) + (SSS_MAM * -5.9614034)) - -471.38763)"
+19,3.0384657,"((BaroclinicDynamicHeight_SON * -4.743067) - ((SSS_MAM * -6.1289597) + (MerWindStr_MAM * 24.187277))) - (PoTemp_DJF * 1.3075855)"
+21,2.98908,"-474.57724 + (((BaroclinicDynamicHeight_JJA * -7.271498) - (MerWindStr_SON * 18.847073)) - ((MerWindStr_MAM * 28.693058) + (SSS_AnnSea * -6.347227)))"
+23,2.9626775,"((-470.7982 - ((SSS_AnnSea * -5.7701626) + (MerWindStr_MAM * 18.11676))) - (BaroclinicDynamicHeight_DJF * -26.139557)) + ((BaroclinicDynamicHeight_JJA * -33.87057) + 4.787187)"
+26,2.7503371,"((((BaroclinicDynamicHeight_JJA * -35.212826) - ((MerWindStr_MAM * 22.950878) - (MerWindStr_SON * -19.818012))) - (BaroclinicDynamicHeight_DJF * -26.414612)) - (SSS_AnnSea * -5.7862034)) + -506.54"
+28,2.7490284,"(((((BaroclinicDynamicHeight_JJA * -35.121494) - ((MerWindStr_MAM * 22.948738) - (MerWindStr_SON * -19.824303))) + 3.1435401) - (SSS_AnnSea * -5.8700447)) - (BaroclinicDynamicHeight_DJF * -26.483847)) + -507.04962"
