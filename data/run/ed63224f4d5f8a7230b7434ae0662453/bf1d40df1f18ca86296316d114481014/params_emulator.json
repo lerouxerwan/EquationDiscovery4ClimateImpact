@@ -1,0 +1,18 @@
+{
+    "binary_operators": [
+        "+",
+        "-",
+        "*"
+    ],
+    "complexity_of_variables": 2,
+    "constraints": {
+        "*": [
+            2,
+            1
+        ],
+        "inv": 2,
+        "sqrt": 2,
+        "square": 2
+    },
+    "extra_sympy_mappings": {
+        "inv": 

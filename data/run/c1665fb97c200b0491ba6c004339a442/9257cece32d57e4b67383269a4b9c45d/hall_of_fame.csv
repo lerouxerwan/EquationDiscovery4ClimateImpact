@@ -1,0 +1,13 @@
+Complexity,Loss,Equation
+1,5.473694,"30.710253"
+6,2.9797506,"(SSS_MAM * 8.651516) + -296.41254"
+8,2.9797504,"((SSS_MAM * 8.651516) + -250.35321) - 46.059338"
+9,2.6381567,"(SSS_MAM * 6.258479) + (SST_MAM * -0.7141582)"
+11,2.637312,"(SST_MAM * -0.7401904) + ((SSS_MAM * 6.127612) + 12.454599)"
+14,2.635852,"(SSS_MAM * 7.901094) + ((SST_AnnSea * -0.92109406) - (SeaSurfaceStericHeight_DJF * -4.1104903))"
+16,2.5118055,"(((SST_AnnSea * -2.0711997) - (BaroclinicDynamicHeight_DJF * -15.453402)) + (SSS_MAM * 7.2067523)) + 920.68256"
+19,2.5102553,"((SST_AnnSea * -2.0599108) - (BaroclinicDynamicHeight_DJF * -15.605316)) + ((PoDens_MAM * 0.8977296) + (SSS_MAM * 7.1829414))"
+21,2.388826,"(SST_AnnSea * -3.1986465) + (((SSS_MAM * 7.5387926) + 1146.0854) + ((SST_JJA * 0.747654) - (BaroclinicDynamicHeight_DJF * -19.068296)))"
+23,2.3888073,"(((SST_AnnSea * -3.1968284) + ((SST_JJA * 0.74950117) - ((BaroclinicDynamicHeight_DJF * -19.068071) - -1.094584))) + (SSS_MAM * 7.5390286)) + 1146.0854"
+25,2.388802,"((SST_AnnSea * -3.1989043) - -0.9029928) + (((((SSS_MAM * 7.5388603) + 1146.0854) + (SST_JJA * 0.7477611)) + -0.85923946) - (BaroclinicDynamicHeight_DJF * -19.068405))"
+26,2.3412485,"(((SST_AnnSea * -3.2860363) + (SST_JJA * 0.78672814)) - (BaroclinicDynamicHeight_DJF * -19.571737)) + (((SSS_MAM * 5.4404316) + 1167.2765) + (SSS_JJA * 2.3895988))"
