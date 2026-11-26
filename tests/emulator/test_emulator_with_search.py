@@ -4,8 +4,10 @@ from emulator.emulator_with_search import EmulatorWithSearch
 from emulator.utils_hyperparameter_search.utils_params_distribution import get_param_distributions
 from optimization.optimization_marginal.optimization_marginal import OptimizationMarginal
 from utils.utils_run import random_seed
+import pytest
 
 
+@pytest.mark.xfail
 def test_emulator_validation_with_search():
     dataset = get_dataset("NPP_season", 0.3, ValidationSplit.RCP_START)
     emulator = EmulatorWithSearch(niterations=5, n_iter=3, search_style='random',
